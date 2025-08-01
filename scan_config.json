@@ -1,0 +1,82 @@
+{
+  "scanning": {
+    "network_range": "192.168.30.0/24",
+    "discovery_interval_minutes": 60,
+    "full_scan_interval_minutes": 1440,
+    "vulnerability_scan_interval_minutes": 4320,
+    "snmp_scan_interval_minutes": 720,
+    "max_concurrent_scans": 3,
+    "nmap_timing": "T4",
+    "ports": {
+      "tcp_top_ports": 1000,
+      "udp_top_ports": 100,
+      "custom_tcp_ports": "21,22,23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080",
+      "custom_udp_ports": "53,67,68,69,123,135,137,138,161,162,445,514,1434"
+    }
+  },
+  "database": {
+    "path": "instance/network_inventory.db",
+    "backup_interval_minutes": 1440,
+    "cleanup_old_scans_days": 90
+  },
+  "oui": {
+    "update_interval_minutes": 10080,
+    "url": "http://standards-oui.ieee.org/oui/oui.txt"
+  },
+  "nvd": {
+    "api_key": "YOUR_NVD_API_KEY_HERE",
+    "update_interval_minutes": 1440,
+    "base_url": "https://services.nvd.nist.gov/rest/json/cves/2.0",
+    "rate_limit_seconds": 6
+  },
+  "device_classification": {
+    "rules": {
+      "router": {
+        "mac_vendors": ["Cisco", "Netgear", "Linksys", "D-Link", "TP-Link", "Asus", "Zyxel"],
+        "services": ["ssh", "telnet", "http", "https", "snmp"],
+        "ports": [22, 23, 80, 443, 161]
+      },
+      "server": {
+        "os_keywords": ["Windows Server", "Linux", "Ubuntu Server", "CentOS", "Red Hat"],
+        "services": ["http", "https", "ssh", "rdp", "sql", "mysql", "postgresql"],
+        "ports": [80, 443, 22, 3389, 1433, 3306, 5432]
+      },
+      "workstation": {
+        "os_keywords": ["Windows 10", "Windows 11", "macOS", "Ubuntu"],
+        "services": ["rdp", "vnc", "ssh"],
+        "ports": [3389, 5900, 22]
+      },
+      "printer": {
+        "mac_vendors": ["HP", "Canon", "Epson", "Brother", "Lexmark"],
+        "services": ["ipp", "http", "https", "snmp"],
+        "ports": [631, 80, 443, 161, 515, 9100]
+      },
+      "voip": {
+        "services": ["sip", "rtp", "h323"],
+        "ports": [5060, 5061, 1720, 5004, 5005]
+      },
+      "mobile": {
+        "mac_vendors": ["Apple", "Samsung", "Google", "Huawei", "Xiaomi"],
+        "services": ["http", "https"],
+        "ports": [80, 443]
+      },
+      "iot": {
+        "mac_vendors": ["Raspberry Pi", "Arduino", "ESP"],
+        "services": ["http", "https", "mqtt"],
+        "ports": [80, 443, 1883, 8883]
+      }
+    }
+  },
+  "alerts": {
+    "new_device_alert": true,
+    "vulnerability_alert": true,
+    "service_change_alert": true,
+    "min_cvss_score": 7.0
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "instance/logs/scanner.log",
+    "max_size_mb": 100,
+    "backup_count": 5
+  }
+}
