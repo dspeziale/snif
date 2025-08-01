@@ -1,6 +1,7 @@
 """
 Modulo principale per le scansioni di rete
 Gestisce l'esecuzione di scansioni NMAP, scheduling e coordinamento
+Versione corretta con supporto per multiple subnet
 """
 import subprocess
 import threading
@@ -9,7 +10,7 @@ import json
 import os
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Union
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tempfile
 import signal
@@ -24,8 +25,44 @@ from .nvd_manager import NVDManager
 logger = logging.getLogger(__name__)
 
 
+def normalize_network_range(network_range: Union[str, List[str]]) -> List[str]:
+    """
+    Normalizza il parametro network_range in modo che sia sempre una lista di stringhe.
+
+    Args:
+        network_range: Può essere una stringa singola o una lista di stringhe
+
+    Returns:
+        list: Lista di subnet come stringhe
+    """
+    if isinstance(network_range, str):
+        # Se è una stringa, potrebbe essere una singola subnet o multiple separate da spazi
+        if ' ' in network_range:
+            return [subnet.strip() for subnet in network_range.split() if subnet.strip()]
+        else:
+            return [network_range]
+    elif isinstance(network_range, list):
+        # Assicura che tutti gli elementi siano stringhe
+        return [str(subnet).strip() for subnet in network_range if str(subnet).strip()]
+    else:
+        raise ValueError(f"network_range deve essere str o list, ricevuto: {type(network_range)}")
+
+
+def format_targets_for_nmap(network_ranges: List[str]) -> str:
+    """
+    Formatta una lista di subnet per l'uso con nmap.
+
+    Args:
+        network_ranges: Lista di subnet
+
+    Returns:
+        Stringa con target separati da spazi per nmap
+    """
+    return ' '.join(network_ranges)
+
+
 class NmapScanner:
-    """Classe per eseguire scansioni NMAP"""
+    """Classe per eseguire scansioni NMAP con supporto multi-subnet"""
 
     def __init__(self, config: Dict):
         self.config = config
@@ -34,14 +71,36 @@ class NmapScanner:
         self.active_scans = {}
         self.scan_lock = threading.Lock()
 
-    def execute_scan(self, scan_type: str, target: str, options: str = "",
+        # Normalizza network_range dalla configurazione
+        raw_network_range = config.get('scanning', {}).get('network_range', '192.168.1.0/24')
+        self.network_ranges = normalize_network_range(raw_network_range)
+
+        logger.info(f"NmapScanner inizializzato con {len(self.network_ranges)} subnet: {self.network_ranges}")
+
+    def execute_scan(self, scan_type: str, target: Union[str, List[str]], options: str = "",
                      callback: Optional[Callable] = None) -> Dict[str, Any]:
-        """Esegue una scansione NMAP"""
-        scan_id = f"{scan_type}_{target}_{int(time.time())}"
+        """
+        Esegue una scansione NMAP con supporto per target multipli
+
+        Args:
+            scan_type: Tipo di scansione
+            target: Target singolo (str) o multipli (List[str])
+            options: Opzioni aggiuntive
+            callback: Callback da chiamare al completamento
+        """
+        # Normalizza target
+        if isinstance(target, str):
+            target_list = [target]
+            target_display = target
+        else:
+            target_list = normalize_network_range(target)
+            target_display = f"[{len(target_list)} subnet]"
+
+        scan_id = f"{scan_type}_{target_display}_{int(time.time())}"
 
         try:
-            # Crea comando nmap
-            nmap_cmd = self._build_nmap_command(scan_type, target, options)
+            # Crea comando nmap per target multipli
+            nmap_cmd = self._build_nmap_command(scan_type, target_list, options)
 
             # File temporaneo per output XML
             xml_file = tempfile.mktemp(suffix='.xml', prefix='nmap_')
@@ -56,7 +115,8 @@ class NmapScanner:
                 self.active_scans[scan_id] = {
                     'process': None,
                     'start_time': start_time,
-                    'target': target,
+                    'target': target_display,
+                    'target_list': target_list,
                     'type': scan_type,
                     'status': 'starting'
                 }
@@ -93,7 +153,8 @@ class NmapScanner:
                 'start_time': start_time,
                 'end_time': end_time,
                 'duration_seconds': duration,
-                'target': target,
+                'target': target_display,
+                'target_list': target_list,
                 'scan_type': scan_type,
                 'nmap_command': ' '.join(nmap_cmd),
                 'xml_output': xml_content,
@@ -118,7 +179,8 @@ class NmapScanner:
                 'error': str(e),
                 'start_time': start_time,
                 'end_time': datetime.now(),
-                'target': target,
+                'target': target_display,
+                'target_list': target_list if 'target_list' in locals() else [],
                 'scan_type': scan_type
             }
 
@@ -129,8 +191,18 @@ class NmapScanner:
 
         return result
 
-    def _build_nmap_command(self, scan_type: str, target: str, options: str = "") -> List[str]:
-        """Costruisce il comando nmap basato sul tipo di scansione"""
+    def _build_nmap_command(self, scan_type: str, target_list: List[str], options: str = "") -> List[str]:
+        """
+        Costruisce il comando nmap basato sul tipo di scansione e target multipli
+
+        Args:
+            scan_type: Tipo di scansione
+            target_list: Lista di target
+            options: Opzioni aggiuntive
+
+        Returns:
+            Lista di stringhe che formano il comando nmap
+        """
         cmd = ['nmap']
 
         # Aggiungi timing
@@ -183,10 +255,27 @@ class NmapScanner:
         if options:
             cmd.extend(options.split())
 
-        # Aggiungi target
-        cmd.append(target)
+        # FIX IMPORTANTE: Aggiungi target come stringhe separate
+        # Nmap può gestire multiple target separandoli con spazi
+        cmd.extend(target_list)
 
         return cmd
+
+    def execute_scan_for_networks(self, scan_type: str, options: str = "",
+                                  callback: Optional[Callable] = None) -> Dict[str, Any]:
+        """
+        Esegue una scansione su tutte le subnet configurate
+
+        Args:
+            scan_type: Tipo di scansione
+            options: Opzioni aggiuntive
+            callback: Callback da chiamare al completamento
+
+        Returns:
+            Risultato della scansione
+        """
+        logger.info(f"Avvio scansione {scan_type} su {len(self.network_ranges)} subnet")
+        return self.execute_scan(scan_type, self.network_ranges, options, callback)
 
     def get_active_scans(self) -> Dict[str, Dict]:
         """Restituisce le scansioni attualmente in corso"""
@@ -235,7 +324,7 @@ class NmapScanner:
 
 
 class ScanScheduler:
-    """Scheduler nativo Python per scansioni automatiche"""
+    """Scheduler nativo Python per scansioni automatiche con supporto multi-subnet"""
 
     def __init__(self, scanner: NmapScanner, db_manager: DatabaseManager):
         self.scanner = scanner
@@ -289,14 +378,33 @@ class ScanScheduler:
                 logger.error(f"Errore nel scheduler loop: {e}")
                 time.sleep(60)
 
-    def add_job(self, job_id: str, scan_type: str, target: str,
+    def add_job(self, job_id: str, scan_type: str, target: Union[str, List[str]],
                 interval_minutes: int, options: str = "", enabled: bool = True):
-        """Aggiunge un job allo scheduler"""
+        """
+        Aggiunge un job allo scheduler con supporto per target multipli
+
+        Args:
+            job_id: ID univoco del job
+            scan_type: Tipo di scansione
+            target: Target singolo o lista di target
+            interval_minutes: Intervallo in minuti
+            options: Opzioni aggiuntive
+            enabled: Se il job è abilitato
+        """
         next_run = datetime.now() + timedelta(minutes=1)  # Primo run tra 1 minuto
+
+        # Normalizza target
+        if isinstance(target, str):
+            target_list = [target]
+            target_display = target
+        else:
+            target_list = normalize_network_range(target)
+            target_display = f"[{len(target_list)} subnet]"
 
         job_info = {
             'scan_type': scan_type,
-            'target': target,
+            'target': target_display,
+            'target_list': target_list,
             'interval_minutes': interval_minutes,
             'options': options,
             'enabled': enabled,
@@ -308,7 +416,7 @@ class ScanScheduler:
         with self.job_lock:
             self.scheduled_jobs[job_id] = job_info
 
-        logger.info(f"Job {job_id} aggiunto: {scan_type} su {target} ogni {interval_minutes} minuti")
+        logger.info(f"Job {job_id} aggiunto: {scan_type} su {target_display} ogni {interval_minutes} minuti")
 
     def remove_job(self, job_id: str):
         """Rimuove un job dallo scheduler"""
@@ -337,10 +445,10 @@ class ScanScheduler:
         def job_callback(result):
             logger.info(f"Job {job_id} completato: {result.get('success', False)}")
 
-        # Avvia scansione
+        # Avvia scansione con target multipli
         threading.Thread(
             target=self.scanner.execute_scan,
-            args=(job_info['scan_type'], job_info['target'], job_info['options'], job_callback),
+            args=(job_info['scan_type'], job_info['target_list'], job_info['options'], job_callback),
             daemon=True
         ).start()
 
@@ -351,18 +459,23 @@ class ScanScheduler:
             job_info['next_run'] = datetime.now() + timedelta(minutes=job_info['interval_minutes'])
 
     def load_jobs_from_config(self, config: Dict):
-        """Carica job dalla configurazione"""
+        """Carica job dalla configurazione con supporto multi-subnet"""
+
+        # Ottieni network_range normalizzato
+        raw_network_range = config.get('scanning', {}).get('network_range', '192.168.1.0/24')
+        network_ranges = normalize_network_range(raw_network_range)
+
         scan_configs = [
-            ('discovery', 'discovery', config.get('scanning', {}).get('network_range', '192.168.1.0/24'),
+            ('discovery', 'discovery', network_ranges,
              config.get('scanning', {}).get('discovery_interval_minutes', 60), '-sn'),
 
-            ('full_scan', 'comprehensive', config.get('scanning', {}).get('network_range', '192.168.1.0/24'),
+            ('full_scan', 'comprehensive', network_ranges,
              config.get('scanning', {}).get('full_scan_interval_minutes', 1440), ''),
 
-            ('vuln_scan', 'vulnerability', config.get('scanning', {}).get('network_range', '192.168.1.0/24'),
+            ('vuln_scan', 'vulnerability', network_ranges,
              config.get('scanning', {}).get('vulnerability_scan_interval_minutes', 4320), ''),
 
-            ('snmp_scan', 'snmp', config.get('scanning', {}).get('network_range', '192.168.1.0/24'),
+            ('snmp_scan', 'snmp', network_ranges,
              config.get('scanning', {}).get('snmp_scan_interval_minutes', 720), '')
         ]
 
@@ -371,7 +484,7 @@ class ScanScheduler:
 
 
 class NetworkScanManager:
-    """Manager principale per tutte le operazioni di scanning"""
+    """Manager principale per tutte le operazioni di scanning con supporto multi-subnet"""
 
     def __init__(self, config_file: str = 'scan_config.json'):
         self.config = self._load_config(config_file)
@@ -386,7 +499,7 @@ class NetworkScanManager:
         self.parser = NmapXMLParser()
         self.processor = NmapResultProcessor(self.db, self.oui_manager, self.device_classifier)
 
-        # Scanner e scheduler
+        # Scanner e scheduler con supporto multi-subnet
         self.scanner = NmapScanner(self.config)
         self.scheduler = ScanScheduler(self.scanner, self.db)
 
@@ -396,7 +509,11 @@ class NetworkScanManager:
         # Setup logging
         self._setup_logging()
 
-        logger.info("NetworkScanManager inizializzato")
+        # Network ranges normalizzate
+        raw_network_range = self.config.get('scanning', {}).get('network_range', '192.168.1.0/24')
+        self.network_ranges = normalize_network_range(raw_network_range)
+
+        logger.info(f"NetworkScanManager inizializzato con {len(self.network_ranges)} subnet: {self.network_ranges}")
 
     def _load_config(self, config_file: str) -> Dict:
         """Carica configurazione da file JSON"""
@@ -417,6 +534,8 @@ class NetworkScanManager:
                 'network_range': '192.168.1.0/24',
                 'discovery_interval_minutes': 60,
                 'full_scan_interval_minutes': 1440,
+                'vulnerability_scan_interval_minutes': 4320,
+                'snmp_scan_interval_minutes': 720,
                 'max_concurrent_scans': 3,
                 'nmap_timing': 'T4'
             },
@@ -449,14 +568,16 @@ class NetworkScanManager:
         logger.info("Avvio NetworkScanManager")
 
         # Aggiorna database OUI se necessario
-        if self.oui_manager.needs_update():
+        if hasattr(self.oui_manager, 'needs_update') and self.oui_manager.needs_update():
             logger.info("Aggiornamento database OUI")
-            self.oui_manager.update_database()
+            if hasattr(self.oui_manager, 'update_database'):
+                self.oui_manager.update_database()
 
         # Aggiorna database NVD se necessario
-        if self.nvd_manager.needs_update():
+        if hasattr(self.nvd_manager, 'needs_update') and self.nvd_manager.needs_update():
             logger.info("Aggiornamento database NVD")
-            self.nvd_manager.update_nvd_database()
+            if hasattr(self.nvd_manager, 'update_nvd_database'):
+                self.nvd_manager.update_nvd_database()
 
         # Avvia scheduler
         self.scheduler.load_jobs_from_config(self.config)
@@ -479,9 +600,26 @@ class NetworkScanManager:
 
         logger.info("NetworkScanManager arrestato")
 
-    def execute_manual_scan(self, scan_type: str, target: str, options: str = "") -> Dict[str, Any]:
-        """Esegue una scansione manuale"""
-        logger.info(f"Avvio scansione manuale: {scan_type} su {target}")
+    def execute_manual_scan(self, scan_type: str, target: Union[str, List[str]] = None, options: str = "") -> Dict[str, Any]:
+        """
+        Esegue una scansione manuale
+
+        Args:
+            scan_type: Tipo di scansione
+            target: Target specifico o None per usare le subnet configurate
+            options: Opzioni aggiuntive
+
+        Returns:
+            Risultato della scansione
+        """
+        # Se non viene specificato un target, usa le subnet configurate
+        if target is None:
+            target = self.network_ranges
+            target_display = f"configurate ({len(self.network_ranges)} subnet)"
+        else:
+            target_display = str(target)
+
+        logger.info(f"Avvio scansione manuale: {scan_type} su {target_display}")
 
         def process_callback(result):
             if result.get('success') and result.get('xml_output'):
@@ -495,10 +633,27 @@ class NetworkScanManager:
 
         return self.scanner.execute_scan(scan_type, target, options, process_callback)
 
-    def execute_async_scan(self, scan_type: str, target: str, options: str = ""):
+    def execute_async_scan(self, scan_type: str, target: Union[str, List[str]] = None, options: str = ""):
         """Esegue una scansione asincrona"""
         future = self.executor.submit(self.execute_manual_scan, scan_type, target, options)
         return future
+
+    # Metodi di scansione specifici per compatibilità
+    def execute_discovery_scan(self) -> Dict[str, Any]:
+        """Esegue discovery scan su tutte le subnet configurate"""
+        return self.scanner.execute_scan_for_networks('discovery')
+
+    def execute_comprehensive_scan(self) -> Dict[str, Any]:
+        """Esegue comprehensive scan su tutte le subnet configurate"""
+        return self.scanner.execute_scan_for_networks('comprehensive')
+
+    def execute_vulnerability_scan(self) -> Dict[str, Any]:
+        """Esegue vulnerability scan su tutte le subnet configurate"""
+        return self.scanner.execute_scan_for_networks('vulnerability')
+
+    def execute_snmp_scan(self) -> Dict[str, Any]:
+        """Esegue SNMP scan su tutte le subnet configurate"""
+        return self.scanner.execute_scan_for_networks('snmp')
 
     def get_network_inventory(self) -> Dict[str, Any]:
         """Recupera l'inventario completo della rete"""
@@ -510,6 +665,7 @@ class NetworkScanManager:
             'hosts_by_status': {},
             'total_vulnerabilities': 0,
             'critical_vulnerabilities': 0,
+            'network_ranges': self.network_ranges,
             'hosts': []
         }
 
@@ -554,12 +710,13 @@ class NetworkScanManager:
         return {
             'active_scans': len(self.scanner.get_active_scans()),
             'scheduled_jobs': len(self.scheduler.get_jobs()),
+            'network_ranges': self.network_ranges,
             'database_stats': {
                 'total_hosts': len(self.db.get_all_hosts()),
                 'active_hosts': len(self.db.get_all_hosts(active_only=True))
             },
-            'oui_stats': self.oui_manager.standard_oui.get_stats(),
-            'nvd_stats': self.nvd_manager.get_nvd_stats(),
+            'oui_stats': self.oui_manager.standard_oui.get_stats() if hasattr(self.oui_manager, 'standard_oui') else {},
+            'nvd_stats': self.nvd_manager.get_nvd_stats() if hasattr(self.nvd_manager, 'get_nvd_stats') else {},
             'last_discovery': self._get_last_scan_time('discovery'),
             'last_full_scan': self._get_last_scan_time('comprehensive'),
             'last_vuln_scan': self._get_last_scan_time('vulnerability')
@@ -634,161 +791,6 @@ class NetworkScanManager:
 
         logger.info(f"Inventario esportato in {output_file} (formato: {format})")
 
-    def generate_report(self, report_type: str = "summary") -> Dict[str, Any]:
-        """Genera report di sicurezza"""
-        inventory = self.get_network_inventory()
-
-        if report_type == "summary":
-            return self._generate_summary_report(inventory)
-        elif report_type == "vulnerabilities":
-            return self._generate_vulnerability_report(inventory)
-        elif report_type == "topology":
-            from .device_classifier import NetworkTopologyAnalyzer
-            analyzer = NetworkTopologyAnalyzer(self.db)
-            return analyzer.analyze_network_topology()
-        else:
-            raise ValueError(f"Report type non supportato: {report_type}")
-
-    def _generate_summary_report(self, inventory: Dict[str, Any]) -> Dict[str, Any]:
-        """Genera report riassuntivo"""
-        return {
-            'report_type': 'summary',
-            'generated_at': datetime.now().isoformat(),
-            'network_overview': {
-                'total_devices': inventory['total_hosts'],
-                'active_devices': inventory['hosts_by_status'].get('up', 0),
-                'device_types': inventory['hosts_by_type'],
-                'total_vulnerabilities': inventory['total_vulnerabilities'],
-                'critical_vulnerabilities': inventory['critical_vulnerabilities']
-            },
-            'top_vulnerabilities': self._get_top_vulnerabilities(),
-            'device_distribution': inventory['hosts_by_type'],
-            'security_score': self._calculate_network_security_score(inventory),
-            'recommendations': self._generate_security_recommendations(inventory)
-        }
-
-    def _generate_vulnerability_report(self, inventory: Dict[str, Any]) -> Dict[str, Any]:
-        """Genera report focalizzato sulle vulnerabilità"""
-        all_vulns = []
-        for host in inventory['hosts']:
-            for vuln in host.get('vulnerabilities', []):
-                vuln['host_ip'] = host.get('ip_address')
-                vuln['hostname'] = host.get('hostname')
-                all_vulns.append(vuln)
-
-        # Raggruppa per severità
-        vulns_by_severity = {}
-        for vuln in all_vulns:
-            severity = vuln.get('severity', 'unknown')
-            if severity not in vulns_by_severity:
-                vulns_by_severity[severity] = []
-            vulns_by_severity[severity].append(vuln)
-
-        return {
-            'report_type': 'vulnerabilities',
-            'generated_at': datetime.now().isoformat(),
-            'total_vulnerabilities': len(all_vulns),
-            'vulnerabilities_by_severity': {
-                k: len(v) for k, v in vulns_by_severity.items()
-            },
-            'critical_vulnerabilities': vulns_by_severity.get('critical', []),
-            'high_vulnerabilities': vulns_by_severity.get('high', []),
-            'top_cves': self._get_most_common_cves(all_vulns),
-            'affected_hosts': len(set(v.get('host_ip') for v in all_vulns if v.get('host_ip')))
-        }
-
-    def _get_top_vulnerabilities(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """Recupera le vulnerabilità più critiche"""
-        with self.db.get_connection() as conn:
-            cursor = conn.execute("""
-                SELECT h.ip_address, h.hostname, v.cve_id, v.cvss_score, 
-                       v.severity, v.description
-                FROM vulnerabilities v
-                JOIN hosts h ON v.host_id = h.id
-                WHERE v.status = 'open'
-                ORDER BY v.cvss_score DESC
-                LIMIT ?
-            """, (limit,))
-
-            return [dict(row) for row in cursor.fetchall()]
-
-    def _get_most_common_cves(self, vulnerabilities: List[Dict]) -> List[Dict[str, Any]]:
-        """Trova i CVE più comuni"""
-        cve_counts = {}
-        for vuln in vulnerabilities:
-            cve_id = vuln.get('cve_id')
-            if cve_id:
-                if cve_id not in cve_counts:
-                    cve_counts[cve_id] = {
-                        'cve_id': cve_id,
-                        'count': 0,
-                        'max_score': 0,
-                        'severity': vuln.get('severity', 'unknown')
-                    }
-                cve_counts[cve_id]['count'] += 1
-                cve_counts[cve_id]['max_score'] = max(
-                    cve_counts[cve_id]['max_score'],
-                    vuln.get('cvss_score', 0)
-                )
-
-        return sorted(cve_counts.values(), key=lambda x: x['count'], reverse=True)[:10]
-
-    def _calculate_network_security_score(self, inventory: Dict[str, Any]) -> float:
-        """Calcola score di sicurezza della rete"""
-        if inventory['total_hosts'] == 0:
-            return 100.0
-
-        score = 100.0
-
-        # Penalità per vulnerabilità
-        vuln_ratio = inventory['total_vulnerabilities'] / inventory['total_hosts']
-        score -= min(vuln_ratio * 10, 40)
-
-        # Penalità extra per vulnerabilità critiche
-        if inventory['critical_vulnerabilities'] > 0:
-            critical_ratio = inventory['critical_vulnerabilities'] / inventory['total_hosts']
-            score -= min(critical_ratio * 30, 30)
-
-        # Penalità per dispositivi non classificati
-        unknown_devices = inventory['hosts_by_type'].get('unknown', 0)
-        unknown_ratio = unknown_devices / inventory['total_hosts']
-        score -= unknown_ratio * 20
-
-        return max(0.0, score)
-
-    def _generate_security_recommendations(self, inventory: Dict[str, Any]) -> List[str]:
-        """Genera raccomandazioni di sicurezza"""
-        recommendations = []
-
-        if inventory['critical_vulnerabilities'] > 0:
-            recommendations.append(
-                f"URGENTE: Risolvere {inventory['critical_vulnerabilities']} vulnerabilità critiche"
-            )
-
-        if inventory['total_vulnerabilities'] > inventory['total_hosts']:
-            recommendations.append(
-                "Alto numero di vulnerabilità per dispositivo - implementare patch management"
-            )
-
-        unknown_count = inventory['hosts_by_type'].get('unknown', 0)
-        if unknown_count > 0:
-            recommendations.append(
-                f"Classificare {unknown_count} dispositivi non identificati"
-            )
-
-        iot_count = inventory['hosts_by_type'].get('iot', 0)
-        if iot_count > 0:
-            recommendations.append(
-                f"Considerare isolamento VLAN per {iot_count} dispositivi IoT"
-            )
-
-        if inventory['hosts_by_status'].get('up', 0) > 50:
-            recommendations.append(
-                "Rete di grandi dimensioni - considerare segmentazione"
-            )
-
-        return recommendations
-
     def perform_maintenance(self):
         """Esegue operazioni di manutenzione"""
         logger.info("Avvio manutenzione database")
@@ -798,135 +800,17 @@ class NetworkScanManager:
         self.db.cleanup_old_data(cleanup_days)
 
         # Aggiorna database OUI se necessario
-        if self.oui_manager.needs_update():
-            self.oui_manager.update_database()
+        if hasattr(self.oui_manager, 'needs_update') and self.oui_manager.needs_update():
+            if hasattr(self.oui_manager, 'update_database'):
+                self.oui_manager.update_database()
 
         # Aggiorna database NVD se necessario
-        if self.nvd_manager.needs_update():
-            self.nvd_manager.update_nvd_database()
+        if hasattr(self.nvd_manager, 'needs_update') and self.nvd_manager.needs_update():
+            if hasattr(self.nvd_manager, 'update_nvd_database'):
+                self.nvd_manager.update_nvd_database()
 
         logger.info("Manutenzione completata")
 
-
-class ScanTemplateManager:
-    """Gestore per template di scansione predefiniti"""
-
-    def __init__(self, config: Dict):
-        self.config = config
-        self.templates = self._load_default_templates()
-
-    def _load_default_templates(self) -> Dict[str, Dict]:
-        """Carica template di scansione predefiniti"""
-        return {
-            'network_discovery': {
-                'name': 'Network Discovery',
-                'description': 'Scoperta rapida di host attivi',
-                'scan_type': 'discovery',
-                'options': '-sn -PE -PP -PS21,22,23,25,80,113,31339',
-                'estimated_time': '2-5 minuti',
-                'suitable_for': ['Scoperta iniziale', 'Monitoraggio hosts']
-            },
-            'port_scan_top1000': {
-                'name': 'Port Scan Top 1000',
-                'description': 'Scansione delle 1000 porte più comuni',
-                'scan_type': 'quick_scan',
-                'options': '-sS --top-ports 1000',
-                'estimated_time': '5-15 minuti',
-                'suitable_for': ['Analisi servizi', 'Identificazione servizi']
-            },
-            'comprehensive_scan': {
-                'name': 'Scansione Completa',
-                'description': 'Scansione completa con OS e service detection',
-                'scan_type': 'comprehensive',
-                'options': '-sS -sU -O -sV -sC --top-ports 1000',
-                'estimated_time': '30-60 minuti',
-                'suitable_for': ['Audit completo', 'Inventario dettagliato']
-            },
-            'vulnerability_assessment': {
-                'name': 'Vulnerability Assessment',
-                'description': 'Scansione focalizzata su vulnerabilità',
-                'scan_type': 'vulnerability',
-                'options': '-sV --script vuln,exploit',
-                'estimated_time': '20-45 minuti',
-                'suitable_for': ['Security audit', 'Penetration testing']
-            },
-            'stealth_scan': {
-                'name': 'Stealth Scan',
-                'description': 'Scansione discreta per evitare detection',
-                'scan_type': 'syn_scan',
-                'options': '-sS -T2 --randomize-hosts',
-                'estimated_time': '45-90 minuti',
-                'suitable_for': ['Red team', 'Analisi stealth']
-            },
-            'snmp_enumeration': {
-                'name': 'SNMP Enumeration',
-                'description': 'Enumerazione servizi SNMP',
-                'scan_type': 'snmp',
-                'options': '-sU -p 161 --script snmp-*',
-                'estimated_time': '10-20 minuti',
-                'suitable_for': ['Network devices', 'Monitoring systems']
-            },
-            'web_services_scan': {
-                'name': 'Web Services Scan',
-                'description': 'Scansione focalizzata su servizi web',
-                'scan_type': 'service_scan',
-                'options': '-sS -p 80,443,8080,8443 --script http-*',
-                'estimated_time': '15-30 minuti',
-                'suitable_for': ['Web applications', 'HTTP services']
-            },
-            'database_scan': {
-                'name': 'Database Services Scan',
-                'description': 'Identificazione servizi database',
-                'scan_type': 'service_scan',
-                'options': '-sS -p 1433,3306,5432,1521,27017 --script database',
-                'estimated_time': '10-15 minuti',
-                'suitable_for': ['Database servers', 'SQL services']
-            }
-        }
-
-    def get_template(self, template_name: str) -> Optional[Dict[str, Any]]:
-        """Recupera un template per nome"""
-        return self.templates.get(template_name)
-
-    def get_all_templates(self) -> Dict[str, Dict]:
-        """Recupera tutti i template disponibili"""
-        return self.templates.copy()
-
-    def add_custom_template(self, name: str, template_data: Dict[str, Any]):
-        """Aggiunge un template personalizzato"""
-        self.templates[name] = template_data
-        logger.info(f"Template personalizzato '{name}' aggiunto")
-
-    def get_recommended_template(self, network_size: str, security_level: str) -> str:
-        """Raccomanda un template basato su dimensioni di rete e livello di sicurezza"""
-        if network_size == 'small' and security_level == 'basic':
-            return 'network_discovery'
-        elif network_size == 'small' and security_level == 'high':
-            return 'comprehensive_scan'
-        elif network_size == 'large' and security_level == 'basic':
-            return 'port_scan_top1000'
-        elif network_size == 'large' and security_level == 'high':
-            return 'vulnerability_assessment'
-        else:
-            return 'port_scan_top1000'
-
-
-def normalize_network_range(network_range):
-    """
-    Normalizza il parametro network_range in modo che sia sempre una lista di stringhe.
-
-    Args:
-        network_range: Può essere una stringa singola o una lista di stringhe
-
-    Returns:
-        list: Lista di subnet come stringhe
-    """
-    if isinstance(network_range, str):
-        return [network_range]
-    elif isinstance(network_range, list):
-        return [str(subnet) for subnet in network_range]  # Assicura che siano stringhe
-    else:
-        raise ValueError(f"network_range deve essere str o list, ricevuto: {type(network_range)}")
 
 # Funzioni di utility per l'integrazione
 def validate_target(target: str) -> bool:
@@ -956,18 +840,30 @@ def validate_target(target: str) -> bool:
     return False
 
 
-def estimate_scan_time(scan_type: str, target: str) -> str:
-    """Stima il tempo di scansione"""
-    # Calcola numero approssimativo di host
-    if '/' in target:  # CIDR
-        cidr_suffix = int(target.split('/')[-1])
-        host_count = 2 ** (32 - cidr_suffix) - 2
-    elif '-' in target:  # Range
-        start_ip = int(target.split('-')[0].split('.')[-1])
-        end_ip = int(target.split('-')[1])
-        host_count = end_ip - start_ip + 1
-    else:  # Singolo host
-        host_count = 1
+def estimate_scan_time(scan_type: str, target: Union[str, List[str]]) -> str:
+    """Stima il tempo di scansione per target singoli o multipli"""
+
+    # Normalizza target
+    if isinstance(target, str):
+        target_list = [target]
+    else:
+        target_list = normalize_network_range(target)
+
+    total_host_count = 0
+
+    for single_target in target_list:
+        # Calcola numero approssimativo di host per ogni target
+        if '/' in single_target:  # CIDR
+            cidr_suffix = int(single_target.split('/')[-1])
+            host_count = 2 ** (32 - cidr_suffix) - 2
+        elif '-' in single_target:  # Range
+            start_ip = int(single_target.split('-')[0].split('.')[-1])
+            end_ip = int(single_target.split('-')[1])
+            host_count = end_ip - start_ip + 1
+        else:  # Singolo host
+            host_count = 1
+
+        total_host_count += host_count
 
     # Tempo base per tipo di scansione (secondi per host)
     time_per_host = {
@@ -979,7 +875,7 @@ def estimate_scan_time(scan_type: str, target: str) -> str:
     }
 
     base_time = time_per_host.get(scan_type, 10)
-    total_seconds = host_count * base_time
+    total_seconds = total_host_count * base_time
 
     if total_seconds < 60:
         return f"{int(total_seconds)} secondi"
@@ -1044,3 +940,82 @@ def check_nmap_availability() -> Dict[str, Any]:
 
     return status
 
+
+# Classe di utilità per template di scansione
+class ScanTemplateManager:
+    """Gestore per template di scansione predefiniti con supporto multi-subnet"""
+
+    def __init__(self, config: Dict):
+        self.config = config
+        self.templates = self._load_default_templates()
+
+    def _load_default_templates(self) -> Dict[str, Dict]:
+        """Carica template di scansione predefiniti"""
+        return {
+            'network_discovery': {
+                'name': 'Network Discovery',
+                'description': 'Scoperta rapida di host attivi su multiple subnet',
+                'scan_type': 'discovery',
+                'options': '-sn -PE -PP -PS21,22,23,25,80,113,31339',
+                'estimated_time': '2-5 minuti per subnet',
+                'suitable_for': ['Scoperta iniziale', 'Monitoraggio hosts', 'Multiple subnet']
+            },
+            'port_scan_top1000': {
+                'name': 'Port Scan Top 1000',
+                'description': 'Scansione delle 1000 porte più comuni su multiple subnet',
+                'scan_type': 'quick_scan',
+                'options': '-sS --top-ports 1000',
+                'estimated_time': '5-15 minuti per subnet',
+                'suitable_for': ['Analisi servizi', 'Identificazione servizi', 'Multiple subnet']
+            },
+            'comprehensive_scan': {
+                'name': 'Scansione Completa Multi-Subnet',
+                'description': 'Scansione completa con OS e service detection su tutte le subnet',
+                'scan_type': 'comprehensive',
+                'options': '-sS -sU -O -sV -sC --top-ports 1000',
+                'estimated_time': '30-60 minuti per subnet',
+                'suitable_for': ['Audit completo', 'Inventario dettagliato', 'Multiple subnet']
+            },
+            'vulnerability_assessment': {
+                'name': 'Vulnerability Assessment Multi-Subnet',
+                'description': 'Scansione focalizzata su vulnerabilità su tutte le subnet',
+                'scan_type': 'vulnerability',
+                'options': '-sV --script vuln,exploit',
+                'estimated_time': '20-45 minuti per subnet',
+                'suitable_for': ['Security audit', 'Penetration testing', 'Multiple subnet']
+            },
+            'snmp_enumeration': {
+                'name': 'SNMP Enumeration Multi-Subnet',
+                'description': 'Enumerazione servizi SNMP su tutte le subnet',
+                'scan_type': 'snmp',
+                'options': '-sU -p 161 --script snmp-*',
+                'estimated_time': '10-20 minuti per subnet',
+                'suitable_for': ['Network devices', 'Monitoring systems', 'Multiple subnet']
+            }
+        }
+
+    def get_template(self, template_name: str) -> Optional[Dict[str, Any]]:
+        """Recupera un template per nome"""
+        return self.templates.get(template_name)
+
+    def get_all_templates(self) -> Dict[str, Dict]:
+        """Recupera tutti i template disponibili"""
+        return self.templates.copy()
+
+    def add_custom_template(self, name: str, template_data: Dict[str, Any]):
+        """Aggiunge un template personalizzato"""
+        self.templates[name] = template_data
+        logger.info(f"Template personalizzato '{name}' aggiunto")
+
+    def get_recommended_template(self, network_size: str, security_level: str) -> str:
+        """Raccomanda un template basato su dimensioni di rete e livello di sicurezza"""
+        if network_size == 'small' and security_level == 'basic':
+            return 'network_discovery'
+        elif network_size == 'small' and security_level == 'high':
+            return 'comprehensive_scan'
+        elif network_size == 'large' and security_level == 'basic':
+            return 'port_scan_top1000'
+        elif network_size == 'large' and security_level == 'high':
+            return 'vulnerability_assessment'
+        else:
+            return 'port_scan_top1000'
