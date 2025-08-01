@@ -6,7 +6,7 @@ import requests
 import re
 import sqlite3
 from datetime import datetime, timedelta
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 import logging
 import time
 

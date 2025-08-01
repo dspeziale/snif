@@ -917,22 +917,22 @@ def validate_target(target: str) -> bool:
     import re
 
     # IP singolo
-    ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}
+    ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}'
     if re.match(ip_pattern, target):
         return True
 
     # Range CIDR
-    cidr_pattern = r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}
+    cidr_pattern = r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}'
     if re.match(cidr_pattern, target):
         return True
 
     # Range IP
-    range_pattern = r'^(\d{1,3}\.){3}\d{1,3}-\d{1,3}
+    range_pattern = r'^(\d{1,3}\.){3}\d{1,3}-\d{1,3}'
     if re.match(range_pattern, target):
         return True
 
     # Hostname
-    hostname_pattern = r'^[a-zA-Z0-9.-]+
+    hostname_pattern = r'^[a-zA-Z0-9.-]+'
     if re.match(hostname_pattern, target):
         return True
 

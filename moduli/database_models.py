@@ -164,7 +164,7 @@ class DatabaseManager:
                     published_date DATETIME,
                     modified_date DATETIME,
                     cpe_list TEXT,
-                    references TEXT,
+                    [references] TEXT,
                     exploit_available BOOLEAN DEFAULT FALSE,
                     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
