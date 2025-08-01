@@ -265,8 +265,7 @@ def main():
 
     import argparse
     parser = argparse.ArgumentParser(description='Network Scanner and Inventory System')
-    parser.add_argument('--mode', choices=['standalone', 'flask'], default='flask',
-                        help='Modalità di esecuzione (default: flask)')
+    parser.add_argument('--mode', default="standalone", choices=['standalone', 'flask'],                         help='Modalità di esecuzione (default: flask)')
     parser.add_argument('--config', default='scan_config.json',
                         help='File di configurazione (default: scan_config.json)')
     parser.add_argument('--host', default='127.0.0.1',

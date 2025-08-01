@@ -1,6 +1,13 @@
 {
   "scanning": {
-    "network_range": "192.168.30.0/24",
+    "network_range": [
+      "192.168.20.0/24",
+      "192.168.30.0/24",
+      "192.168.40.0/24",
+      "192.168.50.0/24",
+      "192.168.60.0/24",
+      "192.168.70.0/24"
+    ],
     "discovery_interval_minutes": 60,
     "full_scan_interval_minutes": 1440,
     "vulnerability_scan_interval_minutes": 4320,
@@ -24,7 +31,7 @@
     "url": "http://standards-oui.ieee.org/oui/oui.txt"
   },
   "nvd": {
-    "api_key": "YOUR_NVD_API_KEY_HERE",
+    "api_key": "337615ef-453a-4bb7-a2da-6bbb2881eaf8",
     "update_interval_minutes": 1440,
     "base_url": "https://services.nvd.nist.gov/rest/json/cves/2.0",
     "rate_limit_seconds": 6

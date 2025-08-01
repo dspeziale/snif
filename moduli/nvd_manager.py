@@ -148,7 +148,7 @@ class NVDManager:
                             INSERT OR REPLACE INTO cve_database (
                                 cve_id, description, cvss_v2_score, cvss_v2_vector,
                                 cvss_v3_score, cvss_v3_vector, severity, published_date,
-                                modified_date, cpe_list, references, exploit_available,
+                                modified_date, cpe_list, [references], exploit_available,
                                 last_updated
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                         """, (

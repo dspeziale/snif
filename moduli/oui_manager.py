@@ -456,6 +456,42 @@ class EnhancedOUIManager:
         self.standard_oui = OUIManager(db_manager, config)
         self.custom_oui = CustomOUIManager(db_manager)
 
+    def needs_update(self) -> bool:
+        """
+        Verifica se il database OUI ha bisogno di essere aggiornato.
+        Controlla l'età del file OUI scaricato confrontandolo con una soglia.
+
+        Returns:
+            bool: True se necessita aggiornamento, False altrimenti
+        """
+        import os
+        from datetime import datetime, timedelta
+
+        try:
+            # Percorso del file OUI (adatta questo percorso secondo la tua struttura)
+            oui_file_path = getattr(self, 'oui_file_path', 'data/oui.txt')
+
+            # Se il file non esiste, necessita aggiornamento
+            if not os.path.exists(oui_file_path):
+                return True
+
+            # Ottieni la data di ultima modifica del file
+            last_modified = datetime.fromtimestamp(os.path.getmtime(oui_file_path))
+
+            # Soglia di aggiornamento (esempio: 30 giorni)
+            update_threshold = timedelta(days=30)
+
+            # Controlla se il file è più vecchio della soglia
+            if datetime.now() - last_modified > update_threshold:
+                return True
+
+            return False
+
+        except Exception as e:
+            # In caso di errore, assume che sia necessario l'aggiornamento
+            print(f"Errore nel controllo aggiornamento OUI: {e}")
+            return True
+
     def get_vendor_by_mac(self, mac_address: str) -> Optional[str]:
         """Recupera vendor con priorità ai mapping personalizzati"""
         # Prima prova con mapping personalizzati

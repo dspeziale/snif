@@ -911,6 +911,23 @@ class ScanTemplateManager:
             return 'port_scan_top1000'
 
 
+def normalize_network_range(network_range):
+    """
+    Normalizza il parametro network_range in modo che sia sempre una lista di stringhe.
+
+    Args:
+        network_range: Può essere una stringa singola o una lista di stringhe
+
+    Returns:
+        list: Lista di subnet come stringhe
+    """
+    if isinstance(network_range, str):
+        return [network_range]
+    elif isinstance(network_range, list):
+        return [str(subnet) for subnet in network_range]  # Assicura che siano stringhe
+    else:
+        raise ValueError(f"network_range deve essere str o list, ricevuto: {type(network_range)}")
+
 # Funzioni di utility per l'integrazione
 def validate_target(target: str) -> bool:
     """Valida un target di scansione"""
@@ -1026,3 +1043,4 @@ def check_nmap_availability() -> Dict[str, Any]:
         status['error'] = str(e)
 
     return status
+
