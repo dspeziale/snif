@@ -15,6 +15,12 @@ app.secret_key = 'your-secret-key-here'
 
 db = SQLAlchemy(app)
 
+from database_manager import DatabaseManager, AdminLTEQueries
+
+# Inizializza globalmente
+db_manager = DatabaseManager('adminlte.db')
+adminlte = AdminLTEQueries(db_manager)
+
 # Define models here to avoid circular imports
 class MenuItem(db.Model):
     __tablename__ = 'menu_items'
