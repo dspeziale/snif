@@ -1101,7 +1101,7 @@ window.AppStatus = {
               <table class="table table-sm">
                 <tr>
                   <td><strong>Database Path:</strong></td>
-                  <td><small><code>${data.database.database_path || 'N/A'}</code></small></td>
+                  <td><small><code> ${data.database.database_path ? data.database.database_path.slice(-20) : 'N/A'}</code></small></td>
                 </tr>
                 <tr>
                   <td><strong>Size:</strong></td>
