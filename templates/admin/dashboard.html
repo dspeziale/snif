@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Administration Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Admin Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Database Overview Card -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-database me-2"></i>Database Overview
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Database Information</h5>
+            <table class="table table-sm">
+              <tr>
+                <td><strong>Database Path:</strong></td>
+                <td><code>{{ database_info.database_path or 'Not available' }}</code></td>
+              </tr>
+              <tr>
+                <td><strong>Database Size:</strong></td>
+                <td>{{ database_info.database_size_mb or 0 }} MB</td>
+              </tr>
+              <tr>
+                <td><strong>Total Tables:</strong></td>
+                <td>{{ database_info.tables|length if database_info.tables else 0 }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h5>Quick Stats</h5>
+            <div class="row">
+              <div class="col-6">
+                <div class="info-box bg-info">
+                  <span class="info-box-icon"><i class="bi bi-chat-text"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Messages</span>
+                    <span class="info-box-number">{{ database_info.tables.messages or 0 }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="info-box bg-warning">
+                  <span class="info-box-icon"><i class="bi bi-bell"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Notifications</span>
+                    <span class="info-box-number">{{ database_info.tables.notifications or 0 }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+  <div class="col-lg-3 col-6">
+    <div class="small-box text-bg-info">
+      <div class="inner">
+        <h3>{{ stats.messages.total or 0 }}</h3>
+        <p>Total Messages</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-chat-text"></i>
+      </div>
+      <a href="{{ url_for('admin_messages') }}" class="small-box-footer">
+        More info <i class="bi bi-arrow-right-circle"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box text-bg-warning">
+      <div class="inner">
+        <h3>{{ stats.notifications.total or 0 }}</h3>
+        <p>Total Notifications</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-bell"></i>
+      </div>
+      <a href="{{ url_for('admin_notifications') }}" class="small-box-footer">
+        More info <i class="bi bi-arrow-right-circle"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box text-bg-success">
+      <div class="inner">
+        <h3>{{ stats.messages.unread or 0 }}</h3>
+        <p>Unread Messages</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-envelope"></i>
+      </div>
+      <a href="{{ url_for('admin_messages') }}?unread_only=true" class="small-box-footer">
+        More info <i class="bi bi-arrow-right-circle"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="small-box text-bg-danger">
+      <div class="inner">
+        <h3>{{ stats.notifications.unread or 0 }}</h3>
+        <p>Unread Notifications</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-bell-slash"></i>
+      </div>
+      <a href="{{ url_for('admin_notifications') }}?unread_only=true" class="small-box-footer">
+        More info <i class="bi bi-arrow-right-circle"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Database Tables Status -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Database Tables Status</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Table Name</th>
+                <th>Record Count</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if database_info.tables %}
+                {% for table_name, count in database_info.tables.items() %}
+                <tr>
+                  <td><code>{{ table_name }}</code></td>
+                  <td>{{ count }}</td>
+                  <td>
+                    {% if count > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if table_name == 'messages' %}
+                      <a href="{{ url_for('admin_messages') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> View
+                      </a>
+                    {% elif table_name == 'notifications' %}
+                      <a href="{{ url_for('admin_notifications') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> View
+                      </a>
+                    {% elif table_name == 'menu_items' %}
+                      <a href="{{ url_for('admin_menu') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> View
+                      </a>
+                    {% else %}
+                      <button class="btn btn-sm btn-secondary" disabled>
+                        <i class="bi bi-eye-slash"></i> N/A
+                      </button>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="4" class="text-center text-muted">No database information available</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-lightning me-2"></i>Quick Actions
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <button type="button" class="btn btn-primary btn-block" onclick="createSampleData()">
+              <i class="bi bi-plus-circle me-2"></i>Create Sample Data
+            </button>
+          </div>
+          <div class="col-md-3">
+            <a href="{{ url_for('admin_database') }}" class="btn btn-info btn-block">
+              <i class="bi bi-database-gear me-2"></i>Database Management
+            </a>
+          </div>
+          <div class="col-md-3">
+            <button type="button" class="btn btn-warning btn-block" onclick="backupDatabase()">
+              <i class="bi bi-download me-2"></i>Backup Database
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button type="button" class="btn btn-success btn-block" onclick="optimizeDatabase()">
+              <i class="bi bi-arrow-clockwise me-2"></i>Optimize Database
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity (if stats.activity exists) -->
+{% if stats.activity %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Recent Activity (Last 30 days)</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="progress-group">
+              Recent Messages
+              <span class="float-end"><b>{{ stats.activity.recent_messages or 0 }}</b></span>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-primary" style="width: {{ (stats.activity.recent_messages / (stats.messages.total or 1) * 100) if stats.messages.total else 0 }}%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="progress-group">
+              Recent Notifications
+              <span class="float-end"><b>{{ stats.activity.recent_notifications or 0 }}</b></span>
+              <div class="progress progress-sm">
+                <div class="progress-bar bg-warning" style="width: {{ (stats.activity.recent_notifications / (stats.notifications.total or 1) * 100) if stats.notifications.total else 0 }}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function createSampleData() {
+  if (confirm('Are you sure you want to create sample data? This will add test messages and notifications.')) {
+    fetch('/demo/create-sample-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Sample data created successfully!');
+        location.reload();
+      } else {
+        alert('Error: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error creating sample data');
+    });
+  }
+}
+
+function backupDatabase() {
+  if (confirm('Create a backup of the database?')) {
+    fetch('/api/database/backup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Database backup created successfully!');
+      } else {
+        alert('Error: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error creating backup');
+    });
+  }
+}
+
+function optimizeDatabase() {
+  if (confirm('Optimize the database? This may take a few seconds.')) {
+    fetch('/api/database/optimize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Database optimized successfully!');
+      } else {
+        alert('Error: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error optimizing database');
+    });
+  }
+}
+
+// Auto-refresh stats every 30 seconds
+setInterval(function() {
+  fetch('/api/stats')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Update counters if needed
+        // This could be enhanced to update specific elements
+      }
+    })
+    .catch(error => console.error('Error updating stats:', error));
+}, 30000);
+</script>
+{% endblock %}

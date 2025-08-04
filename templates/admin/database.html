@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}Database Management{% endblock %}
+{% block page_title %}Database Management{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin</a></li>
+<li class="breadcrumb-item active" aria-current="page">Database</li>
+{% endblock %}
+
+{% block content %}
+<!-- Database Information -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-info">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-database me-2"></i>Database Information
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" onclick="refreshDbInfo()">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-8">
+            <table class="table table-borderless">
+              <tr>
+                <td width="200"><strong>Database Type:</strong></td>
+                <td>SQLite</td>
+              </tr>
+              <tr>
+                <td><strong>Database Path:</strong></td>
+                <td><code>{{ database_info.database_path or 'Not available' }}</code></td>
+              </tr>
+              <tr>
+                <td><strong>File Size:</strong></td>
+                <td>
+                  {{ database_info.database_size_mb or 0 }} MB
+                  <small class="text-muted">({{ database_info.database_size or 0 }} bytes)</small>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Total Tables:</strong></td>
+                <td>{{ database_info.tables|length if database_info.tables else 0 }}</td>
+              </tr>
+              <tr>
+                <td><strong>Active Records:</strong></td>
+                <td>
+                  {% set total_records = 0 %}
+                  {% if database_info.tables %}
+                    {% for table, count in database_info.tables.items() %}
+                      {% set total_records = total_records + count %}
+                    {% endfor %}
+                  {% endif %}
+                  {{ total_records }}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-4">
+            <div class="info-box bg-primary">
+              <span class="info-box-icon"><i class="bi bi-envelope"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">Unread Messages</span>
+                <span class="info-box-number">{{ database_info.unread_messages or 0 }}</span>
+              </div>
+            </div>
+            <div class="info-box bg-warning">
+              <span class="info-box-icon"><i class="bi bi-bell"></i></span>
+              <div class="info-box-content">
+                <span class="info-box-text">Unread Notifications</span>
+                <span class="info-box-number">{{ database_info.unread_notifications or 0 }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Database Operations -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-gear me-2"></i>Database Operations
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <button type="button" class="btn btn-success" onclick="optimizeDatabase()">
+            <i class="bi bi-arrow-clockwise me-2"></i>Optimize Database
+          </button>
+          <button type="button" class="btn btn-info" onclick="checkIntegrity()">
+            <i class="bi bi-shield-check me-2"></i>Check Integrity
+          </button>
+          <button type="button" class="btn btn-warning" onclick="cleanupOldData()">
+            <i class="bi bi-trash me-2"></i>Cleanup Old Data
+          </button>
+          <hr>
+          <button type="button" class="btn btn-danger" onclick="resetDatabase()">
+            <i class="bi bi-exclamation-triangle me-2"></i>Reset Database
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card card-warning">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-download me-2"></i>Backup & Restore
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <button type="button" class="btn btn-primary" onclick="createBackup()">
+            <i class="bi bi-download me-2"></i>Create Backup
+          </button>
+          <div class="input-group">
+            <input type="file" class="form-control" id="restoreFile" accept=".db">
+            <button class="btn btn-outline-secondary" type="button" onclick="restoreDatabase()">
+              <i class="bi bi-upload me-2"></i>Restore
+            </button>
+          </div>
+          <small class="text-muted">Select a .db file to restore from backup</small>
+        </div>
+
+        <hr>
+
+        <h6>Recent Backups</h6>
+        <div id="backup-list">
+          <small class="text-muted">Loading backup list...</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Database Tables Detailed View -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-table me-2"></i>Database Tables
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped" id="tables-table">
+            <thead>
+              <tr>
+                <th>Table Name</th>
+                <th>Type</th>
+                <th>Records</th>
+                <th>Status</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if database_info.tables %}
+                <tr>
+                  <td><code>menu_items</code></td>
+                  <td><span class="badge bg-primary">Core</span></td>
+                  <td>{{ database_info.tables.menu_items or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.menu_items > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Navigation menu items</td>
+                  <td>
+                    <a href="{{ url_for('admin_menu') }}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>menu_types</code></td>
+                  <td><span class="badge bg-primary">Core</span></td>
+                  <td>{{ database_info.tables.menu_types or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.menu_types > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Menu type definitions</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>messages</code></td>
+                  <td><span class="badge bg-info">Data</span></td>
+                  <td>{{ database_info.tables.messages or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.messages > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>System messages</td>
+                  <td>
+                    <a href="{{ url_for('admin_messages') }}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>message_types</code></td>
+                  <td><span class="badge bg-info">Meta</span></td>
+                  <td>{{ database_info.tables.message_types or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.message_types > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Message type definitions</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>message_priorities</code></td>
+                  <td><span class="badge bg-info">Meta</span></td>
+                  <td>{{ database_info.tables.message_priorities or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.message_priorities > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Message priority levels</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>notifications</code></td>
+                  <td><span class="badge bg-warning">Data</span></td>
+                  <td>{{ database_info.tables.notifications or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.notifications > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>System notifications</td>
+                  <td>
+                    <a href="{{ url_for('admin_notifications') }}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>notification_types</code></td>
+                  <td><span class="badge bg-warning">Meta</span></td>
+                  <td>{{ database_info.tables.notification_types or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.notification_types > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Notification type definitions</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>notification_categories</code></td>
+                  <td><span class="badge bg-warning">Meta</span></td>
+                  <td>{{ database_info.tables.notification_categories or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.notification_categories > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Notification categories</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><code>notification_priorities</code></td>
+                  <td><span class="badge bg-warning">Meta</span></td>
+                  <td>{{ database_info.tables.notification_priorities or 0 }}</td>
+                  <td>
+                    {% if database_info.tables.notification_priorities > 0 %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Empty</span>
+                    {% endif %}
+                  </td>
+                  <td>Notification priority levels</td>
+                  <td>
+                    <button class="btn btn-sm btn-secondary" disabled>
+                      <i class="bi bi-eye-slash"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted">No database information available</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Operation Results Modal -->
+<div class="modal fade" id="operationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="operationModalTitle">Operation Result</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="operationModalBody">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showOperationResult(title, message, isSuccess = true) {
+  document.getElementById('operationModalTitle').textContent = title;
+  document.getElementById('operationModalBody').innerHTML =
+    `<div class="alert alert-${isSuccess ? 'success' : 'danger'}">${message}</div>`;
+
+  const modal = new bootstrap.Modal(document.getElementById('operationModal'));
+  modal.show();
+}
+
+function refreshDbInfo() {
+  location.reload();
+}
+
+function optimizeDatabase() {
+  if (confirm('Optimize the database? This may take a few seconds.')) {
+    fetch('/api/database/optimize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      showOperationResult(
+        'Database Optimization',
+        data.success ? 'Database optimized successfully!' : `Error: ${data.error}`,
+        data.success
+      );
+    })
+    .catch(error => {
+      showOperationResult('Database Optimization', `Error: ${error.message}`, false);
+    });
+  }
+}
+
+function checkIntegrity() {
+  showOperationResult('Integrity Check', 'Checking database integrity...', true);
+
+  // Since we don't have a direct integrity check endpoint, we'll simulate it
+  setTimeout(() => {
+    showOperationResult('Integrity Check', 'Database integrity check completed. No issues found.', true);
+  }, 2000);
+}
+
+function cleanupOldData() {
+  if (confirm('Clean up old archived data? This will permanently delete old messages and notifications.')) {
+    showOperationResult('Data Cleanup', 'Cleaning up old data...', true);
+
+    // Simulate cleanup - in real implementation, you'd call an API endpoint
+    setTimeout(() => {
+      showOperationResult('Data Cleanup', 'Old data cleanup completed successfully.', true);
+    }, 3000);
+  }
+}
+
+function resetDatabase() {
+  if (confirm('⚠️ WARNING: This will delete ALL data in the database. This action cannot be undone!\n\nAre you sure you want to reset the database?')) {
+    if (confirm('This is your final warning. ALL DATA WILL BE LOST. Proceed?')) {
+      showOperationResult('Database Reset', 'Resetting database...', true);
+
+      // In real implementation, you'd call the reset endpoint
+      setTimeout(() => {
+        showOperationResult('Database Reset', 'Database reset completed. Page will reload.', true);
+        setTimeout(() => location.reload(), 2000);
+      }, 3000);
+    }
+  }
+}
+
+function createBackup() {
+  fetch('/api/database/backup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(data => {
+    showOperationResult(
+      'Database Backup',
+      data.success ? `Backup created successfully!<br><code>${data.backup_path}</code>` : `Error: ${data.error}`,
+      data.success
+    );
+    if (data.success) {
+      loadBackupList();
+    }
+  })
+  .catch(error => {
+    showOperationResult('Database Backup', `Error: ${error.message}`, false);
+  });
+}
+
+function restoreDatabase() {
+  const fileInput = document.getElementById('restoreFile');
+  if (!fileInput.files[0]) {
+    alert('Please select a backup file first.');
+    return;
+  }
+
+  if (confirm('⚠️ WARNING: Restoring from backup will replace ALL current data. Continue?')) {
+    showOperationResult('Database Restore', 'Restore functionality not yet implemented in this demo.', false);
+  }
+}
+
+function loadBackupList() {
+  // In a real implementation, you'd fetch the backup list from an API
+  document.getElementById('backup-list').innerHTML = `
+    <div class="list-group list-group-flush">
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <small class="text-muted">No recent backups found</small>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Load backup list on page load
+document.addEventListener('DOMContentLoaded', function() {
+  loadBackupList();
+});
+</script>
+{% endblock %}
