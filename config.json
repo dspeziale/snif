@@ -1,0 +1,415 @@
+{
+  "app_name": "AdminLTE Flask Dashboard",
+  "app_version": "4.0.0",
+  "sidebar_menu": [
+    {
+      "title": "Dashboard",
+      "icon": "bi bi-speedometer",
+      "url": "/",
+      "active": true,
+      "children": [
+        {
+          "title": "Dashboard v1",
+          "icon": "bi bi-circle",
+          "url": "/dashboard/v1",
+          "active": true
+        },
+        {
+          "title": "Dashboard v2",
+          "icon": "bi bi-circle",
+          "url": "/dashboard/v2",
+          "active": false
+        },
+        {
+          "title": "Dashboard v3",
+          "icon": "bi bi-circle",
+          "url": "/dashboard/v3",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "Widgets",
+      "icon": "bi bi-grid",
+      "url": "/widgets",
+      "active": false
+    },
+    {
+      "title": "Layout Options",
+      "icon": "bi bi-layout-three-columns",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "Top Navigation",
+          "icon": "bi bi-circle",
+          "url": "/layout/top-nav",
+          "active": false
+        },
+        {
+          "title": "Top Navigation + Sidebar",
+          "icon": "bi bi-circle",
+          "url": "/layout/top-nav-sidebar",
+          "active": false
+        },
+        {
+          "title": "Boxed",
+          "icon": "bi bi-circle",
+          "url": "/layout/boxed",
+          "active": false
+        },
+        {
+          "title": "Fixed Sidebar",
+          "icon": "bi bi-circle",
+          "url": "/layout/fixed-sidebar",
+          "active": false
+        },
+        {
+          "title": "Fixed Navbar",
+          "icon": "bi bi-circle",
+          "url": "/layout/fixed-navbar",
+          "active": false
+        },
+        {
+          "title": "Fixed Footer",
+          "icon": "bi bi-circle",
+          "url": "/layout/fixed-footer",
+          "active": false
+        },
+        {
+          "title": "Collapsed Sidebar",
+          "icon": "bi bi-circle",
+          "url": "/layout/collapsed-sidebar",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "Charts",
+      "icon": "bi bi-pie-chart",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "ChartJS",
+          "icon": "bi bi-circle",
+          "url": "/charts/chartjs",
+          "active": false
+        },
+        {
+          "title": "Flot",
+          "icon": "bi bi-circle",
+          "url": "/charts/flot",
+          "active": false
+        },
+        {
+          "title": "Inline",
+          "icon": "bi bi-circle",
+          "url": "/charts/inline",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "UI Elements",
+      "icon": "bi bi-tree",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "General",
+          "icon": "bi bi-circle",
+          "url": "/ui/general",
+          "active": false
+        },
+        {
+          "title": "Icons",
+          "icon": "bi bi-circle",
+          "url": "/ui/icons",
+          "active": false
+        },
+        {
+          "title": "Buttons",
+          "icon": "bi bi-circle",
+          "url": "/ui/buttons",
+          "active": false
+        },
+        {
+          "title": "Sliders",
+          "icon": "bi bi-circle",
+          "url": "/ui/sliders",
+          "active": false
+        },
+        {
+          "title": "Modals & Alerts",
+          "icon": "bi bi-circle",
+          "url": "/ui/modals",
+          "active": false
+        },
+        {
+          "title": "Navbar & Tabs",
+          "icon": "bi bi-circle",
+          "url": "/ui/navbar",
+          "active": false
+        },
+        {
+          "title": "Timeline",
+          "icon": "bi bi-circle",
+          "url": "/ui/timeline",
+          "active": false
+        },
+        {
+          "title": "Ribbons",
+          "icon": "bi bi-circle",
+          "url": "/ui/ribbons",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "Forms",
+      "icon": "bi bi-pencil-square",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "General Elements",
+          "icon": "bi bi-circle",
+          "url": "/forms/general",
+          "active": false
+        },
+        {
+          "title": "Advanced Elements",
+          "icon": "bi bi-circle",
+          "url": "/forms/advanced",
+          "active": false
+        },
+        {
+          "title": "Editors",
+          "icon": "bi bi-circle",
+          "url": "/forms/editors",
+          "active": false
+        },
+        {
+          "title": "Validation",
+          "icon": "bi bi-circle",
+          "url": "/forms/validation",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "Tables",
+      "icon": "bi bi-table",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "Simple Tables",
+          "icon": "bi bi-circle",
+          "url": "/tables/simple",
+          "active": false
+        },
+        {
+          "title": "Data Tables",
+          "icon": "bi bi-circle",
+          "url": "/tables/data",
+          "active": false
+        }
+      ]
+    },
+    {
+      "title": "Calendar",
+      "icon": "bi bi-calendar",
+      "url": "/calendar",
+      "active": false
+    },
+    {
+      "title": "Gallery",
+      "icon": "bi bi-image",
+      "url": "/gallery",
+      "active": false
+    },
+    {
+      "title": "Kanban Board",
+      "icon": "bi bi-kanban",
+      "url": "/kanban",
+      "active": false
+    },
+    {
+      "title": "Multilevel",
+      "icon": "bi bi-share",
+      "url": "#",
+      "active": false,
+      "children": [
+        {
+          "title": "Level 1",
+          "icon": "bi bi-circle",
+          "url": "#",
+          "active": false,
+          "children": [
+            {
+              "title": "Level 2",
+              "icon": "bi bi-record-circle-fill",
+              "url": "#",
+              "active": false
+            },
+            {
+              "title": "Level 2",
+              "icon": "bi bi-record-circle-fill",
+              "url": "#",
+              "active": false,
+              "children": [
+                {
+                  "title": "Level 3",
+                  "icon": "bi bi-record-circle-fill",
+                  "url": "#",
+                  "active": false
+                },
+                {
+                  "title": "Level 3",
+                  "icon": "bi bi-record-circle-fill",
+                  "url": "#",
+                  "active": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Level 1",
+          "icon": "bi bi-circle",
+          "url": "#",
+          "active": false
+        }
+      ]
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "sender": "Alexander Pierce",
+      "content": "Store your password safely using a password manager...",
+      "time": "4 hours ago",
+      "avatar": "/static/assets/img/user1-128x128.jpg",
+      "unread": true,
+      "subject": "Password Security"
+    },
+    {
+      "id": 2,
+      "sender": "Sarah Bullock",
+      "content": "You better believe it! The new update is amazing.",
+      "time": "2 hours ago",
+      "avatar": "/static/assets/img/user3-128x128.jpg",
+      "unread": true,
+      "subject": "Great Work!"
+    },
+    {
+      "id": 3,
+      "sender": "Nora Silvester",
+      "content": "The subject goes here and this is the message content...",
+      "time": "6 hours ago",
+      "avatar": "/static/assets/img/user4-128x128.jpg",
+      "unread": false,
+      "subject": "Project Update"
+    },
+    {
+      "id": 4,
+      "sender": "John Doe",
+      "content": "Can we schedule a meeting for tomorrow?",
+      "time": "1 day ago",
+      "avatar": "/static/assets/img/user2-160x160.jpg",
+      "unread": false,
+      "subject": "Meeting Request"
+    },
+    {
+      "id": 5,
+      "sender": "Jane Smith",
+      "content": "The quarterly report is ready for review.",
+      "time": "2 days ago",
+      "avatar": "/static/assets/img/user5-128x128.jpg",
+      "unread": false,
+      "subject": "Quarterly Report"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "message": "15 friends sent you a friend request",
+      "time": "Just now",
+      "icon": "bi-person-fill-add",
+      "type": "friend_request",
+      "read": false,
+      "priority": "low"
+    },
+    {
+      "id": 2,
+      "message": "You have 5 new followers",
+      "time": "10 minutes ago",
+      "icon": "bi-people-fill",
+      "type": "followers",
+      "read": false,
+      "priority": "low"
+    },
+    {
+      "id": 3,
+      "message": "You have 3 new messages",
+      "time": "4 minutes ago",
+      "icon": "bi-chat-text-fill",
+      "type": "messages",
+      "read": false,
+      "priority": "medium"
+    },
+    {
+      "id": 4,
+      "message": "Server overloaded with requests. Please check!",
+      "time": "17 minutes ago",
+      "icon": "bi-exclamation-triangle-fill",
+      "type": "warning",
+      "read": false,
+      "priority": "high"
+    },
+    {
+      "id": 5,
+      "message": "Database backup completed successfully",
+      "time": "1 hour ago",
+      "icon": "bi-check-circle-fill",
+      "type": "success",
+      "read": true,
+      "priority": "medium"
+    },
+    {
+      "id": 6,
+      "message": "New user registration: Maria Garcia",
+      "time": "2 hours ago",
+      "icon": "bi-person-plus-fill",
+      "type": "user_registration",
+      "read": true,
+      "priority": "low"
+    },
+    {
+      "id": 7,
+      "message": "System maintenance scheduled for tonight",
+      "time": "3 hours ago",
+      "icon": "bi-gear-fill",
+      "type": "maintenance",
+      "read": false,
+      "priority": "high"
+    }
+  ],
+  "user_settings": {
+    "theme": "light",
+    "language": "en",
+    "timezone": "UTC",
+    "notifications_enabled": true,
+    "email_notifications": true,
+    "push_notifications": false
+  },
+  "app_settings": {
+    "maintenance_mode": false,
+    "registration_enabled": true,
+    "api_rate_limit": 1000,
+    "session_timeout": 3600,
+    "max_file_upload_size": "10MB"
+  }
+}
