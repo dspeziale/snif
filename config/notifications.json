@@ -1,0 +1,244 @@
+{
+  "notifications": [
+    {
+      "id": 1,
+      "message": "15 friends sent you a friend request",
+      "time": "Just now",
+      "icon": "bi-person-fill-add",
+      "type": "friend_request",
+      "read": false,
+      "priority": "low",
+      "timestamp": "2025-08-04T14:00:00.000Z",
+      "action_url": "/friends/requests",
+      "category": "social"
+    },
+    {
+      "id": 2,
+      "message": "You have 5 new followers",
+      "time": "10 minutes ago",
+      "icon": "bi-people-fill",
+      "type": "followers",
+      "read": false,
+      "priority": "low",
+      "timestamp": "2025-08-04T13:50:00.000Z",
+      "action_url": "/profile/followers",
+      "category": "social"
+    },
+    {
+      "id": 3,
+      "message": "You have 3 new messages",
+      "time": "4 minutes ago",
+      "icon": "bi-chat-text-fill",
+      "type": "messages",
+      "read": false,
+      "priority": "medium",
+      "timestamp": "2025-08-04T13:56:00.000Z",
+      "action_url": "/messages",
+      "category": "communication"
+    },
+    {
+      "id": 4,
+      "message": "Server overloaded with requests. Please check!",
+      "time": "17 minutes ago",
+      "icon": "bi-exclamation-triangle-fill",
+      "type": "warning",
+      "read": false,
+      "priority": "high",
+      "timestamp": "2025-08-04T13:43:00.000Z",
+      "action_url": "/admin/server-status",
+      "category": "system"
+    },
+    {
+      "id": 5,
+      "message": "Database backup completed successfully",
+      "time": "1 hour ago",
+      "icon": "bi-check-circle-fill",
+      "type": "success",
+      "read": true,
+      "priority": "medium",
+      "timestamp": "2025-08-04T13:00:00.000Z",
+      "action_url": "/admin/backups",
+      "category": "system"
+    },
+    {
+      "id": 6,
+      "message": "New user registration: Maria Garcia",
+      "time": "2 hours ago",
+      "icon": "bi-person-plus-fill",
+      "type": "user_registration",
+      "read": true,
+      "priority": "low",
+      "timestamp": "2025-08-04T12:00:00.000Z",
+      "action_url": "/admin/users",
+      "category": "admin"
+    },
+    {
+      "id": 7,
+      "message": "System maintenance scheduled for tonight",
+      "time": "3 hours ago",
+      "icon": "bi-gear-fill",
+      "type": "maintenance",
+      "read": false,
+      "priority": "high",
+      "timestamp": "2025-08-04T11:00:00.000Z",
+      "action_url": "/admin/maintenance",
+      "category": "system"
+    },
+    {
+      "id": 8,
+      "message": "Weekly report is ready for download",
+      "time": "5 hours ago",
+      "icon": "bi-file-earmark-arrow-down",
+      "type": "report",
+      "read": true,
+      "priority": "medium",
+      "timestamp": "2025-08-04T09:00:00.000Z",
+      "action_url": "/reports/weekly",
+      "category": "business"
+    },
+    {
+      "id": 9,
+      "message": "Your profile was viewed 25 times today",
+      "time": "8 hours ago",
+      "icon": "bi-eye-fill",
+      "type": "profile_views",
+      "read": false,
+      "priority": "low",
+      "timestamp": "2025-08-04T06:00:00.000Z",
+      "action_url": "/profile/analytics",
+      "category": "social"
+    },
+    {
+      "id": 10,
+      "message": "Payment received: $1,250.00",
+      "time": "1 day ago",
+      "icon": "bi-credit-card-fill",
+      "type": "payment",
+      "read": true,
+      "priority": "medium",
+      "timestamp": "2025-08-03T14:30:00.000Z",
+      "action_url": "/billing/transactions",
+      "category": "financial"
+    }
+  ],
+  "notification_types": [
+    {
+      "type": "friend_request",
+      "label": "Friend Request",
+      "color": "primary",
+      "icon": "bi-person-fill-add"
+    },
+    {
+      "type": "followers",
+      "label": "New Followers",
+      "color": "success",
+      "icon": "bi-people-fill"
+    },
+    {
+      "type": "messages",
+      "label": "Messages",
+      "color": "info",
+      "icon": "bi-chat-text-fill"
+    },
+    {
+      "type": "warning",
+      "label": "System Warning",
+      "color": "warning",
+      "icon": "bi-exclamation-triangle-fill"
+    },
+    {
+      "type": "success",
+      "label": "Success",
+      "color": "success",
+      "icon": "bi-check-circle-fill"
+    },
+    {
+      "type": "user_registration",
+      "label": "New User",
+      "color": "info",
+      "icon": "bi-person-plus-fill"
+    },
+    {
+      "type": "maintenance",
+      "label": "Maintenance",
+      "color": "warning",
+      "icon": "bi-gear-fill"
+    },
+    {
+      "type": "report",
+      "label": "Report",
+      "color": "secondary",
+      "icon": "bi-file-earmark-arrow-down"
+    },
+    {
+      "type": "profile_views",
+      "label": "Profile Views",
+      "color": "secondary",
+      "icon": "bi-eye-fill"
+    },
+    {
+      "type": "payment",
+      "label": "Payment",
+      "color": "success",
+      "icon": "bi-credit-card-fill"
+    }
+  ],
+  "categories": [
+    {
+      "category": "social",
+      "label": "Social",
+      "color": "primary",
+      "icon": "bi-people"
+    },
+    {
+      "category": "communication",
+      "label": "Communication",
+      "color": "info",
+      "icon": "bi-chat"
+    },
+    {
+      "category": "system",
+      "label": "System",
+      "color": "warning",
+      "icon": "bi-gear"
+    },
+    {
+      "category": "admin",
+      "label": "Administration",
+      "color": "danger",
+      "icon": "bi-shield"
+    },
+    {
+      "category": "business",
+      "label": "Business",
+      "color": "success",
+      "icon": "bi-briefcase"
+    },
+    {
+      "category": "financial",
+      "label": "Financial",
+      "color": "success",
+      "icon": "bi-currency-dollar"
+    }
+  ],
+  "priorities": [
+    {
+      "level": "low",
+      "label": "Low Priority",
+      "color": "secondary",
+      "icon": "bi-arrow-down"
+    },
+    {
+      "level": "medium",
+      "label": "Medium Priority",
+      "color": "warning",
+      "icon": "bi-dash"
+    },
+    {
+      "level": "high",
+      "label": "High Priority",
+      "color": "danger",
+      "icon": "bi-arrow-up"
+    }
+  ]
+}
