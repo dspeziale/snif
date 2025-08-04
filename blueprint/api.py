@@ -904,3 +904,341 @@ def paginate_query_results(query_result: dict, page: int, per_page: int) -> dict
         }
 
     return query_result
+
+
+# ===============================
+# API ENDPOINT PER STATUS APPLICAZIONE
+# ===============================
+
+@api.route('/api/app/status')
+def get_app_status():
+    """Endpoint completo per ottenere lo stato dell'applicazione"""
+    try:
+        import psutil
+        import os
+        import platform
+        from datetime import datetime, timedelta
+
+        # Informazioni sistema
+        system_info = {
+            'platform': platform.system(),
+            'platform_release': platform.release(),
+            'platform_version': platform.version(),
+            'architecture': platform.machine(),
+            'hostname': platform.node(),
+            'processor': platform.processor(),
+            'python_version': platform.python_version(),
+            'uptime': str(datetime.now() - datetime.fromtimestamp(psutil.boot_time())),
+        }
+
+        # Informazioni processo Python
+        process = psutil.Process()
+        process_info = {
+            'pid': process.pid,
+            'memory_usage_mb': round(process.memory_info().rss / 1024 / 1024, 2),
+            'cpu_percent': process.cpu_percent(),
+            'create_time': datetime.fromtimestamp(process.create_time()).isoformat(),
+            'num_threads': process.num_threads(),
+            'status': process.status(),
+        }
+
+        # Informazioni memoria sistema
+        memory = psutil.virtual_memory()
+        memory_info = {
+            'total_gb': round(memory.total / 1024 / 1024 / 1024, 2),
+            'available_gb': round(memory.available / 1024 / 1024 / 1024, 2),
+            'used_gb': round(memory.used / 1024 / 1024 / 1024, 2),
+            'percentage': memory.percent,
+        }
+
+        # Informazioni disco
+        disk = psutil.disk_usage('/')
+        disk_info = {
+            'total_gb': round(disk.total / 1024 / 1024 / 1024, 2),
+            'used_gb': round(disk.used / 1024 / 1024 / 1024, 2),
+            'free_gb': round(disk.free / 1024 / 1024 / 1024, 2),
+            'percentage': round((disk.used / disk.total) * 100, 2),
+        }
+
+        # Informazioni CPU
+        cpu_info = {
+            'physical_cores': psutil.cpu_count(logical=False),
+            'total_cores': psutil.cpu_count(logical=True),
+            'max_frequency': round(psutil.cpu_freq().max, 2) if psutil.cpu_freq() else 0,
+            'current_frequency': round(psutil.cpu_freq().current, 2) if psutil.cpu_freq() else 0,
+            'cpu_usage': psutil.cpu_percent(interval=1),
+        }
+
+    except ImportError:
+        # Fallback se psutil non è disponibile
+        system_info = {
+            'platform': platform.system(),
+            'python_version': platform.python_version(),
+            'hostname': platform.node(),
+        }
+        process_info = {'pid': os.getpid()}
+        memory_info = {'status': 'unavailable'}
+        disk_info = {'status': 'unavailable'}
+        cpu_info = {'status': 'unavailable'}
+
+    # Ottieni informazioni database
+    try:
+        from database_config import get_database_info
+        db_info = get_database_info(current_app)
+    except Exception as e:
+        current_app.logger.error(f"Errore nel caricamento info database: {str(e)}")
+        db_info = {'error': str(e)}
+
+    # Ottieni statistiche applicazione
+    try:
+        app_stats = stats_manager.get_dashboard_stats()
+    except Exception as e:
+        current_app.logger.error(f"Errore nel caricamento statistiche: {str(e)}")
+        app_stats = {'error': str(e)}
+
+    # Informazioni configurazione Flask
+    flask_info = {
+        'debug_mode': current_app.debug,
+        'testing': current_app.testing,
+        'secret_key_set': bool(current_app.secret_key),
+        'instance_path': current_app.instance_path,
+        'root_path': current_app.root_path,
+    }
+
+    # Test connettività API
+    api_health = {
+        'messages_api': 'unknown',
+        'notifications_api': 'unknown',
+        'database_api': 'unknown',
+        'stats_api': 'unknown'
+    }
+
+    try:
+        # Test API messaggi
+        messages_data = message_manager.get_messages(limit=1)
+        api_health['messages_api'] = 'healthy' if messages_data else 'error'
+    except Exception:
+        api_health['messages_api'] = 'error'
+
+    try:
+        # Test API notifiche
+        notifications_data = notification_manager.get_notifications(limit=1)
+        api_health['notifications_api'] = 'healthy' if notifications_data else 'error'
+    except Exception:
+        api_health['notifications_api'] = 'error'
+
+    try:
+        # Test accesso database
+        from models import db
+        db.session.execute('SELECT 1').fetchone()
+        api_health['database_api'] = 'healthy'
+    except Exception:
+        api_health['database_api'] = 'error'
+
+    try:
+        # Test API statistiche
+        stats_test = stats_manager.get_dashboard_stats()
+        api_health['stats_api'] = 'healthy' if stats_test else 'error'
+    except Exception:
+        api_health['stats_api'] = 'error'
+
+    # Calcola stato generale
+    total_apis = len(api_health)
+    healthy_apis = sum(1 for status in api_health.values() if status == 'healthy')
+
+    if healthy_apis == total_apis:
+        overall_status = 'healthy'
+    elif healthy_apis >= total_apis * 0.5:
+        overall_status = 'warning'
+    else:
+        overall_status = 'critical'
+
+    # Componi risposta completa
+    status_data = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'overall_status': overall_status,
+        'health_score': round((healthy_apis / total_apis) * 100, 2),
+        'system': system_info,
+        'process': process_info,
+        'memory': memory_info,
+        'disk': disk_info,
+        'cpu': cpu_info,
+        'flask': flask_info,
+        'database': db_info,
+        'statistics': app_stats,
+        'api_health': api_health,
+        'uptime': {
+            'application_start': datetime.utcnow().isoformat(),  # Approssimativo
+            'last_restart': datetime.utcnow().isoformat(),  # Approssimativo
+        }
+    }
+
+    return jsonify({
+        'success': True,
+        'data': status_data,
+        'timestamp': datetime.utcnow().isoformat()
+    })
+
+
+@api.route('/api/app/health')
+def get_app_health():
+    """Endpoint leggero per health check"""
+    try:
+        # Test rapido database
+        from models import db
+        db.session.execute('SELECT 1').fetchone()
+        db_status = 'healthy'
+    except Exception as e:
+        db_status = 'error'
+        current_app.logger.error(f"Database health check failed: {str(e)}")
+
+    # Test rapido API
+    try:
+        messages_count = message_manager.get_messages(limit=1).get('total', 0)
+        api_status = 'healthy'
+    except Exception as e:
+        api_status = 'error'
+        current_app.logger.error(f"API health check failed: {str(e)}")
+
+    # Stato generale
+    if db_status == 'healthy' and api_status == 'healthy':
+        overall_status = 'healthy'
+        http_status = 200
+    else:
+        overall_status = 'unhealthy'
+        http_status = 503
+
+    response_data = {
+        'status': overall_status,
+        'timestamp': datetime.utcnow().isoformat(),
+        'checks': {
+            'database': db_status,
+            'api': api_status
+        }
+    }
+
+    return jsonify(response_data), http_status
+
+
+@api.route('/api/app/metrics')
+def get_app_metrics():
+    """Endpoint per metriche dell'applicazione"""
+    try:
+        # Statistiche database
+        db_stats = stats_manager.get_dashboard_stats()
+
+        # Metriche personalizzate
+        metrics = {
+            'messages': {
+                'total': db_stats.get('messages', {}).get('total', 0),
+                'unread': db_stats.get('messages', {}).get('unread', 0),
+                'read_percentage': db_stats.get('messages', {}).get('read_percentage', 0),
+            },
+            'notifications': {
+                'total': db_stats.get('notifications', {}).get('total', 0),
+                'unread': db_stats.get('notifications', {}).get('unread', 0),
+                'read_percentage': db_stats.get('notifications', {}).get('read_percentage', 0),
+            },
+            'database': {
+                'size_mb': 0,  # Verrà calcolato se disponibile
+                'tables': 0,
+                'total_records': 0,
+            },
+            'system': {
+                'timestamp': datetime.utcnow().isoformat(),
+                'uptime_seconds': 0,  # Approssimativo
+            }
+        }
+
+        # Aggiungi informazioni database se disponibili
+        try:
+            from database_config import get_database_info
+            db_info = get_database_info(current_app)
+
+            metrics['database']['size_mb'] = db_info.get('database_size_mb', 0)
+            metrics['database']['tables'] = len(db_info.get('tables', {}))
+
+            # Calcola totale record
+            tables = db_info.get('tables', {})
+            total_records = sum(tables.values()) if tables else 0
+            metrics['database']['total_records'] = total_records
+
+        except Exception as e:
+            current_app.logger.error(f"Errore nel caricamento metriche database: {str(e)}")
+
+        return jsonify({
+            'success': True,
+            'metrics': metrics,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Errore nel caricamento metriche: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Errore nel caricamento delle metriche',
+            'details': str(e) if current_app.debug else None
+        }), 500
+
+
+@api.route('/api/app/version')
+def get_app_version():
+    """Endpoint per informazioni versione applicazione"""
+    try:
+        import sys
+        import flask
+        from datetime import datetime
+
+        version_info = {
+            'application': {
+                'name': 'AdminLTE Flask Dashboard',
+                'version': '4.0.0',
+                'description': 'A comprehensive admin dashboard built with Flask and AdminLTE 4',
+                'author': 'Development Team',
+                'license': 'MIT'
+            },
+            'framework': {
+                'flask_version': flask.__version__,
+                'python_version': sys.version,
+                'python_executable': sys.executable,
+            },
+            'dependencies': {
+                'sqlalchemy': 'Unknown',  # Potresti aggiungere versioni specifiche
+                'bootstrap': '5.3.2',
+                'adminlte': '4.0.0',
+                'jquery': '3.7.1',
+            },
+            'build_info': {
+                'build_date': datetime.utcnow().isoformat(),
+                'environment': 'development' if current_app.debug else 'production',
+                'debug_mode': current_app.debug,
+            }
+        }
+
+        # Prova a ottenere versioni dei package installati
+        try:
+            import pkg_resources
+            installed_packages = {pkg.project_name: pkg.version
+                                  for pkg in pkg_resources.working_set}
+
+            # Aggiorna con versioni reali se disponibili
+            for pkg_name in ['flask', 'sqlalchemy', 'jinja2']:
+                if pkg_name in installed_packages:
+                    version_info['dependencies'][pkg_name] = installed_packages[pkg_name]
+
+        except ImportError:
+            pass  # pkg_resources non disponibile
+
+        return jsonify({
+            'success': True,
+            'data': version_info,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+
+    except Exception as e:
+        current_app.logger.error(f"Errore nel caricamento info versione: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Errore nel caricamento delle informazioni versione',
+            'details': str(e) if current_app.debug else None
+        }), 500

@@ -1,49 +1,49 @@
 <!doctype html>
 <html lang="it">
-  <!--begin::Head-->
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--begin::Head-->
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>{% block title %}{{ app_name }}{% endblock %} | Dashboard</title>
     <!--begin::Accessibility Meta Tags-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+    <meta name="color-scheme" content="light dark"/>
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)"/>
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)"/>
     <link rel="icon" href="static/assets/img/favicon.ico" type="image/x-icon">
     <!--end::Accessibility Meta Tags-->
     <!--begin::Primary Meta Tags-->
-    <meta name="title" content="{{ app_name }} | Dashboard" />
-    <meta name="author" content="Development Team" />
+    <meta name="title" content="{{ app_name }} | Dashboard"/>
+    <meta name="author" content="Development Team"/>
     <meta
-      name="description"
-      content="AdminLTE is a Free Bootstrap 5 Admin Dashboard with SQLite Database Backend. Fully accessible with WCAG 2.1 AA compliance."
+            name="description"
+            content="AdminLTE is a Free Bootstrap 5 Admin Dashboard with SQLite Database Backend. Fully accessible with WCAG 2.1 AA compliance."
     />
     <meta
-      name="keywords"
-      content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, sqlite, database, flask"
+            name="keywords"
+            content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, sqlite, database, flask"
     />
     <!--end::Primary Meta Tags-->
     <!--begin::Accessibility Features-->
     <!-- Skip links will be dynamically added by accessibility.js -->
-    <meta name="supported-color-schemes" content="light dark" />
-    <link rel="preload" href="{{ url_for('static', filename='css/adminlte.css') }}" as="style" />
+    <meta name="supported-color-schemes" content="light dark"/>
+    <link rel="preload" href="{{ url_for('static', filename='css/adminlte.css') }}" as="style"/>
     <!--end::Accessibility Features-->
     <!--begin::Fonts-->
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
-      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
-      crossorigin="anonymous"
-      media="print"
-      onload="this.media='all'"
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+            integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
+            crossorigin="anonymous"
+            media="print"
+            onload="this.media='all'"
     />
     <!--end::Fonts-->
     <!--begin::Script-->
-<!--begin::Required Plugin(jQuery)-->
+    <!--begin::Required Plugin(jQuery)-->
     <script
-    src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"
-    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-    crossorigin="anonymous"
+            src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"
     ></script>
     <!--end::Required Plugin(jQuery)-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
@@ -53,27 +53,27 @@
     <!--end::Third Party Plugin(OverlayScrollbars)-->
     <!--begin::Third Party Plugin(Bootstrap Icons)-->
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-      crossorigin="anonymous"
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+            crossorigin="anonymous"
     />
     <!--end::Third Party Plugin(Bootstrap Icons)-->
     <!--begin::Required Plugin(AdminLTE)-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminlte.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminlte.css') }}"/>
     <!--end::Required Plugin(AdminLTE)-->
     <!-- apexcharts -->
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
-      integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0="
-      crossorigin="anonymous"
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
+            integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0="
+            crossorigin="anonymous"
     />
     <!-- jsvectormap -->
     <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css"
-      integrity="sha256-+uGLJmmTKOqBr+2E6KDYs/NRsHxSkONXFHUL0fy2O/4="
-      crossorigin="anonymous"
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css"
+            integrity="sha256-+uGLJmmTKOqBr+2E6KDYs/NRsHxSkONXFHUL0fy2O/4="
+            crossorigin="anonymous"
     />
 
     <!--begin::DataTables CSS-->
@@ -91,863 +91,1360 @@
 
     <!--begin::Custom DataTables Styling-->
     <style>
-      /* DataTables Bootstrap 5 Integration */
-      .dataTables_wrapper .dataTables_length,
-      .dataTables_wrapper .dataTables_filter,
-      .dataTables_wrapper .dataTables_info,
-      .dataTables_wrapper .dataTables_processing,
-      .dataTables_wrapper .dataTables_paginate {
-        color: var(--bs-body-color);
-      }
+        /* DataTables Bootstrap 5 Integration */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_processing,
+        .dataTables_wrapper .dataTables_paginate {
+          color: var(--bs-body-color);
+        }
 
-      .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 0;
-        margin: 0;
-        border: none;
-        background: none;
-      }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+          padding: 0;
+          margin: 0;
+          border: none;
+          background: none;
+        }
 
-      .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-      .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-        background: var(--bs-primary);
-        color: white !important;
-        border: 1px solid var(--bs-primary);
-        border-radius: 0.375rem;
-      }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+          background: var(--bs-primary);
+          color: white !important;
+          border: 1px solid var(--bs-primary);
+          border-radius: 0.375rem;
+        }
 
-      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-        background: var(--bs-light);
-        color: var(--bs-dark) !important;
-        border: 1px solid var(--bs-border-color);
-        border-radius: 0.375rem;
-      }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+          background: var(--bs-light);
+          color: var(--bs-dark) !important;
+          border: 1px solid var(--bs-border-color);
+          border-radius: 0.375rem;
+        }
 
-      .dataTables_wrapper .dataTables_length select,
-      .dataTables_wrapper .dataTables_filter input {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-        line-height: 1.5;
-        color: var(--bs-body-color);
-        background-color: var(--bs-body-bg);
-        border: 1px solid var(--bs-border-color);
-        border-radius: 0.375rem;
-      }
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          color: var(--bs-body-color);
+          background-color: var(--bs-body-bg);
+          border: 1px solid var(--bs-border-color);
+          border-radius: 0.375rem;
+        }
 
-      /* Dark mode support */
-      [data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input,
-      [data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select {
-        background-color: var(--bs-dark);
-        border-color: var(--bs-border-color);
-        color: var(--bs-light);
-      }
+        /* Dark mode support */
+        [data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+        [data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select {
+          background-color: var(--bs-dark);
+          border-color: var(--bs-border-color);
+          color: var(--bs-light);
+        }
 
-      /* Custom table row styling */
-      .table-row-unread {
-        background-color: rgba(var(--bs-info-rgb), 0.1);
-      }
+        /* Custom table row styling */
+        .table-row-unread {
+          background-color: rgba(var(--bs-info-rgb), 0.1);
+        }
 
-      .table-row-high-priority {
-        border-left: 4px solid var(--bs-danger);
-      }
+        .table-row-high-priority {
+          border-left: 4px solid var(--bs-danger);
+        }
 
-      .table-row-medium-priority {
-        border-left: 4px solid var(--bs-warning);
-      }
+        .table-row-medium-priority {
+          border-left: 4px solid var(--bs-warning);
+        }
 
-      .table-row-low-priority {
-        border-left: 4px solid var(--bs-success);
-      }
+        .table-row-low-priority {
+          border-left: 4px solid var(--bs-success);
+        }
 
-      /* DataTables buttons styling */
-      .dt-buttons {
-        margin-bottom: 1rem;
-      }
+        /* DataTables buttons styling */
+        .dt-buttons {
+          margin-bottom: 1rem;
+        }
 
-      .dt-button {
-        background-color: var(--bs-primary) !important;
-        border-color: var(--bs-primary) !important;
-        color: white !important;
-        padding: 0.375rem 0.75rem !important;
-        font-size: 0.875rem !important;
-        border-radius: 0.375rem !important;
-        margin-right: 0.25rem !important;
-      }
+        .dt-button {
+          background-color: var(--bs-primary) !important;
+          border-color: var(--bs-primary) !important;
+          color: white !important;
+          padding: 0.375rem 0.75rem !important;
+          font-size: 0.875rem !important;
+          border-radius: 0.375rem !important;
+          margin-right: 0.25rem !important;
+        }
 
-      .dt-button:hover {
-        background-color: var(--bs-primary-dark) !important;
-        border-color: var(--bs-primary-dark) !important;
-      }
+        .dt-button:hover {
+          background-color: var(--bs-primary-dark) !important;
+          border-color: var(--bs-primary-dark) !important;
+        }
 
-      /* Search Builder Styling */
-      .dtsb-searchBuilder {
-        margin-bottom: 1rem;
-      }
+        /* Search Builder Styling */
+        .dtsb-searchBuilder {
+          margin-bottom: 1rem;
+        }
 
-      /* Responsive table improvements */
-      .table-responsive .dataTables_wrapper {
-        overflow-x: visible;
-      }
+        /* Responsive table improvements */
+        .table-responsive .dataTables_wrapper {
+          overflow-x: visible;
+        }
 
-      /* Loading indicator */
-      .dataTables_processing {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        width: auto !important;
-        margin: 0 !important;
-        transform: translate(-50%, -50%) !important;
-        background: rgba(255, 255, 255, 0.9) !important;
-        border: 1px solid var(--bs-border-color) !important;
-        border-radius: 0.375rem !important;
-        padding: 1rem 2rem !important;
-        font-size: 1.1em !important;
-        color: var(--bs-primary) !important;
-      }
+        /* Loading indicator */
+        .dataTables_processing {
+          position: absolute !important;
+          top: 50% !important;
+          left: 50% !important;
+          width: auto !important;
+          margin: 0 !important;
+          transform: translate(-50%, -50%) !important;
+          background: rgba(255, 255, 255, 0.9) !important;
+          border: 1px solid var(--bs-border-color) !important;
+          border-radius: 0.375rem !important;
+          padding: 1rem 2rem !important;
+          font-size: 1.1em !important;
+          color: var(--bs-primary) !important;
+        }
 
-      [data-bs-theme="dark"] .dataTables_processing {
-        background: rgba(33, 37, 41, 0.9) !important;
-        color: var(--bs-light) !important;
-      }
+        [data-bs-theme="dark"] .dataTables_processing {
+          background: rgba(33, 37, 41, 0.9) !important;
+          color: var(--bs-light) !important;
+        }
+
+
+
     </style>
+
     <!--end::Custom DataTables Styling-->
 
+    <style>
+/* App Status Modal Styling */
+.footer-status-link {
+  color: var(--bs-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.footer-status-link:hover {
+  color: var(--bs-primary);
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  text-decoration: none;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.status-indicator.online {
+  background-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+  animation: pulse-status 2s infinite;
+}
+
+.status-indicator.warning {
+  background-color: #ffc107;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+}
+
+.status-indicator.offline {
+  background-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+@keyframes pulse-status {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.status-refresh-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+.status-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  margin-bottom: 1rem;
+}
+
+.metric-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+</style>
+
     {% block extra_head %}{% endblock %}
-  </head>
-  <!--end::Head-->
-  <!--begin::Body-->
-  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
-    <!--begin::App Wrapper-->
-    <div class="app-wrapper">
-      <!--begin::Header-->
-      <nav class="app-header navbar navbar-expand bg-body">
+</head>
+<!--end::Head-->
+<!--begin::Body-->
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<!--begin::App Wrapper-->
+<div class="app-wrapper">
+    <!--begin::Header-->
+    <nav class="app-header navbar navbar-expand bg-body">
         <!--begin::Container-->
         <div class="container-fluid">
-          <!--begin::Start Navbar Links-->
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
-                <i class="bi bi-list"></i>
-              </a>
-            </li>
-            <li class="nav-item d-none d-md-block">
-              <a href="#" class="nav-link">Home</a>
-            </li>
-            <li class="nav-item d-none d-md-block">
-              <a href="#" class="nav-link">Contact</a>
-            </li>
-            {% if database_mode %}
-            <li class="nav-item d-none d-lg-block">
+            <!--begin::Start Navbar Links-->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                        <i class="bi bi-list"></i>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-md-block">
+                    <a href="#" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item d-none d-md-block">
+                    <a href="#" class="nav-link">Contact</a>
+                </li>
+                {% if database_mode %}
+                <li class="nav-item d-none d-lg-block">
               <span class="nav-link text-success">
                 <i class="bi bi-database-check me-1"></i>Database Mode
               </span>
-            </li>
-            {% endif %}
-          </ul>
-          <!--end::Start Navbar Links-->
-          <!--begin::End Navbar Links-->
-          <ul class="navbar-nav ms-auto">
-            <!--begin::Navbar Search-->
-            <li class="nav-item">
-              <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-                <i class="bi bi-search"></i>
-              </a>
-            </li>
-            <!--end::Navbar Search-->
-            <!--begin::Messages Dropdown Menu-->
-            <li class="nav-item dropdown">
-              <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button">
-                <i class="bi bi-chat-text"></i>
-                <span class="navbar-badge badge text-bg-danger" id="messages-count">{{ unread_messages_count or messages|length }}</span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                <a href="#" class="dropdown-item">
-                  <!--begin::Message-->
-                  <div class="d-flex">
-                    <div class="flex-shrink-0">
-                      <img
-                        src="{{ url_for('static', filename='assets/img/user1-128x128.jpg') }}"
-                        alt="User Avatar"
-                        class="img-size-50 rounded-circle me-3"
-                      />
+                </li>
+                {% endif %}
+            </ul>
+            <!--end::Start Navbar Links-->
+            <!--begin::End Navbar Links-->
+            <ul class="navbar-nav ms-auto">
+                <!--begin::Navbar Search-->
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li>
+                <!--end::Navbar Search-->
+                <!--begin::Messages Dropdown Menu-->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button">
+                        <i class="bi bi-chat-text"></i>
+                        <span class="navbar-badge badge text-bg-danger" id="messages-count">{{ unread_messages_count or messages|length }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                        <a href="#" class="dropdown-item">
+                            <!--begin::Message-->
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <img
+                                            src="{{ url_for('static', filename='assets/img/user1-128x128.jpg') }}"
+                                            alt="User Avatar"
+                                            class="img-size-50 rounded-circle me-3"
+                                    />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="dropdown-item-title">
+                                        Messages
+                                        <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
+                                    </h3>
+                                    <p class="fs-7">{{ unread_messages_count or 0 }} new messages</p>
+                                    <p class="fs-7 text-secondary">
+                                        <i class="bi bi-clock-fill me-1"></i>
+                                        {% if database_mode %}From Database{% else %}Now{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <!--end::Message-->
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        {% for message in messages[:3] %}
+                        <a href="#" class="dropdown-item" data-message-id="{{ message.id }}">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <img
+                                            src="{{ message.avatar or url_for('static', filename='assets/img/user2-160x160.jpg') }}"
+                                            alt="User Avatar"
+                                            class="img-size-50 rounded-circle me-3"
+                                    />
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="dropdown-item-title">
+                                        {{ message.sender }}
+                                        {% if message.unread %}
+                                        <span class="float-end fs-7 text-danger"><i
+                                                class="bi bi-circle-fill"></i></span>
+                                        {% endif %}
+                                    </h3>
+                                    <p class="fs-7">{{ message.content[:50] }}...</p>
+                                    <p class="fs-7 text-secondary">
+                                        <i class="bi bi-clock-fill me-1"></i>
+                                        {% if database_mode %}{{ message.time }}{% else %}{{ message.time }}{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        {% endfor %}
+                        <a href="/admin/messages" class="dropdown-item dropdown-footer">See All Messages</a>
                     </div>
-                    <div class="flex-grow-1">
-                      <h3 class="dropdown-item-title">
-                        Messages
-                        <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
-                      </h3>
-                      <p class="fs-7">{{ unread_messages_count or 0 }} new messages</p>
-                      <p class="fs-7 text-secondary">
-                        <i class="bi bi-clock-fill me-1"></i>
-                        {% if database_mode %}From Database{% else %}Now{% endif %}
-                      </p>
-                    </div>
-                  </div>
-                  <!--end::Message-->
-                </a>
-                <div class="dropdown-divider"></div>
-                {% for message in messages[:3] %}
-                <a href="#" class="dropdown-item" data-message-id="{{ message.id }}">
-                  <div class="d-flex">
-                    <div class="flex-shrink-0">
-                      <img
-                        src="{{ message.avatar or url_for('static', filename='assets/img/user2-160x160.jpg') }}"
-                        alt="User Avatar"
-                        class="img-size-50 rounded-circle me-3"
-                      />
-                    </div>
-                    <div class="flex-grow-1">
-                      <h3 class="dropdown-item-title">
-                        {{ message.sender }}
-                        {% if message.unread %}
-                        <span class="float-end fs-7 text-danger"><i class="bi bi-circle-fill"></i></span>
-                        {% endif %}
-                      </h3>
-                      <p class="fs-7">{{ message.content[:50] }}...</p>
-                      <p class="fs-7 text-secondary">
-                        <i class="bi bi-clock-fill me-1"></i>
-                        {% if database_mode %}{{ message.time }}{% else %}{{ message.time }}{% endif %}
-                      </p>
-                    </div>
-                  </div>
-                </a>
-                <div class="dropdown-divider"></div>
-                {% endfor %}
-                <a href="/admin/messages" class="dropdown-item dropdown-footer">See All Messages</a>
-              </div>
-            </li>
-            <!--end::Messages Dropdown Menu-->
-            <!--begin::Notifications Dropdown Menu-->
-            <li class="nav-item dropdown">
-              <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button">
-                <i class="bi bi-bell-fill"></i>
-                <span class="navbar-badge badge text-bg-warning" id="notifications-count">{{ unread_notifications_count or notifications|length }}</span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                <span class="dropdown-item dropdown-header">{{ unread_notifications_count or notifications|length }} Notifications</span>
-                <div class="dropdown-divider"></div>
-                {% for notification in notifications[:3] %}
-                <a href="#" class="dropdown-item" data-notification-id="{{ notification.id }}">
-                  <i class="bi {{ notification.icon or 'bi-bell' }} me-2"></i>
-                  {{ notification.message }}
-                  <span class="float-end text-secondary fs-7">
+                </li>
+                <!--end::Messages Dropdown Menu-->
+                <!--begin::Notifications Dropdown Menu-->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="navbar-badge badge text-bg-warning" id="notifications-count">{{ unread_notifications_count or notifications|length }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                        <span class="dropdown-item dropdown-header">{{ unread_notifications_count or notifications|length }} Notifications</span>
+                        <div class="dropdown-divider"></div>
+                        {% for notification in notifications[:3] %}
+                        <a href="#" class="dropdown-item" data-notification-id="{{ notification.id }}">
+                            <i class="bi {{ notification.icon or 'bi-bell' }} me-2"></i>
+                            {{ notification.message }}
+                            <span class="float-end text-secondary fs-7">
                     {% if database_mode %}{{ notification.time }}{% else %}{{ notification.time }}{% endif %}
                   </span>
-                  {% if not notification.read %}
-                  <span class="badge badge-sm bg-danger ms-1">New</span>
-                  {% endif %}
-                </a>
-                <div class="dropdown-divider"></div>
-                {% endfor %}
-                <a href="/admin/notifications" class="dropdown-item dropdown-footer">See All Notifications</a>
-              </div>
-            </li>
-            <!--end::Notifications Dropdown Menu-->
-            <!--begin::Fullscreen Toggle-->
-            <li class="nav-item">
-              <a class="nav-link" href="#" data-lte-toggle="fullscreen">
-                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
-                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
-              </a>
-            </li>
-            <!--end::Fullscreen Toggle-->
-            <!--begin::User Menu Dropdown-->
-            <li class="nav-item dropdown user-menu">
-              <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                <img
-                  src="{{ current_user.avatar if current_user else url_for('static', filename='assets/img/user2-160x160.jpg') }}"
-                  class="user-image rounded-circle shadow"
-                  alt="User Image"
-                />
-                <span class="d-none d-md-inline">{{ current_user.name if current_user else 'Alexander Pierce' }}</span>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                <!--begin::User Image-->
-                <li class="user-header text-bg-primary">
-                  <img
-                    src="{{ current_user.avatar if current_user else url_for('static', filename='assets/img/user2-160x160.jpg') }}"
-                    class="rounded-circle shadow"
-                    alt="User Image"
-                  />
-                  <p>
-                    {{ current_user.name if current_user else 'Alexander Pierce' }} - Web Developer
-                    <small>Member since {{ current_user.join_date if current_user else 'Nov. 2023' }}</small>
-                  </p>
+                            {% if not notification.read %}
+                            <span class="badge badge-sm bg-danger ms-1">New</span>
+                            {% endif %}
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        {% endfor %}
+                        <a href="/admin/notifications" class="dropdown-item dropdown-footer">See All Notifications</a>
+                    </div>
                 </li>
-                <!--end::User Image-->
-                <!--begin::Menu Body-->
-                <li class="user-body">
-                  <!--begin::Row-->
-                  <div class="row">
-                    <div class="col-4 text-center"><a href="#">Followers</a></div>
-                    <div class="col-4 text-center"><a href="#">Sales</a></div>
-                    <div class="col-4 text-center"><a href="#">Friends</a></div>
-                  </div>
-                  <!--end::Row-->
+                <!--end::Notifications Dropdown Menu-->
+                <!--begin::Fullscreen Toggle-->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                        <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                        <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+                    </a>
                 </li>
-                <!--end::Menu Body-->
-                <!--begin::Menu Footer-->
-                <li class="user-footer">
-                  <a href="#" class="btn btn-default btn-flat">Profile</a>
-                  <a href="#" class="btn btn-default btn-flat float-end">Sign out</a>
+                <!--end::Fullscreen Toggle-->
+                <!--begin::User Menu Dropdown-->
+                <li class="nav-item dropdown user-menu">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <img
+                                src="{{ current_user.avatar if current_user else url_for('static', filename='assets/img/user2-160x160.jpg') }}"
+                                class="user-image rounded-circle shadow"
+                                alt="User Image"
+                        />
+                        <span class="d-none d-md-inline">{{ current_user.name if current_user else 'Alexander Pierce' }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                        <!--begin::User Image-->
+                        <li class="user-header text-bg-primary">
+                            <img
+                                    src="{{ current_user.avatar if current_user else url_for('static', filename='assets/img/user2-160x160.jpg') }}"
+                                    class="rounded-circle shadow"
+                                    alt="User Image"
+                            />
+                            <p>
+                                {{ current_user.name if current_user else 'Alexander Pierce' }} - Web Developer
+                                <small>Member since {{ current_user.join_date if current_user else 'Nov. 2023'
+                                    }}</small>
+                            </p>
+                        </li>
+                        <!--end::User Image-->
+                        <!--begin::Menu Body-->
+                        <li class="user-body">
+                            <!--begin::Row-->
+                            <div class="row">
+                                <div class="col-4 text-center"><a href="#">Followers</a></div>
+                                <div class="col-4 text-center"><a href="#">Sales</a></div>
+                                <div class="col-4 text-center"><a href="#">Friends</a></div>
+                            </div>
+                            <!--end::Row-->
+                        </li>
+                        <!--end::Menu Body-->
+                        <!--begin::Menu Footer-->
+                        <li class="user-footer">
+                            <a href="#" class="btn btn-default btn-flat">Profile</a>
+                            <a href="#" class="btn btn-default btn-flat float-end">Sign out</a>
+                        </li>
+                        <!--end::Menu Footer-->
+                    </ul>
                 </li>
-                <!--end::Menu Footer-->
-              </ul>
-            </li>
-            <!--end::User Menu Dropdown-->
-          </ul>
-          <!--end::End Navbar Links-->
+                <!--end::User Menu Dropdown-->
+            </ul>
+            <!--end::End Navbar Links-->
         </div>
         <!--end::Container-->
-      </nav>
-      <!--end::Header-->
-      <!--begin::Sidebar-->
-      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+    </nav>
+    <!--end::Header-->
+    <!--begin::Sidebar-->
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
         <!--begin::Sidebar Brand-->
         <div class="sidebar-brand">
-          <!--begin::Brand Link-->
-          <a href="{{ url_for('index') }}" class="brand-link">
-            <!--begin::Brand Image-->
-            <img
-              src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') }}"
-              alt="AdminLTE Logo"
-              class="brand-image opacity-75 shadow"
-            />
-            <!--end::Brand Image-->
-            <!--begin::Brand Text-->
-            <span class="brand-text fw-light">AdminLTE 4</span>
-            <!--end::Brand Text-->
-          </a>
-          <!--end::Brand Link-->
+            <!--begin::Brand Link-->
+            <a href="{{ url_for('index') }}" class="brand-link">
+                <!--begin::Brand Image-->
+                <img
+                        src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') }}"
+                        alt="AdminLTE Logo"
+                        class="brand-image opacity-75 shadow"
+                />
+                <!--end::Brand Image-->
+                <!--begin::Brand Text-->
+                <span class="brand-text fw-light">AdminLTE 4</span>
+                <!--end::Brand Text-->
+            </a>
+            <!--end::Brand Link-->
         </div>
         <!--end::Sidebar Brand-->
         <!--begin::Sidebar Wrapper-->
         <div class="sidebar-wrapper">
-          <nav class="mt-2">
-            <!--begin::Sidebar Menu-->
-            <ul
-              class="nav sidebar-menu flex-column"
-              data-lte-toggle="treeview"
-              role="navigation"
-              aria-label="Main navigation"
-              data-accordion="false"
-              id="navigation"
-            >
-              {% for menu_item in sidebar_menu %}
-              {% set outer_loop = loop %}
-              <li class="nav-item {% if menu_item.children %}menu-open{% endif %}">
-                <a href="{{ menu_item.url or '#' }}" class="nav-link {% if menu_item.active %}active{% endif %}">
-                  <i class="nav-icon {{ menu_item.icon }}"></i>
-                  <p>
-                    {{ menu_item.title }}
-                    {% if menu_item.children %}
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                    {% endif %}
-                  </p>
-                </a>
-                {% if menu_item.children %}
-                <ul class="nav nav-treeview">
-                  {% for child in menu_item.children %}
-                  <li class="nav-item">
-                    <a href="{{ child.url or '#' }}" class="nav-link {% if child.active %}active{% endif %}">
-                      <i class="nav-icon {{ child.icon or 'bi bi-circle' }}"></i>
-                      <p>{{ child.title }}</p>
-                    </a>
-                    {% if child.children %}
-                    <ul class="nav nav-treeview">
-                      {% for subchild in child.children %}
-                      <li class="nav-item">
-                        <a href="{{ subchild.url or '#' }}" class="nav-link {% if subchild.active %}active{% endif %}">
-                          <i class="nav-icon {{ subchild.icon or 'bi bi-record-circle-fill' }}"></i>
-                          <p>{{ subchild.title }}</p>
+            <nav class="mt-2">
+                <!--begin::Sidebar Menu-->
+                <ul
+                        class="nav sidebar-menu flex-column"
+                        data-lte-toggle="treeview"
+                        role="navigation"
+                        aria-label="Main navigation"
+                        data-accordion="false"
+                        id="navigation"
+                >
+                    {% for menu_item in sidebar_menu %}
+                    {% set outer_loop = loop %}
+                    <li class="nav-item {% if menu_item.children %}menu-open{% endif %}">
+                        <a href="{{ menu_item.url or '#' }}"
+                           class="nav-link {% if menu_item.active %}active{% endif %}">
+                            <i class="nav-icon {{ menu_item.icon }}"></i>
+                            <p>
+                                {{ menu_item.title }}
+                                {% if menu_item.children %}
+                                <i class="nav-arrow bi bi-chevron-right"></i>
+                                {% endif %}
+                            </p>
                         </a>
-                      </li>
-                      {% endfor %}
-                    </ul>
-                    {% endif %}
-                  </li>
-                  {% endfor %}
-                </ul>
-                {% endif %}
-              </li>
-              {% endfor %}
+                        {% if menu_item.children %}
+                        <ul class="nav nav-treeview">
+                            {% for child in menu_item.children %}
+                            <li class="nav-item">
+                                <a href="{{ child.url or '#' }}"
+                                   class="nav-link {% if child.active %}active{% endif %}">
+                                    <i class="nav-icon {{ child.icon or 'bi bi-circle' }}"></i>
+                                    <p>{{ child.title }}</p>
+                                </a>
+                                {% if child.children %}
+                                <ul class="nav nav-treeview">
+                                    {% for subchild in child.children %}
+                                    <li class="nav-item">
+                                        <a href="{{ subchild.url or '#' }}"
+                                           class="nav-link {% if subchild.active %}active{% endif %}">
+                                            <i class="nav-icon {{ subchild.icon or 'bi bi-record-circle-fill' }}"></i>
+                                            <p>{{ subchild.title }}</p>
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
 
-              {% if database_mode %}
-              <!-- Sezione Admin per gestione database -->
-              <li class="nav-header">DATABASE ADMIN</li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon bi bi-shield-check"></i>
-                  <p>
-                    Administration
-                    <i class="nav-arrow bi bi-chevron-right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="/admin" class="nav-link">
-                      <i class="nav-icon bi bi-speedometer2"></i>
-                      <p>Admin Dashboard</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="/admin/database" class="nav-link">
-                      <i class="nav-icon bi bi-database"></i>
-                      <p>Database</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="/admin/messages" class="nav-link">
-                      <i class="nav-icon bi bi-chat-left-text"></i>
-                      <p>Messages</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="/admin/notifications" class="nav-link">
-                      <i class="nav-icon bi bi-bell"></i>
-                      <p>Notifications</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="/admin/menu" class="nav-link">
-                      <i class="nav-icon bi bi-list-ul"></i>
-                      <p>Menu</p>
-                    </a>
-                  </li>
+                    {% if database_mode %}
+                    <!-- Sezione Admin per gestione database -->
+                    <li class="nav-header">DATABASE ADMIN</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon bi bi-shield-check"></i>
+                            <p>
+                                Administration
+                                <i class="nav-arrow bi bi-chevron-right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="/admin" class="nav-link">
+                                    <i class="nav-icon bi bi-speedometer2"></i>
+                                    <p>Admin Dashboard</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/admin/database" class="nav-link">
+                                    <i class="nav-icon bi bi-database"></i>
+                                    <p>Database</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/admin/messages" class="nav-link">
+                                    <i class="nav-icon bi bi-chat-left-text"></i>
+                                    <p>Messages</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/admin/notifications" class="nav-link">
+                                    <i class="nav-icon bi bi-bell"></i>
+                                    <p>Notifications</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="/admin/menu" class="nav-link">
+                                    <i class="nav-icon bi bi-list-ul"></i>
+                                    <p>Menu</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
-              </li>
-              {% endif %}
-            </ul>
-            <!--end::Sidebar Menu-->
-          </nav>
+                <!--end::Sidebar Menu-->
+            </nav>
         </div>
         <!--end::Sidebar Wrapper-->
-      </aside>
-      <!--end::Sidebar-->
-      <!--begin::App Main-->
-      <main class="app-main">
+    </aside>
+    <!--end::Sidebar-->
+    <!--begin::App Main-->
+    <main class="app-main">
         <!--begin::App Content Header-->
         <div class="app-content-header">
-          <!--begin::Container-->
-          <div class="container-fluid">
-            <!--begin::Row-->
-            <div class="row">
-              <div class="col-sm-6">
-                <h3 class="mb-0">
-                  {% block page_title %}Dashboard{% endblock %}
-                  {% if database_mode %}
-                  <small class="text-success ms-2">
-                    <i class="bi bi-database-check"></i> SQLite
-                  </small>
-                  {% endif %}
-                </h3>
-              </div>
-              <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-end">
-                  {% block breadcrumb %}
-                  <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-                  <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                  {% endblock %}
-                </ol>
-              </div>
+            <!--begin::Container-->
+            <div class="container-fluid">
+                <!--begin::Row-->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h3 class="mb-0">
+                            {% block page_title %}Dashboard{% endblock %}
+                            {% if database_mode %}
+                            <small class="text-success ms-2">
+                                <i class="bi bi-database-check"></i> SQLite
+                            </small>
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            {% block breadcrumb %}
+                            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                            {% endblock %}
+                        </ol>
+                    </div>
+                </div>
+                <!--end::Row-->
             </div>
-            <!--end::Row-->
-          </div>
-          <!--end::Container-->
+            <!--end::Container-->
         </div>
         <!--end::App Content Header-->
         <!--begin::App Content-->
         <div class="app-content">
-          <!--begin::Container-->
-          <div class="container-fluid">
-            {% block content %}{% endblock %}
-          </div>
-          <!--end::Container-->
+            <!--begin::Container-->
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+            <!--end::Container-->
         </div>
         <!--end::App Content-->
-      </main>
-      <!--end::App Main-->
-      <!--begin::Footer-->
-      <footer class="app-footer">
+    </main>
+    <!--end::App Main-->
+    <!--begin::Footer-->
+    <footer class="app-footer">
         <!--begin::To the end-->
         <div class="float-end d-none d-sm-inline">
-          {% block footer_right %}
-          {{ app_name }} v{{ app_version }}
-          {% if database_mode %}
-          <span class="text-success ms-2">
+            {% block footer_right %}
+            {{ app_name }} v{{ app_version }}
+            {% if database_mode %}
+            <span class="text-success ms-2">
             <i class="bi bi-database-check"></i> Database Mode
           </span>
-          {% endif %}
-          {% endblock %}
+            {% endif %}
+            <!-- Status Link -->
+            <span class="text-muted mx-2">|</span>
+            <a href="#" class="footer-status-link" data-bs-toggle="modal" data-bs-target="#appStatusModal"
+               title="Application Status">
+                <i class="bi bi-info-circle me-1"></i>
+                <span class="status-indicator online" id="footer-status-indicator"></span>
+                Status
+            </a>
+            {% endblock %}
         </div>
         <!--end::To the end-->
         <!--begin::Copyright-->
         <strong>
-          Copyright &copy; 2014-2025&nbsp;
-          <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
+            Copyright &copy; 2014-2025&nbsp;
+            <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
         </strong>
         All rights reserved.
         <!--end::Copyright-->
-      </footer>
-      <!--end::Footer-->
-    </div>
-    <!--end::App Wrapper-->
+    </footer>
+    <!--end::Footer-->
+</div>
+<!--end::App Wrapper-->
 
-    <!-- Database Mode Notification -->
-    {% if database_mode %}
-    <div id="database-mode-alert" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
+<!-- App Status Modal -->
+    <div class="modal fade" id="appStatusModal" tabindex="-1" aria-labelledby="appStatusModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="appStatusModalLabel">
+              <i class="bi bi-activity me-2"></i>Application Status Dashboard
+            </h5>
+            <button type="button" class="btn btn-outline-light btn-sm status-refresh-btn" onclick="refreshAppStatus()">
+              <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+            </button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="statusModalBody">
+            <!-- Il contenuto verrà caricato dinamicamente -->
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading application status...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <small class="text-muted me-auto">
+              <i class="bi bi-clock me-1"></i>
+              Last updated: <span id="lastStatusUpdate">Never</span>
+            </small>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="exportStatusReport()">
+              <i class="bi bi-download me-1"></i>Export Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- Database Mode Notification -->
+{% if database_mode %}
+<div id="database-mode-alert" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-database-check me-2"></i>
         <strong>Database Mode Active!</strong> Using SQLite database instead of JSON files.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
     </div>
-    {% endif %}
+</div>
+{% endif %}
 
-    <!--begin::Script-->
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"></script>
-    <!--end::Third Party Plugin(OverlayScrollbars)-->
-    <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I="
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(popperjs for Bootstrap 5)-->
-    <!--begin::Required Plugin(Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-      integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8="
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(Bootstrap 5)-->
-    <!--begin::Required Plugin(AdminLTE)-->
-    <script src="{{ url_for('static', filename='js/adminlte.min.js') }}"></script>
-    <!--end::Required Plugin(AdminLTE)-->
-    <!--begin::Custom AdminLTE Utilities-->
-    <script src="{{ url_for('static', filename='js/adminlte-custom.js') }}"></script>
-    <!--end::Custom AdminLTE Utilities-->
+<!--begin::Script-->
+<!--begin::Third Party Plugin(OverlayScrollbars)-->
+<script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"></script>
+<!--end::Third Party Plugin(OverlayScrollbars)-->
+<!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+<script
+        src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha256-whL0tQWoY1Ku1iskqPFvmZ+CHsvmRWx/PIoEvIeWh4I="
+        crossorigin="anonymous"
+></script>
+<!--end::Required Plugin(popperjs for Bootstrap 5)-->
+<!--begin::Required Plugin(Bootstrap 5)-->
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha256-YMa+wAM6QkVyz999odX7lPRxkoYAan8suedu4k2Zur8="
+        crossorigin="anonymous"
+></script>
+<!--end::Required Plugin(Bootstrap 5)-->
+<!--begin::Required Plugin(AdminLTE)-->
+<script src="{{ url_for('static', filename='js/adminlte.min.js') }}"></script>
+<!--end::Required Plugin(AdminLTE)-->
+<!--begin::Custom AdminLTE Utilities-->
+<script src="{{ url_for('static', filename='js/adminlte-custom.js') }}"></script>
+<!--end::Custom AdminLTE Utilities-->
 
-    <!--begin::DataTables JavaScript-->
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.colVis.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/select/2.0.3/js/dataTables.select.min.js"></script>
-    <script src="https://cdn.datatables.net/searchbuilder/1.7.1/js/dataTables.searchBuilder.min.js"></script>
-    <script src="https://cdn.datatables.net/searchbuilder/1.7.1/js/searchBuilder.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/datetime/1.5.2/js/dataTables.dateTime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <!--end::DataTables JavaScript-->
+<!--begin::DataTables JavaScript-->
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.2/js/buttons.colVis.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/select/2.0.3/js/dataTables.select.min.js"></script>
+<script src="https://cdn.datatables.net/searchbuilder/1.7.1/js/dataTables.searchBuilder.min.js"></script>
+<script src="https://cdn.datatables.net/searchbuilder/1.7.1/js/searchBuilder.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/datetime/1.5.2/js/dataTables.dateTime.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<!--end::DataTables JavaScript-->
 
-    <!--begin::Awesome Notifications JavaScript-->
-    <script src="https://cdn.jsdelivr.net/npm/awesome-notifications@3.1.3/dist/index.var.js"></script>
-    <!--end::Awesome Notifications JavaScript-->
+<!--begin::Awesome Notifications JavaScript-->
+<script src="https://cdn.jsdelivr.net/npm/awesome-notifications@3.1.3/dist/index.var.js"></script>
+<!--end::Awesome Notifications JavaScript-->
 
-    <!--begin::OverlayScrollbars Configure-->
-    <script>
-      const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
-      const Default = {
-        scrollbarTheme: "os-theme-light",
-        scrollbarAutoHide: "leave",
-        scrollbarClickScroll: true,
-      };
-      document.addEventListener("DOMContentLoaded", function () {
-        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-        if (
-          sidebarWrapper &&
-          typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
-        ) {
-          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-            scrollbars: {
-              theme: Default.scrollbarTheme,
-              autoHide: Default.scrollbarAutoHide,
-              clickScroll: Default.scrollbarClickScroll,
-            },
-          });
-        }
-      });
-    </script>
-    <!--end::OverlayScrollbars Configure-->
-
-    <!--begin::Global DataTables Configuration and Utilities-->
+<!--begin::OverlayScrollbars Configure-->
 <script>
-  // Global DataTables and utility configuration
-  $(document).ready(function() {
-    // Set default DataTables configuration
-    $.extend(true, $.fn.dataTable.defaults, {
-      responsive: true,
-      processing: true,
-      language: {
-        processing: '<i class="bi bi-arrow-clockwise spin"></i> Loading...',
-        search: "",
-        searchPlaceholder: "Search...",
-        lengthMenu: "Show _MENU_ entries",
-        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-        infoEmpty: "Showing 0 to 0 of 0 entries",
-        infoFiltered: "(filtered from _MAX_ total entries)",
-        emptyTable: "No data available",
-        paginate: {
-          first: "First",
-          last: "Last",
-          next: "Next",
-          previous: "Previous"
-        }
-      },
-      dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-           '<"row"<"col-sm-12"tr>>' +
-           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-      pageLength: 25,
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-      order: [],
-      columnDefs: [
-        { orderable: false, targets: 'no-sort' },
-        { searchable: false, targets: 'no-search' }
-      ]
+    const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
+    const Default = {
+      scrollbarTheme: "os-theme-light",
+      scrollbarAutoHide: "leave",
+      scrollbarClickScroll: true,
+    };
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+      if (
+        sidebarWrapper &&
+        typeof OverlayScrollbarsGlobal?.OverlayScrollbars !== "undefined"
+      ) {
+        OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+          scrollbars: {
+            theme: Default.scrollbarTheme,
+            autoHide: Default.scrollbarAutoHide,
+            clickScroll: Default.scrollbarClickScroll,
+          },
+        });
+      }
     });
+</script>
+<!--end::OverlayScrollbars Configure-->
 
-    console.log('Global DataTables configuration applied');
-  });
+<!--begin::Global DataTables Configuration and Utilities-->
+<script>
+    // Global DataTables and utility configuration
+    $(document).ready(function() {
+      // Set default DataTables configuration
+      $.extend(true, $.fn.dataTable.defaults, {
+        responsive: true,
+        processing: true,
+        language: {
+          processing: '<i class="bi bi-arrow-clockwise spin"></i> Loading...',
+          search: "",
+          searchPlaceholder: "Search...",
+          lengthMenu: "Show _MENU_ entries",
+          info: "Showing _START_ to _END_ of _TOTAL_ entries",
+          infoEmpty: "Showing 0 to 0 of 0 entries",
+          infoFiltered: "(filtered from _MAX_ total entries)",
+          emptyTable: "No data available",
+          paginate: {
+            first: "First",
+            last: "Last",
+            next: "Next",
+            previous: "Previous"
+          }
+        },
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+             '<"row"<"col-sm-12"tr>>' +
+             '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        order: [],
+        columnDefs: [
+          { orderable: false, targets: 'no-sort' },
+          { searchable: false, targets: 'no-search' }
+        ]
+      });
+
+      console.log('Global DataTables configuration applied');
+    });
 </script>
 <!--end::Global DataTables Configuration and Utilities-->
-    <!--begin::Global Awesome Notifications Configuration-->
-    <script>
-      // Initialize Awesome Notifications
-      document.addEventListener('DOMContentLoaded', function() {
-        // Configure default notification options
-        window.AWN = new AWN({
-          position: 'top-right',
-          maxNotifications: 5,
-          animationDuration: 300,
-          displayDuration: 5000,
-          icons: {
-            enabled: true,
-            suffix: '-circle-fill'
+<!--begin::Global Awesome Notifications Configuration-->
+<script>
+    // Initialize Awesome Notifications
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configure default notification options
+      window.AWN = new AWN({
+        position: 'top-right',
+        maxNotifications: 5,
+        animationDuration: 300,
+        displayDuration: 5000,
+        icons: {
+          enabled: true,
+          suffix: '-circle-fill'
+        }
+      });
+
+      // Notification utility functions
+      window.NotificationUtils = {
+        success: function(message, title = 'Success') {
+          return window.AWN.success(message, {
+            labels: { success: title }
+          });
+        },
+
+        error: function(message, title = 'Error') {
+          return window.AWN.alert(message, {
+            labels: { alert: title }
+          });
+        },
+
+        warning: function(message, title = 'Warning') {
+          return window.AWN.warning(message, {
+            labels: { warning: title }
+          });
+        },
+
+        info: function(message, title = 'Info') {
+          return window.AWN.info(message, {
+            labels: { info: title }
+          });
+        },
+
+        confirm: function(message, title = 'Confirm', onOk, onCancel) {
+          return window.AWN.confirm(message, onOk, onCancel, {
+            labels: { confirm: title }
+          });
+        },
+
+        modal: function(message, title = 'Information') {
+          return window.AWN.modal(message, {
+            labels: { modal: title }
+          });
+        },
+
+        async: function(promise, loadingMessage = 'Processing...', successMessage = 'Operation completed successfully') {
+          return window.AWN.async(promise, loadingMessage, successMessage);
+        },
+
+        // Custom notification for API responses
+        handleApiResponse: function(response, successMessage = 'Operation completed successfully') {
+          if (response.success) {
+            this.success(response.message || successMessage);
+            return true;
+          } else {
+            this.error(response.error || 'An error occurred');
+            return false;
           }
+        },
+
+        // Progress notification
+        progress: function(message, progressFunction, title = 'Processing') {
+          const notification = window.AWN.info(message, {
+            labels: { info: title },
+            displayDuration: 0
+          });
+
+          if (typeof progressFunction === 'function') {
+            progressFunction(notification);
+          }
+
+          return notification;
+        }
+      };
+
+      // Auto-show notifications from flash messages or session
+      {% if get_flashed_messages() %}
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+      window.NotificationUtils.{{ category }}('{{ message|safe }}');
+      {% endfor %}
+      {% endif %}
+    });
+</script>
+<!--end::Global Awesome Notifications Configuration-->
+
+<script>
+// Application Status Management
+window.AppStatus = {
+  lastUpdate: null,
+  statusData: null,
+  autoRefreshInterval: null,
+
+  // Initialize status system
+  init: function() {
+    // Load initial status when modal is first opened
+    $('#appStatusModal').on('show.bs.modal', function() {
+      if (!window.AppStatus.statusData) {
+        window.AppStatus.loadStatus();
+      }
+    });
+
+    // Auto-refresh every 30 seconds when modal is open
+    $('#appStatusModal').on('shown.bs.modal', function() {
+      window.AppStatus.startAutoRefresh();
+    });
+
+    $('#appStatusModal').on('hidden.bs.modal', function() {
+      window.AppStatus.stopAutoRefresh();
+    });
+
+    // Initial footer status check
+    this.updateFooterStatus();
+  },
+
+  // Load application status
+  loadStatus: async function() {
+    try {
+      const loadingHtml = `
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Loading application status...</p>
+        </div>
+      `;
+
+      document.getElementById('statusModalBody').innerHTML = loadingHtml;
+
+      // Collect all status data
+      const [dbInfo, stats, messages, notifications] = await Promise.all([
+        this.fetchAPI('/api/database/info'),
+        this.fetchAPI('/api/stats'),
+        this.fetchAPI('/api/messages?limit=1'),
+        this.fetchAPI('/api/notifications?limit=1')
+      ]);
+
+      const systemInfo = this.getSystemInfo();
+
+      this.statusData = {
+        database: dbInfo.data || {},
+        statistics: stats.data || {},
+        messages: messages || {},
+        notifications: notifications || {},
+        system: systemInfo,
+        timestamp: new Date().toISOString()
+      };
+
+      this.renderStatus();
+      this.updateFooterStatus();
+
+    } catch (error) {
+      console.error('Error loading status:', error);
+      this.renderError(error.message);
+    }
+  },
+
+  // Fetch API with error handling
+  fetchAPI: async function(url) {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data.success ? data : { error: data.error };
+    } catch (error) {
+      return { error: error.message };
+    }
+  },
+
+  // Get system information
+  getSystemInfo: function() {
+    return {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      onLine: navigator.onLine,
+      screenResolution: `${screen.width}x${screen.height}`,
+      windowSize: `${window.innerWidth}x${window.innerHeight}`,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      url: window.location.href
+    };
+  },
+
+  // Render status dashboard
+  renderStatus: function() {
+    const data = this.statusData;
+    const html = `
+      <div class="row">
+        <!-- System Overview -->
+        <div class="col-md-6 mb-4">
+          <div class="status-card card">
+            <div class="card-header bg-success text-white">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-cpu me-2"></i>System Status
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="metric-card bg-primary">
+                    <div class="metric-value">${data.database.database_size_mb || 0} MB</div>
+                    <div class="metric-label">Database Size</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="metric-card bg-success">
+                    <div class="metric-value">${Object.keys(data.database.tables || {}).length}</div>
+                    <div class="metric-label">Database Tables</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="metric-card bg-info">
+                    <div class="metric-value">${data.messages.total || 0}</div>
+                    <div class="metric-label">Total Messages</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="metric-card bg-warning">
+                    <div class="metric-value">${data.notifications.total || 0}</div>
+                    <div class="metric-label">Total Notifications</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Database Status -->
+        <div class="col-md-6 mb-4">
+          <div class="status-card card">
+            <div class="card-header bg-info text-white">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-database me-2"></i>Database Status
+              </h6>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm">
+                <tr>
+                  <td><strong>Database Path:</strong></td>
+                  <td><small><code>${data.database.database_path || 'N/A'}</code></small></td>
+                </tr>
+                <tr>
+                  <td><strong>Size:</strong></td>
+                  <td>${data.database.database_size_mb || 0} MB</td>
+                </tr>
+                <tr>
+                  <td><strong>Unread Messages:</strong></td>
+                  <td><span class="badge bg-danger">${data.database.unread_messages || 0}</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Unread Notifications:</strong></td>
+                  <td><span class="badge bg-warning">${data.database.unread_notifications || 0}</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Menu Items:</strong></td>
+                  <td>${data.database.active_menu_items || 0}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="col-md-6 mb-4">
+          <div class="status-card card">
+            <div class="card-header bg-primary text-white">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-info-circle me-2"></i>System Information
+              </h6>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm">
+                <tr>
+                  <td><strong>Platform:</strong></td>
+                  <td>${data.system.platform}</td>
+                </tr>
+                <tr>
+                  <td><strong>Language:</strong></td>
+                  <td>${data.system.language}</td>
+                </tr>
+                <tr>
+                  <td><strong>Timezone:</strong></td>
+                  <td>${data.system.timezone}</td>
+                </tr>
+                <tr>
+                  <td><strong>Screen:</strong></td>
+                  <td>${data.system.screenResolution}</td>
+                </tr>
+                <tr>
+                  <td><strong>Online:</strong></td>
+                  <td>
+                    <span class="status-indicator ${data.system.onLine ? 'online' : 'offline'}"></span>
+                    ${data.system.onLine ? 'Connected' : 'Offline'}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Statistics -->
+        <div class="col-md-6 mb-4">
+          <div class="status-card card">
+            <div class="card-header bg-warning text-dark">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-activity me-2"></i>Activity Statistics
+              </h6>
+            </div>
+            <div class="card-body">
+              ${this.renderActivityStats(data.statistics)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('statusModalBody').innerHTML = html;
+    this.lastUpdate = new Date();
+    document.getElementById('lastStatusUpdate').textContent = this.lastUpdate.toLocaleString();
+  },
+
+  // Render activity statistics
+  renderActivityStats: function(stats) {
+    if (!stats || !stats.messages) {
+      return '<p class="text-muted">No activity statistics available</p>';
+    }
+
+    return `
+      <div class="row g-2">
+        <div class="col-6">
+          <div class="text-center p-2 bg-light rounded">
+            <div class="h5 mb-1">${stats.messages.total || 0}</div>
+            <small class="text-muted">Messages</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="text-center p-2 bg-light rounded">
+            <div class="h5 mb-1">${stats.notifications.total || 0}</div>
+            <small class="text-muted">Notifications</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="text-center p-2 bg-success text-white rounded">
+            <div class="h5 mb-1">${stats.messages.read_percentage || 0}%</div>
+            <small>Messages Read</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="text-center p-2 bg-info text-white rounded">
+            <div class="h5 mb-1">${stats.notifications.read_percentage || 0}%</div>
+            <small>Notifications Read</small>
+          </div>
+        </div>
+      </div>
+    `;
+  },
+
+  // Render error state
+  renderError: function(message) {
+    const html = `
+      <div class="text-center py-4">
+        <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-danger">Error Loading Status</h5>
+        <p class="text-muted">${message}</p>
+        <button class="btn btn-primary" onclick="window.AppStatus.loadStatus()">
+          <i class="bi bi-arrow-clockwise me-1"></i>Try Again
+        </button>
+      </div>
+    `;
+    document.getElementById('statusModalBody').innerHTML = html;
+  },
+
+  // Update footer status indicator
+  updateFooterStatus: function() {
+    const indicator = document.getElementById('footer-status-indicator');
+    if (indicator) {
+      fetch('/api/stats')
+        .then(response => {
+          if (response.ok) {
+            indicator.className = 'status-indicator online';
+          } else {
+            indicator.className = 'status-indicator warning';
+          }
+        })
+        .catch(error => {
+          indicator.className = 'status-indicator offline';
         });
+    }
+  },
 
-        // Notification utility functions
-        window.NotificationUtils = {
-          success: function(message, title = 'Success') {
-            return window.AWN.success(message, {
-              labels: { success: title }
-            });
-          },
+  // Auto-refresh management
+  startAutoRefresh: function() {
+    this.stopAutoRefresh();
+    this.autoRefreshInterval = setInterval(() => {
+      this.loadStatus();
+    }, 30000);
+  },
 
-          error: function(message, title = 'Error') {
-            return window.AWN.alert(message, {
-              labels: { alert: title }
-            });
-          },
+  stopAutoRefresh: function() {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = null;
+    }
+  }
+};
 
-          warning: function(message, title = 'Warning') {
-            return window.AWN.warning(message, {
-              labels: { warning: title }
-            });
-          },
+// Global functions
+function refreshAppStatus() {
+  window.AppStatus.loadStatus();
+}
 
-          info: function(message, title = 'Info') {
-            return window.AWN.info(message, {
-              labels: { info: title }
-            });
-          },
+function exportStatusReport() {
+  if (!window.AppStatus.statusData) {
+    alert('No status data available to export');
+    return;
+  }
 
-          confirm: function(message, title = 'Confirm', onOk, onCancel) {
-            return window.AWN.confirm(message, onOk, onCancel, {
-              labels: { confirm: title }
-            });
-          },
+  const data = window.AppStatus.statusData;
+  const report = {
+    exportDate: new Date().toISOString(),
+    application: '{{ app_name }} v{{ app_version }}',
+    status: data
+  };
 
-          modal: function(message, title = 'Information') {
-            return window.AWN.modal(message, {
-              labels: { modal: title }
-            });
-          },
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `app-status-report-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
-          async: function(promise, loadingMessage = 'Processing...', successMessage = 'Operation completed successfully') {
-            return window.AWN.async(promise, loadingMessage, successMessage);
-          },
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  window.AppStatus.init();
 
-          // Custom notification for API responses
-          handleApiResponse: function(response, successMessage = 'Operation completed successfully') {
-            if (response.success) {
-              this.success(response.message || successMessage);
-              return true;
+  // Update footer status every 60 seconds
+  setInterval(() => {
+    window.AppStatus.updateFooterStatus();
+  }, 60000);
+});
+</script>
+
+<!--begin::Database Mode JavaScript-->
+{% if database_mode %}
+<script>
+    // JavaScript per la gestione delle funzionalità database
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-dismiss della notifica database mode dopo 5 secondi
+      setTimeout(function() {
+        const alert = document.getElementById('database-mode-alert');
+        if (alert) {
+          const bsAlert = new bootstrap.Alert(alert.querySelector('.alert'));
+          bsAlert.close();
+        }
+      }, 5000);
+
+      // Gestione click sui messaggi per segnarli come letti
+      document.querySelectorAll('[data-message-id]').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+          e.preventDefault();
+          const messageId = this.getAttribute('data-message-id');
+
+          // Chiamata API per segnare come letto
+          fetch(`/api/messages/${messageId}/read`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Rimuovi l'indicatore "non letto"
+              const indicator = this.querySelector('.text-danger i');
+              if (indicator) {
+                indicator.remove();
+              }
+
+              // Aggiorna il contatore
+              updateMessageCounter();
+
+              // Show success notification
+              window.NotificationUtils.success('Message marked as read');
             } else {
-              this.error(response.error || 'An error occurred');
-              return false;
+              window.NotificationUtils.error('Failed to mark message as read');
             }
-          },
-
-          // Progress notification
-          progress: function(message, progressFunction, title = 'Processing') {
-            const notification = window.AWN.info(message, {
-              labels: { info: title },
-              displayDuration: 0
-            });
-
-            if (typeof progressFunction === 'function') {
-              progressFunction(notification);
-            }
-
-            return notification;
-          }
-        };
-
-        // Auto-show notifications from flash messages or session
-        {% if get_flashed_messages() %}
-        {% for category, message in get_flashed_messages(with_categories=true) %}
-        window.NotificationUtils.{{ category }}('{{ message|safe }}');
-        {% endfor %}
-        {% endif %}
-      });
-    </script>
-    <!--end::Global Awesome Notifications Configuration-->
-
-    <!--begin::Database Mode JavaScript-->
-    {% if database_mode %}
-    <script>
-      // JavaScript per la gestione delle funzionalità database
-      document.addEventListener('DOMContentLoaded', function() {
-        // Auto-dismiss della notifica database mode dopo 5 secondi
-        setTimeout(function() {
-          const alert = document.getElementById('database-mode-alert');
-          if (alert) {
-            const bsAlert = new bootstrap.Alert(alert.querySelector('.alert'));
-            bsAlert.close();
-          }
-        }, 5000);
-
-        // Gestione click sui messaggi per segnarli come letti
-        document.querySelectorAll('[data-message-id]').forEach(function(element) {
-          element.addEventListener('click', function(e) {
-            e.preventDefault();
-            const messageId = this.getAttribute('data-message-id');
-
-            // Chiamata API per segnare come letto
-            fetch(`/api/messages/${messageId}/read`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Rimuovi l'indicatore "non letto"
-                const indicator = this.querySelector('.text-danger i');
-                if (indicator) {
-                  indicator.remove();
-                }
-
-                // Aggiorna il contatore
-                updateMessageCounter();
-
-                // Show success notification
-                window.NotificationUtils.success('Message marked as read');
-              } else {
-                window.NotificationUtils.error('Failed to mark message as read');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              window.NotificationUtils.error('An error occurred');
-            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            window.NotificationUtils.error('An error occurred');
           });
         });
+      });
 
-        // Gestione click sulle notifiche per segnarle come lette
-        document.querySelectorAll('[data-notification-id]').forEach(function(element) {
-          element.addEventListener('click', function(e) {
-            e.preventDefault();
-            const notificationId = this.getAttribute('data-notification-id');
+      // Gestione click sulle notifiche per segnarle come lette
+      document.querySelectorAll('[data-notification-id]').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+          e.preventDefault();
+          const notificationId = this.getAttribute('data-notification-id');
 
-            // Chiamata API per segnare come letta
-            fetch(`/api/notifications/${notificationId}/read`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
+          // Chiamata API per segnare come letta
+          fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Rimuovi il badge "New"
+              const badge = this.querySelector('.badge.bg-danger');
+              if (badge) {
+                badge.remove();
               }
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Rimuovi il badge "New"
-                const badge = this.querySelector('.badge.bg-danger');
-                if (badge) {
-                  badge.remove();
-                }
 
-                // Aggiorna il contatore
-                updateNotificationCounter();
+              // Aggiorna il contatore
+              updateNotificationCounter();
 
-                // Show success notification
-                window.NotificationUtils.success('Notification marked as read');
-              } else {
-                window.NotificationUtils.error('Failed to mark notification as read');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              window.NotificationUtils.error('An error occurred');
-            });
+              // Show success notification
+              window.NotificationUtils.success('Notification marked as read');
+            } else {
+              window.NotificationUtils.error('Failed to mark notification as read');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            window.NotificationUtils.error('An error occurred');
           });
         });
-
-        // Funzioni per aggiornare i contatori
-        function updateMessageCounter() {
-          fetch('/api/messages?unread_only=true')
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                const counter = document.getElementById('messages-count');
-                if (counter) {
-                  counter.textContent = data.unread_count || 0;
-                  if (data.unread_count === 0) {
-                    counter.style.display = 'none';
-                  }
-                }
-              }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        function updateNotificationCounter() {
-          fetch('/api/notifications?unread_only=true')
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                const counter = document.getElementById('notifications-count');
-                if (counter) {
-                  counter.textContent = data.unread_count || 0;
-                  if (data.unread_count === 0) {
-                    counter.style.display = 'none';
-                  }
-                }
-              }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Aggiorna i contatori ogni 30 secondi
-        setInterval(function() {
-          updateMessageCounter();
-          updateNotificationCounter();
-        }, 30000);
       });
-    </script>
-    {% endif %}
-    <!--end::Database Mode JavaScript-->
 
-    {% block extra_js %}{% endblock %}
-    <!--end::Script-->
-  </body>
-  <!--end::Body-->
+      // Funzioni per aggiornare i contatori
+      function updateMessageCounter() {
+        fetch('/api/messages?unread_only=true')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const counter = document.getElementById('messages-count');
+              if (counter) {
+                counter.textContent = data.unread_count || 0;
+                if (data.unread_count === 0) {
+                  counter.style.display = 'none';
+                }
+              }
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      function updateNotificationCounter() {
+        fetch('/api/notifications?unread_only=true')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              const counter = document.getElementById('notifications-count');
+              if (counter) {
+                counter.textContent = data.unread_count || 0;
+                if (data.unread_count === 0) {
+                  counter.style.display = 'none';
+                }
+              }
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+
+      // Aggiorna i contatori ogni 30 secondi
+      setInterval(function() {
+        updateMessageCounter();
+        updateNotificationCounter();
+      }, 30000);
+    });
+</script>
+{% endif %}
+<!--end::Database Mode JavaScript-->
+
+{% block extra_js %}{% endblock %}
+<!--end::Script-->
+</body>
+<!--end::Body-->
 </html>
