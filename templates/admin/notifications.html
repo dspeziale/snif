@@ -10,65 +10,42 @@
 {% endblock %}
 
 {% block content %}
-<!-- Filters and Actions -->
+<!-- Quick Actions Bar -->
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="bi bi-funnel me-2"></i>Filters & Actions
+          <i class="bi bi-lightning-fill me-2"></i>Quick Actions
         </h3>
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-md-9">
-            <div class="row">
-              <div class="col-md-2">
-                <select class="form-select" id="typeFilter">
-                  <option value="">All Types</option>
-                  {% for notif_type in notification_types %}
-                  <option value="{{ notif_type.type }}">{{ notif_type.label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-2">
-                <select class="form-select" id="categoryFilter">
-                  <option value="">All Categories</option>
-                  {% for category in categories %}
-                  <option value="{{ category.category }}">{{ category.label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-2">
-                <select class="form-select" id="priorityFilter">
-                  <option value="">All Priorities</option>
-                  {% for priority in priorities %}
-                  <option value="{{ priority.level }}">{{ priority.label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-2">
-                <select class="form-select" id="statusFilter">
-                  <option value="">All Status</option>
-                  <option value="unread">Unread Only</option>
-                  <option value="read">Read Only</option>
-                  <option value="dismissed">Dismissed</option>
-                </select>
-              </div>
-              <div class="col-md-2">
-                <button type="button" class="btn btn-primary" onclick="applyFilters()">
-                  <i class="bi bi-search me-1"></i>Filter
-                </button>
-              </div>
+          <div class="col-md-8">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newNotificationModal">
+                <i class="bi bi-plus-circle me-1"></i>New Notification
+              </button>
+              <button type="button" class="btn btn-warning" onclick="markAllNotificationsRead()">
+                <i class="bi bi-check-all me-1"></i>Mark All Read
+              </button>
+              <button type="button" class="btn btn-info" onclick="refreshNotificationsTable()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
             </div>
           </div>
-          <div class="col-md-3 text-end">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newNotificationModal">
-              <i class="bi bi-plus-circle me-1"></i>New Notification
-            </button>
-            <button type="button" class="btn btn-warning" onclick="markAllRead()">
-              <i class="bi bi-check-all me-1"></i>Mark All Read
-            </button>
+          <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-primary" onclick="exportNotifications('excel')">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
+              </button>
+              <button type="button" class="btn btn-outline-success" onclick="exportNotifications('csv')">
+                <i class="bi bi-file-earmark-text me-1"></i>CSV
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="exportNotifications('pdf')">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -76,214 +53,274 @@
   </div>
 </div>
 
-<!-- Notifications Table -->
+<!-- Advanced Filters -->
+<div class="row">
+  <div class="col-12">
+    <div class="card card-outline card-info collapsed-card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-funnel me-2"></i>Advanced Filters
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="filterType">Notification Type</label>
+              <select class="form-select" id="filterType">
+                <option value="">All Types</option>
+                {% for notif_type in notification_types %}
+                <option value="{{ notif_type.type }}">{{ notif_type.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="filterCategory">Category</label>
+              <select class="form-select" id="filterCategory">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.category }}">{{ category.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="filterPriority">Priority</label>
+              <select class="form-select" id="filterPriority">
+                <option value="">All Priorities</option>
+                {% for priority in priorities %}
+                <option value="{{ priority.level }}">{{ priority.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label for="filterStatus">Status</label>
+              <select class="form-select" id="filterStatus">
+                <option value="">All Status</option>
+                <option value="unread">Unread Only</option>
+                <option value="read">Read Only</option>
+                <option value="dismissed">Dismissed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="filterDateFrom">Date From</label>
+              <input type="date" class="form-control" id="filterDateFrom">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="filterDateTo">Date To</label>
+              <input type="date" class="form-control" id="filterDateTo">
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                <i class="bi bi-search me-1"></i>Apply Filters
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                <i class="bi bi-x-circle me-1"></i>Clear Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications DataTable -->
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="bi bi-bell me-2"></i>Notifications
-          <span class="badge bg-warning ms-2">{{ notifications|length }}</span>
+          <i class="bi bi-bell me-2"></i>Notifications Database
+          <span class="badge bg-warning ms-2" id="notifications-total-count">{{ notifications|length }}</span>
         </h3>
+        <div class="card-tools">
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleSelectAll()">
+              <i class="bi bi-check-square me-1"></i>Select All
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="clearSelection()">
+              <i class="bi bi-square me-1"></i>Clear Selection
+            </button>
+          </div>
+        </div>
       </div>
       <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-bordered table-striped" id="notificationsTable">
-            <thead>
-              <tr>
-                <th width="30">
-                  <input type="checkbox" id="selectAllNotifications" onchange="toggleAllNotifications()">
-                </th>
-                <th width="50">Icon</th>
-                <th>Message</th>
-                <th>Type</th>
-                <th>Category</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Action URL</th>
-                <th>Timestamp</th>
-                <th width="150">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for notification in notifications %}
-              <tr class="{% if not notification.read %}table-warning{% endif %}" data-notification-id="{{ notification.id }}">
-                <td>
-                  <input type="checkbox" class="notification-checkbox" value="{{ notification.id }}">
-                </td>
-                <td class="text-center">
-                  <i class="bi {{ notification.icon or 'bi-bell' }}
-                     {% if notification.type_info %}text-{{ notification.type_info.color }}{% else %}text-info{% endif %}"
-                     style="font-size: 1.5em;"></i>
-                </td>
-                <td>
-                  <div class="notification-message" style="max-width: 400px;">
-                    {{ notification.message[:150] }}
-                    {% if notification.message|length > 150 %}
-                    <span class="text-muted">...</span>
-                    <button class="btn btn-link btn-sm p-0" onclick="toggleNotificationContent({{ notification.id }})">
-                      <small>Show more</small>
-                    </button>
-                    <div class="full-content d-none">{{ notification.message }}</div>
-                    {% endif %}
-                  </div>
+        <!-- DataTable will be inserted here -->
+        <table id="notificationsTable" class="table table-bordered table-striped table-hover"
+               data-table="notifications"
+               {% if database_mode %}data-ajax-url="/api/notifications"{% endif %}>
+          <thead>
+            <tr>
+              <th class="no-sort no-search" width="30">
+                <input type="checkbox" id="selectAllNotifications">
+              </th>
+              <th class="no-sort" width="50">Icon</th>
+              <th>Message</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Action URL</th>
+              <th>Time</th>
+              <th class="no-sort" width="150">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not database_mode %}
+            {% for notification in notifications %}
+            <tr class="{% if not notification.read %}table-row-unread{% endif %} {% if notification.priority_info %}table-row-{{ notification.priority_info.level }}-priority{% endif %}"
+                data-notification-id="{{ notification.id }}">
+              <td class="text-center">
+                <input type="checkbox" class="notification-checkbox" value="{{ notification.id }}">
+              </td>
+              <td class="text-center">
+                <i class="bi {{ notification.icon or 'bi-bell' }}
+                   {% if notification.type_info %}text-{{ notification.type_info.color }}{% else %}text-info{% endif %}"
+                   style="font-size: 1.5em;"></i>
+              </td>
+              <td>
+                <div class="notification-message" style="max-width: 400px;">
+                  {{ notification.message[:150] }}
+                  {% if notification.message|length > 150 %}...{% endif %}
+                </div>
+                {% if not notification.read %}
+                <span class="badge bg-danger badge-sm">New</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if notification.type_info %}
+                <span class="badge bg-{{ notification.type_info.color }}">
+                  <i class="bi {{ notification.type_info.icon }} me-1"></i>{{ notification.type_info.label }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">Unknown</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if notification.category_info %}
+                <span class="badge bg-{{ notification.category_info.color }}">
+                  <i class="bi {{ notification.category_info.icon }} me-1"></i>{{ notification.category_info.label }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">General</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if notification.priority_info %}
+                <span class="badge bg-{{ notification.priority_info.color }}">
+                  <i class="bi {{ notification.priority_info.icon }} me-1"></i>{{ notification.priority_info.label }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">Normal</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if not notification.read %}
+                <span class="badge bg-warning">Unread</span>
+                {% elif notification.dismissed %}
+                <span class="badge bg-secondary">Dismissed</span>
+                {% else %}
+                <span class="badge bg-success">Read</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if notification.action_url %}
+                <small><a href="{{ notification.action_url }}" class="text-decoration-none" target="_blank">
+                  {{ notification.action_url[:30] }}...
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </a></small>
+                {% else %}
+                <small class="text-muted">No action</small>
+                {% endif %}
+              </td>
+              <td>
+                <small>{{ notification.time }}</small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
                   {% if not notification.read %}
-                  <span class="badge bg-danger badge-sm">New</span>
+                  <button class="btn btn-outline-success" onclick="AdminLTE.Actions.markNotificationRead({{ notification.id }})" title="Mark as Read">
+                    <i class="bi bi-check"></i>
+                  </button>
                   {% endif %}
-                </td>
-                <td>
-                  {% if notification.type_info %}
-                  <span class="badge bg-{{ notification.type_info.color }}">
-                    <i class="bi {{ notification.type_info.icon }} me-1"></i>{{ notification.type_info.label }}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-secondary">Unknown</span>
+                  <button class="btn btn-outline-primary" onclick="AdminLTE.Actions.viewNotification({{ notification.id }})" title="View">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  {% if not notification.dismissed %}
+                  <button class="btn btn-outline-warning" onclick="AdminLTE.Actions.dismissNotification({{ notification.id }})" title="Dismiss">
+                    <i class="bi bi-x-circle"></i>
+                  </button>
                   {% endif %}
-                </td>
-                <td>
-                  {% if notification.category_info %}
-                  <span class="badge bg-{{ notification.category_info.color }}">
-                    <i class="bi {{ notification.category_info.icon }} me-1"></i>{{ notification.category_info.label }}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-secondary">General</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if notification.priority_info %}
-                  <span class="badge bg-{{ notification.priority_info.color }}">
-                    <i class="bi {{ notification.priority_info.icon }} me-1"></i>{{ notification.priority_info.label }}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-secondary">Normal</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if not notification.read %}
-                  <span class="badge bg-warning">Unread</span>
-                  {% elif notification.dismissed %}
-                  <span class="badge bg-secondary">Dismissed</span>
-                  {% else %}
-                  <span class="badge bg-success">Read</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if notification.action_url %}
-                  <small><a href="{{ notification.action_url }}" class="text-decoration-none" target="_blank">
-                    {{ notification.action_url[:30] }}...
-                    <i class="bi bi-box-arrow-up-right"></i>
-                  </a></small>
-                  {% else %}
-                  <small class="text-muted">No action</small>
-                  {% endif %}
-                </td>
-                <td>
-                  <small>{{ notification.time }}</small>
-                  <br>
-                  <small class="text-muted">{{ notification.timestamp[:10] if notification.timestamp else '' }}</small>
-                </td>
-                <td>
-                  <div class="btn-group btn-group-sm" role="group">
-                    {% if not notification.read %}
-                    <button class="btn btn-outline-success" onclick="markNotificationRead({{ notification.id }})" title="Mark as Read">
-                      <i class="bi bi-check"></i>
-                    </button>
-                    {% endif %}
-
-                    <button class="btn btn-outline-primary" onclick="viewNotification({{ notification.id }})" title="View">
-                      <i class="bi bi-eye"></i>
-                    </button>
-
-                    {% if not notification.dismissed %}
-                    <button class="btn btn-outline-warning" onclick="dismissNotification({{ notification.id }})" title="Dismiss">
-                      <i class="bi bi-x-circle"></i>
-                    </button>
-                    {% endif %}
-
-                    <button class="btn btn-outline-danger" onclick="deleteNotification({{ notification.id }})" title="Delete">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              {% else %}
-              <tr>
-                <td colspan="10" class="text-center text-muted py-4">
-                  <i class="bi bi-bell-slash display-4"></i>
-                  <br>
-                  No notifications found
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      {% if pagination and pagination.pages > 1 %}
-      <div class="card-footer">
-        <nav aria-label="Notifications pagination">
-          <ul class="pagination justify-content-center mb-0">
-            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-              <a class="page-link" href="?page={{ pagination.page - 1 if pagination.has_prev else 1 }}">Previous</a>
-            </li>
-
-            {% for page_num in range(1, pagination.pages + 1) %}
-              {% if page_num == pagination.page %}
-              <li class="page-item active">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-              </li>
-              {% elif page_num <= 3 or page_num > pagination.pages - 3 or (page_num >= pagination.page - 1 and page_num <= pagination.page + 1) %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-              </li>
-              {% elif page_num == 4 or page_num == pagination.pages - 3 %}
-              <li class="page-item disabled">
-                <span class="page-link">...</span>
-              </li>
-              {% endif %}
+                  <button class="btn btn-outline-danger" onclick="AdminLTE.Actions.deleteNotification({{ notification.id }})" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
             {% endfor %}
-
-            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-              <a class="page-link" href="?page={{ pagination.page + 1 if pagination.has_next else pagination.pages }}">Next</a>
-            </li>
-          </ul>
-        </nav>
-
-        <div class="text-center mt-2">
-          <small class="text-muted">
-            Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to
-            {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page < pagination.total else pagination.total }}
-            of {{ pagination.total }} notifications
-          </small>
-        </div>
+            {% endif %}
+          </tbody>
+        </table>
       </div>
-      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Bulk Actions -->
+<!-- Bulk Actions Card -->
 <div class="row">
   <div class="col-12">
-    <div class="card">
+    <div class="card card-outline card-warning">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-collection me-2"></i>Bulk Actions
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-warning" id="selected-count">0 selected</span>
+        </div>
+      </div>
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Bulk Actions:</strong>
-            <button class="btn btn-sm btn-success ms-2" onclick="bulkMarkRead()" id="bulkReadBtn" disabled>
-              <i class="bi bi-check-all me-1"></i>Mark Selected as Read
-            </button>
-            <button class="btn btn-sm btn-warning ms-1" onclick="bulkDismiss()" id="bulkDismissBtn" disabled>
-              <i class="bi bi-x-circle me-1"></i>Dismiss Selected
-            </button>
-            <button class="btn btn-sm btn-danger ms-1" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
-              <i class="bi bi-trash me-1"></i>Delete Selected
-            </button>
+        <div class="row">
+          <div class="col-md-8">
+            <div class="btn-group" role="group">
+              <button class="btn btn-success" onclick="bulkMarkRead()" id="bulkReadBtn" disabled>
+                <i class="bi bi-check-all me-1"></i>Mark as Read
+              </button>
+              <button class="btn btn-warning" onclick="bulkDismiss()" id="bulkDismissBtn" disabled>
+                <i class="bi bi-x-circle me-1"></i>Dismiss Selected
+              </button>
+              <button class="btn btn-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                <i class="bi bi-trash me-1"></i>Delete Selected
+              </button>
+            </div>
           </div>
-          <div>
-            <span id="selectedCount">0</span> notifications selected
+          <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary" onclick="bulkExport('selected')" id="bulkExportBtn" disabled>
+                <i class="bi bi-download me-1"></i>Export Selected
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -296,46 +333,66 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="newNotificationModalLabel">Create New Notification</h5>
+        <h5 class="modal-title" id="newNotificationModalLabel">
+          <i class="bi bi-plus-circle me-2"></i>Create New Notification
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="newNotificationForm">
           <div class="mb-3">
-            <label for="notificationMessage" class="form-label">Message *</label>
+            <label for="notificationMessage" class="form-label">
+              <i class="bi bi-chat-square-text me-1"></i>Message *
+            </label>
             <textarea class="form-control" id="notificationMessage" rows="3" required
                       placeholder="Enter the notification message..."></textarea>
+            <div class="form-text">
+              <small class="text-muted">
+                <span id="messageCount">0</span>/500 characters
+              </small>
+            </div>
           </div>
 
           <div class="row">
             <div class="col-md-4">
               <div class="mb-3">
-                <label for="notificationType" class="form-label">Type</label>
+                <label for="notificationType" class="form-label">
+                  <i class="bi bi-tag me-1"></i>Type
+                </label>
                 <select class="form-select" id="notificationType">
                   <option value="">Select Type</option>
                   {% for notif_type in notification_types %}
-                  <option value="{{ notif_type.type }}">{{ notif_type.label }}</option>
+                  <option value="{{ notif_type.type }}" data-color="{{ notif_type.color }}" data-icon="{{ notif_type.icon }}">
+                    {{ notif_type.label }}
+                  </option>
                   {% endfor %}
                 </select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label for="notificationCategory" class="form-label">Category</label>
+                <label for="notificationCategory" class="form-label">
+                  <i class="bi bi-folder me-1"></i>Category
+                </label>
                 <select class="form-select" id="notificationCategory">
                   <option value="">Select Category</option>
                   {% for category in categories %}
-                  <option value="{{ category.category }}">{{ category.label }}</option>
+                  <option value="{{ category.category }}" data-color="{{ category.color }}" data-icon="{{ category.icon }}">
+                    {{ category.label }}
+                  </option>
                   {% endfor %}
                 </select>
               </div>
             </div>
             <div class="col-md-4">
               <div class="mb-3">
-                <label for="notificationPriority" class="form-label">Priority</label>
+                <label for="notificationPriority" class="form-label">
+                  <i class="bi bi-exclamation-circle me-1"></i>Priority
+                </label>
                 <select class="form-select" id="notificationPriority">
                   {% for priority in priorities %}
-                  <option value="{{ priority.level }}" {% if priority.level == 'low' %}selected{% endif %}>
+                  <option value="{{ priority.level }}" data-color="{{ priority.color }}" data-icon="{{ priority.icon }}"
+                          {% if priority.level == 'low' %}selected{% endif %}>
                     {{ priority.label }}
                   </option>
                   {% endfor %}
@@ -347,32 +404,65 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="notificationIcon" class="form-label">Icon</label>
+                <label for="notificationIcon" class="form-label">
+                  <i class="bi bi-palette2 me-1"></i>Icon
+                </label>
                 <div class="input-group">
-                  <span class="input-group-text">bi</span>
+                  <span class="input-group-text">
+                    <i class="bi bi-bell" id="iconPreview"></i>
+                  </span>
                   <input type="text" class="form-control" id="notificationIcon"
                          placeholder="bell" value="bell">
                 </div>
-                <small class="form-text text-muted">
-                  Bootstrap Icons name (without 'bi bi-' prefix)
-                </small>
+                <div class="form-text">
+                  <small class="text-muted">
+                    Bootstrap Icons name (without 'bi bi-' prefix)
+                  </small>
+                </div>
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="notificationActionUrl" class="form-label">Action URL</label>
+                <label for="notificationActionUrl" class="form-label">
+                  <i class="bi bi-link-45deg me-1"></i>Action URL
+                </label>
                 <input type="url" class="form-control" id="notificationActionUrl"
                        placeholder="https://example.com/action">
-                <small class="form-text text-muted">
-                  Optional URL for notification action
-                </small>
+                <div class="form-text">
+                  <small class="text-muted">
+                    Optional URL for notification action
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="card bg-light">
+                <div class="card-header">
+                  <h6 class="card-title mb-0">
+                    <i class="bi bi-eye me-1"></i>Preview
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div id="notificationPreview" class="d-flex align-items-center p-2 border rounded">
+                    <i class="bi bi-bell text-info me-3" style="font-size: 1.5em;" id="previewIcon"></i>
+                    <div class="flex-grow-1">
+                      <div id="previewMessage" class="text-muted">Enter a message to see preview...</div>
+                      <div id="previewBadges" class="mt-1"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
         <button type="button" class="btn btn-primary" onclick="createNotification()">
           <i class="bi bi-plus-circle me-1"></i>Create Notification
         </button>
@@ -381,19 +471,50 @@
   </div>
 </div>
 
-<!-- View Notification Modal -->
-<div class="modal fade" id="viewNotificationModal" tabindex="-1" aria-labelledby="viewNotificationModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="viewNotificationModalLabel">Notification Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Statistics Cards -->
+<div class="row mt-3">
+  <div class="col-md-3">
+    <div class="info-box bg-warning">
+      <span class="info-box-icon"><i class="bi bi-bell"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Total Notifications</span>
+        <span class="info-box-number" id="total-notifications">{{ notifications|length }}</span>
       </div>
-      <div class="modal-body" id="notificationViewContent">
-        <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-danger">
+      <span class="info-box-icon"><i class="bi bi-bell-slash"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Unread</span>
+        <span class="info-box-number" id="unread-notifications">
+          {% set unread_count = notifications|rejectattr('read')|list|length %}
+          {{ unread_count }}
+        </span>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-success">
+      <span class="info-box-icon"><i class="bi bi-check-circle"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Read</span>
+        <span class="info-box-number" id="read-notifications">
+          {% set read_count = notifications|selectattr('read')|rejectattr('dismissed')|list|length %}
+          {{ read_count }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-secondary">
+      <span class="info-box-icon"><i class="bi bi-x-circle"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Dismissed</span>
+        <span class="info-box-number" id="dismissed-notifications">
+          {% set dismissed_count = notifications|selectattr('dismissed')|list|length %}
+          {{ dismissed_count }}
+        </span>
       </div>
     </div>
   </div>
@@ -401,302 +522,394 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Notifications specific JavaScript -->
 <script>
-// Filter and search functionality
-function applyFilters() {
-  const type = document.getElementById('typeFilter').value;
-  const category = document.getElementById('categoryFilter').value;
-  const priority = document.getElementById('priorityFilter').value;
-  const status = document.getElementById('statusFilter').value;
+let notificationsTable;
 
-  const params = new URLSearchParams();
-  if (type) params.append('type', type);
-  if (category) params.append('category', category);
-  if (priority) params.append('priority', priority);
-  if (status === 'unread') params.append('unread_only', 'true');
+$(document).ready(function() {
+    // Initialize Notifications DataTable
+    {% if database_mode %}
+    // Use AJAX data source for database mode
+    notificationsTable = AdminLTE.DataTables.initNotificationsTable('#notificationsTable', '/api/notifications');
+    {% else %}
+    // Use static data for JSON file mode
+    notificationsTable = AdminLTE.DataTables.initNotificationsTable('#notificationsTable');
+    {% endif %}
 
-  window.location.href = '?' + params.toString();
-}
+    // Setup event listeners
+    setupEventListeners();
 
-function clearFilters() {
-  window.location.href = window.location.pathname;
-}
+    // Setup modal form handlers
+    setupModalHandlers();
 
-// Notification content toggle
-function toggleNotificationContent(notificationId) {
-  const row = document.querySelector(`tr[data-notification-id="${notificationId}"]`);
-  const contentDiv = row.querySelector('.notification-message');
-  const fullContent = contentDiv.querySelector('.full-content');
-  const button = contentDiv.querySelector('button');
-
-  if (fullContent.classList.contains('d-none')) {
-    contentDiv.innerHTML = fullContent.innerHTML +
-      '<button class="btn btn-link btn-sm p-0 ms-2" onclick="toggleNotificationContent(' + notificationId + ')"><small>Show less</small></button>';
-  } else {
-    location.reload(); // Simple approach - in production you'd want to restore the truncated view
-  }
-}
-
-// Individual notification actions
-function markNotificationRead(notificationId) {
-  fetch(`/api/notifications/${notificationId}/read`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      location.reload();
-    } else {
-      alert('Error: ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error marking notification as read');
-  });
-}
-
-function dismissNotification(notificationId) {
-  if (confirm('Dismiss this notification?')) {
-    fetch(`/api/notifications/${notificationId}/dismiss`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error dismissing notification');
-    });
-  }
-}
-
-function deleteNotification(notificationId) {
-  if (confirm('⚠️ Are you sure you want to delete this notification? This action cannot be undone.')) {
-    fetch(`/api/notifications/${notificationId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error deleting notification');
-    });
-  }
-}
-
-function viewNotification(notificationId) {
-  fetch(`/api/notifications/${notificationId}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const notification = data.data;
-        document.getElementById('notificationViewContent').innerHTML = `
-          <div class="row">
-            <div class="col-md-2 text-center">
-              <i class="bi ${notification.icon || 'bi-bell'}
-                 ${notification.type_info ? 'text-' + notification.type_info.color : 'text-info'}"
-                 style="font-size: 3em;"></i>
-            </div>
-            <div class="col-md-10">
-              <h6 class="text-muted">Notification Details</h6>
-              <small class="text-muted">${notification.time}</small>
-              ${notification.type_info ? `<span class="badge bg-${notification.type_info.color} ms-2">${notification.type_info.label}</span>` : ''}
-              ${notification.category_info ? `<span class="badge bg-${notification.category_info.color} ms-1">${notification.category_info.label}</span>` : ''}
-              ${notification.priority_info ? `<span class="badge bg-${notification.priority_info.color} ms-1">${notification.priority_info.label}</span>` : ''}
-            </div>
-          </div>
-          <hr>
-          <div class="notification-content">
-            <h6>Message:</h6>
-            <p>${notification.message}</p>
-            ${notification.action_url ? `
-              <h6>Action URL:</h6>
-              <p><a href="${notification.action_url}" target="_blank" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-box-arrow-up-right me-1"></i>Open Action
-              </a></p>
-            ` : ''}
-          </div>
-        `;
-
-        const modal = new bootstrap.Modal(document.getElementById('viewNotificationModal'));
-        modal.show();
-
-        // Mark as read if unread
-        if (!notification.read) {
-          markNotificationRead(notificationId);
+    // Auto-refresh table every 30 seconds if in database mode
+    {% if database_mode %}
+    setInterval(function() {
+        if (notificationsTable) {
+            AdminLTE.DataTables.refreshTable(notificationsTable);
+            updateStatistics();
         }
-      } else {
-        alert('Error loading notification: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error loading notification');
+    }, 30000);
+    {% endif %}
+});
+
+function setupEventListeners() {
+    // Select all checkbox handler
+    $('#selectAllNotifications').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.notification-checkbox').prop('checked', isChecked);
+        updateBulkActionButtons();
+    });
+
+    // Individual checkbox handler
+    $(document).on('change', '.notification-checkbox', function() {
+        updateBulkActionButtons();
+
+        // Update select all checkbox state
+        const totalCheckboxes = $('.notification-checkbox').length;
+        const checkedCheckboxes = $('.notification-checkbox:checked').length;
+
+        $('#selectAllNotifications').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+        $('#selectAllNotifications').prop('checked', checkedCheckboxes === totalCheckboxes);
     });
 }
 
-// Bulk actions
-function toggleAllNotifications() {
-  const selectAll = document.getElementById('selectAllNotifications');
-  const checkboxes = document.querySelectorAll('.notification-checkbox');
+function setupModalHandlers() {
+    // Character counter for notification message
+    $('#notificationMessage').on('input', function() {
+        const length = $(this).val().length;
+        $('#messageCount').text(length);
 
-  checkboxes.forEach(checkbox => {
-    checkbox.checked = selectAll.checked;
-  });
+        if (length > 500) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
 
-  updateBulkActionButtons();
+        updatePreview();
+    });
+
+    // Icon preview
+    $('#notificationIcon').on('input', function() {
+        const iconName = $(this).val().trim();
+        const iconClass = iconName ? `bi bi-${iconName}` : 'bi bi-bell';
+        $('#iconPreview').attr('class', iconClass);
+        updatePreview();
+    });
+
+    // Type, category, priority change handlers
+    $('#notificationType, #notificationCategory, #notificationPriority').on('change', function() {
+        updatePreview();
+    });
+
+    // Modal form reset on hide
+    $('#newNotificationModal').on('hidden.bs.modal', function() {
+        $('#newNotificationForm')[0].reset();
+        $('#messageCount').text('0');
+        $('#notificationMessage').removeClass('is-invalid');
+        $('#notificationPriority').val('low');
+        $('#notificationIcon').val('bell');
+        $('#iconPreview').attr('class', 'bi bi-bell');
+        updatePreview();
+    });
+
+    // Modal show handler
+    $('#newNotificationModal').on('shown.bs.modal', function() {
+        $('#notificationMessage').focus();
+        updatePreview();
+    });
+}
+
+function updatePreview() {
+    const message = $('#notificationMessage').val() || 'Enter a message to see preview...';
+    const iconName = $('#notificationIcon').val().trim() || 'bell';
+    const type = $('#notificationType').val();
+    const category = $('#notificationCategory').val();
+    const priority = $('#notificationPriority').val();
+
+    // Update preview icon
+    const iconClass = `bi bi-${iconName}`;
+    let iconColor = 'text-info';
+
+    if (type) {
+        const typeOption = $(`#notificationType option[value="${type}"]`);
+        iconColor = `text-${typeOption.data('color') || 'info'}`;
+    }
+
+    $('#previewIcon').attr('class', `${iconClass} ${iconColor} me-3`);
+
+    // Update preview message
+    $('#previewMessage').text(message);
+
+    // Update preview badges
+    let badges = '';
+
+    if (type) {
+        const typeOption = $(`#notificationType option[value="${type}"]`);
+        const color = typeOption.data('color') || 'secondary';
+        const icon = typeOption.data('icon') || 'bi-tag';
+        badges += `<span class="badge bg-${color} me-1"><i class="bi ${icon} me-1"></i>${typeOption.text()}</span>`;
+    }
+
+    if (category) {
+        const categoryOption = $(`#notificationCategory option[value="${category}"]`);
+        const color = categoryOption.data('color') || 'secondary';
+        const icon = categoryOption.data('icon') || 'bi-folder';
+        badges += `<span class="badge bg-${color} me-1"><i class="bi ${icon} me-1"></i>${categoryOption.text()}</span>`;
+    }
+
+    if (priority) {
+        const priorityOption = $(`#notificationPriority option[value="${priority}"]`);
+        const color = priorityOption.data('color') || 'secondary';
+        const icon = priorityOption.data('icon') || 'bi-exclamation';
+        badges += `<span class="badge bg-${color} me-1"><i class="bi ${icon} me-1"></i>${priorityOption.text()}</span>`;
+    }
+
+    $('#previewBadges').html(badges);
 }
 
 function updateBulkActionButtons() {
-  const checkedBoxes = document.querySelectorAll('.notification-checkbox:checked');
-  const count = checkedBoxes.length;
+    const selectedCount = $('.notification-checkbox:checked').length;
+    const bulkButtons = ['#bulkReadBtn', '#bulkDismissBtn', '#bulkDeleteBtn', '#bulkExportBtn'];
 
-  document.getElementById('selectedCount').textContent = count;
+    bulkButtons.forEach(btn => {
+        $(btn).prop('disabled', selectedCount === 0);
+    });
 
-  const buttons = ['bulkReadBtn', 'bulkDismissBtn', 'bulkDeleteBtn'];
-  buttons.forEach(btnId => {
-    document.getElementById(btnId).disabled = count === 0;
-  });
+    $('#selected-count').text(`${selectedCount} selected`);
 }
 
-function bulkMarkRead() {
-  const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
+// Action Functions
+function toggleSelectAll() {
+    const allSelected = $('.notification-checkbox:checked').length === $('.notification-checkbox').length;
+    $('.notification-checkbox').prop('checked', !allSelected);
+    $('#selectAllNotifications').prop('checked', !allSelected);
+    updateBulkActionButtons();
+}
 
-  if (selectedIds.length === 0) return;
+function clearSelection() {
+    $('.notification-checkbox, #selectAllNotifications').prop('checked', false);
+    updateBulkActionButtons();
+}
 
-  if (confirm(`Mark ${selectedIds.length} notification(s) as read?`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/notifications/${id}/read`, { method: 'POST' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
+function refreshNotificationsTable() {
+    if (notificationsTable) {
+        AdminLTE.DataTables.refreshTable(notificationsTable);
+        AdminLTE.Notifications.success('Notifications table refreshed');
+        updateStatistics();
+    }
+}
+
+function createNotification() {
+    const formData = {
+        message: $('#notificationMessage').val(),
+        type: $('#notificationType').val(),
+        category: $('#notificationCategory').val(),
+        priority: $('#notificationPriority').val(),
+        icon: 'bi-' + $('#notificationIcon').val(),
+        action_url: $('#notificationActionUrl').val()
+    };
+
+    if (!formData.message) {
+        AdminLTE.Notifications.warning('Please enter a notification message');
+        return;
+    }
+
+    if (formData.message.length > 500) {
+        AdminLTE.Notifications.warning('Notification message is too long (max 500 characters)');
+        return;
+    }
+
+    AdminLTE.Forms.validateAndSubmit(
+        '#newNotificationForm',
+        '/api/notifications',
+        {
+            successMessage: 'Notification created successfully',
+            closeModal: '#newNotificationModal',
+            onSuccess: function(data) {
+                if (notificationsTable) {
+                    AdminLTE.DataTables.refreshTable(notificationsTable);
+                }
+                updateStatistics();
+            }
+        }
+    );
+}
+
+function markAllNotificationsRead() {
+    AdminLTE.Notifications.confirm(
+        'Mark all notifications as read?',
+        'Confirm Action',
+        () => {
+            AdminLTE.Notifications.async(
+                fetch('/api/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    if (notificationsTable) {
+                        AdminLTE.DataTables.refreshTable(notificationsTable);
+                    }
+                    updateStatistics();
+                    return data;
+                }),
+                'Marking all notifications as read...',
+                'All notifications marked as read'
+            );
+        }
+    );
+}
+
+// Filter Functions
+function applyFilters() {
+    const filters = {
+        type: $('#filterType').val(),
+        category: $('#filterCategory').val(),
+        priority: $('#filterPriority').val(),
+        status: $('#filterStatus').val(),
+        dateFrom: $('#filterDateFrom').val(),
+        dateTo: $('#filterDateTo').val()
+    };
+
+    {% if database_mode %}
+    // For AJAX mode, rebuild URL with filters
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+        if (filters[key]) {
+            if (key === 'status' && filters[key] === 'unread') {
+                params.append('unread_only', 'true');
+            } else {
+                params.append(key, filters[key]);
+            }
+        }
     });
-  }
+
+    // Update AJAX URL and reload
+    const newUrl = '/api/notifications?' + params.toString();
+    notificationsTable.ajax.url(newUrl).load();
+    {% else %}
+    // For static mode, apply DataTables search
+    notificationsTable.draw();
+    {% endif %}
+
+    AdminLTE.Notifications.success('Filters applied');
+}
+
+function clearFilters() {
+    $('#filterType, #filterCategory, #filterPriority, #filterStatus').val('');
+    $('#filterDateFrom, #filterDateTo').val('');
+
+    {% if database_mode %}
+    notificationsTable.ajax.url('/api/notifications').load();
+    {% else %}
+    notificationsTable.search('').draw();
+    {% endif %}
+
+    AdminLTE.Notifications.info('Filters cleared');
+}
+
+// Bulk Actions
+function bulkMarkRead() {
+    const selectedIds = $('.notification-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
+
+    AdminLTE.Actions.bulkMarkNotificationsRead(selectedIds);
+    clearSelection();
 }
 
 function bulkDismiss() {
-  const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
+    const selectedIds = $('.notification-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
 
-  if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) {
+        AdminLTE.Notifications.warning('No notifications selected');
+        return;
+    }
 
-  if (confirm(`Dismiss ${selectedIds.length} notification(s)?`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/notifications/${id}/dismiss`, { method: 'POST' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
-    });
-  }
+    AdminLTE.Notifications.confirm(
+        `Dismiss ${selectedIds.length} notification(s)?`,
+        'Confirm Bulk Dismiss',
+        () => {
+            const promises = selectedIds.map(id =>
+                fetch(`/api/notifications/${id}/dismiss`, { method: 'POST' })
+            );
+
+            AdminLTE.Notifications.async(
+                Promise.all(promises),
+                'Dismissing notifications...',
+                `${selectedIds.length} notifications dismissed`
+            ).then(() => {
+                if (notificationsTable) {
+                    AdminLTE.DataTables.refreshTable(notificationsTable);
+                }
+                clearSelection();
+                updateStatistics();
+            });
+        }
+    );
 }
 
 function bulkDelete() {
-  const selectedIds = Array.from(document.querySelectorAll('.notification-checkbox:checked')).map(cb => cb.value);
+    const selectedIds = $('.notification-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
 
-  if (selectedIds.length === 0) return;
-
-  if (confirm(`⚠️ Delete ${selectedIds.length} notification(s)? This action cannot be undone.`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/notifications/${id}`, { method: 'DELETE' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
-    });
-  }
+    AdminLTE.Actions.bulkDeleteNotifications(selectedIds);
+    clearSelection();
 }
 
-function markAllRead() {
-  if (confirm('Mark all notifications as read?')) {
-    fetch('/api/notifications/mark-all-read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error marking all notifications as read');
-    });
-  }
-}
-
-// Create new notification
-function createNotification() {
-  const formData = {
-    message: document.getElementById('notificationMessage').value,
-    type: document.getElementById('notificationType').value,
-    category: document.getElementById('notificationCategory').value,
-    priority: document.getElementById('notificationPriority').value,
-    icon: 'bi-' + document.getElementById('notificationIcon').value,
-    action_url: document.getElementById('notificationActionUrl').value
-  };
-
-  if (!formData.message) {
-    alert('Please enter a notification message.');
-    return;
-  }
-
-  fetch('/api/notifications', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById('newNotificationModal'));
-      modal.hide();
-      location.reload();
-    } else {
-      alert('Error: ' + data.error);
+// Export Functions
+function exportNotifications(format) {
+    if (notificationsTable) {
+        AdminLTE.DataTables.exportTable(notificationsTable, format);
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error creating notification');
-  });
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // Add event listeners to checkboxes
-  document.querySelectorAll('.notification-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', updateBulkActionButtons);
-  });
+function bulkExport(type) {
+    const selectedRows = notificationsTable.rows('.selected').data().toArray();
 
-  // Clear form when modal is hidden
-  document.getElementById('newNotificationModal').addEventListener('hidden.bs.modal', function() {
-    document.getElementById('newNotificationForm').reset();
-    // Reset priority to 'low'
-    document.getElementById('notificationPriority').value = 'low';
-    document.getElementById('notificationIcon').value = 'bell';
-  });
-});
+    if (selectedRows.length === 0) {
+        AdminLTE.Notifications.warning('No notifications selected for export');
+        return;
+    }
+
+    // Create temporary data for export
+    const tempData = selectedRows.map(row => ({
+        message: row.message,
+        type: row.type_info ? row.type_info.label : 'Unknown',
+        category: row.category_info ? row.category_info.label : 'General',
+        priority: row.priority_info ? row.priority_info.label : 'Normal',
+        status: row.read ? 'Read' : 'Unread',
+        time: row.time
+    }));
+
+    // Export logic here - could create CSV or trigger download
+    AdminLTE.Notifications.info('Export functionality would be implemented here');
+}
+
+function updateStatistics() {
+    {% if database_mode %}
+    // Update statistics from API
+    fetch('/api/notifications?limit=1')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#total-notifications').text(data.total || 0);
+                $('#unread-notifications').text(data.unread_count || 0);
+
+                // Update other statistics as needed
+                const readCount = (data.total || 0) - (data.unread_count || 0);
+                $('#read-notifications').text(readCount);
+            }
+        })
+        .catch(error => console.error('Error updating statistics:', error));
+    {% endif %}
+}
 </script>
 {% endblock %}

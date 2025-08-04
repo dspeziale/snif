@@ -10,60 +10,42 @@
 {% endblock %}
 
 {% block content %}
-<!-- Filters and Actions -->
+<!-- Quick Actions Bar -->
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="bi bi-funnel me-2"></i>Filters & Actions
+          <i class="bi bi-lightning-fill me-2"></i>Quick Actions
         </h3>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-8">
-            <div class="row">
-              <div class="col-md-3">
-                <select class="form-select" id="typeFilter">
-                  <option value="">All Types</option>
-                  {% for msg_type in message_types %}
-                  <option value="{{ msg_type.type }}">{{ msg_type.label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-3">
-                <select class="form-select" id="priorityFilter">
-                  <option value="">All Priorities</option>
-                  {% for priority in priorities %}
-                  <option value="{{ priority.level }}">{{ priority.label }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-3">
-                <select class="form-select" id="statusFilter">
-                  <option value="">All Status</option>
-                  <option value="unread">Unread Only</option>
-                  <option value="read">Read Only</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-              <div class="col-md-3">
-                <button type="button" class="btn btn-primary" onclick="applyFilters()">
-                  <i class="bi bi-search me-1"></i>Filter
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="clearFilters()">
-                  <i class="bi bi-x-circle me-1"></i>Clear
-                </button>
-              </div>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newMessageModal">
+                <i class="bi bi-plus-circle me-1"></i>New Message
+              </button>
+              <button type="button" class="btn btn-warning" onclick="markAllMessagesRead()">
+                <i class="bi bi-check-all me-1"></i>Mark All Read
+              </button>
+              <button type="button" class="btn btn-info" onclick="refreshMessagesTable()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+              </button>
             </div>
           </div>
           <div class="col-md-4 text-end">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newMessageModal">
-              <i class="bi bi-plus-circle me-1"></i>New Message
-            </button>
-            <button type="button" class="btn btn-warning" onclick="markAllRead()">
-              <i class="bi bi-check-all me-1"></i>Mark All Read
-            </button>
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-outline-primary" onclick="exportMessages('excel')">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
+              </button>
+              <button type="button" class="btn btn-outline-success" onclick="exportMessages('csv')">
+                <i class="bi bi-file-earmark-text me-1"></i>CSV
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="exportMessages('pdf')">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -71,200 +53,167 @@
   </div>
 </div>
 
-<!-- Messages Table -->
+<!-- Messages DataTable -->
 <div class="row">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="bi bi-chat-text me-2"></i>Messages
-          <span class="badge bg-primary ms-2">{{ messages|length }}</span>
+          <i class="bi bi-chat-text me-2"></i>Messages Database
+          <span class="badge bg-primary ms-2" id="messages-total-count">{{ messages|length }}</span>
         </h3>
+        <div class="card-tools">
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleSelectAll()">
+              <i class="bi bi-check-square me-1"></i>Select All
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="clearSelection()">
+              <i class="bi bi-square me-1"></i>Clear Selection
+            </button>
+          </div>
+        </div>
       </div>
       <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-bordered table-striped" id="messagesTable">
-            <thead>
-              <tr>
-                <th width="30">
-                  <input type="checkbox" id="selectAllMessages" onchange="toggleAllMessages()">
-                </th>
-                <th width="50">Avatar</th>
-                <th>Sender</th>
-                <th>Subject</th>
-                <th>Content</th>
-                <th>Type</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Timestamp</th>
-                <th width="150">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for message in messages %}
-              <tr class="{% if message.unread %}table-info{% endif %}" data-message-id="{{ message.id }}">
-                <td>
-                  <input type="checkbox" class="message-checkbox" value="{{ message.id }}">
-                </td>
-                <td>
-                  <img src="{{ message.avatar or url_for('static', filename='assets/img/user-default.jpg') }}"
-                       alt="Avatar" class="img-circle" width="40" height="40">
-                </td>
-                <td>
-                  <strong>{{ message.sender }}</strong>
+        <!-- DataTable will be inserted here -->
+        <table id="messagesTable" class="table table-bordered table-striped table-hover"
+               data-table="messages"
+               {% if database_mode %}data-ajax-url="/api/messages"{% endif %}>
+          <thead>
+            <tr>
+              <th class="no-sort no-search" width="30">
+                <input type="checkbox" id="selectAllMessages">
+              </th>
+              <th class="no-sort" width="50">Avatar</th>
+              <th>Sender</th>
+              <th>Subject</th>
+              <th>Content</th>
+              <th>Type</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Time</th>
+              <th class="no-sort" width="150">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if not database_mode %}
+            {% for message in messages %}
+            <tr class="{% if message.unread %}table-row-unread{% endif %} {% if message.priority_info %}table-row-{{ message.priority_info.level }}-priority{% endif %}"
+                data-message-id="{{ message.id }}">
+              <td class="text-center">
+                <input type="checkbox" class="message-checkbox" value="{{ message.id }}">
+              </td>
+              <td class="text-center">
+                <img src="{{ message.avatar or url_for('static', filename='assets/img/user-default.jpg') }}"
+                     alt="Avatar" class="img-circle" width="40" height="40">
+              </td>
+              <td>
+                <strong>{{ message.sender }}</strong>
+                {% if message.unread %}
+                <span class="badge bg-danger badge-sm ms-1">Unread</span>
+                {% endif %}
+              </td>
+              <td>
+                <strong>{{ message.subject or 'No Subject' }}</strong>
+              </td>
+              <td>
+                <div class="message-content" style="max-width: 300px;">
+                  {{ message.content[:100] }}
+                  {% if message.content|length > 100 %}...{% endif %}
+                </div>
+              </td>
+              <td class="text-center">
+                {% if message.type_info %}
+                <span class="badge bg-{{ message.type_info.color }}">
+                  <i class="bi {{ message.type_info.icon }} me-1"></i>{{ message.type_info.label }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">Unknown</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if message.priority_info %}
+                <span class="badge bg-{{ message.priority_info.color }}">
+                  <i class="bi {{ message.priority_info.icon }} me-1"></i>{{ message.priority_info.label }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary">Normal</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if message.unread %}
+                <span class="badge bg-warning">Unread</span>
+                {% elif message.archived %}
+                <span class="badge bg-secondary">Archived</span>
+                {% else %}
+                <span class="badge bg-success">Read</span>
+                {% endif %}
+              </td>
+              <td>
+                <small>{{ message.time }}</small>
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
                   {% if message.unread %}
-                  <span class="badge bg-danger badge-sm ms-1">Unread</span>
+                  <button class="btn btn-outline-success" onclick="AdminLTE.Actions.markMessageRead({{ message.id }})" title="Mark as Read">
+                    <i class="bi bi-check"></i>
+                  </button>
                   {% endif %}
-                </td>
-                <td>
-                  <strong>{{ message.subject or 'No Subject' }}</strong>
-                </td>
-                <td>
-                  <div class="message-content" style="max-width: 300px;">
-                    {{ message.content[:100] }}
-                    {% if message.content|length > 100 %}
-                    <span class="text-muted">...</span>
-                    <button class="btn btn-link btn-sm p-0" onclick="toggleMessageContent({{ message.id }})">
-                      <small>Show more</small>
-                    </button>
-                    <div class="full-content d-none">{{ message.content }}</div>
-                    {% endif %}
-                  </div>
-                </td>
-                <td>
-                  {% if message.type_info %}
-                  <span class="badge bg-{{ message.type_info.color }}">
-                    <i class="bi {{ message.type_info.icon }} me-1"></i>{{ message.type_info.label }}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-secondary">Unknown</span>
+                  <button class="btn btn-outline-primary" onclick="AdminLTE.Actions.viewMessage({{ message.id }})" title="View">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  {% if not message.archived %}
+                  <button class="btn btn-outline-warning" onclick="AdminLTE.Actions.archiveMessage({{ message.id }})" title="Archive">
+                    <i class="bi bi-archive"></i>
+                  </button>
                   {% endif %}
-                </td>
-                <td>
-                  {% if message.priority_info %}
-                  <span class="badge bg-{{ message.priority_info.color }}">
-                    <i class="bi {{ message.priority_info.icon }} me-1"></i>{{ message.priority_info.label }}
-                  </span>
-                  {% else %}
-                  <span class="badge bg-secondary">Normal</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if message.unread %}
-                  <span class="badge bg-warning">Unread</span>
-                  {% elif message.archived %}
-                  <span class="badge bg-secondary">Archived</span>
-                  {% else %}
-                  <span class="badge bg-success">Read</span>
-                  {% endif %}
-                </td>
-                <td>
-                  <small>{{ message.time }}</small>
-                  <br>
-                  <small class="text-muted">{{ message.timestamp[:10] if message.timestamp else '' }}</small>
-                </td>
-                <td>
-                  <div class="btn-group btn-group-sm" role="group">
-                    {% if message.unread %}
-                    <button class="btn btn-outline-success" onclick="markMessageRead({{ message.id }})" title="Mark as Read">
-                      <i class="bi bi-check"></i>
-                    </button>
-                    {% endif %}
-
-                    <button class="btn btn-outline-primary" onclick="viewMessage({{ message.id }})" title="View">
-                      <i class="bi bi-eye"></i>
-                    </button>
-
-                    {% if not message.archived %}
-                    <button class="btn btn-outline-warning" onclick="archiveMessage({{ message.id }})" title="Archive">
-                      <i class="bi bi-archive"></i>
-                    </button>
-                    {% endif %}
-
-                    <button class="btn btn-outline-danger" onclick="deleteMessage({{ message.id }})" title="Delete">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              {% else %}
-              <tr>
-                <td colspan="10" class="text-center text-muted py-4">
-                  <i class="bi bi-inbox display-4"></i>
-                  <br>
-                  No messages found
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Pagination -->
-      {% if pagination and pagination.pages > 1 %}
-      <div class="card-footer">
-        <nav aria-label="Messages pagination">
-          <ul class="pagination justify-content-center mb-0">
-            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-              <a class="page-link" href="?page={{ pagination.page - 1 if pagination.has_prev else 1 }}">Previous</a>
-            </li>
-
-            {% for page_num in range(1, pagination.pages + 1) %}
-              {% if page_num == pagination.page %}
-              <li class="page-item active">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-              </li>
-              {% elif page_num <= 3 or page_num > pagination.pages - 3 or (page_num >= pagination.page - 1 and page_num <= pagination.page + 1) %}
-              <li class="page-item">
-                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
-              </li>
-              {% elif page_num == 4 or page_num == pagination.pages - 3 %}
-              <li class="page-item disabled">
-                <span class="page-link">...</span>
-              </li>
-              {% endif %}
+                  <button class="btn btn-outline-danger" onclick="AdminLTE.Actions.deleteMessage({{ message.id }})" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
             {% endfor %}
-
-            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-              <a class="page-link" href="?page={{ pagination.page + 1 if pagination.has_next else pagination.pages }}">Next</a>
-            </li>
-          </ul>
-        </nav>
-
-        <div class="text-center mt-2">
-          <small class="text-muted">
-            Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to
-            {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page < pagination.total else pagination.total }}
-            of {{ pagination.total }} messages
-          </small>
-        </div>
+            {% endif %}
+          </tbody>
+        </table>
       </div>
-      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Bulk Actions -->
+<!-- Bulk Actions Card -->
 <div class="row">
   <div class="col-12">
-    <div class="card">
+    <div class="card card-outline card-info">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-collection me-2"></i>Bulk Actions
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-info" id="selected-count">0 selected</span>
+        </div>
+      </div>
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <strong>Bulk Actions:</strong>
-            <button class="btn btn-sm btn-success ms-2" onclick="bulkMarkRead()" id="bulkReadBtn" disabled>
-              <i class="bi bi-check-all me-1"></i>Mark Selected as Read
-            </button>
-            <button class="btn btn-sm btn-warning ms-1" onclick="bulkArchive()" id="bulkArchiveBtn" disabled>
-              <i class="bi bi-archive me-1"></i>Archive Selected
-            </button>
-            <button class="btn btn-sm btn-danger ms-1" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
-              <i class="bi bi-trash me-1"></i>Delete Selected
-            </button>
+        <div class="row">
+          <div class="col-md-8">
+            <div class="btn-group" role="group">
+              <button class="btn btn-success" onclick="bulkMarkRead()" id="bulkReadBtn" disabled>
+                <i class="bi bi-check-all me-1"></i>Mark as Read
+              </button>
+              <button class="btn btn-warning" onclick="bulkArchive()" id="bulkArchiveBtn" disabled>
+                <i class="bi bi-archive me-1"></i>Archive Selected
+              </button>
+              <button class="btn btn-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                <i class="bi bi-trash me-1"></i>Delete Selected
+              </button>
+            </div>
           </div>
-          <div>
-            <span id="selectedCount">0</span> messages selected
+          <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+              <button class="btn btn-outline-primary" onclick="bulkExport('selected')" id="bulkExportBtn" disabled>
+                <i class="bi bi-download me-1"></i>Export Selected
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -277,7 +226,9 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="newMessageModalLabel">Create New Message</h5>
+        <h5 class="modal-title" id="newMessageModalLabel">
+          <i class="bi bi-plus-circle me-2"></i>Create New Message
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -285,14 +236,20 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="messageSender" class="form-label">Sender *</label>
-                <input type="text" class="form-control" id="messageSender" required>
+                <label for="messageSender" class="form-label">
+                  <i class="bi bi-person me-1"></i>Sender *
+                </label>
+                <input type="text" class="form-control" id="messageSender" required
+                       placeholder="Enter sender name">
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="messageSubject" class="form-label">Subject</label>
-                <input type="text" class="form-control" id="messageSubject">
+                <label for="messageSubject" class="form-label">
+                  <i class="bi bi-chat-square-text me-1"></i>Subject
+                </label>
+                <input type="text" class="form-control" id="messageSubject"
+                       placeholder="Enter message subject">
               </div>
             </div>
           </div>
@@ -300,18 +257,24 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="messageType" class="form-label">Type</label>
+                <label for="messageType" class="form-label">
+                  <i class="bi bi-tag me-1"></i>Type
+                </label>
                 <select class="form-select" id="messageType">
                   <option value="">Select Type</option>
                   {% for msg_type in message_types %}
-                  <option value="{{ msg_type.type }}">{{ msg_type.label }}</option>
+                  <option value="{{ msg_type.type }}">
+                    <i class="bi {{ msg_type.icon }}"></i> {{ msg_type.label }}
+                  </option>
                   {% endfor %}
                 </select>
               </div>
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="messagePriority" class="form-label">Priority</label>
+                <label for="messagePriority" class="form-label">
+                  <i class="bi bi-exclamation-circle me-1"></i>Priority
+                </label>
                 <select class="form-select" id="messagePriority">
                   {% for priority in priorities %}
                   <option value="{{ priority.level }}" {% if priority.level == 'medium' %}selected{% endif %}>
@@ -324,18 +287,34 @@
           </div>
 
           <div class="mb-3">
-            <label for="messageContent" class="form-label">Content *</label>
-            <textarea class="form-control" id="messageContent" rows="4" required></textarea>
+            <label for="messageContent" class="form-label">
+              <i class="bi bi-card-text me-1"></i>Content *
+            </label>
+            <textarea class="form-control" id="messageContent" rows="4" required
+                      placeholder="Enter message content..."></textarea>
+            <div class="form-text">
+              <small class="text-muted">
+                <span id="contentCount">0</span>/1000 characters
+              </small>
+            </div>
           </div>
 
           <div class="mb-3">
-            <label for="messageAvatar" class="form-label">Avatar URL</label>
-            <input type="url" class="form-control" id="messageAvatar" placeholder="https://example.com/avatar.jpg">
+            <label for="messageAvatar" class="form-label">
+              <i class="bi bi-person-circle me-1"></i>Avatar URL
+            </label>
+            <input type="url" class="form-control" id="messageAvatar"
+                   placeholder="https://example.com/avatar.jpg">
+            <div class="form-text">
+              <small class="text-muted">Optional: URL to sender's avatar image</small>
+            </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancel
+        </button>
         <button type="button" class="btn btn-primary" onclick="createMessage()">
           <i class="bi bi-plus-circle me-1"></i>Create Message
         </button>
@@ -344,19 +323,50 @@
   </div>
 </div>
 
-<!-- View Message Modal -->
-<div class="modal fade" id="viewMessageModal" tabindex="-1" aria-labelledby="viewMessageModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="viewMessageModalLabel">Message Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Statistics Cards (if needed) -->
+<div class="row mt-3">
+  <div class="col-md-3">
+    <div class="info-box bg-info">
+      <span class="info-box-icon"><i class="bi bi-envelope"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Total Messages</span>
+        <span class="info-box-number" id="total-messages">{{ messages|length }}</span>
       </div>
-      <div class="modal-body" id="messageViewContent">
-        <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-warning">
+      <span class="info-box-icon"><i class="bi bi-envelope-open"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Unread</span>
+        <span class="info-box-number" id="unread-messages">
+          {% set unread_count = messages|selectattr('unread')|list|length %}
+          {{ unread_count }}
+        </span>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-success">
+      <span class="info-box-icon"><i class="bi bi-check-circle"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Read</span>
+        <span class="info-box-number" id="read-messages">
+          {% set read_count = messages|rejectattr('unread')|rejectattr('archived')|list|length %}
+          {{ read_count }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box bg-secondary">
+      <span class="info-box-icon"><i class="bi bi-archive"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Archived</span>
+        <span class="info-box-number" id="archived-messages">
+          {% set archived_count = messages|selectattr('archived')|list|length %}
+          {{ archived_count }}
+        </span>
       </div>
     </div>
   </div>
@@ -364,288 +374,268 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Messages specific JavaScript -->
 <script>
-// Filter and search functionality
-function applyFilters() {
-  const type = document.getElementById('typeFilter').value;
-  const priority = document.getElementById('priorityFilter').value;
-  const status = document.getElementById('statusFilter').value;
+let messagesTable;
 
-  const params = new URLSearchParams();
-  if (type) params.append('type', type);
-  if (priority) params.append('priority', priority);
-  if (status === 'unread') params.append('unread_only', 'true');
+$(document).ready(function() {
+    // Initialize Messages DataTable
+    {% if database_mode %}
+    // Use AJAX data source for database mode
+    messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable', '/api/messages');
+    {% else %}
+    // Use static data for JSON file mode
+    messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable');
+    {% endif %}
 
-  window.location.href = '?' + params.toString();
-}
+    // Setup event listeners
+    setupEventListeners();
 
-function clearFilters() {
-  window.location.href = window.location.pathname;
-}
+    // Character counter for message content
+    $('#messageContent').on('input', function() {
+        const length = $(this).val().length;
+        $('#contentCount').text(length);
 
-// Message content toggle
-function toggleMessageContent(messageId) {
-  const row = document.querySelector(`tr[data-message-id="${messageId}"]`);
-  const contentDiv = row.querySelector('.message-content');
-  const fullContent = contentDiv.querySelector('.full-content');
-  const button = contentDiv.querySelector('button');
-
-  if (fullContent.classList.contains('d-none')) {
-    contentDiv.innerHTML = fullContent.innerHTML +
-      '<button class="btn btn-link btn-sm p-0 ms-2" onclick="toggleMessageContent(' + messageId + ')"><small>Show less</small></button>';
-  } else {
-    location.reload(); // Simple approach - in production you'd want to restore the truncated view
-  }
-}
-
-// Individual message actions
-function markMessageRead(messageId) {
-  fetch(`/api/messages/${messageId}/read`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      location.reload();
-    } else {
-      alert('Error: ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error marking message as read');
-  });
-}
-
-function archiveMessage(messageId) {
-  if (confirm('Archive this message?')) {
-    fetch(`/api/messages/${messageId}/archive`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error archiving message');
-    });
-  }
-}
-
-function deleteMessage(messageId) {
-  if (confirm('⚠️ Are you sure you want to delete this message? This action cannot be undone.')) {
-    fetch(`/api/messages/${messageId}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error deleting message');
-    });
-  }
-}
-
-function viewMessage(messageId) {
-  fetch(`/api/messages/${messageId}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const message = data.data;
-        document.getElementById('messageViewContent').innerHTML = `
-          <div class="row">
-            <div class="col-md-2">
-              <img src="${message.avatar || '/static/assets/img/user-default.jpg'}" class="img-circle" width="60" height="60">
-            </div>
-            <div class="col-md-10">
-              <h5>${message.sender}</h5>
-              <h6 class="text-muted">${message.subject || 'No Subject'}</h6>
-              <small class="text-muted">${message.time}</small>
-              ${message.type_info ? `<span class="badge bg-${message.type_info.color} ms-2">${message.type_info.label}</span>` : ''}
-              ${message.priority_info ? `<span class="badge bg-${message.priority_info.color} ms-1">${message.priority_info.label}</span>` : ''}
-            </div>
-          </div>
-          <hr>
-          <div class="message-content">
-            ${message.content}
-          </div>
-        `;
-
-        const modal = new bootstrap.Modal(document.getElementById('viewMessageModal'));
-        modal.show();
-
-        // Mark as read if unread
-        if (message.unread) {
-          markMessageRead(messageId);
+        if (length > 1000) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
         }
-      } else {
-        alert('Error loading message: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error loading message');
     });
-}
 
-// Bulk actions
-function toggleAllMessages() {
-  const selectAll = document.getElementById('selectAllMessages');
-  const checkboxes = document.querySelectorAll('.message-checkbox');
+    // Auto-refresh table every 30 seconds if in database mode
+    {% if database_mode %}
+    setInterval(function() {
+        if (messagesTable) {
+            AdminLTE.DataTables.refreshTable(messagesTable);
+            updateStatistics();
+        }
+    }, 30000);
+    {% endif %}
+});
 
-  checkboxes.forEach(checkbox => {
-    checkbox.checked = selectAll.checked;
-  });
+function setupEventListeners() {
+    // Select all checkbox handler
+    $('#selectAllMessages').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.message-checkbox').prop('checked', isChecked);
+        updateBulkActionButtons();
+    });
 
-  updateBulkActionButtons();
+    // Individual checkbox handler
+    $(document).on('change', '.message-checkbox', function() {
+        updateBulkActionButtons();
+
+        // Update select all checkbox state
+        const totalCheckboxes = $('.message-checkbox').length;
+        const checkedCheckboxes = $('.message-checkbox:checked').length;
+
+        $('#selectAllMessages').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+        $('#selectAllMessages').prop('checked', checkedCheckboxes === totalCheckboxes);
+    });
+
+    // Modal form reset on hide
+    $('#newMessageModal').on('hidden.bs.modal', function() {
+        $('#newMessageForm')[0].reset();
+        $('#contentCount').text('0');
+        $('#messageContent').removeClass('is-invalid');
+    });
 }
 
 function updateBulkActionButtons() {
-  const checkedBoxes = document.querySelectorAll('.message-checkbox:checked');
-  const count = checkedBoxes.length;
+    const selectedCount = $('.message-checkbox:checked').length;
+    const bulkButtons = ['#bulkReadBtn', '#bulkArchiveBtn', '#bulkDeleteBtn', '#bulkExportBtn'];
 
-  document.getElementById('selectedCount').textContent = count;
+    bulkButtons.forEach(btn => {
+        $(btn).prop('disabled', selectedCount === 0);
+    });
 
-  const buttons = ['bulkReadBtn', 'bulkArchiveBtn', 'bulkDeleteBtn'];
-  buttons.forEach(btnId => {
-    document.getElementById(btnId).disabled = count === 0;
-  });
+    $('#selected-count').text(`${selectedCount} selected`);
 }
 
+// Action Functions
+function toggleSelectAll() {
+    const allSelected = $('.message-checkbox:checked').length === $('.message-checkbox').length;
+    $('.message-checkbox').prop('checked', !allSelected);
+    $('#selectAllMessages').prop('checked', !allSelected);
+    updateBulkActionButtons();
+}
+
+function clearSelection() {
+    $('.message-checkbox, #selectAllMessages').prop('checked', false);
+    updateBulkActionButtons();
+}
+
+function refreshMessagesTable() {
+    if (messagesTable) {
+        AdminLTE.DataTables.refreshTable(messagesTable);
+        AdminLTE.Notifications.success('Messages table refreshed');
+        updateStatistics();
+    }
+}
+
+function createMessage() {
+    const formData = {
+        sender: $('#messageSender').val(),
+        subject: $('#messageSubject').val(),
+        content: $('#messageContent').val(),
+        type: $('#messageType').val(),
+        priority: $('#messagePriority').val(),
+        avatar: $('#messageAvatar').val()
+    };
+
+    if (!formData.sender || !formData.content) {
+        AdminLTE.Notifications.warning('Please fill in all required fields');
+        return;
+    }
+
+    if (formData.content.length > 1000) {
+        AdminLTE.Notifications.warning('Message content is too long (max 1000 characters)');
+        return;
+    }
+
+    AdminLTE.Forms.validateAndSubmit(
+        '#newMessageForm',
+        '/api/messages',
+        {
+            successMessage: 'Message created successfully',
+            closeModal: '#newMessageModal',
+            onSuccess: function(data) {
+                if (messagesTable) {
+                    AdminLTE.DataTables.refreshTable(messagesTable);
+                }
+                updateStatistics();
+            }
+        }
+    );
+}
+
+function markAllMessagesRead() {
+    AdminLTE.Notifications.confirm(
+        'Mark all messages as read?',
+        'Confirm Action',
+        () => {
+            AdminLTE.Notifications.async(
+                fetch('/api/messages/mark-all-read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    if (messagesTable) {
+                        AdminLTE.DataTables.refreshTable(messagesTable);
+                    }
+                    updateStatistics();
+                    return data;
+                }),
+                'Marking all messages as read...',
+                'All messages marked as read'
+            );
+        }
+    );
+}
+
+// Bulk Actions
 function bulkMarkRead() {
-  const selectedIds = Array.from(document.querySelectorAll('.message-checkbox:checked')).map(cb => cb.value);
+    const selectedIds = $('.message-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
 
-  if (selectedIds.length === 0) return;
-
-  if (confirm(`Mark ${selectedIds.length} message(s) as read?`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/messages/${id}/read`, { method: 'POST' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
-    });
-  }
+    AdminLTE.Actions.bulkMarkMessagesRead(selectedIds);
+    clearSelection();
 }
 
 function bulkArchive() {
-  const selectedIds = Array.from(document.querySelectorAll('.message-checkbox:checked')).map(cb => cb.value);
+    const selectedIds = $('.message-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
 
-  if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) {
+        AdminLTE.Notifications.warning('No messages selected');
+        return;
+    }
 
-  if (confirm(`Archive ${selectedIds.length} message(s)?`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/messages/${id}/archive`, { method: 'POST' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
-    });
-  }
+    AdminLTE.Notifications.confirm(
+        `Archive ${selectedIds.length} message(s)?`,
+        'Confirm Bulk Archive',
+        () => {
+            const promises = selectedIds.map(id =>
+                fetch(`/api/messages/${id}/archive`, { method: 'POST' })
+            );
+
+            AdminLTE.Notifications.async(
+                Promise.all(promises),
+                'Archiving messages...',
+                `${selectedIds.length} messages archived`
+            ).then(() => {
+                if (messagesTable) {
+                    AdminLTE.DataTables.refreshTable(messagesTable);
+                }
+                clearSelection();
+                updateStatistics();
+            });
+        }
+    );
 }
 
 function bulkDelete() {
-  const selectedIds = Array.from(document.querySelectorAll('.message-checkbox:checked')).map(cb => cb.value);
+    const selectedIds = $('.message-checkbox:checked').map(function() {
+        return $(this).val();
+    }).get();
 
-  if (selectedIds.length === 0) return;
-
-  if (confirm(`⚠️ Delete ${selectedIds.length} message(s)? This action cannot be undone.`)) {
-    Promise.all(selectedIds.map(id =>
-      fetch(`/api/messages/${id}`, { method: 'DELETE' })
-    ))
-    .then(() => location.reload())
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error in bulk operation');
-    });
-  }
+    AdminLTE.Actions.bulkDeleteMessages(selectedIds);
+    clearSelection();
 }
 
-function markAllRead() {
-  if (confirm('Mark all messages as read?')) {
-    fetch('/api/messages/mark-all-read', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        location.reload();
-      } else {
-        alert('Error: ' + data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error marking all messages as read');
-    });
-  }
-}
-
-// Create new message
-function createMessage() {
-  const formData = {
-    sender: document.getElementById('messageSender').value,
-    subject: document.getElementById('messageSubject').value,
-    content: document.getElementById('messageContent').value,
-    type: document.getElementById('messageType').value,
-    priority: document.getElementById('messagePriority').value,
-    avatar: document.getElementById('messageAvatar').value
-  };
-
-  if (!formData.sender || !formData.content) {
-    alert('Please fill in all required fields.');
-    return;
-  }
-
-  fetch('/api/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById('newMessageModal'));
-      modal.hide();
-      location.reload();
-    } else {
-      alert('Error: ' + data.error);
+// Export Functions
+function exportMessages(format) {
+    if (messagesTable) {
+        AdminLTE.DataTables.exportTable(messagesTable, format);
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error creating message');
-  });
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-  // Add event listeners to checkboxes
-  document.querySelectorAll('.message-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', updateBulkActionButtons);
-  });
+function bulkExport(type) {
+    const selectedRows = messagesTable.rows('.selected').data().toArray();
 
-  // Clear form when modal is hidden
-  document.getElementById('newMessageModal').addEventListener('hidden.bs.modal', function() {
-    document.getElementById('newMessageForm').reset();
-  });
-});
+    if (selectedRows.length === 0) {
+        AdminLTE.Notifications.warning('No messages selected for export');
+        return;
+    }
+
+    // Create temporary table with selected data for export
+    const tempData = selectedRows.map(row => ({
+        sender: row.sender,
+        subject: row.subject || 'No Subject',
+        content: row.content,
+        type: row.type_info ? row.type_info.label : 'Unknown',
+        priority: row.priority_info ? row.priority_info.label : 'Normal',
+        time: row.time
+    }));
+
+    // Export logic here - could create CSV or trigger download
+    AdminLTE.Notifications.info('Export functionality would be implemented here');
+}
+
+function updateStatistics() {
+    {% if database_mode %}
+    // Update statistics from API
+    fetch('/api/messages?limit=1')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                $('#total-messages').text(data.total || 0);
+                $('#unread-messages').text(data.unread_count || 0);
+
+                // Update other statistics as needed
+                const readCount = (data.total || 0) - (data.unread_count || 0);
+                $('#read-messages').text(readCount);
+            }
+        })
+        .catch(error => console.error('Error updating statistics:', error));
+    {% endif %}
+}
 </script>
 {% endblock %}
