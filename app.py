@@ -560,4 +560,4 @@ if __name__ == '__main__':
     print("   3. Visita http://localhost:5000 per vedere la dashboard")
     print("=" * 70)
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='fusion.capecchispa.eu', port=5000, debug=True)

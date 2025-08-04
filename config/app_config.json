@@ -1,12 +1,12 @@
 {
   "app_info": {
-    "name": "AdminLTE Flask Dashboard",
-    "version": "4.0.0",
-    "description": "A comprehensive admin dashboard built with Flask and AdminLTE 4",
-    "author": "Development Team",
+    "name": "SNID Dashboard",
+    "version": "1.2.0",
+    "description": "Smart Network Inventory & Discovery",
+    "author": "Daniele Speziale",
     "license": "MIT",
-    "homepage": "https://adminlte.io",
-    "repository": "https://github.com/your-org/adminlte-flask",
+    "homepage": "https://dsc.altervista.org",
+    "repository": "https://github.com/dspeziale/snif",
     "documentation": "https://docs.adminlte.io"
   },
   "theme": {
