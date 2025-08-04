@@ -182,21 +182,20 @@ def set_active_menu():
 # ===============================
 # API ENDPOINTS PER I MESSAGGI
 # ===============================
-
 @api.route('/api/messages')
 def get_messages():
-    """Endpoint per ottenere i messaggi"""
+    """Endpoint semplificato per ottenere i messaggi"""
     try:
-        # Parametri di query
+        # Parametri di query con valori di default
         limit = request.args.get('limit', type=int)
         unread_only = request.args.get('unread_only', 'false').lower() == 'true'
         message_type = request.args.get('type')
         priority = request.args.get('priority')
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
+        per_page = request.args.get('per_page', 25, type=int)
 
-        # Ottieni i messaggi
-        result = message_manager.get_messages(
+        # Usa il manager per ottenere i messaggi
+        messages_data = message_manager.get_messages(
             limit=limit,
             unread_only=unread_only,
             message_type=message_type,
@@ -205,21 +204,44 @@ def get_messages():
             per_page=per_page
         )
 
-        # Aggiungi metadati aggiuntivi
-        result['success'] = True
-        result['timestamp'] = datetime.utcnow().isoformat()
-        result['message_types'] = message_manager.get_message_types()
-        result['priorities'] = message_manager.get_message_priorities()
+        # Verifica che abbiamo dati validi
+        if not messages_data:
+            messages_data = {'messages': [], 'total': 0, 'unread_count': 0}
 
-        return jsonify(result)
+        # Prepara i dati per DataTables
+        messages_list = messages_data.get('messages', [])
+
+        # Formato DataTables standard
+        response = {
+            'draw': request.args.get('draw', 1, type=int),  # Per DataTables server-side
+            'recordsTotal': messages_data.get('total', len(messages_list)),
+            'recordsFiltered': messages_data.get('total', len(messages_list)),
+            'data': messages_list,
+            'success': True,
+            'messages': messages_list,  # Backward compatibility
+            'total': messages_data.get('total', len(messages_list)),
+            'unread_count': messages_data.get('unread_count', 0)
+        }
+
+        return jsonify(response)
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel caricamento dei messaggi: {str(e)}")
-        return jsonify({
+        current_app.logger.error(f"Errore API messages: {str(e)}")
+
+        # Risposta di errore in formato DataTables
+        error_response = {
+            'draw': request.args.get('draw', 1, type=int),
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
             'success': False,
-            'error': 'Errore nel caricamento dei messaggi',
-            'details': str(e) if current_app.debug else None
-        }), 500
+            'error': str(e),
+            'messages': [],
+            'total': 0,
+            'unread_count': 0
+        }
+
+        return jsonify(error_response), 500
 
 
 @api.route('/api/messages/<int:message_id>')
@@ -232,20 +254,19 @@ def get_message(message_id):
             return jsonify({
                 'success': True,
                 'data': message,
-                'timestamp': datetime.utcnow().isoformat()
+                'message': message  # Backward compatibility
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Messaggio non trovato'
+                'error': 'Message not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel caricamento del messaggio {message_id}: {str(e)}")
+        current_app.logger.error(f"Errore get_message {message_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nel caricamento del messaggio',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -254,15 +275,24 @@ def create_message():
     """Endpoint per creare un nuovo messaggio"""
     try:
         data = request.get_json()
-        if not data or 'sender' not in data or 'content' not in data:
+
+        # Validazione dati di base
+        if not data:
             return jsonify({
                 'success': False,
-                'error': 'Dati non validi. I campi "sender" e "content" sono obbligatori.'
+                'error': 'No data provided'
             }), 400
 
+        if not data.get('sender') or not data.get('content'):
+            return jsonify({
+                'success': False,
+                'error': 'Sender and content are required'
+            }), 400
+
+        # Crea il messaggio
         message = message_manager.create_message(
-            sender=data['sender'],
-            content=data['content'],
+            sender=data.get('sender'),
+            content=data.get('content'),
             subject=data.get('subject'),
             message_type=data.get('type'),
             priority=data.get('priority', 'medium'),
@@ -274,20 +304,19 @@ def create_message():
             return jsonify({
                 'success': True,
                 'data': message.to_dict(),
-                'message': 'Messaggio creato con successo'
+                'message': 'Message created successfully'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore nella creazione del messaggio'
+                'error': 'Failed to create message'
             }), 500
 
     except Exception as e:
-        current_app.logger.error(f"Errore nella creazione del messaggio: {str(e)}")
+        current_app.logger.error(f"Errore create_message: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nella creazione del messaggio',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -300,20 +329,19 @@ def mark_message_read(message_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Messaggio segnato come letto'
+                'message': 'Message marked as read'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Messaggio non trovato'
+                'error': 'Message not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nell'aggiornamento del messaggio {message_id}: {str(e)}")
+        current_app.logger.error(f"Errore mark_message_read {message_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'aggiornamento del messaggio',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -326,20 +354,19 @@ def mark_all_messages_read():
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Tutti i messaggi sono stati segnati come letti'
+                'message': 'All messages marked as read'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore nell\'operazione'
+                'error': 'Failed to mark messages as read'
             }), 500
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel segnare tutti i messaggi come letti: {str(e)}")
+        current_app.logger.error(f"Errore mark_all_messages_read: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'operazione',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -352,20 +379,19 @@ def archive_message(message_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Messaggio archiviato'
+                'message': 'Message archived'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Messaggio non trovato'
+                'error': 'Message not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nell'archiviazione del messaggio {message_id}: {str(e)}")
+        current_app.logger.error(f"Errore archive_message {message_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'archiviazione del messaggio',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -378,42 +404,39 @@ def delete_message(message_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Messaggio eliminato'
+                'message': 'Message deleted'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Messaggio non trovato'
+                'error': 'Message not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nell'eliminazione del messaggio {message_id}: {str(e)}")
+        current_app.logger.error(f"Errore delete_message {message_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'eliminazione del messaggio',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
-
 
 # ===============================
 # API ENDPOINTS PER LE NOTIFICHE
 # ===============================
-
 @api.route('/api/notifications')
 def get_notifications():
-    """Endpoint per ottenere le notifiche"""
+    """Endpoint semplificato per ottenere le notifiche"""
     try:
-        # Parametri di query
+        # Parametri di query con valori di default
         limit = request.args.get('limit', type=int)
         unread_only = request.args.get('unread_only', 'false').lower() == 'true'
         notification_type = request.args.get('type')
         category = request.args.get('category')
         priority = request.args.get('priority')
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
+        per_page = request.args.get('per_page', 25, type=int)
 
-        # Ottieni le notifiche
-        result = notification_manager.get_notifications(
+        # Usa il manager per ottenere le notifiche
+        notifications_data = notification_manager.get_notifications(
             limit=limit,
             unread_only=unread_only,
             notification_type=notification_type,
@@ -423,22 +446,44 @@ def get_notifications():
             per_page=per_page
         )
 
-        # Aggiungi metadati aggiuntivi
-        result['success'] = True
-        result['timestamp'] = datetime.utcnow().isoformat()
-        result['notification_types'] = notification_manager.get_notification_types()
-        result['categories'] = notification_manager.get_notification_categories()
-        result['priorities'] = notification_manager.get_notification_priorities()
+        # Verifica che abbiamo dati validi
+        if not notifications_data:
+            notifications_data = {'notifications': [], 'total': 0, 'unread_count': 0}
 
-        return jsonify(result)
+        # Prepara i dati per DataTables
+        notifications_list = notifications_data.get('notifications', [])
+
+        # Formato DataTables standard
+        response = {
+            'draw': request.args.get('draw', 1, type=int),  # Per DataTables server-side
+            'recordsTotal': notifications_data.get('total', len(notifications_list)),
+            'recordsFiltered': notifications_data.get('total', len(notifications_list)),
+            'data': notifications_list,
+            'success': True,
+            'notifications': notifications_list,  # Backward compatibility
+            'total': notifications_data.get('total', len(notifications_list)),
+            'unread_count': notifications_data.get('unread_count', 0)
+        }
+
+        return jsonify(response)
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel caricamento delle notifiche: {str(e)}")
-        return jsonify({
+        current_app.logger.error(f"Errore API notifications: {str(e)}")
+
+        # Risposta di errore in formato DataTables
+        error_response = {
+            'draw': request.args.get('draw', 1, type=int),
+            'recordsTotal': 0,
+            'recordsFiltered': 0,
+            'data': [],
             'success': False,
-            'error': 'Errore nel caricamento delle notifiche',
-            'details': str(e) if current_app.debug else None
-        }), 500
+            'error': str(e),
+            'notifications': [],
+            'total': 0,
+            'unread_count': 0
+        }
+
+        return jsonify(error_response), 500
 
 
 @api.route('/api/notifications/<int:notification_id>')
@@ -451,20 +496,19 @@ def get_notification(notification_id):
             return jsonify({
                 'success': True,
                 'data': notification,
-                'timestamp': datetime.utcnow().isoformat()
+                'notification': notification  # Backward compatibility
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Notifica non trovata'
+                'error': 'Notification not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel caricamento della notifica {notification_id}: {str(e)}")
+        current_app.logger.error(f"Errore get_notification {notification_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nel caricamento della notifica',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -473,14 +517,23 @@ def create_notification():
     """Endpoint per creare una nuova notifica"""
     try:
         data = request.get_json()
-        if not data or 'message' not in data:
+
+        # Validazione dati di base
+        if not data:
             return jsonify({
                 'success': False,
-                'error': 'Dati non validi. Il campo "message" è obbligatorio.'
+                'error': 'No data provided'
             }), 400
 
+        if not data.get('message'):
+            return jsonify({
+                'success': False,
+                'error': 'Message is required'
+            }), 400
+
+        # Crea la notifica
         notification = notification_manager.create_notification(
-            message=data['message'],
+            message=data.get('message'),
             notification_type=data.get('type'),
             category=data.get('category'),
             priority=data.get('priority', 'low'),
@@ -493,20 +546,19 @@ def create_notification():
             return jsonify({
                 'success': True,
                 'data': notification.to_dict(),
-                'message': 'Notifica creata con successo'
+                'message': 'Notification created successfully'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore nella creazione della notifica'
+                'error': 'Failed to create notification'
             }), 500
 
     except Exception as e:
-        current_app.logger.error(f"Errore nella creazione della notifica: {str(e)}")
+        current_app.logger.error(f"Errore create_notification: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nella creazione della notifica',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -519,20 +571,19 @@ def mark_notification_read(notification_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Notifica segnata come letta'
+                'message': 'Notification marked as read'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Notifica non trovata'
+                'error': 'Notification not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nell'aggiornamento della notifica {notification_id}: {str(e)}")
+        current_app.logger.error(f"Errore mark_notification_read {notification_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'aggiornamento della notifica',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -545,20 +596,19 @@ def mark_all_notifications_read():
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Tutte le notifiche sono state segnate come lette'
+                'message': 'All notifications marked as read'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Errore nell\'operazione'
+                'error': 'Failed to mark notifications as read'
             }), 500
 
     except Exception as e:
-        current_app.logger.error(f"Errore nel segnare tutte le notifiche come lette: {str(e)}")
+        current_app.logger.error(f"Errore mark_all_notifications_read: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'operazione',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -571,20 +621,19 @@ def dismiss_notification(notification_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Notifica rimossa'
+                'message': 'Notification dismissed'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Notifica non trovata'
+                'error': 'Notification not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nella rimozione della notifica {notification_id}: {str(e)}")
+        current_app.logger.error(f"Errore dismiss_notification {notification_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nella rimozione della notifica',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
 
 
@@ -597,22 +646,20 @@ def delete_notification(notification_id):
         if success:
             return jsonify({
                 'success': True,
-                'message': 'Notifica eliminata'
+                'message': 'Notification deleted'
             })
         else:
             return jsonify({
                 'success': False,
-                'error': 'Notifica non trovata'
+                'error': 'Notification not found'
             }), 404
 
     except Exception as e:
-        current_app.logger.error(f"Errore nell'eliminazione della notifica {notification_id}: {str(e)}")
+        current_app.logger.error(f"Errore delete_notification {notification_id}: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Errore nell\'eliminazione della notifica',
-            'details': str(e) if current_app.debug else None
+            'error': str(e)
         }), 500
-
 
 # ===============================
 # API ENDPOINTS PER LE STATISTICHE

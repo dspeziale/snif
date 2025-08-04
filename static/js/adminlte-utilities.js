@@ -42,125 +42,27 @@ AdminLTE.DataTables = {
 
     // Initialize Messages DataTable
     initMessagesTable: function(selector, ajaxUrl = null) {
-        const config = {
-            ...this.defaultConfig,
-            columns: [
-                {
-                    data: null,
-                    width: "30px",
-                    className: "text-center no-sort no-search",
-                    render: function(data, type, row) {
-                        return `<input type="checkbox" class="message-checkbox" value="${row.id}">`;
-                    }
-                },
-                {
-                    data: 'avatar',
-                    width: "50px",
-                    className: "text-center no-sort",
-                    render: function(data, type, row) {
-                        const avatar = data || '/static/assets/img/user-default.jpg';
-                        return `<img src="${avatar}" alt="Avatar" class="img-circle" width="40" height="40">`;
-                    }
-                },
-                {
-                    data: 'sender',
-                    render: function(data, type, row) {
-                        let html = `<strong>${data}</strong>`;
-                        if (row.unread) {
-                            html += ` <span class="badge bg-danger badge-sm ms-1">Unread</span>`;
-                        }
-                        return html;
-                    }
-                },
-                {
-                    data: 'subject',
-                    render: function(data, type, row) {
-                        return `<strong>${data || 'No Subject'}</strong>`;
-                    }
-                },
-                {
-                    data: 'content',
-                    render: function(data, type, row) {
-                        if (type === 'display') {
-                            const truncated = data.length > 100 ? data.substring(0, 100) + '...' : data;
-                            return `<div class="message-content" style="max-width: 300px;">${truncated}</div>`;
-                        }
-                        return data;
-                    }
-                },
-                {
-                    data: 'type_info',
-                    className: "text-center",
-                    render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}">
-                                      <i class="bi ${data.icon} me-1"></i>${data.label}
-                                    </span>`;
-                        }
-                        return '<span class="badge bg-secondary">Unknown</span>';
-                    }
-                },
-                {
-                    data: 'priority_info',
-                    className: "text-center",
-                    render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}">
-                                      <i class="bi ${data.icon} me-1"></i>${data.label}
-                                    </span>`;
-                        }
-                        return '<span class="badge bg-secondary">Normal</span>';
-                    }
-                },
-                {
-                    data: null,
-                    className: "text-center",
-                    render: function(data, type, row) {
-                        if (row.unread) {
-                            return '<span class="badge bg-warning">Unread</span>';
-                        } else if (row.archived) {
-                            return '<span class="badge bg-secondary">Archived</span>';
-                        } else {
-                            return '<span class="badge bg-success">Read</span>';
-                        }
-                    }
-                },
-                {
-                    data: 'time',
-                    width: "120px"
-                },
-                {
-                    data: null,
-                    width: "150px",
-                    className: "text-center no-sort",
-                    render: function(data, type, row) {
-                        let buttons = '<div class="btn-group btn-group-sm" role="group">';
+         const config = $.extend(true, {}, this.defaultConfig, {
+        ajax: ajaxUrl ? {
+            url: ajaxUrl,
+            type: 'GET',
+            dataSrc: function(json) {
+                // Debug: log the response
+                console.log('DataTables Ajax response:', json);
 
-                        if (row.unread) {
-                            buttons += `<button class="btn btn-outline-success" onclick="AdminLTE.Actions.markMessageRead(${row.id})" title="Mark as Read">
-                                          <i class="bi bi-check"></i>
-                                        </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-primary" onclick="AdminLTE.Actions.viewMessage(${row.id})" title="View">
-                                      <i class="bi bi-eye"></i>
-                                    </button>`;
-
-                        if (!row.archived) {
-                            buttons += `<button class="btn btn-outline-warning" onclick="AdminLTE.Actions.archiveMessage(${row.id})" title="Archive">
-                                          <i class="bi bi-archive"></i>
-                                        </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-danger" onclick="AdminLTE.Actions.deleteMessage(${row.id})" title="Delete">
-                                      <i class="bi bi-trash"></i>
-                                    </button>`;
-
-                        buttons += '</div>';
-                        return buttons;
-                    }
+                if (json.success && json.messages) {
+                    return json.messages;
+                } else {
+                    console.error('Invalid API response:', json);
+                    AdminLTE.Notifications.error('Invalid API response format');
+                    return [];
                 }
-            ],
+            },
+            error: function(xhr, error, code) {
+                console.error('DataTables Ajax error:', {xhr, error, code});
+                AdminLTE.Notifications.error('Failed to load messages: ' + error);
+            }
+        } : null,
             createdRow: function(row, data, dataIndex) {
                 if (data.unread) {
                     $(row).addClass('table-row-unread');

@@ -379,13 +379,41 @@
 let messagesTable;
 
 $(document).ready(function() {
-    // Initialize Messages DataTable
+    // Verifica prima se l'API funziona
     {% if database_mode %}
-    // Use AJAX data source for database mode
-    messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable', '/api/messages');
+    // Test API endpoint first
+    fetch('/api/messages?limit=1')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('API not available');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // API works, initialize with AJAX
+                messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable', '/api/messages');
+            } else {
+                throw new Error('API returned error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('API test failed:', error);
+            AdminLTE.Notifications.warning('API not available, using static table');
+            // Fallback to static table
+            messagesTable = $('#messagesTable').DataTable({
+                responsive: true,
+                processing: false,
+                serverSide: false
+            });
+        });
     {% else %}
     // Use static data for JSON file mode
-    messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable');
+    messagesTable = $('#messagesTable').DataTable({
+        responsive: true,
+        processing: false,
+        serverSide: false
+    });
     {% endif %}
 
     // Setup event listeners
@@ -402,16 +430,6 @@ $(document).ready(function() {
             $(this).removeClass('is-invalid');
         }
     });
-
-    // Auto-refresh table every 30 seconds if in database mode
-    {% if database_mode %}
-    setInterval(function() {
-        if (messagesTable) {
-            AdminLTE.DataTables.refreshTable(messagesTable);
-            updateStatistics();
-        }
-    }, 30000);
-    {% endif %}
 });
 
 function setupEventListeners() {
