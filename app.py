@@ -4,7 +4,6 @@ al posto dei file JSON per menu, messaggi e notifiche
 """
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 import os
-from pathlib import Path
 
 # Import delle configurazioni e modelli del database
 from database_config import init_database, get_database_info

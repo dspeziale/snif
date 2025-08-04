@@ -59,14 +59,6 @@ class MenuItem(BaseModel):
     parent_id = db.Column(db.Integer, db.ForeignKey('menu_items.id'))
     menu_type_id = db.Column(db.Integer, db.ForeignKey('menu_types.id'))
 
-    # Relazioni self-referencing per la gerarchia
-    children = db.relationship(
-        'MenuItem',
-        backref=db.backref('parent', remote_side=[id]),
-        lazy='dynamic',
-        cascade='all, delete-orphan'
-    )
-
     # Metadati aggiuntivi come JSON
     extra_data = db.Column(db.Text)  # JSON string per dati aggiuntivi
 
@@ -83,16 +75,25 @@ class MenuItem(BaseModel):
         """Imposta i metadati da dizionario"""
         self.extra_data = json.dumps(data) if data else None
 
+    def get_children(self):
+        """Ottiene i figli di questo elemento"""
+        return MenuItem.query.filter_by(parent_id=self.id, enabled=True).order_by(MenuItem.sort_order, MenuItem.title).all()
+
+    def get_parent(self):
+        """Ottiene il genitore di questo elemento"""
+        if self.parent_id:
+            return MenuItem.query.get(self.parent_id)
+        return None
+
     def to_dict(self, include_children: bool = True) -> Dict[str, Any]:
         """Converte in dizionario con opzione per includere i figli"""
         result = super().to_dict()
         result['extra_data'] = self.get_metadata()
 
-        if include_children and self.children.count() > 0:
-            result['children'] = [
-                child.to_dict(include_children=True)
-                for child in self.children.order_by(MenuItem.sort_order, MenuItem.title)
-            ]
+        if include_children:
+            children = self.get_children()
+            if children:
+                result['children'] = [child.to_dict(include_children=True) for child in children]
 
         return result
 
