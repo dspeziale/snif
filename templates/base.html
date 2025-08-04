@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <!--begin::Head-->
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -9,6 +9,7 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="static/assets/img/favicon.ico" type="image/x-icon">
     <!--end::Accessibility Meta Tags-->
     <!--begin::Primary Meta Tags-->
     <meta name="title" content="AdminLTE v4 | Dashboard" />
@@ -38,11 +39,8 @@
     />
     <!--end::Fonts-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
-      crossorigin="anonymous"
-    />
+    <!-- Remove or update the integrity attribute -->
+<script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"></script>
     <!--end::Third Party Plugin(OverlayScrollbars)-->
     <!--begin::Third Party Plugin(Bootstrap Icons)-->
     <link
@@ -242,7 +240,7 @@
         <!--begin::Sidebar Brand-->
         <div class="sidebar-brand">
           <!--begin::Brand Link-->
-          <a href="{{ url_for('main.index') if url_for else './' }}" class="brand-link">
+          <a href="{{ './' }}" class="brand-link">
             <!--begin::Brand Image-->
             <img
               src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') }}"
@@ -327,7 +325,7 @@
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-end">
                   {% block breadcrumb %}
-                  <li class="breadcrumb-item"><a href="{{ url_for('main.index') if url_for else '#' }}">Home</a></li>
+                  <li class="breadcrumb-item"><a href="{{ '#' }}">Home</a></li>
                   <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
                   {% endblock %}
                 </ol>
@@ -367,11 +365,8 @@
     <!--end::App Wrapper-->
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
-      integrity="sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w="
-      crossorigin="anonymous"
-    ></script>
+  <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"></script>
+
     <!--end::Third Party Plugin(OverlayScrollbars)-->
     <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script
