@@ -1,241 +1,288 @@
 /**
- * AdminLTE Flask Dashboard - Custom JavaScript Utilities
- * Provides utilities for DataTables, Notifications, Forms, and Actions
+ * AdminLTE Custom Utilities - Fixed Version
+ * Gestisce form, notifiche e DataTables
  */
 
-// Wait for DOM and jQuery to be ready
-$(document).ready(function() {
-    'use strict';
+// Namespace globale AdminLTE
+window.AdminLTE = window.AdminLTE || {};
 
-    // Initialize AdminLTE namespace
-    window.AdminLTE = window.AdminLTE || {};
-
+// ===============================
+// GESTIONE FORM
+// ===============================
+AdminLTE.Forms = {
     /**
-     * DataTables Utilities
+     * Valida e invia un form via AJAX
      */
-    AdminLTE.DataTables = {
-        // Default configuration for all DataTables
-        defaultConfig: {
+    validateAndSubmit: function(formSelector, apiUrl, options = {}) {
+        const form = document.querySelector(formSelector);
+        if (!form) {
+            console.error('Form not found:', formSelector);
+            return;
+        }
+
+        // Opzioni di default
+        const defaults = {
+            method: 'POST',
+            successMessage: 'Operation completed successfully',
+            errorMessage: 'An error occurred',
+            closeModal: null,
+            onSuccess: null,
+            onError: null,
+            validateForm: true
+        };
+
+        const config = { ...defaults, ...options };
+
+        // Validazione form se richiesta
+        if (config.validateForm && !form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Raccogli i dati del form
+        const formData = new FormData(form);
+        const jsonData = {};
+
+        // Converti FormData in oggetto JSON
+        for (let [key, value] of formData.entries()) {
+            // Gestisci checkbox
+            if (form.querySelector(`[name="${key}"]`).type === 'checkbox') {
+                jsonData[key] = form.querySelector(`[name="${key}"]`).checked;
+            } else {
+                jsonData[key] = value;
+            }
+        }
+
+        // Aggiungi dati da input non in FormData (come i select)
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+            if (!jsonData.hasOwnProperty(input.name) && input.name) {
+                if (input.type === 'checkbox') {
+                    jsonData[input.name] = input.checked;
+                } else {
+                    jsonData[input.name] = input.value;
+                }
+            }
+        });
+
+        console.log('Sending data:', jsonData);
+
+        // Invia richiesta AJAX
+        fetch(apiUrl, {
+            method: config.method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Successo
+                if (window.NotificationUtils) {
+                    window.NotificationUtils.success(data.message || config.successMessage);
+                } else {
+                    alert(data.message || config.successMessage);
+                }
+
+                // Chiudi modal se specificato
+                if (config.closeModal) {
+                    const modal = bootstrap.Modal.getInstance(document.querySelector(config.closeModal));
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+
+                // Callback di successo
+                if (config.onSuccess) {
+                    config.onSuccess(data);
+                }
+
+                // Reset form
+                form.reset();
+
+            } else {
+                throw new Error(data.error || 'Operation failed');
+            }
+        })
+        .catch(error => {
+            console.error('Form submission error:', error);
+
+            if (window.NotificationUtils) {
+                window.NotificationUtils.error(error.message || config.errorMessage);
+            } else {
+                alert(error.message || config.errorMessage);
+            }
+
+            // Callback di errore
+            if (config.onError) {
+                config.onError(error);
+            }
+        });
+    }
+};
+
+// ===============================
+// GESTIONE NOTIFICHE
+// ===============================
+AdminLTE.Notifications = {
+    success: function(message, title = 'Success') {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.success(message, title);
+        } else {
+            alert(`${title}: ${message}`);
+        }
+    },
+
+    error: function(message, title = 'Error') {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.error(message, title);
+        } else {
+            alert(`${title}: ${message}`);
+        }
+    },
+
+    warning: function(message, title = 'Warning') {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.warning(message, title);
+        } else {
+            alert(`${title}: ${message}`);
+        }
+    },
+
+    info: function(message, title = 'Info') {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.info(message, title);
+        } else {
+            alert(`${title}: ${message}`);
+        }
+    },
+
+    confirm: function(message, title = 'Confirm', onConfirm, onCancel) {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.confirm(message, title, onConfirm, onCancel);
+        } else {
+            if (confirm(`${title}: ${message}`)) {
+                if (onConfirm) onConfirm();
+            } else {
+                if (onCancel) onCancel();
+            }
+        }
+    },
+
+    async: function(promise, loadingMessage = 'Processing...', successMessage = 'Completed') {
+        if (window.NotificationUtils) {
+            return window.NotificationUtils.async(promise, loadingMessage, successMessage);
+        } else {
+            return promise.then(result => {
+                alert(successMessage);
+                return result;
+            }).catch(error => {
+                alert('Error: ' + error.message);
+                throw error;
+            });
+        }
+    }
+};
+
+// ===============================
+// GESTIONE DATATABLES
+// ===============================
+AdminLTE.DataTables = {
+    /**
+     * Inizializza una DataTable per i messaggi
+     */
+    initMessagesTable: function(selector, ajaxUrl = null) {
+        const tableOptions = {
             responsive: true,
             processing: true,
             pageLength: 25,
-            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-            order: [],
-            language: {
-                processing: '<i class="bi bi-arrow-clockwise spin"></i> Loading...',
-                search: "",
-                searchPlaceholder: "Search...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                infoEmpty: "Showing 0 to 0 of 0 entries",
-                infoFiltered: "(filtered from _MAX_ total entries)",
-                emptyTable: "No data available",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
-                }
-            },
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                 '<"row"<"col-sm-12"tr>>' +
-                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            order: [[8, 'desc']], // Ordina per data (colonna Time)
             columnDefs: [
-                { orderable: false, targets: 'no-sort' },
-                { searchable: false, targets: 'no-search' }
-            ]
-        },
-
-        // Initialize Messages DataTable
-        initMessagesTable: function(selector, ajaxUrl = null) {
-            const config = $.extend(true, {}, this.defaultConfig, {
-                ajax: ajaxUrl ? {
-                    url: ajaxUrl,
-                    type: 'GET',
-                    error: function(xhr, error, code) {
-                        console.error('DataTables Ajax error:', error);
-                        AdminLTE.Notifications.error('Failed to load messages: ' + error);
-                    }
-                } : null,
-                columns: ajaxUrl ? [
-                    { data: null, render: function(data, type, row) {
-                        return `<input type="checkbox" class="message-checkbox" value="${row.id}">`;
-                    }},
-                    { data: 'avatar', render: function(data, type, row) {
-                        return `<img src="${data || '/static/assets/img/user-default.jpg'}" alt="Avatar" class="img-circle" width="40" height="40">`;
-                    }},
-                    { data: 'sender' },
-                    { data: 'subject', render: function(data, type, row) {
-                        return data || 'No Subject';
-                    }},
-                    { data: 'content', render: function(data, type, row) {
-                        return data.length > 100 ? data.substring(0, 100) + '...' : data;
-                    }},
-                    { data: 'type_info', render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
-                        }
-                        return '<span class="badge bg-secondary">Unknown</span>';
-                    }},
-                    { data: 'priority_info', render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
-                        }
-                        return '<span class="badge bg-secondary">Normal</span>';
-                    }},
-                    { data: 'unread', render: function(data, type, row) {
-                        if (data) {
-                            return '<span class="badge bg-warning">Unread</span>';
-                        } else if (row.archived) {
-                            return '<span class="badge bg-secondary">Archived</span>';
-                        } else {
-                            return '<span class="badge bg-success">Read</span>';
-                        }
-                    }},
-                    { data: 'time' },
-                    { data: null, render: function(data, type, row) {
-                        let buttons = '<div class="btn-group btn-group-sm" role="group">';
-
-                        if (row.unread) {
-                            buttons += `<button class="btn btn-outline-success" onclick="AdminLTE.Actions.markMessageRead(${row.id})" title="Mark as Read">
-                                <i class="bi bi-check"></i>
-                            </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-primary" onclick="AdminLTE.Actions.viewMessage(${row.id})" title="View">
-                            <i class="bi bi-eye"></i>
-                        </button>`;
-
-                        if (!row.archived) {
-                            buttons += `<button class="btn btn-outline-warning" onclick="AdminLTE.Actions.archiveMessage(${row.id})" title="Archive">
-                                <i class="bi bi-archive"></i>
-                            </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-danger" onclick="AdminLTE.Actions.deleteMessage(${row.id})" title="Delete">
-                            <i class="bi bi-trash"></i>
-                        </button>`;
-
-                        buttons += '</div>';
-                        return buttons;
-                    }}
-                ] : null
-            });
-
-            return $(selector).DataTable(config);
-        },
-
-        // Initialize Notifications DataTable
-        initNotificationsTable: function(selector, ajaxUrl = null) {
-            const config = $.extend(true, {}, this.defaultConfig, {
-                ajax: ajaxUrl ? {
-                    url: ajaxUrl,
-                    type: 'GET',
-                    error: function(xhr, error, code) {
-                        console.error('DataTables Ajax error:', error);
-                        AdminLTE.Notifications.error('Failed to load notifications: ' + error);
-                    }
-                } : null,
-                columns: ajaxUrl ? [
-                    { data: null, render: function(data, type, row) {
-                        return `<input type="checkbox" class="notification-checkbox" value="${row.id}">`;
-                    }},
-                    { data: 'icon', render: function(data, type, row) {
-                        const iconClass = data || 'bi-bell';
-                        const color = row.type_info ? `text-${row.type_info.color}` : 'text-info';
-                        return `<i class="bi ${iconClass} ${color}" style="font-size: 1.5em;"></i>`;
-                    }},
-                    { data: 'message', render: function(data, type, row) {
-                        const truncated = data.length > 150 ? data.substring(0, 150) + '...' : data;
-                        let html = `<div class="notification-message">${truncated}</div>`;
-                        if (!row.read) {
-                            html += '<span class="badge bg-danger badge-sm">New</span>';
-                        }
-                        return html;
-                    }},
-                    { data: 'type_info', render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
-                        }
-                        return '<span class="badge bg-secondary">Unknown</span>';
-                    }},
-                    { data: 'category_info', render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
-                        }
-                        return '<span class="badge bg-secondary">General</span>';
-                    }},
-                    { data: 'priority_info', render: function(data, type, row) {
-                        if (data) {
-                            return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
-                        }
-                        return '<span class="badge bg-secondary">Normal</span>';
-                    }},
-                    { data: 'read', render: function(data, type, row) {
-                        if (!data) {
-                            return '<span class="badge bg-warning">Unread</span>';
-                        } else if (row.dismissed) {
-                            return '<span class="badge bg-secondary">Dismissed</span>';
-                        } else {
-                            return '<span class="badge bg-success">Read</span>';
-                        }
-                    }},
-                    { data: 'action_url', render: function(data, type, row) {
-                        if (data) {
-                            const truncated = data.length > 30 ? data.substring(0, 30) + '...' : data;
-                            return `<small><a href="${data}" class="text-decoration-none" target="_blank">
-                                ${truncated} <i class="bi bi-box-arrow-up-right"></i>
-                            </a></small>`;
-                        }
-                        return '<small class="text-muted">No action</small>';
-                    }},
-                    { data: 'time' },
-                    { data: null, render: function(data, type, row) {
-                        let buttons = '<div class="btn-group btn-group-sm" role="group">';
-
-                        if (!row.read) {
-                            buttons += `<button class="btn btn-outline-success" onclick="AdminLTE.Actions.markNotificationRead(${row.id})" title="Mark as Read">
-                                <i class="bi bi-check"></i>
-                            </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-primary" onclick="AdminLTE.Actions.viewNotification(${row.id})" title="View">
-                            <i class="bi bi-eye"></i>
-                        </button>`;
-
-                        if (!row.dismissed) {
-                            buttons += `<button class="btn btn-outline-warning" onclick="AdminLTE.Actions.dismissNotification(${row.id})" title="Dismiss">
-                                <i class="bi bi-x-circle"></i>
-                            </button>`;
-                        }
-
-                        buttons += `<button class="btn btn-outline-danger" onclick="AdminLTE.Actions.deleteNotification(${row.id})" title="Delete">
-                            <i class="bi bi-trash"></i>
-                        </button>`;
-
-                        buttons += '</div>';
-                        return buttons;
-                    }}
-                ] : null
-            });
-
-            return $(selector).DataTable(config);
-        },
-
-        // Refresh table data
-        refreshTable: function(table) {
-            if (table && table.ajax) {
-                table.ajax.reload(null, false);
-            } else if (table) {
-                table.draw();
+                { orderable: false, targets: [0, 1, 9] }, // Checkbox, Avatar, Actions
+                { searchable: false, targets: [0, 1, 9] }
+            ],
+            language: {
+                processing: '<i class="bi bi-arrow-clockwise"></i> Loading messages...',
+                emptyTable: 'No messages found',
+                zeroRecords: 'No matching messages found'
             }
-        },
+        };
 
-        // Export table data
-        exportTable: function(table, format) {
-            if (!table) return;
+        // Se è specificato un URL AJAX, usa server-side processing
+        if (ajaxUrl) {
+            tableOptions.serverSide = true;
+            tableOptions.ajax = {
+                url: ajaxUrl,
+                type: 'GET',
+                error: function(xhr, error, thrown) {
+                    console.error('DataTables AJAX error:', error);
+                    AdminLTE.Notifications.error('Failed to load messages: ' + error);
+                }
+            };
+        }
 
-            switch (format.toLowerCase()) {
+        return $(selector).DataTable(tableOptions);
+    },
+
+    /**
+     * Inizializza una DataTable per le notifiche
+     */
+    initNotificationsTable: function(selector, ajaxUrl = null) {
+        const tableOptions = {
+            responsive: true,
+            processing: true,
+            pageLength: 25,
+            order: [[8, 'desc']], // Ordina per data
+            columnDefs: [
+                { orderable: false, targets: [0, 1, 9] }, // Checkbox, Icon, Actions
+                { searchable: false, targets: [0, 1, 9] }
+            ],
+            language: {
+                processing: '<i class="bi bi-arrow-clockwise"></i> Loading notifications...',
+                emptyTable: 'No notifications found',
+                zeroRecords: 'No matching notifications found'
+            }
+        };
+
+        if (ajaxUrl) {
+            tableOptions.serverSide = true;
+            tableOptions.ajax = {
+                url: ajaxUrl,
+                type: 'GET',
+                error: function(xhr, error, thrown) {
+                    console.error('DataTables AJAX error:', error);
+                    AdminLTE.Notifications.error('Failed to load notifications: ' + error);
+                }
+            };
+        }
+
+        return $(selector).DataTable(tableOptions);
+    },
+
+    /**
+     * Aggiorna una DataTable
+     */
+    refreshTable: function(table) {
+        if (table && table.ajax) {
+            table.ajax.reload(null, false); // Mantieni la pagina corrente
+        } else if (table) {
+            table.draw(false);
+        }
+    },
+
+    /**
+     * Esporta una DataTable
+     */
+    exportTable: function(table, format = 'excel') {
+        if (table && table.button) {
+            switch (format) {
                 case 'excel':
                     table.button('.buttons-excel').trigger();
                     break;
@@ -245,466 +292,513 @@ $(document).ready(function() {
                 case 'pdf':
                     table.button('.buttons-pdf').trigger();
                     break;
-                case 'print':
-                    table.button('.buttons-print').trigger();
-                    break;
                 default:
-                    AdminLTE.Notifications.warning('Unsupported export format: ' + format);
+                    console.warn('Unknown export format:', format);
             }
         }
-    };
+    }
+};
+
+// ===============================
+// GESTIONE AZIONI
+// ===============================
+AdminLTE.Actions = {
+    /**
+     * Segna un messaggio come letto
+     */
+    markMessageRead: function(messageId) {
+        fetch(`/api/messages/${messageId}/read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                AdminLTE.Notifications.success('Message marked as read');
+                // Rimuovi la classe unread dalla riga
+                const row = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (row) {
+                    row.classList.remove('table-row-unread');
+                    // Rimuovi il badge "Unread"
+                    const unreadBadge = row.querySelector('.badge.bg-warning');
+                    if (unreadBadge && unreadBadge.textContent === 'Unread') {
+                        unreadBadge.textContent = 'Read';
+                        unreadBadge.className = 'badge bg-success';
+                    }
+                }
+            } else {
+                AdminLTE.Notifications.error(data.error || 'Failed to mark message as read');
+            }
+        })
+        .catch(error => {
+            AdminLTE.Notifications.error('Error: ' + error.message);
+        });
+    },
 
     /**
-     * Notification Utilities (using Awesome Notifications)
+     * Visualizza un messaggio
      */
-    AdminLTE.Notifications = {
-        success: function(message, title = 'Success') {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.success(message, title);
-            } else {
-                console.log('Success:', message);
-                alert(title + ': ' + message);
-            }
-        },
+    viewMessage: function(messageId) {
+        fetch(`/api/messages/${messageId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const message = data.data || data.message;
 
-        error: function(message, title = 'Error') {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.error(message, title);
-            } else {
-                console.error('Error:', message);
-                alert(title + ': ' + message);
-            }
-        },
+                // Mostra il messaggio in un modal
+                const modalHtml = `
+                    <div class="modal fade" id="viewMessageModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Message from ${message.sender}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>${message.subject || 'No Subject'}</h6>
+                                    <p>${message.content}</p>
+                                    <small class="text-muted">Received: ${message.time}</small>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
-        warning: function(message, title = 'Warning') {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.warning(message, title);
-            } else {
-                console.warn('Warning:', message);
-                alert(title + ': ' + message);
-            }
-        },
+                // Aggiungi il modal al DOM se non esiste
+                let existingModal = document.getElementById('viewMessageModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
 
-        info: function(message, title = 'Info') {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.info(message, title);
-            } else {
-                console.info('Info:', message);
-                alert(title + ': ' + message);
-            }
-        },
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-        confirm: function(message, title = 'Confirm', onOk, onCancel) {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.confirm(message, title, onOk, onCancel);
-            } else {
-                const result = confirm(title + ': ' + message);
-                if (result && onOk) onOk();
-                else if (!result && onCancel) onCancel();
-                return result;
-            }
-        },
+                // Mostra il modal
+                const modal = new bootstrap.Modal(document.getElementById('viewMessageModal'));
+                modal.show();
 
-        async: function(promise, loadingMessage = 'Processing...', successMessage = 'Operation completed successfully') {
-            if (window.NotificationUtils) {
-                return window.NotificationUtils.async(promise, loadingMessage, successMessage);
+                // Segna come letto se non lo è già
+                if (message.unread) {
+                    this.markMessageRead(messageId);
+                }
             } else {
-                console.log(loadingMessage);
-                return promise.then(result => {
-                    console.log(successMessage);
-                    return result;
-                }).catch(error => {
-                    console.error('Error:', error);
-                    throw error;
-                });
+                AdminLTE.Notifications.error(data.error || 'Failed to load message');
             }
-        }
-    };
+        })
+        .catch(error => {
+            AdminLTE.Notifications.error('Error: ' + error.message);
+        });
+    },
 
     /**
-     * Form Utilities
+     * Archivia un messaggio
      */
-    AdminLTE.Forms = {
-        // Validate and submit form via AJAX
-        validateAndSubmit: function(formSelector, url, options = {}) {
-            const form = $(formSelector);
-            const formData = this.serializeForm(form);
-
-            // Basic validation
-            if (options.validate && !options.validate(formData)) {
-                return;
-            }
-
-            // Submit via AJAX
-            AdminLTE.Notifications.async(
-                fetch(url, {
+    archiveMessage: function(messageId) {
+        AdminLTE.Notifications.confirm(
+            'Archive this message?',
+            'Confirm Archive',
+            () => {
+                fetch(`/api/messages/${messageId}/archive`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    headers: { 'Content-Type': 'application/json' }
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.error || 'Operation failed');
+                    if (data.success) {
+                        AdminLTE.Notifications.success('Message archived');
+                        // Rimuovi la riga o aggiorna lo stato
+                        const row = document.querySelector(`[data-message-id="${messageId}"]`);
+                        if (row) {
+                            row.style.opacity = '0.5';
+                            // Aggiorna il badge di stato
+                            const statusBadge = row.querySelector('.badge.bg-success, .badge.bg-warning');
+                            if (statusBadge) {
+                                statusBadge.textContent = 'Archived';
+                                statusBadge.className = 'badge bg-secondary';
+                            }
+                        }
+                    } else {
+                        AdminLTE.Notifications.error(data.error || 'Failed to archive message');
                     }
-
-                    // Close modal if specified
-                    if (options.closeModal) {
-                        const modal = bootstrap.Modal.getInstance(document.querySelector(options.closeModal));
-                        if (modal) modal.hide();
-                    }
-
-                    // Reset form if specified
-                    if (options.resetForm !== false) {
-                        form[0].reset();
-                    }
-
-                    // Call success callback
-                    if (options.onSuccess) {
-                        options.onSuccess(data);
-                    }
-
-                    return data;
-                }),
-                'Submitting...',
-                options.successMessage || 'Operation completed successfully'
-            );
-        },
-
-        // Serialize form to object
-        serializeForm: function(form) {
-            const formData = {};
-            const arrayData = form.serializeArray();
-
-            $.each(arrayData, function(i, field) {
-                if (formData[field.name]) {
-                    if (!Array.isArray(formData[field.name])) {
-                        formData[field.name] = [formData[field.name]];
-                    }
-                    formData[field.name].push(field.value);
-                } else {
-                    formData[field.name] = field.value;
-                }
-            });
-
-            // Handle checkboxes
-            form.find('input[type="checkbox"]').each(function() {
-                formData[this.name] = this.checked;
-            });
-
-            return formData;
-        }
-    };
+                })
+                .catch(error => {
+                    AdminLTE.Notifications.error('Error: ' + error.message);
+                });
+            }
+        );
+    },
 
     /**
-     * Action Utilities
+     * Elimina un messaggio
      */
-    AdminLTE.Actions = {
-        // Message actions
-        markMessageRead: function(messageId) {
-            AdminLTE.Notifications.async(
-                fetch(`/api/messages/${messageId}/read`, { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) throw new Error(data.error);
-                        return data;
-                    }),
-                'Marking message as read...',
-                'Message marked as read'
-            );
-        },
-
-        viewMessage: function(messageId) {
-            AdminLTE.Notifications.info('View message functionality would be implemented here');
-        },
-
-        archiveMessage: function(messageId) {
-            AdminLTE.Notifications.confirm(
-                'Archive this message?',
-                'Confirm Archive',
-                () => {
-                    AdminLTE.Notifications.async(
-                        fetch(`/api/messages/${messageId}/archive`, { method: 'POST' })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (!data.success) throw new Error(data.error);
-                                return data;
-                            }),
-                        'Archiving message...',
-                        'Message archived'
-                    );
-                }
-            );
-        },
-
-        deleteMessage: function(messageId) {
-            AdminLTE.Notifications.confirm(
-                'Delete this message? This action cannot be undone.',
-                'Confirm Delete',
-                () => {
-                    AdminLTE.Notifications.async(
-                        fetch(`/api/messages/${messageId}`, { method: 'DELETE' })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (!data.success) throw new Error(data.error);
-                                return data;
-                            }),
-                        'Deleting message...',
-                        'Message deleted'
-                    );
-                }
-            );
-        },
-
-        // Notification actions
-        markNotificationRead: function(notificationId) {
-            AdminLTE.Notifications.async(
-                fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.success) throw new Error(data.error);
-                        return data;
-                    }),
-                'Marking notification as read...',
-                'Notification marked as read'
-            );
-        },
-
-        viewNotification: function(notificationId) {
-            AdminLTE.Notifications.info('View notification functionality would be implemented here');
-        },
-
-        dismissNotification: function(notificationId) {
-            AdminLTE.Notifications.confirm(
-                'Dismiss this notification?',
-                'Confirm Dismiss',
-                () => {
-                    AdminLTE.Notifications.async(
-                        fetch(`/api/notifications/${notificationId}/dismiss`, { method: 'POST' })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (!data.success) throw new Error(data.error);
-                                return data;
-                            }),
-                        'Dismissing notification...',
-                        'Notification dismissed'
-                    );
-                }
-            );
-        },
-
-        deleteNotification: function(notificationId) {
-            AdminLTE.Notifications.confirm(
-                'Delete this notification? This action cannot be undone.',
-                'Confirm Delete',
-                () => {
-                    AdminLTE.Notifications.async(
-                        fetch(`/api/notifications/${notificationId}`, { method: 'DELETE' })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (!data.success) throw new Error(data.error);
-                                return data;
-                            }),
-                        'Deleting notification...',
-                        'Notification deleted'
-                    );
-                }
-            );
-        },
-
-        // Bulk actions
-        bulkMarkMessagesRead: function(messageIds) {
-            if (!messageIds || messageIds.length === 0) {
-                AdminLTE.Notifications.warning('No messages selected');
-                return;
+    deleteMessage: function(messageId) {
+        AdminLTE.Notifications.confirm(
+            'Delete this message permanently?',
+            'Confirm Delete',
+            () => {
+                fetch(`/api/messages/${messageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AdminLTE.Notifications.success('Message deleted');
+                        // Rimuovi la riga
+                        const row = document.querySelector(`[data-message-id="${messageId}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                    } else {
+                        AdminLTE.Notifications.error(data.error || 'Failed to delete message');
+                    }
+                })
+                .catch(error => {
+                    AdminLTE.Notifications.error('Error: ' + error.message);
+                });
             }
+        );
+    },
 
-            AdminLTE.Notifications.confirm(
-                `Mark ${messageIds.length} message(s) as read?`,
-                'Confirm Bulk Action',
-                () => {
-                    const promises = messageIds.map(id =>
-                        fetch(`/api/messages/${id}/read`, { method: 'POST' })
-                    );
-
-                    AdminLTE.Notifications.async(
-                        Promise.all(promises),
-                        'Marking messages as read...',
-                        `${messageIds.length} messages marked as read`
-                    );
+    // Azioni per le notifiche (simili ai messaggi)
+    markNotificationRead: function(notificationId) {
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                AdminLTE.Notifications.success('Notification marked as read');
+                const row = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                if (row) {
+                    row.classList.remove('table-row-unread');
                 }
-            );
-        },
-
-        bulkDeleteMessages: function(messageIds) {
-            if (!messageIds || messageIds.length === 0) {
-                AdminLTE.Notifications.warning('No messages selected');
-                return;
+            } else {
+                AdminLTE.Notifications.error(data.error || 'Failed to mark notification as read');
             }
+        })
+        .catch(error => {
+            AdminLTE.Notifications.error('Error: ' + error.message);
+        });
+    },
 
-            AdminLTE.Notifications.confirm(
-                `Delete ${messageIds.length} message(s)? This action cannot be undone.`,
-                'Confirm Bulk Delete',
-                () => {
-                    const promises = messageIds.map(id =>
-                        fetch(`/api/messages/${id}`, { method: 'DELETE' })
-                    );
+    viewNotification: function(notificationId) {
+        fetch(`/api/notifications/${notificationId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const notification = data.data || data.notification;
 
-                    AdminLTE.Notifications.async(
-                        Promise.all(promises),
-                        'Deleting messages...',
-                        `${messageIds.length} messages deleted`
-                    );
+                const modalHtml = `
+                    <div class="modal fade" id="viewNotificationModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Notification</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${notification.message}</p>
+                                    <small class="text-muted">Time: ${notification.time}</small>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                let existingModal = document.getElementById('viewNotificationModal');
+                if (existingModal) {
+                    existingModal.remove();
                 }
-            );
-        },
 
-        bulkMarkNotificationsRead: function(notificationIds) {
-            if (!notificationIds || notificationIds.length === 0) {
-                AdminLTE.Notifications.warning('No notifications selected');
-                return;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                const modal = new bootstrap.Modal(document.getElementById('viewNotificationModal'));
+                modal.show();
+
+                if (!notification.read) {
+                    this.markNotificationRead(notificationId);
+                }
+            } else {
+                AdminLTE.Notifications.error(data.error || 'Failed to load notification');
             }
+        })
+        .catch(error => {
+            AdminLTE.Notifications.error('Error: ' + error.message);
+        });
+    },
 
-            AdminLTE.Notifications.confirm(
-                `Mark ${notificationIds.length} notification(s) as read?`,
-                'Confirm Bulk Action',
-                () => {
-                    const promises = notificationIds.map(id =>
-                        fetch(`/api/notifications/${id}/read`, { method: 'POST' })
-                    );
-
-                    AdminLTE.Notifications.async(
-                        Promise.all(promises),
-                        'Marking notifications as read...',
-                        `${notificationIds.length} notifications marked as read`
-                    );
-                }
-            );
-        },
-
-        bulkDeleteNotifications: function(notificationIds) {
-            if (!notificationIds || notificationIds.length === 0) {
-                AdminLTE.Notifications.warning('No notifications selected');
-                return;
+    dismissNotification: function(notificationId) {
+        AdminLTE.Notifications.confirm(
+            'Dismiss this notification?',
+            'Confirm Dismiss',
+            () => {
+                fetch(`/api/notifications/${notificationId}/dismiss`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AdminLTE.Notifications.success('Notification dismissed');
+                        const row = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                        if (row) {
+                            row.style.opacity = '0.5';
+                        }
+                    } else {
+                        AdminLTE.Notifications.error(data.error || 'Failed to dismiss notification');
+                    }
+                })
+                .catch(error => {
+                    AdminLTE.Notifications.error('Error: ' + error.message);
+                });
             }
+        );
+    },
 
-            AdminLTE.Notifications.confirm(
-                `Delete ${notificationIds.length} notification(s)? This action cannot be undone.`,
-                'Confirm Bulk Delete',
-                () => {
-                    const promises = notificationIds.map(id =>
-                        fetch(`/api/notifications/${id}`, { method: 'DELETE' })
-                    );
+    deleteNotification: function(notificationId) {
+        AdminLTE.Notifications.confirm(
+            'Delete this notification permanently?',
+            'Confirm Delete',
+            () => {
+                fetch(`/api/notifications/${notificationId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        AdminLTE.Notifications.success('Notification deleted');
+                        const row = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                    } else {
+                        AdminLTE.Notifications.error(data.error || 'Failed to delete notification');
+                    }
+                })
+                .catch(error => {
+                    AdminLTE.Notifications.error('Error: ' + error.message);
+                });
+            }
+        );
+    }
+};
 
-                    AdminLTE.Notifications.async(
-                        Promise.all(promises),
-                        'Deleting notifications...',
-                        `${notificationIds.length} notifications deleted`
-                    );
-                }
-            );
+// ===============================
+// UTILITÀ GLOBALI
+// ===============================
+AdminLTE.Utils = {
+    /**
+     * Formatta una data
+     */
+    formatDate: function(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        } catch (error) {
+            return dateString;
         }
-    };
+    },
 
     /**
-     * General Utilities
+     * Debounce function
      */
-    AdminLTE.Utils = {
-        // Format numbers
-        formatNumber: function(num, decimals = 0) {
-            return new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            }).format(num);
-        },
-
-        // Format dates
-        formatDate: function(date, format = 'short') {
-            if (!date) return '';
-
-            const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-            switch (format) {
-                case 'short':
-                    return dateObj.toLocaleDateString();
-                case 'long':
-                    return dateObj.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    });
-                case 'time':
-                    return dateObj.toLocaleTimeString();
-                case 'datetime':
-                    return dateObj.toLocaleString();
-                default:
-                    return dateObj.toString();
-            }
-        },
-
-        // Debounce function
-        debounce: function(func, wait, immediate) {
-            let timeout;
-            return function executedFunction() {
-                const context = this;
-                const args = arguments;
-                const later = function() {
-                    timeout = null;
-                    if (!immediate) func.apply(context, args);
-                };
-                const callNow = immediate && !timeout;
+    debounce: function(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
                 clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-                if (callNow) func.apply(context, args);
+                func(...args);
             };
-        },
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
 
-        // Generate random ID
-        generateId: function(prefix = 'id') {
-            return prefix + '_' + Math.random().toString(36).substr(2, 9);
-        },
+    /**
+     * Aggiorna i contatori della navbar
+     */
+    updateNavbarCounters: function() {
+        // Aggiorna contatore messaggi
+        fetch('/api/messages?limit=1&unread_only=true')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const counter = document.getElementById('messages-count');
+                if (counter) {
+                    counter.textContent = data.unread_count || 0;
+                    if (data.unread_count === 0) {
+                        counter.style.display = 'none';
+                    } else {
+                        counter.style.display = 'inline';
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error updating message counter:', error));
 
-        // Check if element is in viewport
-        isInViewport: function(element) {
-            const rect = element.getBoundingClientRect();
-            return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            );
-        }
+        // Aggiorna contatore notifiche
+        fetch('/api/notifications?limit=1&unread_only=true')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const counter = document.getElementById('notifications-count');
+                if (counter) {
+                    counter.textContent = data.unread_count || 0;
+                    if (data.unread_count === 0) {
+                        counter.style.display = 'none';
+                    } else {
+                        counter.style.display = 'inline';
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error updating notification counter:', error));
+    }
+};
+
+// ===============================
+// INIZIALIZZAZIONE
+// ===============================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('AdminLTE Custom Utilities loaded successfully');
+
+    // Aggiorna i contatori ogni 30 secondi
+    setInterval(AdminLTE.Utils.updateNavbarCounters, 30000);
+
+    // Setup globale per i form
+    document.querySelectorAll('form[data-ajax="true"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const apiUrl = this.getAttribute('data-url') || this.action;
+            AdminLTE.Forms.validateAndSubmit(`#${this.id}`, apiUrl);
+        });
+    });
+});
+
+// ===============================
+// FUNZIONI GLOBALI PER COMPATIBILITÀ
+// ===============================
+
+// Funzioni globali per i template
+window.createMessage = function() {
+    // Raccogli i dati manualmente dai campi del form
+    const messageData = {
+        sender: document.getElementById('messageSender').value,
+        subject: document.getElementById('messageSubject').value,
+        content: document.getElementById('messageContent').value,
+        type: document.getElementById('messageType').value,
+        priority: document.getElementById('messagePriority').value,
+        avatar: document.getElementById('messageAvatar').value
     };
 
-    // Add CSS for spinning animation
-    if (!document.getElementById('adminlte-custom-styles')) {
-        const style = document.createElement('style');
-        style.id = 'adminlte-custom-styles';
-        style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            .spin { animation: spin 1s linear infinite; }
-
-            .table-row-unread {
-                background-color: rgba(var(--bs-info-rgb), 0.1);
-            }
-
-            .table-row-high-priority {
-                border-left: 4px solid var(--bs-danger);
-            }
-
-            .table-row-medium-priority {
-                border-left: 4px solid var(--bs-warning);
-            }
-
-            .table-row-low-priority {
-                border-left: 4px solid var(--bs-success);
-            }
-        `;
-        document.head.appendChild(style);
+    // Validazione di base
+    if (!messageData.sender || !messageData.content) {
+        AdminLTE.Notifications.warning('Please fill in sender and content fields');
+        return;
     }
 
-    console.log('AdminLTE Custom Utilities loaded successfully');
-});
+    if (messageData.content.length > 1000) {
+        AdminLTE.Notifications.warning('Message content is too long (max 1000 characters)');
+        return;
+    }
+
+    console.log('Creating message with data:', messageData);
+
+    // Invia i dati
+    fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messageData)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success response:', data);
+        if (data.success) {
+            AdminLTE.Notifications.success(data.message || 'Message created successfully');
+
+            // Chiudi il modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newMessageModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            // Aggiorna la tabella se esiste
+            if (typeof messagesTable !== 'undefined' && messagesTable) {
+                AdminLTE.DataTables.refreshTable(messagesTable);
+            }
+
+            // Aggiorna i contatori
+            AdminLTE.Utils.updateNavbarCounters();
+        } else {
+            throw new Error(data.error || 'Operation failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating message:', error);
+        AdminLTE.Notifications.error(error.message || 'Failed to create message');
+    });
+};
+
+window.createNotification = function() {
+    const notificationData = {
+        message: document.getElementById('notificationMessage').value,
+        type: document.getElementById('notificationType').value,
+        category: document.getElementById('notificationCategory').value,
+        priority: document.getElementById('notificationPriority').value,
+        icon: 'bi-' + document.getElementById('notificationIcon').value,
+        action_url: document.getElementById('notificationActionUrl').value
+    };
+
+    if (!notificationData.message) {
+        AdminLTE.Notifications.warning('Please enter a notification message');
+        return;
+    }
+
+    fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(notificationData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            AdminLTE.Notifications.success(data.message || 'Notification created successfully');
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newNotificationModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            if (typeof notificationsTable !== 'undefined' && notificationsTable) {
+                AdminLTE.DataTables.refreshTable(notificationsTable);
+            }
+
+            AdminLTE.Utils.updateNavbarCounters();
+        } else {
+            throw new Error(data.error || 'Operation failed');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating notification:', error);
+        AdminLTE.Notifications.error(error.message || 'Failed to create notification');
+    });
+};

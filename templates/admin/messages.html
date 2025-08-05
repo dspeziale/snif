@@ -372,64 +372,38 @@
   </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<!-- Messages specific JavaScript -->
 <script>
+// SOLUZIONE SEMPLICE - Sostituisci tutto il JavaScript in admin/messages.html con questo:
+
 let messagesTable;
 
 $(document).ready(function() {
-    // Verifica prima se l'API funziona
-    {% if database_mode %}
-    // Test API endpoint first
-    fetch('/api/messages?limit=1')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('API not available');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // API works, initialize with AJAX
-                messagesTable = AdminLTE.DataTables.initMessagesTable('#messagesTable', '/api/messages');
-            } else {
-                throw new Error('API returned error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('API test failed:', error);
-            AdminLTE.Notifications.warning('API not available, using static table');
-            // Fallback to static table
-            messagesTable = $('#messagesTable').DataTable({
-                responsive: true,
-                processing: false,
-                serverSide: false
-            });
-        });
-    {% else %}
-    // Use static data for JSON file mode
+    console.log('Initializing messages page...');
+
+    // Inizializza DataTable SEMPLICE (senza AJAX per ora)
     messagesTable = $('#messagesTable').DataTable({
         responsive: true,
         processing: false,
-        serverSide: false
+        serverSide: false,
+        pageLength: 25,
+        order: [[8, 'desc']], // Ordina per colonna Time
+        columnDefs: [
+            { orderable: false, targets: [0, 1, 9] }, // Checkbox, Avatar, Actions non ordinabili
+            { searchable: false, targets: [0, 1, 9] }  // Checkbox, Avatar, Actions non ricercabili
+        ],
+        language: {
+            emptyTable: 'No messages found',
+            zeroRecords: 'No matching messages found',
+            search: 'Search messages:',
+            lengthMenu: 'Show _MENU_ messages',
+            info: 'Showing _START_ to _END_ of _TOTAL_ messages'
+        }
     });
-    {% endif %}
+
+    console.log('DataTable initialized successfully');
 
     // Setup event listeners
     setupEventListeners();
-
-    // Character counter for message content
-    $('#messageContent').on('input', function() {
-        const length = $(this).val().length;
-        $('#contentCount').text(length);
-
-        if (length > 1000) {
-            $(this).addClass('is-invalid');
-        } else {
-            $(this).removeClass('is-invalid');
-        }
-    });
 });
 
 function setupEventListeners() {
@@ -443,13 +417,18 @@ function setupEventListeners() {
     // Individual checkbox handler
     $(document).on('change', '.message-checkbox', function() {
         updateBulkActionButtons();
+    });
 
-        // Update select all checkbox state
-        const totalCheckboxes = $('.message-checkbox').length;
-        const checkedCheckboxes = $('.message-checkbox:checked').length;
+    // Character counter for message content
+    $('#messageContent').on('input', function() {
+        const length = $(this).val().length;
+        $('#contentCount').text(length);
 
-        $('#selectAllMessages').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
-        $('#selectAllMessages').prop('checked', checkedCheckboxes === totalCheckboxes);
+        if (length > 1000) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
     });
 
     // Modal form reset on hide
@@ -471,7 +450,132 @@ function updateBulkActionButtons() {
     $('#selected-count').text(`${selectedCount} selected`);
 }
 
-// Action Functions
+// FUNZIONE PRINCIPALE - Create Message
+function createMessage() {
+    console.log('createMessage called');
+
+    // Verifica che il modal sia aperto e i campi esistano
+    const modal = document.getElementById('newMessageModal');
+    if (!modal || !modal.classList.contains('show')) {
+        console.error('Modal not open or not found');
+        alert('Please open the message form first');
+        return;
+    }
+
+    // Raccogli i dati dai campi
+    const senderField = document.getElementById('messageSender');
+    const subjectField = document.getElementById('messageSubject');
+    const contentField = document.getElementById('messageContent');
+    const typeField = document.getElementById('messageType');
+    const priorityField = document.getElementById('messagePriority');
+    const avatarField = document.getElementById('messageAvatar');
+
+    // Debug: verifica che i campi esistano
+    console.log('Field check:');
+    console.log('sender:', senderField ? senderField.value : 'FIELD NOT FOUND');
+    console.log('content:', contentField ? contentField.value : 'FIELD NOT FOUND');
+
+    if (!senderField || !contentField) {
+        alert('Error: Form fields not found. Please refresh the page and try again.');
+        return;
+    }
+
+    const formData = {
+        sender: senderField.value.trim(),
+        subject: subjectField ? subjectField.value.trim() : '',
+        content: contentField.value.trim(),
+        type: typeField ? typeField.value : '',
+        priority: priorityField ? priorityField.value : 'medium',
+        avatar: avatarField ? avatarField.value.trim() : ''
+    };
+
+    console.log('Collected form data:', formData);
+
+    // Validazione
+    if (!formData.sender) {
+        alert('Please enter a sender name');
+        senderField.focus();
+        return;
+    }
+
+    if (!formData.content) {
+        alert('Please enter message content');
+        contentField.focus();
+        return;
+    }
+
+    if (formData.content.length > 1000) {
+        alert('Message content is too long (max 1000 characters)');
+        return;
+    }
+
+    // Mostra loading
+    const submitBtn = document.querySelector('#newMessageModal .btn-primary');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass"></i> Creating...';
+
+    // Invia i dati
+    fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        console.log('API Response Status:', response.status);
+
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Error response text:', text);
+                try {
+                    const errorJson = JSON.parse(text);
+                    throw new Error(errorJson.error || `HTTP ${response.status}`);
+                } catch (e) {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+            });
+        }
+
+        return response.json();
+    })
+    .then(data => {
+        console.log('API Response Data:', data);
+
+        if (data.success) {
+            alert('Message created successfully!');
+
+            // Chiudi il modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            // Reset form
+            document.getElementById('newMessageForm').reset();
+
+            // Ricarica la pagina per vedere il nuovo messaggio
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+
+        } else {
+            throw new Error(data.error || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Create message error:', error);
+        alert('Error creating message: ' + error.message);
+    })
+    .finally(() => {
+        // Ripristina il pulsante
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// Funzioni di utility semplici
 function toggleSelectAll() {
     const allSelected = $('.message-checkbox:checked').length === $('.message-checkbox').length;
     $('.message-checkbox').prop('checked', !allSelected);
@@ -486,174 +590,454 @@ function clearSelection() {
 
 function refreshMessagesTable() {
     if (messagesTable) {
-        AdminLTE.DataTables.refreshTable(messagesTable);
-        AdminLTE.Notifications.success('Messages table refreshed');
-        updateStatistics();
+        messagesTable.draw();
+        console.log('Messages table refreshed');
     }
-}
-
-function createMessage() {
-    const formData = {
-        sender: $('#messageSender').val(),
-        subject: $('#messageSubject').val(),
-        content: $('#messageContent').val(),
-        type: $('#messageType').val(),
-        priority: $('#messagePriority').val(),
-        avatar: $('#messageAvatar').val()
-    };
-
-    if (!formData.sender || !formData.content) {
-        AdminLTE.Notifications.warning('Please fill in all required fields');
-        return;
-    }
-
-    if (formData.content.length > 1000) {
-        AdminLTE.Notifications.warning('Message content is too long (max 1000 characters)');
-        return;
-    }
-
-    AdminLTE.Forms.validateAndSubmit(
-        '#newMessageForm',
-        '/api/messages',
-        {
-            successMessage: 'Message created successfully',
-            closeModal: '#newMessageModal',
-            onSuccess: function(data) {
-                if (messagesTable) {
-                    AdminLTE.DataTables.refreshTable(messagesTable);
-                }
-                updateStatistics();
-            }
-        }
-    );
+    // Aggiorna anche i contatori
+    updateStatistics();
 }
 
 function markAllMessagesRead() {
-    AdminLTE.Notifications.confirm(
-        'Mark all messages as read?',
-        'Confirm Action',
-        () => {
-            AdminLTE.Notifications.async(
-                fetch('/api/messages/mark-all-read', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.error);
-                    }
-                    if (messagesTable) {
-                        AdminLTE.DataTables.refreshTable(messagesTable);
-                    }
-                    updateStatistics();
-                    return data;
-                }),
-                'Marking all messages as read...',
-                'All messages marked as read'
-            );
-        }
-    );
-}
-
-// Bulk Actions
-function bulkMarkRead() {
-    const selectedIds = $('.message-checkbox:checked').map(function() {
-        return $(this).val();
-    }).get();
-
-    AdminLTE.Actions.bulkMarkMessagesRead(selectedIds);
-    clearSelection();
-}
-
-function bulkArchive() {
-    const selectedIds = $('.message-checkbox:checked').map(function() {
-        return $(this).val();
-    }).get();
-
-    if (selectedIds.length === 0) {
-        AdminLTE.Notifications.warning('No messages selected');
-        return;
+    if (confirm('Mark all messages as read?')) {
+        fetch('/api/messages/mark-all-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('All messages marked as read');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error marking messages as read');
+        });
     }
+}
 
-    AdminLTE.Notifications.confirm(
-        `Archive ${selectedIds.length} message(s)?`,
-        'Confirm Bulk Archive',
-        () => {
-            const promises = selectedIds.map(id =>
-                fetch(`/api/messages/${id}/archive`, { method: 'POST' })
-            );
-
-            AdminLTE.Notifications.async(
-                Promise.all(promises),
-                'Archiving messages...',
-                `${selectedIds.length} messages archived`
-            ).then(() => {
-                if (messagesTable) {
-                    AdminLTE.DataTables.refreshTable(messagesTable);
+// Azioni sui messaggi individuali
+function markMessageRead(messageId) {
+    fetch(`/api/messages/${messageId}/read`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Message marked as read');
+            // Aggiorna la riga visivamente
+            const row = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (row) {
+                row.classList.remove('table-row-unread');
+                const badge = row.querySelector('.badge.bg-warning');
+                if (badge && badge.textContent === 'Unread') {
+                    badge.textContent = 'Read';
+                    badge.className = 'badge bg-success';
                 }
-                clearSelection();
-                updateStatistics();
-            });
+            }
+        } else {
+            alert('Error: ' + data.error);
         }
-    );
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking message as read');
+    });
 }
 
-function bulkDelete() {
-    const selectedIds = $('.message-checkbox:checked').map(function() {
-        return $(this).val();
-    }).get();
+function viewMessage(messageId) {
+    fetch(`/api/messages/${messageId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const message = data.data || data.message;
+            alert(`Message from ${message.sender}:\n\n${message.content}`);
 
-    AdminLTE.Actions.bulkDeleteMessages(selectedIds);
-    clearSelection();
+            // Segna come letto se non lo è già
+            if (message.unread) {
+                markMessageRead(messageId);
+            }
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading message');
+    });
 }
 
-// Export Functions
-function exportMessages(format) {
-    if (messagesTable) {
-        AdminLTE.DataTables.exportTable(messagesTable, format);
+function archiveMessage(messageId) {
+    if (confirm('Archive this message?')) {
+        fetch(`/api/messages/${messageId}/archive`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Message archived');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error archiving message');
+        });
     }
 }
 
-function bulkExport(type) {
-    const selectedRows = messagesTable.rows('.selected').data().toArray();
-
-    if (selectedRows.length === 0) {
-        AdminLTE.Notifications.warning('No messages selected for export');
-        return;
+function deleteMessage(messageId) {
+    if (confirm('Delete this message permanently?')) {
+        fetch(`/api/messages/${messageId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Message deleted');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting message');
+        });
     }
-
-    // Create temporary table with selected data for export
-    const tempData = selectedRows.map(row => ({
-        sender: row.sender,
-        subject: row.subject || 'No Subject',
-        content: row.content,
-        type: row.type_info ? row.type_info.label : 'Unknown',
-        priority: row.priority_info ? row.priority_info.label : 'Normal',
-        time: row.time
-    }));
-
-    // Export logic here - could create CSV or trigger download
-    AdminLTE.Notifications.info('Export functionality would be implemented here');
 }
 
 function updateStatistics() {
-    {% if database_mode %}
-    // Update statistics from API
+    // Aggiorna i contatori nella pagina
     fetch('/api/messages?limit=1')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                $('#total-messages').text(data.total || 0);
-                $('#unread-messages').text(data.unread_count || 0);
+                const totalEl = document.getElementById('total-messages');
+                const unreadEl = document.getElementById('unread-messages');
 
-                // Update other statistics as needed
-                const readCount = (data.total || 0) - (data.unread_count || 0);
-                $('#read-messages').text(readCount);
+                if (totalEl) totalEl.textContent = data.total || 0;
+                if (unreadEl) unreadEl.textContent = data.unread_count || 0;
             }
         })
         .catch(error => console.error('Error updating statistics:', error));
-    {% endif %}
+}
+
+// Export functions (semplici per ora)
+function exportMessages(format) {
+    alert(`Export to ${format} - feature coming soon!`);
+}
+
+function bulkMarkRead() {
+    alert('Bulk mark read - feature coming soon!');
+}
+
+function bulkArchive() {
+    alert('Bulk archive - feature coming soon!');
+}
+
+function bulkDelete() {
+    alert('Bulk delete - feature coming soon!');
+}
+
+function bulkExport() {
+    alert('Bulk export - feature coming soon!');
+}
+
+console.log('Messages page JavaScript loaded successfully');
+</script>
+
+{% block extra_js %}
+<!-- Messages specific JavaScript -->
+<script>
+// CORREZIONE DATATABLES - Aggiungi questo in fondo al template admin/messages.html
+
+$(document).ready(function() {
+    // Disabilita DataTables se non ci sono dati o se c'è un errore API
+
+    // Prima controlla se l'API funziona
+    fetch('/api/messages?limit=1')
+        .then(response => {
+            console.log('API Test Response Status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('API Test Response Data:', data);
+
+            if (data.success && data.data) {
+                console.log('API is working, initializing DataTable with AJAX');
+                // API funziona, inizializza con AJAX
+                initDataTableWithAjax();
+            } else {
+                console.log('API not working properly, using static table');
+                // API non funziona, usa tabella statica
+                initStaticDataTable();
+            }
+        })
+        .catch(error => {
+            console.error('API Test Failed:', error);
+            console.log('Falling back to static table');
+            // Fallback a tabella statica
+            initStaticDataTable();
+        });
+});
+
+function initDataTableWithAjax() {
+    messagesTable = $('#messagesTable').DataTable({
+        responsive: true,
+        processing: true,
+        serverSide: false, // Cambiato da true a false per semplicità
+        ajax: {
+            url: '/api/messages',
+            type: 'GET',
+            data: function(d) {
+                // Converti parametri DataTables in parametri API
+                return {
+                    page: Math.floor(d.start / d.length) + 1,
+                    per_page: d.length,
+                    search: d.search.value
+                };
+            },
+            dataSrc: function(json) {
+                console.log('AJAX Response:', json);
+
+                // Gestisci diversi formati di risposta
+                if (json.success) {
+                    if (json.data) {
+                        return json.data; // Formato standard
+                    } else if (json.messages) {
+                        return json.messages; // Formato alternativo
+                    }
+                }
+
+                console.error('Invalid API response format:', json);
+                return [];
+            },
+            error: function(xhr, error, thrown) {
+                console.error('DataTables AJAX Error:', error, thrown);
+                $('#messagesTable tbody').html('<tr><td colspan="10" class="text-center text-danger">Error loading messages: ' + error + '</td></tr>');
+            }
+        },
+        columns: [
+            { data: null, defaultContent: '<input type="checkbox" class="message-checkbox">', orderable: false, searchable: false },
+            {
+                data: 'avatar',
+                render: function(data, type, row) {
+                    const avatar = data || '/static/assets/img/user-default.jpg';
+                    return `<img src="${avatar}" alt="Avatar" class="img-circle" width="40" height="40">`;
+                },
+                orderable: false,
+                searchable: false
+            },
+            { data: 'sender' },
+            { data: 'subject', defaultContent: 'No Subject' },
+            {
+                data: 'content',
+                render: function(data, type, row) {
+                    if (type === 'display' && data.length > 100) {
+                        return data.substr(0, 100) + '...';
+                    }
+                    return data;
+                }
+            },
+            {
+                data: 'type_info',
+                render: function(data, type, row) {
+                    if (data) {
+                        return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
+                    }
+                    return '<span class="badge bg-secondary">Unknown</span>';
+                },
+                orderable: false
+            },
+            {
+                data: 'priority_info',
+                render: function(data, type, row) {
+                    if (data) {
+                        return `<span class="badge bg-${data.color}"><i class="bi ${data.icon} me-1"></i>${data.label}</span>`;
+                    }
+                    return '<span class="badge bg-secondary">Normal</span>';
+                },
+                orderable: false
+            },
+            {
+                data: 'unread',
+                render: function(data, type, row) {
+                    if (data) {
+                        return '<span class="badge bg-warning">Unread</span>';
+                    } else if (row.archived) {
+                        return '<span class="badge bg-secondary">Archived</span>';
+                    } else {
+                        return '<span class="badge bg-success">Read</span>';
+                    }
+                },
+                orderable: false
+            },
+            { data: 'time' },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    let buttons = '';
+
+                    if (row.unread) {
+                        buttons += `<button class="btn btn-outline-success btn-sm" onclick="AdminLTE.Actions.markMessageRead(${row.id})" title="Mark as Read"><i class="bi bi-check"></i></button> `;
+                    }
+
+                    buttons += `<button class="btn btn-outline-primary btn-sm" onclick="AdminLTE.Actions.viewMessage(${row.id})" title="View"><i class="bi bi-eye"></i></button> `;
+
+                    if (!row.archived) {
+                        buttons += `<button class="btn btn-outline-warning btn-sm" onclick="AdminLTE.Actions.archiveMessage(${row.id})" title="Archive"><i class="bi bi-archive"></i></button> `;
+                    }
+
+                    buttons += `<button class="btn btn-outline-danger btn-sm" onclick="AdminLTE.Actions.deleteMessage(${row.id})" title="Delete"><i class="bi bi-trash"></i></button>`;
+
+                    return `<div class="btn-group btn-group-sm">${buttons}</div>`;
+                },
+                orderable: false,
+                searchable: false
+            }
+        ],
+        order: [[8, 'desc']], // Ordina per data
+        pageLength: 25,
+        language: {
+            processing: '<i class="bi bi-arrow-clockwise"></i> Loading messages...',
+            emptyTable: 'No messages found',
+            zeroRecords: 'No matching messages found'
+        }
+    });
+}
+
+function initStaticDataTable() {
+    // Tabella statica semplice senza AJAX
+    messagesTable = $('#messagesTable').DataTable({
+        responsive: true,
+        processing: false,
+        serverSide: false,
+        pageLength: 25,
+        order: [[8, 'desc']],
+        columnDefs: [
+            { orderable: false, targets: [0, 1, 9] },
+            { searchable: false, targets: [0, 1, 9] }
+        ],
+        language: {
+            emptyTable: 'No messages found',
+            zeroRecords: 'No matching messages found'
+        }
+    });
+
+    console.log('Static DataTable initialized');
+}
+
+// CORREZIONE PRINCIPALE: Form data collection
+function createMessage() {
+    // Metodo più robusto per raccogliere i dati
+    const sender = document.getElementById('messageSender');
+    const subject = document.getElementById('messageSubject');
+    const content = document.getElementById('messageContent');
+    const type = document.getElementById('messageType');
+    const priority = document.getElementById('messagePriority');
+    const avatar = document.getElementById('messageAvatar');
+
+    // Debug: controlla se gli elementi esistono
+    console.log('Form elements check:');
+    console.log('sender element:', sender);
+    console.log('content element:', content);
+
+    if (!sender || !content) {
+        alert('Form elements not found! Check if the modal is properly loaded.');
+        return;
+    }
+
+    const formData = {
+        sender: sender.value.trim(),
+        subject: subject ? subject.value.trim() : '',
+        content: content.value.trim(),
+        type: type ? type.value : '',
+        priority: priority ? priority.value : 'medium',
+        avatar: avatar ? avatar.value.trim() : ''
+    };
+
+    console.log('Form data collected:', formData);
+
+    // Validazione
+    if (!formData.sender) {
+        alert('Please enter a sender name');
+        sender.focus();
+        return;
+    }
+
+    if (!formData.content) {
+        alert('Please enter message content');
+        content.focus();
+        return;
+    }
+
+    if (formData.content.length > 1000) {
+        alert('Message content is too long (max 1000 characters)');
+        return;
+    }
+
+    // Invia i dati
+    console.log('Sending to API:', formData);
+
+    fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Response text:', text);
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.error || `HTTP ${response.status}`);
+                } catch (e) {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success response:', data);
+
+        if (data.success) {
+            alert('Message created successfully!');
+
+            // Chiudi il modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newMessageModal'));
+            if (modal) {
+                modal.hide();
+            }
+
+            // Reset form
+            document.getElementById('newMessageForm').reset();
+
+            // Ricarica la pagina
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Request failed:', error);
+        alert('Error creating message: ' + error.message);
+    });
 }
 </script>
 {% endblock %}

@@ -9,10 +9,10 @@
     <meta name="color-scheme" content="light dark"/>
     <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)"/>
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)"/>
-    <link rel="icon" href="static/assets/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="{{url_for('static', filename='assets/img/favicon.ico')}}" type="image/x-icon">
     <!--end::Accessibility Meta Tags-->
     <!--begin::Primary Meta Tags-->
-    <meta name="title" content="{{ app_name }} | Dashboard"/>
+    {<meta name="title" content="{{ app_name }} | Dashboard"/>
     <meta name="author" content="Development Team"/>
     <meta
             name="description"
