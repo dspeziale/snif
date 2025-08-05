@@ -16,7 +16,7 @@ $(document).ready(function() {
     initializeEventHandlers();
 
     // Initialize theme toggle if needed
-    initializeThemeToggle();
+//    initializeThemeToggle();
 
     console.log('Custom JavaScript initialized successfully');
 });
@@ -28,7 +28,7 @@ function initializeNotifications() {
     if (typeof AWN !== 'undefined') {
         globalNotifier = new AWN({
             position: 'top-right',
-            duration: 4000,
+            duration: 1000,
             icons: {
                 enabled: true
             },
