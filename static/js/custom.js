@@ -28,7 +28,12 @@ function initializeNotifications() {
     if (typeof AWN !== 'undefined') {
         globalNotifier = new AWN({
             position: 'top-right',
-            duration: 1000,
+            duration: {
+                success: 1000,
+                info: 1000,
+                warning: 1000,
+                alert: 2000
+                },
             icons: {
                 enabled: true
             },
@@ -241,8 +246,8 @@ function initializeDataTable(selector, options = {}) {
 /**
  * Format currency helper function
  */
-function formatCurrency(amount, currency = 'USD') {
-    return new Intl.NumberFormat('en-US', {
+function formatCurrency(amount, currency = 'EURO') {
+    return new Intl.NumberFormat('it-IT', {
         style: 'currency',
         currency: currency
     }).format(amount);
