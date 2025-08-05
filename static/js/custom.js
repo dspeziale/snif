@@ -28,12 +28,12 @@ function initializeNotifications() {
     if (typeof AWN !== 'undefined') {
         globalNotifier = new AWN({
             position: 'top-right',
-            duration: {
-                success: 1000,
-                info: 1000,
-                warning: 1000,
-                alert: 2000
-                },
+//            duration: {
+//                success: 1000,
+//                info: 1000,
+//                warning: 1000,
+//                alert: 2000
+//                },
             icons: {
                 enabled: true
             },
