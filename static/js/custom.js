@@ -16,7 +16,7 @@ $(document).ready(function() {
     initializeEventHandlers();
 
     // Initialize theme toggle if needed
-//    initializeThemeToggle();
+    initializeThemeToggle();
 
     console.log('Custom JavaScript initialized successfully');
 });
