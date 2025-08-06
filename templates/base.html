@@ -1,0 +1,246 @@
+       <!doctype html>
+<html lang="it">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{% block title %}{{ page_title }} | AdminLTE v4{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="AdminLTE is a Free Bootstrap 5 Admin Dashboard" />
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" crossorigin="anonymous" />
+
+    <!-- Third Party Plugins -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adminlte.css') }}" />
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+    <div class="app-wrapper">
+        <!-- Header -->
+        <nav class="app-header navbar navbar-expand bg-body">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                            <i class="bi bi-list"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-md-block">
+                        <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item d-none d-md-block">
+                        <a href="#" class="nav-link">Contatti</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" role="button">
+                            <i class="bi bi-search"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                            <i class="bi bi-chat-text"></i>
+                            <span class="navbar-badge badge text-bg-danger">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-bs-toggle="dropdown" href="#">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="navbar-badge badge text-bg-warning">15</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                            <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                            <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown user-menu">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <img src="{{ url_for('static', filename='assets/img/daniele.png') }}" class="user-image rounded-circle shadow" alt="User Image" />
+                            <span class="d-none d-md-inline">{{ current_user|default('User') }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+            <div class="sidebar-brand">
+                <a href="{{ url_for('index') }}" class="brand-link">
+                    <img src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
+                    <span class="brand-text fw-light">AdminLTE 4</span>
+                </a>
+            </div>
+
+            <div class="sidebar-wrapper">
+                <nav class="mt-2">
+                    <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation">
+                        <!-- Dashboard -->
+                        <li class="nav-item menu-open">
+                            <a href="#" class="nav-link active">
+                                <i class="nav-icon bi bi-speedometer"></i>
+                                <p>Dashboard<i class="nav-arrow bi bi-chevron-right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('index') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Dashboard v1</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('dashboard_v2') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Dashboard v2</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('dashboard_v3') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Dashboard v3</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Theme Generate -->
+                        <li class="nav-item">
+                            <a href="{{ url_for('theme_generate') }}" class="nav-link">
+                                <i class="nav-icon bi bi-palette"></i><p>Theme Generate</p>
+                            </a>
+                        </li>
+
+                        <!-- Widgets -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-box-seam-fill"></i>
+                                <p>Widgets<i class="nav-arrow bi bi-chevron-right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('widgets_small_box') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Small Box</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('widgets_info_box') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Info Box</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('widgets_cards') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Cards</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Forms -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-pencil-square"></i>
+                                <p>Forms<i class="nav-arrow bi bi-chevron-right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('forms_general') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>General Elements</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Tables -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-table"></i>
+                                <p>Tables<i class="nav-arrow bi bi-chevron-right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('tables_simple') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Simple Tables</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-header">EXAMPLES</li>
+
+                        <!-- Auth -->
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                                <p>Auth<i class="nav-arrow bi bi-chevron-right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ url_for('login') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Login</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ url_for('register') }}" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i><p>Register</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3 class="mb-0">{% block page_title %}{{ page_title }}{% endblock %}</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-end">
+                                {% block breadcrumbs %}
+                                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                                <li class="breadcrumb-item active">{{ page_title }}</li>
+                                {% endblock %}
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-content">
+                <div class="container-fluid">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="float-end d-none d-sm-inline">Anything you want</div>
+            <strong>Copyright &copy; 2014-{{ current_year }} <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+            All rights reserved.
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/adminlte.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
