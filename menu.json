@@ -1,0 +1,119 @@
+{
+  "menu_items": [
+    {
+      "type": "header",
+      "text": "MAIN NAVIGATION"
+    },
+    {
+      "type": "item",
+      "text": "Dashboard",
+      "icon": "bi-speedometer",
+      "active": true,
+      "children": [
+        {
+          "text": "Dashboard v1",
+          "icon": "bi-circle",
+          "url": "/"
+        },
+        {
+          "text": "Dashboard v2",
+          "icon": "bi-circle",
+          "url": "/dashboard-v2"
+        },
+        {
+          "text": "Dashboard v3",
+          "icon": "bi-circle",
+          "url": "/dashboard-v3"
+        }
+      ]
+    },
+    {
+      "type": "item",
+      "text": "Kanban Board",
+      "icon": "bi-kanban",
+      "url": "#"
+    },
+    {
+      "type": "header",
+      "text": "DOCUMENTATION"
+    },
+    {
+      "type": "item",
+      "text": "Installation",
+      "icon": "bi-download",
+      "url": "/docs/introduction"
+    },
+    {
+      "type": "item",
+      "text": "Layout",
+      "icon": "bi-grip-horizontal",
+      "url": "/docs/layout"
+    },
+    {
+      "type": "item",
+      "text": "Color Mode",
+      "icon": "bi-star-fill",
+      "url": "/docs/color-mode"
+    },
+    {
+      "type": "header",
+      "text": "MULTI LEVEL EXAMPLE"
+    },
+    {
+      "type": "item",
+      "text": "Level 1",
+      "icon": "bi-circle-fill",
+      "url": "#"
+    },
+    {
+      "type": "item",
+      "text": "Level 1",
+      "icon": "bi-circle-fill",
+      "children": [
+        {
+          "text": "Level 2",
+          "icon": "bi-circle",
+          "url": "#"
+        },
+        {
+          "text": "Level 2",
+          "icon": "bi-circle",
+          "children": [
+            {
+              "text": "Level 3",
+              "icon": "bi-record-circle-fill",
+              "url": "#"
+            },
+            {
+              "text": "Level 3",
+              "icon": "bi-record-circle-fill",
+              "url": "#"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "text": "LABELS"
+    },
+    {
+      "type": "item",
+      "text": "Important",
+      "icon": "bi-circle text-danger",
+      "url": "#"
+    },
+    {
+      "type": "item",
+      "text": "Warning",
+      "icon": "bi-circle text-warning",
+      "url": "#"
+    },
+    {
+      "type": "item",
+      "text": "Informational",
+      "icon": "bi-circle text-info",
+      "url": "#"
+    }
+  ]
+}

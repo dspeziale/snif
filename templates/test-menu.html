@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test Menu Dinamico</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            padding: 20px;
+        }
+        .sidebar {
+            width: 300px;
+            background: #343a40;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .nav-link {
+            color: #c2c7d0;
+            padding: 8px 10px;
+            display: block;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,0.1);
+        }
+        .nav-header {
+            color: #939ba2;
+            padding: 10px 10px 5px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .nav-treeview {
+            padding-left: 20px;
+            list-style: none;
+        }
+        .nav-item {
+            list-style: none;
+        }
+        ul {
+            padding-left: 0;
+            margin: 0;
+        }
+        .nav-arrow {
+            float: right;
+            transition: transform 0.3s;
+        }
+        .menu-open > a .nav-arrow {
+            transform: rotate(90deg);
+        }
+        .badge {
+            float: right;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Menu Dinamico</h1>
+        <button class="btn btn-primary mb-3" onclick="loadMenu()">Carica Menu</button>
+        <button class="btn btn-success mb-3" onclick="testToggle()">Test Toggle Menu</button>
+
+        <div class="sidebar">
+            <ul id="test-menu">
+                <li>Clicca "Carica Menu" per iniziare</li>
+            </ul>
+        </div>
+
+        <div class="mt-3">
+            <h3>Console Debug:</h3>
+            <div id="debug" style="background: #f0f0f0; padding: 10px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+    // Funzione di debug
+    function debug(msg) {
+        console.log(msg);
+        $('#debug').append(new Date().toLocaleTimeString() + ' - ' + msg + '<br>');
+        $('#debug').scrollTop($('#debug')[0].scrollHeight);
+    }
+
+    // Menu di esempio
+    const menuData = {
+        menu_items: [
+            {
+                type: "header",
+                text: "NAVIGAZIONE PRINCIPALE"
+            },
+            {
+                type: "item",
+                text: "Dashboard",
+                icon: "bi-speedometer",
+                children: [
+                    { text: "Dashboard v1", icon: "bi-circle", url: "/" },
+                    { text: "Dashboard v2", icon: "bi-circle", url: "/dashboard-v2" }
+                ]
+            },
+            {
+                type: "item",
+                text: "Widgets",
+                icon: "bi-box-seam-fill",
+                children: [
+                    { text: "Small Box", icon: "bi-circle", url: "/widgets/small-box" },
+                    { text: "Info Box", icon: "bi-circle", url: "/widgets/info-box" }
+                ]
+            },
+            {
+                type: "item",
+                text: "Pagina Singola",
+                icon: "bi-file",
+                url: "/single-page"
+            }
+        ]
+    };
+
+    function buildMenuItem(item) {
+        let html = '';
+
+        if (item.type === 'header') {
+            html = `<li class="nav-header">${item.text}</li>`;
+        } else if (item.type === 'item') {
+            const hasChildren = item.children && item.children.length > 0;
+
+            html = `<li class="nav-item ${hasChildren ? 'has-children' : ''}">`;
+            html += `<a class="nav-link" ${!hasChildren && item.url ? `href="${item.url}"` : 'href="#"'}>`;
+            html += `<i class="bi ${item.icon}"></i> `;
+            html += item.text;
+
+            if (hasChildren) {
+                html += ` <i class="nav-arrow bi bi-chevron-right"></i>`;
+            }
+
+            html += `</a>`;
+
+            if (hasChildren) {
+                html += `<ul class="nav-treeview" style="display: none;">`;
+                item.children.forEach(child => {
+                    html += buildMenuItem(child);
+                });
+                html += `</ul>`;
+            }
+
+            html += `</li>`;
+        }
+
+        return html;
+    }
+
+    function loadMenu() {
+        debug('Caricamento menu...');
+
+        let menuHtml = '';
+        menuData.menu_items.forEach(item => {
+            menuHtml += buildMenuItem(item);
+        });
+
+        $('#test-menu').html(menuHtml);
+        debug('Menu caricato nel DOM');
+
+        // Aggiungi handler click
+        $('#test-menu').on('click', '.has-children > a', function(e) {
+            e.preventDefault();
+            debug('Click su: ' + $(this).text());
+
+            const $parent = $(this).parent();
+            const $submenu = $parent.find('> .nav-treeview');
+
+            if ($submenu.is(':visible')) {
+                debug('Chiudo sottomenu');
+                $submenu.slideUp(200);
+                $parent.removeClass('menu-open');
+            } else {
+                debug('Apro sottomenu');
+                $submenu.slideDown(200);
+                $parent.addClass('menu-open');
+            }
+
+            return false;
+        });
+
+        debug('Handler click aggiunti');
+    }
+
+    function testToggle() {
+        debug('Test toggle su tutti i menu con figli');
+        $('.has-children > a').each(function() {
+            $(this).click();
+        });
+    }
+
+    // Carica automaticamente
+    $(document).ready(function() {
+        debug('Pagina pronta');
+    });
+    </script>
+</body>
+</html>
