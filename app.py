@@ -9,13 +9,57 @@ import json
 import os
 from menu_database import MenuDatabase, MenuItem, migrate_from_json_file
 
+from scanner.scanner_api import scanner_bp
+from scanner.network_scanner import NetworkScanner, SCANNER_CONFIG
+import threading
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['MENU_DATABASE'] = 'menu.db'
 
 # Inizializza il database dei menu
 menu_db = MenuDatabase(app.config['MENU_DATABASE'])
+app.register_blueprint(scanner_bp)
 
+scanner_instance = None
+scanner_thread = None
+
+
+def init_scanner():
+    """Inizializza lo scanner di rete in background"""
+    global scanner_instance, scanner_thread
+
+    try:
+        scanner_instance = NetworkScanner(SCANNER_CONFIG)
+
+        # Avvia lo scanner in un thread separato
+        def run_scanner():
+            scanner_instance.start_periodic_scan()
+
+        scanner_thread = threading.Thread(target=run_scanner, daemon=True)
+        scanner_thread.start()
+
+        app.logger.info("Network Scanner inizializzato e avviato")
+    except Exception as e:
+        app.logger.error(f"Errore inizializzazione scanner: {e}")
+
+
+# Aggiungi anche il comando CLI per lo scanner
+@app.cli.command('init-scanner')
+def init_scanner_command():
+    """Inizializza il database dello scanner"""
+    from scanner.network_scanner import NetworkScanner, SCANNER_CONFIG
+    scanner = NetworkScanner(SCANNER_CONFIG)
+    print("Database scanner inizializzato.")
+
+
+@app.cli.command('start-scanner')
+def start_scanner_command():
+    """Avvia lo scanner manualmente"""
+    from scanner.network_scanner import NetworkScanner, SCANNER_CONFIG
+    scanner = NetworkScanner(SCANNER_CONFIG)
+    scanner.run_full_scan()
+    print("Scansione completata.")
 
 # ==================== API ENDPOINTS ====================
 
@@ -368,6 +412,9 @@ def inject_menu():
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        if app.config.get('SCANNER_ENABLED', True):
+            init_scanner()
     # Assicurati che il database sia inizializzato
     if not os.path.exists(app.config['MENU_DATABASE']):
         menu_db.init_database()

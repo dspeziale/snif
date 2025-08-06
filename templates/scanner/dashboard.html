@@ -1,0 +1,677 @@
+{% extends "base.html" %}
+
+{% block title %}Network Scanner Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .small-box {
+        border-radius: 0.5rem;
+        position: relative;
+        padding: 20px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+    }
+
+    .small-box .inner {
+        padding: 10px;
+    }
+
+    .small-box .inner h3 {
+        font-size: 38px;
+        font-weight: bold;
+        margin: 0 0 10px 0;
+        white-space: nowrap;
+        padding: 0;
+    }
+
+    .small-box .inner p {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    .small-box .icon {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 70px;
+        opacity: 0.3;
+    }
+
+    .device-type-card {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .device-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,.2);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 20px;
+    }
+
+    .alert-badge {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-online { background: #28a745; color: white; }
+    .status-offline { background: #dc3545; color: white; }
+
+    .scan-status {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .scan-progress {
+        height: 30px;
+        background: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .scan-progress-bar {
+        height: 100%;
+        background: linear-gradient(45deg, #007bff 25%, rgba(0,123,255,.8) 25%, rgba(0,123,255,.8) 50%, #007bff 50%, #007bff 75%, rgba(0,123,255,.8) 75%, rgba(0,123,255,.8));
+        background-size: 1rem 1rem;
+        animation: progress-bar-stripes 1s linear infinite;
+    }
+
+    @keyframes progress-bar-stripes {
+        from { background-position: 0 0; }
+        to { background-position: 1rem 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3">Network Scanner Dashboard</h1>
+                <div>
+                    <button class="btn btn-primary" onclick="triggerScan()">
+                        <i class="bi bi-arrow-clockwise"></i> Scansione Manuale
+                    </button>
+                    <button class="btn btn-success" onclick="exportData()">
+                        <i class="bi bi-download"></i> Esporta Dati
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scan Status -->
+    <div class="scan-status" id="scanStatus" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span><i class="bi bi-radar"></i> Scansione in corso...</span>
+            <span id="scanSubnet"></span>
+        </div>
+        <div class="scan-progress">
+            <div class="scan-progress-bar" style="width: 0%" id="scanProgress"></div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3 id="totalDevices">-</h3>
+                    <p>Dispositivi Totali</p>
+                </div>
+                <div class="icon">
+                    <i class="bi bi-pc-display"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3 id="onlineDevices">-</h3>
+                    <p>Dispositivi Online</p>
+                </div>
+                <div class="icon">
+                    <i class="bi bi-wifi"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3 id="newDevices">-</h3>
+                    <p>Nuovi (7 giorni)</p>
+                </div>
+                <div class="icon">
+                    <i class="bi bi-plus-circle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3 id="unresolvedAlerts" class="alert-badge">-</h3>
+                    <p>Alert Attivi</p>
+                </div>
+                <div class="icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Device Types Chart -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Dispositivi per Tipo</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="deviceTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subnet Status -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Stato Subnet</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="subnetChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Type Cards -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h4>Dispositivi per Categoria</h4>
+        </div>
+        <div id="deviceTypeCards" class="row">
+            <!-- Populated dynamically -->
+        </div>
+    </div>
+
+    <!-- Recent Alerts -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Alert Recenti</h3>
+                    <div class="card-tools">
+                        <a href="/scanner/alerts" class="btn btn-sm btn-outline-primary">
+                            Vedi Tutti
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Dispositivo</th>
+                                    <th>Messaggio</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentAlerts">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Vendors -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Top Vendor</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="vendorChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Last Scan Info -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Ultima Scansione:</strong>
+                            <span id="lastScanTime">-</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Subnet:</strong>
+                            <span id="lastScanSubnet">-</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Dispositivi Trovati:</strong>
+                            <span id="lastScanDevices">-</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Prossima Scansione:</strong>
+                            <span id="nextScanTime">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Variabili globali per i grafici
+let deviceTypesChart, subnetChart, vendorChart;
+
+// Carica dashboard all'avvio
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboard();
+
+    // Aggiorna ogni 30 secondi
+    setInterval(loadDashboard, 30000);
+});
+
+async function loadDashboard() {
+    try {
+        // Carica statistiche
+        const statsResponse = await fetch('/scanner/api/statistics');
+        const statsData = await statsResponse.json();
+
+        if (statsData.success) {
+            updateStatistics(statsData.statistics);
+        }
+
+        // Carica alert recenti
+        const alertsResponse = await fetch('/scanner/api/alerts?resolved=false&limit=5');
+        const alertsData = await alertsResponse.json();
+
+        if (alertsData.success) {
+            updateRecentAlerts(alertsData.alerts);
+        }
+
+    } catch (error) {
+        console.error('Errore caricamento dashboard:', error);
+        showNotification('Errore nel caricamento dei dati', 'error');
+    }
+}
+
+function updateStatistics(stats) {
+    // Aggiorna contatori
+    document.getElementById('totalDevices').textContent = stats.total_devices || 0;
+    document.getElementById('onlineDevices').textContent = stats.online_devices || 0;
+    document.getElementById('newDevices').textContent = stats.new_devices_week || 0;
+
+    // Conta alert non risolti
+    let totalAlerts = 0;
+    if (stats.unresolved_alerts) {
+        stats.unresolved_alerts.forEach(alert => {
+            totalAlerts += alert.count;
+        });
+    }
+    document.getElementById('unresolvedAlerts').textContent = totalAlerts;
+
+    // Aggiorna grafici
+    updateDeviceTypesChart(stats.by_type);
+    updateSubnetChart(stats.by_subnet);
+    updateVendorChart(stats.top_vendors);
+
+    // Aggiorna device type cards
+    updateDeviceTypeCards(stats.by_type);
+
+    // Aggiorna info ultima scansione
+    if (stats.last_scan) {
+        const lastScanTime = new Date(stats.last_scan.time);
+        document.getElementById('lastScanTime').textContent = lastScanTime.toLocaleString('it-IT');
+        document.getElementById('lastScanSubnet').textContent = stats.last_scan.subnet || 'Tutte';
+        document.getElementById('lastScanDevices').textContent = stats.last_scan.devices_found || 0;
+
+        // Calcola prossima scansione (assumendo ogni 10 minuti)
+        const nextScan = new Date(lastScanTime.getTime() + 10 * 60 * 1000);
+        document.getElementById('nextScanTime').textContent = nextScan.toLocaleTimeString('it-IT');
+    }
+}
+
+function updateDeviceTypesChart(data) {
+    const ctx = document.getElementById('deviceTypesChart').getContext('2d');
+
+    if (deviceTypesChart) {
+        deviceTypesChart.destroy();
+    }
+
+    const labels = data.map(item => item.type || 'Sconosciuto');
+    const values = data.map(item => item.count);
+
+    deviceTypesChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    '#007bff',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6610f2',
+                    '#e83e8c',
+                    '#fd7e14',
+                    '#20c997',
+                    '#6c757d'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function updateSubnetChart(data) {
+    const ctx = document.getElementById('subnetChart').getContext('2d');
+
+    if (subnetChart) {
+        subnetChart.destroy();
+    }
+
+    const labels = data.map(item => item.subnet || 'N/A');
+    const online = data.map(item => item.online);
+    const offline = data.map(item => item.offline);
+
+    subnetChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Online',
+                data: online,
+                backgroundColor: '#28a745'
+            }, {
+                label: 'Offline',
+                data: offline,
+                backgroundColor: '#dc3545'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true
+                }
+            }
+        }
+    });
+}
+
+function updateVendorChart(data) {
+    const ctx = document.getElementById('vendorChart').getContext('2d');
+
+    if (vendorChart) {
+        vendorChart.destroy();
+    }
+
+    const labels = data.map(item => item.vendor);
+    const values = data.map(item => item.count);
+
+    vendorChart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Dispositivi',
+                data: values,
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updateDeviceTypeCards(data) {
+    const container = document.getElementById('deviceTypeCards');
+    container.innerHTML = '';
+
+    const icons = {
+        'router': 'bi-router',
+        'switch': 'bi-diagram-3',
+        'server': 'bi-server',
+        'workstation': 'bi-pc-display',
+        'printer': 'bi-printer',
+        'camera': 'bi-camera-video',
+        'ap': 'bi-wifi',
+        'mobile': 'bi-phone',
+        'nas': 'bi-hdd-stack',
+        'voip': 'bi-telephone',
+        'iot': 'bi-cpu',
+        'unknown': 'bi-question-circle'
+    };
+
+    const colors = {
+        'router': 'primary',
+        'switch': 'info',
+        'server': 'success',
+        'workstation': 'secondary',
+        'printer': 'warning',
+        'camera': 'danger',
+        'ap': 'primary',
+        'mobile': 'info',
+        'nas': 'dark',
+        'voip': 'success',
+        'iot': 'warning',
+        'unknown': 'light'
+    };
+
+    data.forEach(item => {
+        const type = item.type || 'unknown';
+        const icon = icons[type] || icons['unknown'];
+        const color = colors[type] || colors['unknown'];
+
+        const card = `
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-3">
+                <div class="card device-type-card text-center" onclick="filterDevices('${type}')">
+                    <div class="card-body">
+                        <i class="bi ${icon} text-${color}" style="font-size: 2rem;"></i>
+                        <h5 class="mt-2 mb-1">${item.count}</h5>
+                        <small class="text-muted">${type}</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += card;
+    });
+}
+
+function updateRecentAlerts(alerts) {
+    const tbody = document.getElementById('recentAlerts');
+    tbody.innerHTML = '';
+
+    if (alerts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nessun alert attivo</td></tr>';
+        return;
+    }
+
+    alerts.forEach(alert => {
+        const severity = {
+            'critical': 'danger',
+            'warning': 'warning',
+            'info': 'info'
+        };
+
+        const badgeClass = severity[alert.severity] || 'secondary';
+        const createdAt = new Date(alert.created_at).toLocaleString('it-IT');
+
+        const row = `
+            <tr>
+                <td><span class="badge bg-${badgeClass}">${alert.alert_type}</span></td>
+                <td>${alert.ip_address}</td>
+                <td>${alert.message}</td>
+                <td><small>${createdAt}</small></td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+async function triggerScan() {
+    if (!confirm('Vuoi avviare una scansione manuale completa?')) {
+        return;
+    }
+
+    try {
+        // Mostra stato scansione
+        document.getElementById('scanStatus').style.display = 'block';
+        document.getElementById('scanSubnet').textContent = 'Tutte le subnet';
+
+        const response = await fetch('/scanner/api/scan/trigger', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({})
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Scansione avviata con successo', 'success');
+
+            // Simula progresso
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                document.getElementById('scanProgress').style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        document.getElementById('scanStatus').style.display = 'none';
+                        loadDashboard();
+                    }, 1000);
+                }
+            }, 1000);
+        } else {
+            showNotification('Errore: ' + data.error, 'error');
+            document.getElementById('scanStatus').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Errore trigger scan:', error);
+        showNotification('Errore nella richiesta', 'error');
+        document.getElementById('scanStatus').style.display = 'none';
+    }
+}
+
+function filterDevices(type) {
+    // Naviga alla pagina dispositivi con filtro
+    window.location.href = `/scanner/devices?type=${type}`;
+}
+
+async function exportData() {
+    try {
+        const response = await fetch('/scanner/api/devices');
+        const data = await response.json();
+
+        if (data.success) {
+            // Crea CSV
+            let csv = 'IP,MAC,Hostname,Vendor,Type,OS,Status,Last Seen\n';
+
+            data.devices.forEach(device => {
+                csv += `"${device.ip_address}","${device.mac_address || ''}","${device.hostname || ''}",`;
+                csv += `"${device.vendor || ''}","${device.device_type || ''}","${device.os_family || ''}",`;
+                csv += `"${device.status}","${device.last_seen}"\n`;
+            });
+
+            // Download CSV
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `network_devices_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+
+            showNotification('Dati esportati con successo', 'success');
+        }
+    } catch (error) {
+        console.error('Errore export:', error);
+        showNotification('Errore nell\'esportazione', 'error');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Implementa notifiche toast o alert
+    const alertClass = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    };
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass[type]} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}
