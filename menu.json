@@ -28,34 +28,6 @@
       ]
     },
     {
-      "type": "item",
-      "text": "Kanban Board",
-      "icon": "bi-kanban",
-      "url": "#"
-    },
-    {
-      "type": "header",
-      "text": "DOCUMENTATION"
-    },
-    {
-      "type": "item",
-      "text": "Installation",
-      "icon": "bi-download",
-      "url": "/docs/introduction"
-    },
-    {
-      "type": "item",
-      "text": "Layout",
-      "icon": "bi-grip-horizontal",
-      "url": "/docs/layout"
-    },
-    {
-      "type": "item",
-      "text": "Color Mode",
-      "icon": "bi-star-fill",
-      "url": "/docs/color-mode"
-    },
-    {
       "type": "header",
       "text": "MULTI LEVEL EXAMPLE"
     },
@@ -92,28 +64,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "header",
-      "text": "LABELS"
-    },
-    {
-      "type": "item",
-      "text": "Important",
-      "icon": "bi-circle text-danger",
-      "url": "#"
-    },
-    {
-      "type": "item",
-      "text": "Warning",
-      "icon": "bi-circle text-warning",
-      "url": "#"
-    },
-    {
-      "type": "item",
-      "text": "Informational",
-      "icon": "bi-circle text-info",
-      "url": "#"
     }
   ]
 }
