@@ -64,6 +64,17 @@
           ]
         }
       ]
+    },
+    {
+      "type": "header",
+      "text": "IMPOSTAZIONI"
+    },
+    {
+      "type": "item",
+      "text": "Gestione Menu",
+      "icon": "bi-speedometer",
+      "url": "/admin/menu",
+      "active": true
     }
   ]
 }
