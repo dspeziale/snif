@@ -10,7 +10,7 @@ import os
 from menu_database import MenuDatabase, MenuItem, migrate_from_json_file
 
 from scanner.scanner_api import scanner_bp
-from scanner.network_scanner import NetworkScanner, SCANNER_CONFIG
+#from scanner.network_scanner import NetworkScanner, SCANNER_CONFIG
 import threading
 
 app = Flask(__name__)
@@ -412,9 +412,9 @@ def inject_menu():
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        if app.config.get('SCANNER_ENABLED', True):
-            init_scanner()
+    # with app.app_context():
+    #     if app.config.get('SCANNER_ENABLED', True):
+    #         init_scanner()
     # Assicurati che il database sia inizializzato
     if not os.path.exists(app.config['MENU_DATABASE']):
         menu_db.init_database()
