@@ -143,38 +143,62 @@ class DatabaseManager:
         conn.commit()
         conn.close()
 
-    def add_device(self, ip, mac=None, hostname=None, vendor=None):
-        """Aggiunge o aggiorna un dispositivo"""
+    def add_device(self, ip, mac=None, hostname=None, vendor=None, device_type=None):
+        """Aggiunge o aggiorna un dispositivo con informazioni migliorate"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        # Controlla se il dispositivo esiste già
-        cursor.execute('SELECT id FROM devices WHERE ip_address = ?', (ip,))
-        existing = cursor.fetchone()
+        try:
+            # Controlla se il dispositivo esiste già
+            cursor.execute('SELECT id, mac_address, hostname, vendor FROM devices WHERE ip_address = ?', (ip,))
+            existing = cursor.fetchone()
 
-        if existing:
-            # Aggiorna dispositivo esistente
-            cursor.execute('''
-                UPDATE devices 
-                SET mac_address = COALESCE(?, mac_address),
-                    hostname = COALESCE(?, hostname),
-                    vendor = COALESCE(?, vendor),
-                    last_seen = CURRENT_TIMESTAMP,
-                    is_active = 1
-                WHERE ip_address = ?
-            ''', (mac, hostname, vendor, ip))
-            device_id = existing['id']
-        else:
-            # Crea nuovo dispositivo
-            cursor.execute('''
-                INSERT INTO devices (ip_address, mac_address, hostname, vendor)
-                VALUES (?, ?, ?, ?)
-            ''', (ip, mac, hostname, vendor))
-            device_id = cursor.lastrowid
+            if existing:
+                # Aggiorna dispositivo esistente - mantieni info esistenti se nuove sono vuote
+                update_fields = []
+                params = []
 
-        conn.commit()
-        conn.close()
-        return device_id
+                if mac and mac != existing['mac_address']:
+                    update_fields.append('mac_address = ?')
+                    params.append(mac)
+
+                if hostname and hostname != existing['hostname']:
+                    update_fields.append('hostname = ?')
+                    params.append(hostname)
+
+                if vendor and vendor != existing['vendor']:
+                    update_fields.append('vendor = ?')
+                    params.append(vendor)
+
+                if device_type:
+                    update_fields.append('device_type = ?')
+                    params.append(device_type)
+
+                # Sempre aggiorna last_seen e is_active
+                update_fields.extend(['last_seen = CURRENT_TIMESTAMP', 'is_active = 1'])
+                params.append(ip)
+
+                if update_fields:
+                    query = f"UPDATE devices SET {', '.join(update_fields)} WHERE ip_address = ?"
+                    cursor.execute(query, params)
+
+                device_id = existing['id']
+            else:
+                # Crea nuovo dispositivo
+                cursor.execute('''
+                    INSERT INTO devices (ip_address, mac_address, hostname, vendor, device_type)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (ip, mac, hostname, vendor, device_type))
+                device_id = cursor.lastrowid
+
+            conn.commit()
+            return device_id
+
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close()
 
     def add_service(self, device_id, port, protocol, service_name=None, version=None, state='open'):
         """Aggiunge o aggiorna un servizio"""
@@ -244,17 +268,19 @@ class DatabaseManager:
         return devices
 
     def get_device_details(self, device_id):
-        """Ottiene dettagli completi di un dispositivo"""
+        """Ottiene dettagli completi di un dispositivo - CORRETTO"""
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        # Dispositivo base
+        # Dispositivo base - CORREZIONE: fetchone() va chiamato una sola volta
         cursor.execute('SELECT * FROM devices WHERE id = ?', (device_id,))
-        device = dict(cursor.fetchone()) if cursor.fetchone() else None
+        device_row = cursor.fetchone()  # Salva il risultato
 
-        if not device:
+        if not device_row:
             conn.close()
             return None
+
+        device = dict(device_row)  # Converte a dict solo se esiste
 
         # Servizi
         cursor.execute('''
@@ -274,16 +300,16 @@ class DatabaseManager:
 
         # SNMP
         cursor.execute('SELECT * FROM snmp_info WHERE device_id = ?', (device_id,))
-        snmp_info = cursor.fetchone()
-        if snmp_info:
-            device['snmp'] = dict(snmp_info)
+        snmp_row = cursor.fetchone()
+        if snmp_row:
+            device['snmp'] = dict(snmp_row)
 
             # Interfacce SNMP
             cursor.execute('''
                 SELECT * FROM snmp_interfaces 
                 WHERE snmp_info_id = ? 
                 ORDER BY interface_index
-            ''', (snmp_info['id'],))
+            ''', (snmp_row['id'],))
             device['snmp']['interfaces'] = [dict(row) for row in cursor.fetchall()]
 
         conn.close()

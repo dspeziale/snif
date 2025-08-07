@@ -197,6 +197,122 @@ def api_stats():
     return jsonify(stats)
 
 
+# Aggiungi al file app.py - endpoint per monitorare lo stato delle scansioni
+
+@app.route('/api/scan/status')
+def api_scan_status():
+    """API per ottenere stato delle scansioni"""
+    try:
+        # Ottieni ultime scansioni
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+
+        # Scansioni recenti (ultime 24 ore)
+        cursor.execute('''
+            SELECT scan_type, target, start_time, end_time, status, devices_found, notes
+            FROM scan_history 
+            WHERE start_time > datetime('now', '-1 day')
+            ORDER BY start_time DESC
+            LIMIT 20
+        ''')
+        recent_scans = [dict(row) for row in cursor.fetchall()]
+
+        # Statistiche scansioni
+        cursor.execute('''
+            SELECT 
+                scan_type,
+                COUNT(*) as total_scans,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as successful,
+                SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as failed,
+                SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) as running,
+                AVG(devices_found) as avg_devices_found
+            FROM scan_history 
+            WHERE start_time > datetime('now', '-7 days')
+            GROUP BY scan_type
+        ''')
+        scan_stats = [dict(row) for row in cursor.fetchall()]
+
+        # Scansioni attive
+        cursor.execute('''
+            SELECT scan_type, target, start_time
+            FROM scan_history 
+            WHERE status = 'running'
+            ORDER BY start_time DESC
+        ''')
+        active_scans = [dict(row) for row in cursor.fetchall()]
+
+        conn.close()
+
+        return jsonify({
+            'recent_scans': recent_scans,
+            'scan_statistics': scan_stats,
+            'active_scans': active_scans,
+            'total_active': len(active_scans)
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/network/summary')
+def api_network_summary():
+    """Riepilogo della rete scoperta"""
+    try:
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+
+        # Statistiche per subnet
+        cursor.execute('''
+            SELECT 
+                SUBSTR(ip_address, 1, INSTR(ip_address||'.', '.', -1, 2)-1) as subnet,
+                COUNT(*) as device_count,
+                COUNT(CASE WHEN device_type IS NOT NULL THEN 1 END) as typed_devices,
+                COUNT(CASE WHEN hostname IS NOT NULL THEN 1 END) as named_devices,
+                COUNT(CASE WHEN mac_address IS NOT NULL THEN 1 END) as mac_known,
+                MAX(last_seen) as last_activity
+            FROM devices 
+            WHERE is_active = 1
+            GROUP BY subnet
+            ORDER BY device_count DESC
+        ''')
+        subnet_stats = [dict(row) for row in cursor.fetchall()]
+
+        # Dispositivi per tipo
+        cursor.execute('''
+            SELECT 
+                COALESCE(device_type, 'unknown') as type,
+                COUNT(*) as count
+            FROM devices 
+            WHERE is_active = 1
+            GROUP BY device_type
+            ORDER BY count DESC
+        ''')
+        device_types = [dict(row) for row in cursor.fetchall()]
+
+        # Vendor distribution
+        cursor.execute('''
+            SELECT 
+                COALESCE(vendor, 'Unknown') as vendor,
+                COUNT(*) as count
+            FROM devices 
+            WHERE is_active = 1
+            GROUP BY vendor
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        vendor_stats = [dict(row) for row in cursor.fetchall()]
+
+        conn.close()
+
+        return jsonify({
+            'subnet_statistics': subnet_stats,
+            'device_types': device_types,
+            'vendor_distribution': vendor_stats
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/config/ranges', methods=['GET', 'POST'])
 def api_config_ranges():
     """API per gestire configurazione range di rete"""
@@ -277,3 +393,4 @@ if __name__ == '__main__':
 
     # Avvia Flask
     app.run(debug=True, host='0.0.0.0', port=5000)
+

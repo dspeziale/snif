@@ -1,3 +1,4 @@
+import platform
 import subprocess
 import xml.etree.ElementTree as ET
 import os
@@ -6,10 +7,17 @@ import socket
 import ipaddress
 import threading
 import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import logging
+
+from perfmon import ObjectType
+from pysnmp.entity.engine import SnmpEngine
 from pysnmp.hlapi import *
-import platform
+from concurrent.futures import ThreadPoolExecutor, as_completed  # NUOVO IMPORT AGGIUNTO
+
+from pysnmp.hlapi.asyncio import nextCmd, CommunityData, UdpTransportTarget, ContextData
+from pysnmp.smi.rfc1902 import ObjectIdentity
 
 
 class NetworkScanner:
@@ -20,6 +28,17 @@ class NetworkScanner:
         self.db = db_manager
         self.cache = cache_manager
         self.setup_logging()
+
+        # Verifica capacità nmap
+        nmap_status = self.check_nmap_capabilities()
+        if nmap_status == "limited":
+            self.logger.warning("Modalità limitata: eseguire come amministratore per funzionalità complete")
+        elif nmap_status == "unstable":
+            self.logger.warning("Nmap instabile rilevato: userò opzioni conservative")
+            # Forza timing più lento
+            self.config.set('nmap.timing', '2')
+        elif not nmap_status:
+            raise Exception("Nmap non funzionante - controllare installazione")
 
     def setup_logging(self):
         """Configura il logging"""
@@ -38,6 +57,47 @@ class NetworkScanner:
         )
 
         self.logger = logging.getLogger(__name__)
+
+    def check_nmap_capabilities(self):
+        """Verifica capacità e privilegi nmap"""
+        try:
+            # Test versione nmap
+            result = subprocess.run(
+                [self.config.get('nmap.path', 'nmap'), '--version'],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode != 0:
+                self.logger.error("Nmap non trovato o non funzionante")
+                return False
+
+            version_info = result.stdout
+            self.logger.info(f"Nmap version: {version_info.split()[1] if len(version_info.split()) > 1 else 'Unknown'}")
+
+            # Test privilegi su Windows
+            if platform.system().lower() == 'windows':
+                # Test se può fare SYN scan (richiede privilegi admin)
+                test_result = subprocess.run(
+                    [self.config.get('nmap.path', 'nmap'), '-sS', '-T4', '--max-retries', '0', '127.0.0.1/32'],
+                    capture_output=True,
+                    text=True,
+                    timeout=15
+                )
+
+                if "requires root privileges" in test_result.stderr or "Operation not permitted" in test_result.stderr:
+                    self.logger.warning("Nmap non ha privilegi amministratore - alcune scansioni potrebbero fallire")
+                    return "limited"
+                elif test_result.returncode in [3221225725, -1073741571]:
+                    self.logger.warning("Nmap ha problemi di memoria/stack su Windows")
+                    return "unstable"
+
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Errore verifica nmap: {e}")
+            return False
 
     def _get_subprocess_encoding(self):
         """Ottiene l'encoding appropriato per subprocess su Windows"""
@@ -132,29 +192,21 @@ class NetworkScanner:
 
         return timing_map.get(timing.lower(), '-T4')
 
-    def _get_scan_ranges(self):
-        """Ottiene tutti i range di rete da scansionare"""
-        # Supporta sia il formato legacy che il nuovo
-        scan_ranges = self.config.get('network.scan_ranges', [])
+    def get_scan_ranges(self):
+        """Ottiene i range di scansione dalla configurazione"""
+        # Range dalla configurazione
+        configured_range = self.config.get('network.scan_range')
 
-        # Supporto per retrocompatibilità
-        legacy_range = self.config.get('network.scan_range')
-        if legacy_range and legacy_range not in scan_ranges:
-            scan_ranges.append(legacy_range)
-
-        # Auto-detection delle reti locali se abilitata
-        if self.config.get('network.auto_detect_local_networks', False):
-            local_networks = self._detect_local_networks()
-            for network in local_networks:
-                if network not in scan_ranges:
-                    scan_ranges.append(network)
-
-        # Se non ci sono range configurati, usa un default
-        if not scan_ranges:
-            scan_ranges = ['192.168.1.0/24']
-
-        self.logger.info(f"Range di scansione configurati: {scan_ranges}")
-        return scan_ranges
+        if isinstance(configured_range, list):
+            return configured_range
+        elif isinstance(configured_range, str):
+            return [configured_range]
+        else:
+            # Fallback: rileva automaticamente la rete locale
+            from .utils import get_local_network_range
+            local_range = get_local_network_range()
+            self.logger.warning(f"Usando range rilevato automaticamente: {local_range}")
+            return [local_range]
 
     def _detect_local_networks(self):
         """Rileva automaticamente le reti locali"""
@@ -293,42 +345,125 @@ class NetworkScanner:
 
         return interfaces
 
+    def _scan_single_range(self, scan_range):
+        """Esegue scansione su un singolo range con comando corretto"""
+        self.logger.info(f"Scansione discovery su range {scan_range}")
+
+        try:
+            # Prepara comando nmap corretto per discovery
+            safe_range = scan_range.replace('/', '_').replace('.', '_')
+            xml_file = f"scanner/xml/discovery_{safe_range}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml"
+
+            # Comando nmap per discovery (CORRETTO - rimossa opzione incompatibile)
+            nmap_cmd = [
+                self.config.get('nmap.path', 'nmap'),
+                '-sn',  # Ping scan only - non compatibile con --defeat-rst-ratelimit
+                '-PE',  # ICMP Echo
+                '-PP',  # ICMP Timestamp
+                '-PS80,443,22,23',  # TCP SYN ping su porte comuni
+                '-T3',  # Timing normale
+                '--max-retries', '2',  # Massimo 2 retry
+                '--max-rtt-timeout', '3000ms',  # Timeout RTT fisso a 3 secondi
+                '--max-scan-delay', '10ms',  # Ritardo massimo tra probe
+                # RIMOSSO: '--defeat-rst-ratelimit',  # Non compatibile con -sn
+                '-oX', xml_file,
+                scan_range
+            ]
+
+            self.logger.debug(f"Comando nmap: {' '.join(nmap_cmd)}")
+
+            # Esegue scansione
+            result = subprocess.run(
+                nmap_cmd,
+                capture_output=True,
+                text=True,
+                timeout=self.config.get('network.single_range_timeout', 120)
+            )
+
+            # Gestione codici di ritorno
+            if result.returncode == 0:
+                # Successo completo
+                pass
+            elif result.returncode == 1:
+                # Warning - continua comunque
+                self.logger.warning(f"Nmap warning per range {scan_range}: {result.stderr}")
+            elif result.returncode in [3221225725, -1073741571]:
+                # Errori Windows - fallback
+                self.logger.warning(f"Errore Windows nmap per {scan_range}, provo comando semplificato")
+                return self._scan_single_range_simple(scan_range)
+            else:
+                # Altri errori - prova fallback
+                self.logger.error(f"Nmap fallito (returncode {result.returncode}): {result.stderr}")
+                return self._scan_single_range_simple(scan_range)
+
+            # Processa risultati
+            devices_found = self._parse_discovery_xml(xml_file)
+
+            # Se non troviamo dispositivi nella rete che contiene il nostro IP, prova fallback
+            if devices_found == 0 and self._is_local_network(scan_range):
+                self.logger.info(f"Nessun dispositivo trovato nella rete locale {scan_range}, provo metodo alternativo")
+                return self._scan_single_range_simple(scan_range)
+
+            return devices_found
+
+        except subprocess.TimeoutExpired:
+            self.logger.warning(f"Timeout scansione {scan_range}, provo metodo semplificato")
+            return self._scan_single_range_simple(scan_range)
+        except Exception as e:
+            self.logger.error(f"Errore scansione discovery range {scan_range}: {e}")
+            return self._scan_single_range_simple(scan_range)
+
     def run_discovery_scan(self):
-        """Esegue scansione di discovery su tutti i range configurati"""
-        scan_ranges = self._get_scan_ranges()
-        self.logger.info(f"Avvio scansione discovery su {len(scan_ranges)} range")
+        """Esegue scansione di discovery della rete su tutti i range configurati"""
+        ranges = self.get_scan_ranges()
+        self.logger.info(f"Range di scansione configurati: {ranges}")
+        self.logger.info(f"Avvio scansione discovery su {len(ranges)} range")
 
-        total_devices_found = 0
-        scan_results = []
+        # Registra scansione
+        scan_id = self.db.add_scan_record('discovery', f"{len(ranges)} ranges")
 
-        # Determina se eseguire scansioni parallele
-        parallel_scans = self.config.get('network.parallel_scans', True)
-        max_concurrent = self.config.get('network.max_concurrent_ranges', 3)
+        try:
+            all_devices_found = 0
+            successful_ranges = 0
+            failed_ranges = []
 
-        if parallel_scans and len(scan_ranges) > 1:
-            # Scansioni parallele
-            total_devices_found = self._run_parallel_discovery(scan_ranges, max_concurrent)
-        else:
-            # Scansioni sequenziali
-            for scan_range in scan_ranges:
-                try:
-                    result = self._run_single_discovery(scan_range)
-                    scan_results.append(result)
-                    total_devices_found += result['devices_found']
-                except Exception as e:
-                    self.logger.error(f"Errore scansione range {scan_range}: {e}")
-                    scan_results.append({
-                        'range': scan_range,
-                        'devices_found': 0,
-                        'error': str(e)
-                    })
+            # Scansione parallela di tutti i range
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                future_to_range = {
+                    executor.submit(self._scan_single_range, range_ip): range_ip
+                    for range_ip in ranges
+                }
 
-        self.logger.info(f"Scansione discovery completata: {total_devices_found} dispositivi totali trovati")
-        return {
-            'total_devices_found': total_devices_found,
-            'ranges_scanned': len(scan_ranges),
-            'results': scan_results
-        }
+                for future in as_completed(future_to_range):
+                    range_ip = future_to_range[future]
+                    try:
+                        devices_count = future.result()
+                        all_devices_found += devices_count
+                        successful_ranges += 1
+                        self.logger.info(f"Range {range_ip}: {devices_count} dispositivi trovati")
+                    except Exception as e:
+                        failed_ranges.append(range_ip)
+                        self.logger.error(f"Errore scansione parallela range {range_ip}: {e}")
+
+            # Aggiorna record scansione
+            status_msg = f"Completata: {successful_ranges}/{len(ranges)} range"
+            if failed_ranges:
+                status_msg += f". Falliti: {failed_ranges}"
+
+            self.db.update_scan_record(scan_id, 'completed', all_devices_found, status_msg)
+
+            self.logger.info(f"Scansione discovery completata: {all_devices_found} dispositivi totali trovati")
+            return {
+                'devices_found': all_devices_found,
+                'successful_ranges': successful_ranges,
+                'failed_ranges': failed_ranges,
+                'total_ranges': len(ranges)
+            }
+
+        except Exception as e:
+            self.logger.error(f"Errore scansione discovery: {e}")
+            self.db.update_scan_record(scan_id, 'error', 0, str(e))
+            raise
 
     def _run_parallel_discovery(self, scan_ranges, max_concurrent):
         """Esegue scansioni discovery in parallelo"""
@@ -415,7 +550,7 @@ class NetworkScanner:
 
     def get_scan_ranges_info(self):
         """Ottiene informazioni sui range di scansione configurati"""
-        scan_ranges = self._get_scan_ranges()
+        scan_ranges = self.get_scan_ranges()
         ranges_info = []
 
         for scan_range in scan_ranges:
@@ -599,14 +734,13 @@ class NetworkScanner:
         return dict(device) if device else None
 
     def _parse_discovery_xml(self, xml_file):
-        """Processa XML di discovery scan"""
+        """Processa XML di discovery scan con informazioni migliorate"""
         if not os.path.exists(xml_file):
             return 0
 
         try:
             tree = ET.parse(xml_file)
             root = tree.getroot()
-
             devices_found = 0
 
             for host in root.findall('host'):
@@ -624,26 +758,45 @@ class NetworkScanner:
 
                 # Estrae MAC se disponibile
                 mac = None
+                vendor = None
                 mac_elem = host.find(".//address[@addrtype='mac']")
                 if mac_elem is not None:
                     mac = mac_elem.get('addr')
-                    vendor = mac_elem.get('vendor')
+                    vendor = mac_elem.get('vendor', '')
                     if not vendor and mac:
                         vendor = self.cache.get_vendor_from_mac(mac)
-                else:
-                    vendor = None
 
                 # Estrae hostname
                 hostname = None
-                hostname_elem = host.find(".//hostname")
-                if hostname_elem is not None:
-                    hostname = hostname_elem.get('name')
+                hostnames = host.findall(".//hostname")
+                if hostnames:
+                    # Prendi il primo hostname non vuoto
+                    for hn in hostnames:
+                        name = hn.get('name', '').strip()
+                        if name and name != ip:
+                            hostname = name
+                            break
+
+                # Prova risoluzione DNS se non abbiamo hostname
+                if not hostname:
+                    try:
+                        import socket
+                        socket.setdefaulttimeout(2)
+                        hostname = socket.gethostbyaddr(ip)[0]
+                        self.logger.debug(f"Risolto hostname per {ip}: {hostname}")
+                    except:
+                        pass
+                    finally:
+                        socket.setdefaulttimeout(None)
+
+                # Stima tipo dispositivo basato su IP
+                device_type = self._estimate_device_type(ip, hostname, mac)
 
                 # Aggiunge dispositivo al database
-                self.db.add_device(ip, mac, hostname, vendor)
+                device_id = self.db.add_device(ip, mac, hostname, vendor, device_type)
                 devices_found += 1
 
-                self.logger.debug(f"Dispositivo trovato: {ip} ({mac}) - {hostname}")
+                self.logger.debug(f"Dispositivo trovato: {ip} ({mac}) - {hostname} [{device_type}]")
 
             return devices_found
 
@@ -870,3 +1023,197 @@ class NetworkScanner:
                 continue
 
         return None
+
+    def _scan_single_range_simple(self, scan_range):
+        """Metodo di scansione semplificato e più affidabile"""
+        self.logger.info(f"Scansione semplificata su range {scan_range}")
+
+        try:
+            safe_range = scan_range.replace('/', '_').replace('.', '_')
+            xml_file = f"scanner/xml/discovery_simple_{safe_range}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml"
+
+            # Comando nmap ultra-semplificato e affidabile
+            nmap_cmd = [
+                self.config.get('nmap.path', 'nmap'),
+                '-sn',  # Solo ping scan
+                '-PE',  # Solo ICMP Echo
+                '-T2',  # Timing lento ma molto stabile
+                '--max-retries', '1',
+                '--host-timeout', '30s',  # Timeout per singolo host
+                '-oX', xml_file,
+                scan_range
+            ]
+
+            self.logger.debug(f"Comando nmap semplificato: {' '.join(nmap_cmd)}")
+
+            result = subprocess.run(
+                nmap_cmd,
+                capture_output=True,
+                text=True,
+                timeout=180  # Timeout più lungo per T2
+            )
+
+            # Accetta anche warning minori
+            if result.returncode in [0, 1]:
+                devices_found = self._parse_discovery_xml(xml_file)
+                self.logger.info(f"Scansione semplificata completata: {devices_found} dispositivi")
+                return devices_found
+            else:
+                self.logger.error(f"Scansione semplificata fallita per {scan_range}: {result.stderr}")
+                return 0
+
+        except Exception as e:
+            self.logger.error(f"Errore scansione semplificata {scan_range}: {e}")
+            return 0
+
+    def _should_have_devices(self, scan_range):
+        """Verifica se un range dovrebbe contenere dispositivi (es. range locale)"""
+        try:
+            from .utils import get_local_network_range, is_private_ip
+            import ipaddress
+
+            # Ottieni network del range
+            network = ipaddress.IPv4Network(scan_range, strict=False)
+
+            # Se è una rete privata e contiene potenziali gateway comuni
+            if any(is_private_ip(str(ip)) for ip in list(network.hosts())[:5]):
+                # Controlla se contiene indirizzi gateway comuni
+                common_gateways = ['.1', '.254', '.100']
+                range_base = str(network.network_address)[:-1]  # es. "192.168.1" da "192.168.1.0"
+
+                for gw_suffix in common_gateways:
+                    potential_gw = range_base + gw_suffix
+                    if ipaddress.IPv4Address(potential_gw) in network:
+                        # Prova ping veloce
+                        if self._quick_ping(potential_gw):
+                            return True
+
+            return False
+        except:
+            return False
+
+    def _quick_ping(self, ip):
+        """Ping veloce per verificare connettività"""
+        try:
+            import platform
+
+            param = '-n' if platform.system().lower() == 'windows' else '-c'
+            timeout_param = '-w' if platform.system().lower() == 'windows' else '-W'
+            timeout_val = '1000' if platform.system().lower() == 'windows' else '1'
+
+            result = subprocess.run(
+                ['ping', param, '1', timeout_param, timeout_val, ip],
+                capture_output=True,
+                timeout=3
+            )
+            return result.returncode == 0
+        except:
+            return False
+
+
+
+    def get_optimized_nmap_command(self, scan_type, target, xml_file):
+        """Genera comando nmap ottimizzato in base al sistema e privilegi"""
+        base_cmd = [self.config.get('nmap.path', 'nmap')]
+
+        if scan_type == 'discovery':
+            if platform.system().lower() == 'windows':
+                # Comando Windows-friendly
+                cmd = base_cmd + [
+                    '-sn',
+                    '-PE', '-PP',  # ICMP Echo e Timestamp
+                    '-PS80,443,22',  # Solo porte essenziali
+                    '-T2',  # Timing lento ma stabile
+                    '--max-retries', '1',
+                    '--max-rtt-timeout', '2000ms',
+                    '--max-scan-delay', '20ms',
+                    '-oX', xml_file,
+                    target
+                ]
+            else:
+                # Comando Linux/Unix
+                cmd = base_cmd + [
+                    '-sn',
+                    '-PE', '-PP', '-PM',
+                    '-PS21,22,23,25,53,80,110,443',
+                    f'-T{self.config.get("nmap.timing", "4")}',
+                    '-oX', xml_file,
+                    target
+                ]
+
+        return cmd
+
+    def _is_local_network(self, scan_range):
+        """Verifica se il range contiene la nostra rete locale"""
+        try:
+            import ipaddress
+            import socket
+
+            # Ottieni il nostro IP
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+
+            # Verifica se il nostro IP è nel range
+            network = ipaddress.IPv4Network(scan_range, strict=False)
+            return ipaddress.IPv4Address(local_ip) in network
+
+        except Exception:
+            return False
+
+    def _estimate_device_type(self, ip, hostname=None, mac=None):
+        """Stima il tipo di dispositivo basato su indizi disponibili"""
+
+        # Analisi basata su hostname
+        if hostname:
+            hostname_lower = hostname.lower()
+
+            if any(term in hostname_lower for term in ['router', 'gateway', 'gw']):
+                return 'router'
+            elif any(term in hostname_lower for term in ['switch', 'sw']):
+                return 'switch'
+            elif any(term in hostname_lower for term in ['ap', 'wifi', 'wireless']):
+                return 'access_point'
+            elif any(term in hostname_lower for term in ['printer', 'print']):
+                return 'printer'
+            elif any(term in hostname_lower for term in ['server', 'srv']):
+                return 'server'
+            elif any(term in hostname_lower for term in ['desktop', 'pc', 'workstation']):
+                return 'desktop'
+            elif any(term in hostname_lower for term in ['laptop', 'notebook']):
+                return 'laptop'
+            elif any(term in hostname_lower for term in ['phone', 'mobile', 'android', 'iphone']):
+                return 'mobile'
+
+        # Analisi basata su MAC (vendor)
+        if mac:
+            vendor_lower = (self.cache.get_vendor_from_mac(mac) or '').lower()
+
+            if any(term in vendor_lower for term in ['cisco', 'juniper', 'mikrotik']):
+                return 'router'
+            elif any(term in vendor_lower for term in ['hp', 'canon', 'epson', 'brother']):
+                return 'printer'
+            elif any(term in vendor_lower for term in ['apple']):
+                if any(term in vendor_lower for term in ['iphone', 'ipad']):
+                    return 'mobile'
+                else:
+                    return 'desktop'
+            elif any(term in vendor_lower for term in ['samsung', 'lg', 'sony']):
+                return 'mobile'
+
+        # Analisi basata su IP
+        if ip:
+            last_octet = int(ip.split('.')[-1])
+
+            # Gateway comuni
+            if last_octet in [1, 254]:
+                return 'router'
+            # Range server
+            elif 10 <= last_octet <= 50:
+                return 'server'
+            # Range stampanti
+            elif 200 <= last_octet <= 220:
+                return 'printer'
+
+        return 'unknown'

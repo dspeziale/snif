@@ -15,7 +15,7 @@ class ConfigManager:
         """Carica la configurazione dal file JSON"""
         default_config = {
             "network": {
-                "scan_ranges": [
+                "scan_range": [
                     "192.168.20.0/24",
                     "192.168.30.0/24",
                     "192.168.40.0/24",
@@ -23,19 +23,19 @@ class ConfigManager:
                     "192.168.60.0/24",
                     "192.168.70.0/24"
                 ],
-                "auto_detect_local_networks": 'true',
-                "timeout": 300,
+                "timeout": 600,
+                "single_range_timeout": 180,
                 "max_retries": 3,
-                "parallel_scans": 'true',
-                "max_concurrent_ranges": 3
+                "parallel_scans": 1
             },
             "nmap": {
                 "path": "nmap",
-                "discovery_args": "-sn -PE -PS22,23,25,53,80,110,443,993,995,1723,3389,5900,8080",
-                "services_args": "-sS -sV -O --version-intensity 5",
+                "discovery_args": "-sn -PE -PP -PS80,443,22,23",
+                "services_args": "-sS -sV --version-intensity 3",
                 "vuln_args": "--script vuln",
-                "snmp_args": "-sU -p 161 --script snmp-info,snmp-interfaces,snmp-processes",
-                "timing": "T4"
+                "snmp_args": "-sU -p 161 --script snmp-info",
+                "timing": "3",
+                "windows_safe_mode": 'true'
             },
             "snmp": {
                 "community_strings": ["public", "private", "community"],
@@ -52,11 +52,11 @@ class ConfigManager:
                 "update_interval_days": 30
             },
             "scanning": {
-                "discovery_interval_minutes": 10,
-                "services_scan_delay_hours": 1,
-                "os_scan_delay_hours": 2,
-                "vuln_scan_delay_hours": 6,
-                "snmp_scan_delay_hours": 4
+                "discovery_interval_minutes": 15,
+                "services_scan_delay_hours": 2,
+                "os_scan_delay_hours": 4,
+                "vuln_scan_delay_hours": 8,
+                "snmp_scan_delay_hours": 6
             },
             "logging": {
                 "level": "INFO",
@@ -65,6 +65,8 @@ class ConfigManager:
                 "backup_count": 5
             }
         }
+
+
 
         if os.path.exists(self.config_file):
             try:
