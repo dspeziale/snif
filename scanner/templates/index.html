@@ -1,634 +1,1135 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Scanner Dashboard - Multi-Subnet</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-shield-check"></i> Network Scanner Multi-Subnet
-            </a>
+{% extends "base.html" %}
+
+{% block title %}Network Scanner Dashboard{% endblock %}
+{% block page_title %}Network Scanner Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
+{% block extra_css %}
+{{ super() }}
+<!-- Dashboard specific styles -->
+<style>
+.dashboard-stats .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-stats .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.scan-progress {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.device-type-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.vulnerability-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.network-map {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px dashed #dee2e6;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+}
+
+.quick-action-btn {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.scan-status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-running { background-color: #007bff; animation: pulse 1.5s infinite; }
+.status-completed { background-color: #28a745; }
+.status-error { background-color: #dc3545; }
+.status-pending { background-color: #6c757d; }
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Statistics -->
+<div class="row dashboard-stats mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="small-box text-bg-primary">
+      <div class="inner">
+        <h3 id="totalDevices">{{ stats.total_devices or 0 }}</h3>
+        <p>Total Devices</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-router"></i>
+      </div>
+      <a href="#devicesSection" class="small-box-footer">
+        More info <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="small-box text-bg-success">
+      <div class="inner">
+        <h3 id="activeDevices">{{ stats.devices_24h or 0 }}</h3>
+        <p>Active (24h)</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-activity"></i>
+      </div>
+      <a href="#" class="small-box-footer" onclick="filterActiveDevices()">
+        More info <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="small-box text-bg-info">
+      <div class="inner">
+        <h3 id="totalServices">{{ stats.total_services or 0 }}</h3>
+        <p>Services Found</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-gear"></i>
+      </div>
+      <a href="#servicesSection" class="small-box-footer">
+        More info <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="small-box text-bg-warning">
+      <div class="inner">
+        <h3 id="totalVulnerabilities">{{ stats.total_vulnerabilities or 0 }}</h3>
+        <p>Vulnerabilities</p>
+      </div>
+      <div class="icon">
+        <i class="bi bi-shield-exclamation"></i>
+      </div>
+      <a href="#vulnerabilitiesSection" class="small-box-footer">
+        More info <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-lightning-charge me-2"></i>Quick Actions
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+          </button>
         </div>
-    </nav>
-
-    <div class="container mt-4">
-        <!-- Dashboard Stats -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4>{{ stats.total_devices }}</h4>
-                                <p class="mb-0">Dispositivi Totali</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="bi bi-router fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4>{{ stats.devices_24h }}</h4>
-                                <p class="mb-0">Attivi (24h)</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="bi bi-activity fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4>{{ stats.total_ranges }}</h4>
-                                <p class="mb-0">Range di Rete</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="bi bi-diagram-3 fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4>{{ stats.total_vulnerabilities }}</h4>
-                                <p class="mb-0">Vulnerabilità</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="bi bi-bug fs-1"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Network Ranges Info -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Range di Rete Configurati</h5>
-                        <div>
-                            <button class="btn btn-sm btn-outline-secondary me-2" onclick="detectNetworks()">
-                                <i class="bi bi-search"></i> Rileva Automaticamente
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshRanges()">
-                                <i class="bi bi-arrow-clockwise"></i> Aggiorna
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm" id="rangesTable">
-                                <thead>
-                                    <tr>
-                                        <th>Range</th>
-                                        <th>Network</th>
-                                        <th>Broadcast</th>
-                                        <th>Host Possibili</th>
-                                        <th>Privato</th>
-                                        <th>Stato</th>
-                                        <th>Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Controlli Scansione Multi-Subnet</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="btn-group me-2" role="group">
-                            <button type="button" class="btn btn-primary" onclick="runDiscoveryAll()">
-                                <i class="bi bi-search"></i> Scansione Discovery (Tutti)
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="updateCache()">
-                                <i class="bi bi-arrow-clockwise"></i> Aggiorna Cache
-                            </button>
-                        </div>
-                        <div class="form-check form-switch d-inline-block ms-3">
-                            <input class="form-check-input" type="checkbox" id="parallelScans" checked>
-                            <label class="form-check-label" for="parallelScans">
-                                Scansioni Parallele
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Devices Table -->
+      </div>
+      <div class="card-body">
         <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Dispositivi Rilevati</h5>
-                        <button class="btn btn-sm btn-outline-primary" onclick="refreshDevices()">
-                            <i class="bi bi-arrow-clockwise"></i> Aggiorna
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="devicesTable">
-                                <thead>
-                                    <tr>
-                                        <th>IP Address</th>
-                                        <th>MAC Address</th>
-                                        <th>Hostname</th>
-                                        <th>Vendor</th>
-                                        <th>Subnet</th>
-                                        <th>OS</th>
-                                        <th>Servizi</th>
-                                        <th>Vulnerabilità</th>
-                                        <th>SNMP</th>
-                                        <th>Ultimo Visto</th>
-                                        <th>Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-primary quick-action-btn w-100" onclick="startDiscoveryScan()">
+              <i class="bi bi-search mb-2 d-block fs-4"></i>
+              <div>Discovery Scan</div>
+              <small class="text-light opacity-75">Find new devices</small>
+            </button>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-info quick-action-btn w-100" onclick="startServicesScan()">
+              <i class="bi bi-gear mb-2 d-block fs-4"></i>
+              <div>Services Scan</div>
+              <small class="text-light opacity-75">Identify running services</small>
+            </button>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-warning quick-action-btn w-100" onclick="startVulnerabilityScan()">
+              <i class="bi bi-shield-exclamation mb-2 d-block fs-4"></i>
+              <div>Security Scan</div>
+              <small class="text-dark opacity-75">Check for vulnerabilities</small>
+            </button>
+          </div>
+          <div class="col-md-3 mb-3">
+            <button class="btn btn-success quick-action-btn w-100" onclick="generateReport()">
+              <i class="bi bi-file-text mb-2 d-block fs-4"></i>
+              <div>Generate Report</div>
+              <small class="text-light opacity-75">Export scan results</small>
+            </button>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <!-- Device Details Modal -->
-    <div class="modal fade" id="deviceModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Dettagli Dispositivo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="deviceModalBody">
-                    <!-- Populated by JavaScript -->
-                </div>
-            </div>
+<!-- Network Overview and Recent Activity -->
+<div class="row mb-4">
+  <!-- Network Ranges -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-diagram-3 me-2"></i>Network Ranges
+        </h3>
+        <div class="card-tools">
+          <button class="btn btn-sm btn-tool" onclick="refreshNetworkRanges()" title="Refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
         </div>
+      </div>
+      <div class="card-body">
+        <div id="networkRangesList">
+          <div class="text-center text-muted">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            Loading network ranges...
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Global variables
-        let devices = [];
-        let networkRanges = [];
-        const deviceModal = new bootstrap.Modal(document.getElementById('deviceModal'));
+  <!-- Recent Scans -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-clock-history me-2"></i>Recent Activity
+        </h3>
+        <div class="card-tools">
+          <button class="btn btn-sm btn-tool" onclick="refreshRecentActivity()" title="Refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="recentActivityList">
+          <div class="text-center text-muted">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            Loading recent activity...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        // Load data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            refreshRanges();
-            refreshDevices();
-        });
+<!-- Devices Table -->
+<div class="row" id="devicesSection">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-router me-2"></i>Discovered Devices
+        </h3>
+        <div class="card-tools">
+          <div class="input-group input-group-sm me-2" style="width: 200px;">
+            <input type="text" class="form-control" placeholder="Search devices..." id="deviceSearchInput">
+            <div class="input-group-append">
+              <button class="btn btn-default" onclick="searchDevices()">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="refreshDevicesList()" title="Refresh Devices">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover mb-0" id="devicesTable">
+            <thead class="table-light">
+              <tr>
+                <th>Status</th>
+                <th>IP Address</th>
+                <th>Hostname</th>
+                <th>Type</th>
+                <th>Vendor</th>
+                <th>Services</th>
+                <th>Vulnerabilities</th>
+                <th>Last Seen</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="devicesTableBody">
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">
+                  <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                  Loading devices...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted" id="devicesCount">Loading...</small>
+          <nav>
+            <ul class="pagination pagination-sm mb-0" id="devicesPagination">
+              <!-- Pagination will be generated by JavaScript -->
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        async function refreshRanges() {
-            try {
-                const response = await fetch('/api/network/ranges');
-                const data = await response.json();
-                networkRanges = data.ranges;
-                updateRangesTable();
-            } catch (error) {
-                console.error('Errore caricamento range:', error);
-                showAlert('Errore caricamento range di rete', 'danger');
-            }
-        }
+<!-- Device Details Modal -->
+<div class="modal fade" id="deviceDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-router me-2"></i>Device Details
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="deviceDetailsContent">
+        <div class="text-center">
+          <div class="spinner-border" role="status"></div>
+          <p class="mt-2">Loading device details...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function updateRangesTable() {
-            const tbody = document.querySelector('#rangesTable tbody');
-            tbody.innerHTML = '';
+<!-- Scan Progress Modal -->
+<div class="modal fade" id="scanProgressModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-search me-2"></i>Scan in Progress
+        </h5>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-3">
+          <div class="scan-progress">
+            <div class="progress mb-3">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                   role="progressbar" style="width: 0%" id="scanProgressBar"></div>
+            </div>
+          </div>
+          <h6 id="scanProgressText">Initializing scan...</h6>
+          <p class="text-muted" id="scanProgressDetails">Please wait while we scan your network</p>
+        </div>
+        <div class="row text-center">
+          <div class="col-4">
+            <strong id="devicesFound">0</strong>
+            <br><small class="text-muted">Devices Found</small>
+          </div>
+          <div class="col-4">
+            <strong id="rangesScanned">0</strong>
+            <br><small class="text-muted">Ranges Scanned</small>
+          </div>
+          <div class="col-4">
+            <strong id="scanDuration">0s</strong>
+            <br><small class="text-muted">Duration</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="cancelScan()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-            networkRanges.forEach((range, index) => {
-                const row = document.createElement('tr');
+{% endblock %}
 
-                if (!range.valid) {
-                    row.classList.add('table-danger');
-                }
+{% block extra_js %}
+<script>
+// Dashboard JavaScript
+class NetworkScannerDashboard {
+  constructor() {
+    this.devices = [];
+    this.networkRanges = [];
+    this.currentPage = 1;
+    this.devicesPerPage = 10;
+    this.searchTerm = '';
+    this.activeScan = null;
+    this.scanStartTime = null;
+    
+    this.init();
+  }
 
-                const subnet = range.range ? range.range.split('/')[0].split('.').slice(0, 3).join('.') : 'N/A';
+  init() {
+    this.loadDashboardData();
+    this.setupEventListeners();
+    this.startAutoRefresh();
+  }
 
-                row.innerHTML = `
-                    <td><strong>${range.range}</strong></td>
-                    <td>${range.network_address || 'N/A'}</td>
-                    <td>${range.broadcast_address || 'N/A'}</td>
-                    <td>${range.num_hosts || 0}</td>
-                    <td>
-                        ${range.is_private ?
-                            '<span class="badge bg-success">Sì</span>' :
-                            '<span class="badge bg-warning">No</span>'
-                        }
-                    </td>
-                    <td>
-                        ${range.valid ?
-                            '<span class="badge bg-success">Valido</span>' :
-                            '<span class="badge bg-danger" title="' + (range.error || '') + '">Errore</span>'
-                        }
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-outline-primary" onclick="scanRange('${range.range}')" title="Scansiona Range"
-                                    ${!range.valid ? 'disabled' : ''}>
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+  async loadDashboardData() {
+    try {
+      await Promise.all([
+        this.loadStats(),
+        this.loadNetworkRanges(),
+        this.loadDevices(),
+        this.loadRecentActivity()
+      ]);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      window.showAlert('Error loading dashboard data', 'error');
+    }
+  }
 
-        async function refreshDevices() {
-            try {
-                const response = await fetch('/api/devices');
-                devices = await response.json();
-                updateDevicesTable();
-            } catch (error) {
-                console.error('Errore caricamento dispositivi:', error);
-                showAlert('Errore caricamento dispositivi', 'danger');
-            }
-        }
+  async loadStats() {
+    try {
+      const response = await fetch('/api/stats');
+      const stats = await response.json();
+      
+      document.getElementById('totalDevices').textContent = stats.total_devices || 0;
+      document.getElementById('activeDevices').textContent = stats.devices_24h || 0;
+      document.getElementById('totalServices').textContent = stats.total_services || 0;
+      document.getElementById('totalVulnerabilities').textContent = stats.total_vulnerabilities || 0;
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  }
 
-        function updateDevicesTable() {
-            const tbody = document.querySelector('#devicesTable tbody');
-            tbody.innerHTML = '';
+  async loadNetworkRanges() {
+    try {
+      const response = await fetch('/api/network/ranges');
+      const data = await response.json();
+      this.networkRanges = data.ranges || [];
+      this.renderNetworkRanges();
+    } catch (error) {
+      console.error('Error loading network ranges:', error);
+      document.getElementById('networkRangesList').innerHTML = 
+        '<div class="text-danger">Error loading network ranges</div>';
+    }
+  }
 
-            devices.forEach(device => {
-                const row = document.createElement('tr');
+  renderNetworkRanges() {
+    const container = document.getElementById('networkRangesList');
+    
+    if (this.networkRanges.length === 0) {
+      container.innerHTML = '<div class="text-muted">No network ranges configured</div>';
+      return;
+    }
 
-                // Determina subnet dall'IP
-                const subnet = device.ip_address ?
-                    device.ip_address.split('.').slice(0, 3).join('.') + '.x' : 'N/A';
+    const rangesHtml = this.networkRanges.map(range => {
+      const statusClass = range.valid ? 'success' : 'danger';
+      const statusIcon = range.valid ? 'check-circle' : 'x-circle';
+      
+      return `
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+          <div>
+            <strong>${range.range}</strong>
+            <br>
+            <small class="text-muted">
+              ${range.num_hosts || 0} hosts • 
+              ${range.is_private ? 'Private' : 'Public'} network
+            </small>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-${statusClass} mb-1">
+              <i class="bi bi-${statusIcon} me-1"></i>
+              ${range.valid ? 'Valid' : 'Error'}
+            </span>
+            <br>
+            <button class="btn btn-sm btn-outline-primary" onclick="dashboard.scanRange('${range.range}')" 
+                    ${!range.valid ? 'disabled' : ''}>
+              <i class="bi bi-search"></i> Scan
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
 
-                row.innerHTML = `
-                    <td><strong>${device.ip_address}</strong></td>
-                    <td>${device.mac_address || '-'}</td>
-                    <td>${device.hostname || '-'}</td>
-                    <td>${device.vendor || '-'}</td>
-                    <td><span class="badge bg-info">${subnet}</span></td>
-                    <td>${device.os_name || '-'}</td>
-                    <td>
-                        <span class="badge bg-primary">${device.services_count}</span>
-                    </td>
-                    <td>
-                        <span class="badge ${device.vulnerabilities_count > 0 ? 'bg-danger' : 'bg-success'}">
-                            ${device.vulnerabilities_count}
-                        </span>
-                    </td>
-                    <td>
-                        ${device.has_snmp ? '<i class="bi bi-check-circle text-success"></i>' : '-'}
-                    </td>
-                    <td>${new Date(device.last_seen).toLocaleString()}</td>
-                    <td>
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-outline-primary" onclick="showDeviceDetails(${device.id})" title="Dettagli">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Scansioni">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" onclick="runServicesScan(${device.id})">Servizi</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="runOSScan(${device.id})">OS Detection</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="runVulnScan(${device.id})">Vulnerabilità</a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="runSNMPScan(${device.id})">SNMP</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+    container.innerHTML = rangesHtml;
+  }
 
-        async function detectNetworks() {
-            showAlert('Rilevamento reti locali in corso...', 'info');
-            try {
-                const response = await fetch('/api/network/detect');
-                const result = await response.json();
+  async loadDevices() {
+    try {
+      const response = await fetch('/api/devices');
+      this.devices = await response.json();
+      this.renderDevicesTable();
+      this.updateDevicesCount();
+    } catch (error) {
+      console.error('Error loading devices:', error);
+      document.getElementById('devicesTableBody').innerHTML = 
+        '<tr><td colspan="9" class="text-center text-danger">Error loading devices</td></tr>';
+    }
+  }
 
-                if (result.status === 'success') {
-                    showAlert(`Rilevamento completato: ${result.ranges.length} reti trovate`, 'success');
-                    networkRanges = result.ranges;
-                    updateRangesTable();
-                } else {
-                    showAlert(`Errore rilevamento: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante il rilevamento reti', 'danger');
-            }
-        }
+  renderDevicesTable() {
+    const tbody = document.getElementById('devicesTableBody');
+    
+    if (this.devices.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No devices found</td></tr>';
+      return;
+    }
 
-        async function runDiscoveryAll() {
-            showAlert('Avvio scansione discovery su tutti i range...', 'info');
-            try {
-                const response = await fetch('/api/scan/discovery');
-                const result = await response.json();
+    // Filter and paginate devices
+    const filteredDevices = this.filterDevices();
+    const startIndex = (this.currentPage - 1) * this.devicesPerPage;
+    const endIndex = startIndex + this.devicesPerPage;
+    const pageDevices = filteredDevices.slice(startIndex, endIndex);
 
-                if (result.status === 'success') {
-                    const totalDevices = result.result.total_devices_found;
-                    const rangesScanned = result.result.ranges_scanned;
-                    showAlert(`Scansione completata: ${totalDevices} dispositivi trovati su ${rangesScanned} range`, 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                console.error('Errore scansione:', error);
-                showAlert('Errore durante la scansione', 'danger');
-            }
-        }
+    const devicesHtml = pageDevices.map(device => {
+      const statusClass = this.getDeviceStatusClass(device);
+      const typeIcon = this.getDeviceTypeIcon(device.device_type);
+      const vulnerabilityBadge = this.getVulnerabilityBadge(device.vulnerabilities_count);
+      
+      return `
+        <tr>
+          <td>
+            <span class="status-indicator ${statusClass}"></span>
+          </td>
+          <td>
+            <strong>${device.ip_address}</strong>
+            ${device.mac_address ? `<br><small class="text-muted">${device.mac_address}</small>` : ''}
+          </td>
+          <td>${device.hostname || '<span class="text-muted">Unknown</span>'}</td>
+          <td>
+            <span class="device-type-icon bg-light text-dark me-1">${typeIcon}</span>
+            ${this.formatDeviceType(device.device_type)}
+          </td>
+          <td>${device.vendor || '<span class="text-muted">Unknown</span>'}</td>
+          <td>
+            <span class="badge bg-primary">${device.services_count || 0}</span>
+          </td>
+          <td>${vulnerabilityBadge}</td>
+          <td>
+            <small>${this.formatTimestamp(device.last_seen)}</small>
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-primary" onclick="dashboard.showDeviceDetails(${device.id})" 
+                      title="View Details">
+                <i class="bi bi-eye"></i>
+              </button>
+              <div class="btn-group" role="group">
+                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                  <i class="bi bi-gear"></i>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="dashboard.scanDevice(${device.id}, 'services')">
+                    <i class="bi bi-gear me-2"></i>Scan Services</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="dashboard.scanDevice(${device.id}, 'os')">
+                    <i class="bi bi-laptop me-2"></i>Detect OS</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="dashboard.scanDevice(${device.id}, 'vulnerabilities')">
+                    <i class="bi bi-shield-exclamation me-2"></i>Security Scan</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="dashboard.scanDevice(${device.id}, 'snmp')">
+                    <i class="bi bi-diagram-3 me-2"></i>SNMP Scan</a></li>
+                </ul>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
-        async function scanRange(networkRange) {
-            // Codifica il range per l'URL (sostituisce . con _ e / con -)
-            const encodedRange = networkRange.replace(/\./g, '_').replace(/\//g, '-');
+    tbody.innerHTML = devicesHtml;
+    this.renderPagination(filteredDevices.length);
+  }
 
-            showAlert(`Avvio scansione su range ${networkRange}...`, 'info');
-            try {
-                const response = await fetch(`/api/scan/discovery/${encodedRange}`);
-                const result = await response.json();
+  getDeviceStatusClass(device) {
+    const lastSeen = new Date(device.last_seen);
+    const now = new Date();
+    const hoursDiff = (now - lastSeen) / (1000 * 60 * 60);
+    
+    if (hoursDiff < 1) return 'status-running';
+    if (hoursDiff < 24) return 'status-completed';
+    return 'status-error';
+  }
 
-                if (result.status === 'success') {
-                    showAlert(`Scansione range completata: ${result.result.devices_found} dispositivi trovati`, 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione range: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante la scansione del range', 'danger');
-            }
-        }
+  getDeviceTypeIcon(deviceType) {
+    const icons = {
+      'router': '🔀',
+      'switch': '🔄',
+      'server': '🖥️',
+      'desktop': '💻',
+      'laptop': '💻',
+      'mobile': '📱',
+      'printer': '🖨️',
+      'access_point': '📡',
+      'unknown': '❓'
+    };
+    return icons[deviceType] || icons['unknown'];
+  }
 
-        async function showDeviceDetails(deviceId) {
-            try {
-                const response = await fetch(`/api/device/${deviceId}`);
-                const device = await response.json();
+  formatDeviceType(deviceType) {
+    if (!deviceType || deviceType === 'unknown') return 'Unknown';
+    return deviceType.charAt(0).toUpperCase() + deviceType.slice(1).replace('_', ' ');
+  }
 
-                let modalContent = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Informazioni Base</h6>
-                            <table class="table table-sm">
-                                <tr><td><strong>IP:</strong></td><td>${device.ip_address}</td></tr>
-                                <tr><td><strong>MAC:</strong></td><td>${device.mac_address || '-'}</td></tr>
-                                <tr><td><strong>Hostname:</strong></td><td>${device.hostname || '-'}</td></tr>
-                                <tr><td><strong>Vendor:</strong></td><td>${device.vendor || '-'}</td></tr>
-                                <tr><td><strong>OS:</strong></td><td>${device.os_name || '-'}</td></tr>
-                                <tr><td><strong>Primo visto:</strong></td><td>${new Date(device.first_seen).toLocaleString()}</td></tr>
-                                <tr><td><strong>Ultimo visto:</strong></td><td>${new Date(device.last_seen).toLocaleString()}</td></tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Statistiche</h6>
-                            <table class="table table-sm">
-                                <tr><td><strong>Subnet:</strong></td><td>${device.ip_address ? device.ip_address.split('.').slice(0, 3).join('.') + '.x' : '-'}</td></tr>
-                                <tr><td><strong>Servizi attivi:</strong></td><td>${device.services ? device.services.length : 0}</td></tr>
-                                <tr><td><strong>Vulnerabilità:</strong></td><td>${device.vulnerabilities ? device.vulnerabilities.length : 0}</td></tr>
-                                <tr><td><strong>SNMP disponibile:</strong></td><td>${device.snmp ? 'Sì' : 'No'}</td></tr>
-                            </table>
-                        </div>
-                    </div>
-                `;
+  getVulnerabilityBadge(count) {
+    if (!count || count === 0) {
+      return '<span class="badge bg-success">0</span>';
+    } else if (count < 5) {
+      return `<span class="badge bg-warning">${count}</span>`;
+    } else {
+      return `<span class="badge bg-danger">${count}</span>`;
+    }
+  }
 
-                if (device.services && device.services.length > 0) {
-                    modalContent += `
-                        <hr>
-                        <h6>Servizi</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead><tr><th>Porta</th><th>Protocollo</th><th>Servizio</th><th>Versione</th><th>Stato</th></tr></thead>
-                                <tbody>
-                    `;
-                    device.services.forEach(service => {
-                        modalContent += `
-                            <tr>
-                                <td>${service.port}</td>
-                                <td>${service.protocol.toUpperCase()}</td>
-                                <td>${service.service_name || '-'}</td>
-                                <td>${service.version || '-'}</td>
-                                <td><span class="badge bg-success">${service.state}</span></td>
-                            </tr>
-                        `;
-                    });
-                    modalContent += '</tbody></table></div>';
-                }
+  formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    
+    return date.toLocaleDateString();
+  }
 
-                if (device.vulnerabilities && device.vulnerabilities.length > 0) {
-                    modalContent += `
-                        <hr>
-                        <h6>Vulnerabilità</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead><tr><th>CVE</th><th>Severity</th><th>Score</th><th>Descrizione</th></tr></thead>
-                                <tbody>
-                    `;
-                    device.vulnerabilities.forEach(vuln => {
-                        const severityClass = vuln.severity === 'HIGH' ? 'danger' : vuln.severity === 'MEDIUM' ? 'warning' : 'info';
-                        modalContent += `
-                            <tr>
-                                <td>${vuln.cve_id}</td>
-                                <td><span class="badge bg-${severityClass}">${vuln.severity}</span></td>
-                                <td>${vuln.score || '-'}</td>
-                                <td>${vuln.description ? vuln.description.substring(0, 100) + '...' : '-'}</td>
-                            </tr>
-                        `;
-                    });
-                    modalContent += '</tbody></table></div>';
-                }
+  filterDevices() {
+    if (!this.searchTerm) return this.devices;
+    
+    const term = this.searchTerm.toLowerCase();
+    return this.devices.filter(device => 
+      device.ip_address.toLowerCase().includes(term) ||
+      (device.hostname && device.hostname.toLowerCase().includes(term)) ||
+      (device.vendor && device.vendor.toLowerCase().includes(term)) ||
+      (device.device_type && device.device_type.toLowerCase().includes(term))
+    );
+  }
 
-                if (device.snmp) {
-                    modalContent += `
-                        <hr>
-                        <h6>Informazioni SNMP</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <table class="table table-sm">
-                                    <tr><td><strong>Community:</strong></td><td>${device.snmp.community_string}</td></tr>
-                                    <tr><td><strong>Version:</strong></td><td>${device.snmp.version}</td></tr>
-                                    <tr><td><strong>System Name:</strong></td><td>${device.snmp.system_name || '-'}</td></tr>
-                                    <tr><td><strong>System Description:</strong></td><td>${device.snmp.system_descr || '-'}</td></tr>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                }
+  renderPagination(totalDevices) {
+    const totalPages = Math.ceil(totalDevices / this.devicesPerPage);
+    const pagination = document.getElementById('devicesPagination');
+    
+    if (totalPages <= 1) {
+      pagination.innerHTML = '';
+      return;
+    }
 
-                document.getElementById('deviceModalBody').innerHTML = modalContent;
-                deviceModal.show();
+    let paginationHtml = '';
+    
+    // Previous button
+    paginationHtml += `
+      <li class="page-item ${this.currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="dashboard.changePage(${this.currentPage - 1})">Previous</a>
+      </li>
+    `;
+    
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= this.currentPage - 2 && i <= this.currentPage + 2)) {
+        paginationHtml += `
+          <li class="page-item ${i === this.currentPage ? 'active' : ''}">
+            <a class="page-link" href="#" onclick="dashboard.changePage(${i})">${i}</a>
+          </li>
+        `;
+      } else if (i === this.currentPage - 3 || i === this.currentPage + 3) {
+        paginationHtml += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+      }
+    }
+    
+    // Next button
+    paginationHtml += `
+      <li class="page-item ${this.currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="dashboard.changePage(${this.currentPage + 1})">Next</a>
+      </li>
+    `;
+    
+    pagination.innerHTML = paginationHtml;
+  }
 
-            } catch (error) {
-                console.error('Errore caricamento dettagli:', error);
-                showAlert('Errore caricamento dettagli dispositivo', 'danger');
-            }
-        }
+  updateDevicesCount() {
+    const filtered = this.filterDevices();
+    const start = (this.currentPage - 1) * this.devicesPerPage + 1;
+    const end = Math.min(start + this.devicesPerPage - 1, filtered.length);
+    
+    document.getElementById('devicesCount').textContent = 
+      `Showing ${start}-${end} of ${filtered.length} devices`;
+  }
 
-        async function runServicesScan(deviceId) {
-            showAlert('Avvio scansione servizi...', 'info');
-            try {
-                const response = await fetch(`/api/scan/services/${deviceId}`);
-                const result = await response.json();
+  async loadRecentActivity() {
+    try {
+      const response = await fetch('/api/scan/status');
+      const data = await response.json();
+      this.renderRecentActivity(data.recent_scans || []);
+    } catch (error) {
+      console.error('Error loading recent activity:', error);
+      document.getElementById('recentActivityList').innerHTML = 
+        '<div class="text-danger">Error loading recent activity</div>';
+    }
+  }
 
-                if (result.status === 'success') {
-                    showAlert(`Scansione servizi completata: ${result.result.services_found} servizi trovati`, 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione servizi: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante la scansione servizi', 'danger');
-            }
-        }
+  renderRecentActivity(scans) {
+    const container = document.getElementById('recentActivityList');
+    
+    if (scans.length === 0) {
+      container.innerHTML = '<div class="text-muted">No recent activity</div>';
+      return;
+    }
 
-        async function runOSScan(deviceId) {
-            showAlert('Avvio rilevamento OS...', 'info');
-            try {
-                const response = await fetch(`/api/scan/os/${deviceId}`);
-                const result = await response.json();
+    const activityHtml = scans.slice(0, 5).map(scan => {
+      const statusClass = this.getScanStatusClass(scan.status);
+      const statusIcon = this.getScanStatusIcon(scan.status);
+      
+      return `
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+          <div>
+            <strong>${this.formatScanType(scan.scan_type)}</strong>
+            <br>
+            <small class="text-muted">${scan.target}</small>
+          </div>
+          <div class="text-end">
+            <span class="scan-status-indicator ${statusClass}"></span>
+            <span class="badge bg-${this.getScanStatusBadgeClass(scan.status)}">
+              <i class="bi bi-${statusIcon} me-1"></i>
+              ${this.formatScanStatus(scan.status)}
+            </span>
+            <br>
+            <small class="text-muted">${this.formatTimestamp(scan.start_time)}</small>
+          </div>
+        </div>
+      `;
+    }).join('');
 
-                if (result.status === 'success') {
-                    showAlert('Rilevamento OS completato', 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore rilevamento OS: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante il rilevamento OS', 'danger');
-            }
-        }
+    container.innerHTML = activityHtml;
+  }
 
-        async function runVulnScan(deviceId) {
-            showAlert('Avvio scansione vulnerabilità...', 'info');
-            try {
-                const response = await fetch(`/api/scan/vulnerabilities/${deviceId}`);
-                const result = await response.json();
+  getScanStatusClass(status) {
+    const classes = {
+      'running': 'status-running',
+      'completed': 'status-completed',
+      'error': 'status-error',
+      'pending': 'status-pending'
+    };
+    return classes[status] || 'status-pending';
+  }
 
-                if (result.status === 'success') {
-                    showAlert(`Scansione vulnerabilità completata: ${result.result.vulnerabilities_found} vulnerabilità trovate`, 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione vulnerabilità: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante la scansione vulnerabilità', 'danger');
-            }
-        }
+  getScanStatusIcon(status) {
+    const icons = {
+      'running': 'arrow-clockwise',
+      'completed': 'check-circle',
+      'error': 'x-circle',
+      'pending': 'clock'
+    };
+    return icons[status] || 'clock';
+  }
 
-        async function runSNMPScan(deviceId) {
-            showAlert('Avvio scansione SNMP...', 'info');
-            try {
-                const response = await fetch(`/api/scan/snmp/${deviceId}`);
-                const result = await response.json();
+  getScanStatusBadgeClass(status) {
+    const classes = {
+      'running': 'primary',
+      'completed': 'success',
+      'error': 'danger',
+      'pending': 'secondary'
+    };
+    return classes[status] || 'secondary';
+  }
 
-                if (result.status === 'success') {
-                    if (result.result.snmp_available) {
-                        showAlert('Scansione SNMP completata', 'success');
-                    } else {
-                        showAlert('SNMP non disponibile su questo dispositivo', 'warning');
-                    }
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione SNMP: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante la scansione SNMP', 'danger');
-            }
-        }
+  formatScanType(scanType) {
+    const types = {
+      'discovery': 'Network Discovery',
+      'services': 'Services Scan',
+      'os': 'OS Detection',
+      'vulnerabilities': 'Security Scan',
+      'snmp': 'SNMP Scan'
+    };
+    return types[scanType] || scanType;
+  }
 
-        async function updateCache() {
-            showAlert('Aggiornamento cache in corso...', 'info');
-            try {
-                const response = await fetch('/api/cache/update');
-                const result = await response.json();
+  formatScanStatus(status) {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }
 
-                if (result.status === 'success') {
-                    showAlert('Cache aggiornata con successo', 'success');
-                } else {
-                    showAlert(`Errore aggiornamento cache: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                showAlert('Errore durante aggiornamento cache', 'danger');
-            }
-        }
+  setupEventListeners() {
+    // Search input
+    document.getElementById('deviceSearchInput').addEventListener('input', (e) => {
+      this.searchTerm = e.target.value;
+      this.currentPage = 1;
+      this.renderDevicesTable();
+      this.updateDevicesCount();
+    });
 
-        function showAlert(message, type) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+    // Enter key for search
+    document.getElementById('deviceSearchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        this.searchDevices();
+      }
+    });
+  }
 
-            document.body.appendChild(alertDiv);
+  startAutoRefresh() {
+    // Refresh stats every 30 seconds
+    setInterval(() => {
+      this.loadStats();
+      this.loadRecentActivity();
+    }, 30000);
 
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
+    // Refresh devices every 2 minutes
+    setInterval(() => {
+      this.loadDevices();
+    }, 120000);
+  }
 
-        // Event listeners
-        document.getElementById('parallelScans').addEventListener('change', async function() {
-            try {
-                const response = await fetch('/api/config/ranges', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        parallel_scans: this.checked
-                    })
-                });
+  // Public methods for UI interactions
+  changePage(page) {
+    const totalPages = Math.ceil(this.filterDevices().length / this.devicesPerPage);
+    if (page >= 1 && page <= totalPages) {
+      this.currentPage = page;
+      this.renderDevicesTable();
+      this.updateDevicesCount();
+    }
+  }
 
-                if (response.ok) {
-                    showAlert(`Scansioni parallele ${this.checked ? 'abilitate' : 'disabilitate'}`, 'info');
-                }
-            } catch (error) {
-                console.error('Errore aggiornamento configurazione:', error);
-            }
-        });
+  searchDevices() {
+    this.currentPage = 1;
+    this.renderDevicesTable();
+    this.updateDevicesCount();
+  }
 
-        // Auto-refresh ogni 30 secondi
-        setInterval(() => {
-            refreshDevices();
-        }, 30000);
-    </script>
-</body>
-</html>
+  async refreshNetworkRanges() {
+    await this.loadNetworkRanges();
+    window.showAlert('Network ranges refreshed', 'success', 3000);
+  }
+
+  async refreshRecentActivity() {
+    await this.loadRecentActivity();
+    window.showAlert('Recent activity refreshed', 'success', 3000);
+  }
+
+  async refreshDevicesList() {
+    await this.loadDevices();
+    window.showAlert('Devices list refreshed', 'success', 3000);
+  }
+
+  async showDeviceDetails(deviceId) {
+    const modal = new bootstrap.Modal(document.getElementById('deviceDetailsModal'));
+    modal.show();
+    
+    try {
+      const response = await fetch(`/api/device/${deviceId}`);
+      const device = await response.json();
+      
+      this.renderDeviceDetails(device);
+    } catch (error) {
+      console.error('Error loading device details:', error);
+      document.getElementById('deviceDetailsContent').innerHTML = 
+        '<div class="text-center text-danger">Error loading device details</div>';
+    }
+  }
+
+  renderDeviceDetails(device) {
+    const content = document.getElementById('deviceDetailsContent');
+    
+    let detailsHtml = `
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h6>Basic Information</h6>
+          <table class="table table-sm">
+            <tr><td><strong>IP Address:</strong></td><td>${device.ip_address}</td></tr>
+            <tr><td><strong>MAC Address:</strong></td><td>${device.mac_address || 'Unknown'}</td></tr>
+            <tr><td><strong>Hostname:</strong></td><td>${device.hostname || 'Unknown'}</td></tr>
+            <tr><td><strong>Device Type:</strong></td><td>${this.formatDeviceType(device.device_type)}</td></tr>
+            <tr><td><strong>Vendor:</strong></td><td>${device.vendor || 'Unknown'}</td></tr>
+            <tr><td><strong>OS:</strong></td><td>${device.os_name || 'Unknown'}</td></tr>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <h6>Discovery Information</h6>
+          <table class="table table-sm">
+            <tr><td><strong>First Seen:</strong></td><td>${this.formatTimestamp(device.first_seen)}</td></tr>
+            <tr><td><strong>Last Seen:</strong></td><td>${this.formatTimestamp(device.last_seen)}</td></tr>
+            <tr><td><strong>Services:</strong></td><td>${(device.services || []).length}</td></tr>
+            <tr><td><strong>Vulnerabilities:</strong></td><td>${(device.vulnerabilities || []).length}</td></tr>
+            <tr><td><strong>SNMP:</strong></td><td>${device.snmp ? 'Available' : 'Not Available'}</td></tr>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // Services section
+    if (device.services && device.services.length > 0) {
+      detailsHtml += `
+        <h6>Services</h6>
+        <div class="table-responsive mb-4">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr><th>Port</th><th>Protocol</th><th>Service</th><th>Version</th><th>State</th></tr>
+            </thead>
+            <tbody>
+              ${device.services.map(service => `
+                <tr>
+                  <td>${service.port}</td>
+                  <td>${service.protocol.toUpperCase()}</td>
+                  <td>${service.service_name || 'Unknown'}</td>
+                  <td>${service.version || 'Unknown'}</td>
+                  <td><span class="badge bg-success">${service.state}</span></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // Vulnerabilities section
+    if (device.vulnerabilities && device.vulnerabilities.length > 0) {
+      detailsHtml += `
+        <h6>Vulnerabilities</h6>
+        <div class="table-responsive mb-4">
+          <table class="table table-sm table-striped">
+            <thead>
+              <tr><th>CVE</th><th>Severity</th><th>Score</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              ${device.vulnerabilities.slice(0, 10).map(vuln => `
+                <tr>
+                  <td><code>${vuln.cve_id}</code></td>
+                  <td><span class="badge bg-${this.getVulnerabilitySeverityClass(vuln.severity)}">${vuln.severity}</span></td>
+                  <td>${vuln.score || 'N/A'}</td>
+                  <td>${vuln.description ? vuln.description.substring(0, 100) + '...' : 'No description'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    content.innerHTML = detailsHtml;
+  }
+
+  getVulnerabilitySeverityClass(severity) {
+    const classes = {
+      'CRITICAL': 'danger',
+      'HIGH': 'danger',
+      'MEDIUM': 'warning',
+      'LOW': 'info',
+      'UNKNOWN': 'secondary'
+    };
+    return classes[severity] || 'secondary';
+  }
+
+  async scanRange(range) {
+    await this.startScan('discovery', range);
+  }
+
+  async scanDevice(deviceId, scanType) {
+    await this.startScan(scanType, deviceId);
+  }
+
+  async startScan(scanType, target) {
+    this.showScanProgressModal(scanType);
+    
+    try {
+      let endpoint;
+      switch (scanType) {
+        case 'discovery':
+          endpoint = '/api/scan/discovery';
+          break;
+        case 'services':
+          endpoint = `/api/scan/services/${target}`;
+          break;
+        case 'os':
+          endpoint = `/api/scan/os/${target}`;
+          break;
+        case 'vulnerabilities':
+          endpoint = `/api/scan/vulnerabilities/${target}`;
+          break;
+        case 'snmp':
+          endpoint = `/api/scan/snmp/${target}`;
+          break;
+        default:
+          throw new Error('Unknown scan type');
+      }
+
+      const response = await fetch(endpoint);
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        this.handleScanSuccess(scanType, result.result);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Scan error:', error);
+      this.handleScanError(error.message);
+    }
+  }
+
+  showScanProgressModal(scanType) {
+    const modal = new bootstrap.Modal(document.getElementById('scanProgressModal'));
+    modal.show();
+    
+    this.scanStartTime = Date.now();
+    this.updateScanProgress(scanType, 0, 'Initializing...');
+    
+    // Start progress simulation
+    this.simulateScanProgress(scanType);
+  }
+
+  simulateScanProgress(scanType) {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 10;
+      if (progress >= 95) {
+        clearInterval(interval);
+        progress = 95;
+      }
+      
+      this.updateScanProgress(scanType, progress, this.getScanProgressMessage(scanType, progress));
+    }, 1000);
+  }
+
+  updateScanProgress(scanType, progress, message) {
+    document.getElementById('scanProgressBar').style.width = `${progress}%`;
+    document.getElementById('scanProgressText').textContent = message;
+    document.getElementById('scanProgressDetails').textContent = `Scanning ${scanType}...`;
+    
+    const duration = this.scanStartTime ? Math.floor((Date.now() - this.scanStartTime) / 1000) : 0;
+    document.getElementById('scanDuration').textContent = `${duration}s`;
+  }
+
+  getScanProgressMessage(scanType, progress) {
+    if (progress < 20) return 'Initializing scan...';
+    if (progress < 40) return 'Discovering targets...';
+    if (progress < 60) return 'Scanning network...';
+    if (progress < 80) return 'Analyzing results...';
+    if (progress < 95) return 'Finalizing...';
+    return 'Completing scan...';
+  }
+
+  handleScanSuccess(scanType, result) {
+    this.updateScanProgress(scanType, 100, 'Scan completed successfully!');
+    
+    // Update stats based on scan type
+    if (result.devices_found !== undefined) {
+      document.getElementById('devicesFound').textContent = result.devices_found;
+    }
+    if (result.services_found !== undefined) {
+      document.getElementById('devicesFound').textContent = result.services_found;
+    }
+
+    setTimeout(() => {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('scanProgressModal'));
+      modal.hide();
+      
+      window.showAlert(`${this.formatScanType(scanType)} completed successfully!`, 'success');
+      
+      // Refresh relevant data
+      this.loadDashboardData();
+    }, 2000);
+  }
+
+  handleScanError(errorMessage) {
+    this.updateScanProgress('', 100, 'Scan failed!');
+    document.getElementById('scanProgressDetails').textContent = errorMessage;
+    
+    setTimeout(() => {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('scanProgressModal'));
+      modal.hide();
+      
+      window.showAlert(`Scan failed: ${errorMessage}`, 'error');
+    }, 3000);
+  }
+
+  cancelScan() {
+    // TODO: Implement scan cancellation
+    const modal = bootstrap.Modal.getInstance(document.getElementById('scanProgressModal'));
+    modal.hide();
+    
+    window.showAlert('Scan cancelled', 'warning');
+  }
+}
+
+// Global functions for quick actions
+function startDiscoveryScan() {
+  dashboard.startScan('discovery', 'network');
+}
+
+function startServicesScan() {
+  // Scan services on all recently discovered devices
+  window.showAlert('Starting services scan on all devices...', 'info');
+  // TODO: Implement bulk services scan
+}
+
+function startVulnerabilityScan() {
+  // Scan for vulnerabilities on all devices
+  window.showAlert('Starting security scan on all devices...', 'info');
+  // TODO: Implement bulk vulnerability scan
+}
+
+function generateReport() {
+  window.showLoading('Generating Report', 'Please wait while we compile the network scan report...');
+  
+  // Simulate report generation
+  setTimeout(() => {
+    window.hideLoading();
+    window.showAlert('Report generated successfully!', 'success');
+    // TODO: Implement actual report generation and download
+  }, 3000);
+}
+
+function filterActiveDevices() {
+  dashboard.searchTerm = '';
+  document.getElementById('deviceSearchInput').value = '';
+  // TODO: Add date filter for active devices
+  dashboard.renderDevicesTable();
+}
+
+// Initialize dashboard when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  window.dashboard = new NetworkScannerDashboard();
+});
+</script>
+{% endblock %}
