@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="it">
+<!--begin::Head-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>{% block title %}AdminLTE v4 | Dashboard{% endblock %}</title>
+  <!--begin::Accessibility Meta Tags-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <!--end::Accessibility Meta Tags-->
+
+  <!--begin::Primary Meta Tags-->
+  <meta name="title" content="{% block meta_title %}AdminLTE v4 | Dashboard{% endblock %}" />
+  <meta name="author" content="ColorlibHQ" />
+  <meta name="description" content="{% block meta_description %}AdminLTE Dashboard Flask Application{% endblock %}" />
+  <!--end::Primary Meta Tags-->
+
+  <!--begin::Fonts-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+    integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print"
+    onload="this.media='all'" />
+  <!--end::Fonts-->
+
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(OverlayScrollbars)-->
+
+  <!--begin::Third Party Plugin(Bootstrap Icons)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(Bootstrap Icons)-->
+
+  <!--begin::Required Plugin(AdminLTE)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/css/adminlte.min.css" />
+  <!--end::Required Plugin(AdminLTE)-->
+
+  {% block extra_css %}
+  <!-- Personalizzazioni CSS per tema light -->
+  <style>
+    /* Sidebar con tema light e testi più scuri */
+    .app-sidebar[data-bs-theme="light"] {
+      background-color: #f8f9fa !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link {
+      color: #212529 !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link:hover {
+      background-color: #e9ecef !important;
+      color: #000 !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link.active {
+      background-color: #007bff !important;
+      color: #fff !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-header {
+      color: #6c757d !important;
+      font-weight: 600;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .brand-text {
+      color: #212529 !important;
+    }
+
+    /* Testo più scuro per tutto il contenuto */
+    .app-content {
+      color: #212529;
+    }
+
+    .card-title {
+      color: #212529 !important;
+      font-weight: 600;
+    }
+
+    .card-body {
+      color: #212529;
+    }
+
+    /* Breadcrumb con testi più scuri */
+    .breadcrumb-item a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+      color: #6c757d;
+    }
+
+    /* Header con testi più scuri */
+    h1, h2, h3, h4, h5, h6 {
+      color: #212529 !important;
+    }
+
+    /* Testi paragrafi più scuri */
+    p, div, span {
+      color: #212529;
+    }
+
+    /* Navbar con tema light */
+    .app-header {
+      background-color: #fff !important;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .navbar-nav .nav-link {
+      color: #212529 !important;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #007bff !important;
+    }
+  </style>
+  {% endblock %}
+</head>
+<!--end::Head-->
+
+<!--begin::Body-->
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Start Navbar Links-->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+              <i class="bi bi-list"></i>
+            </a>
+          </li>
+          <li class="nav-item d-none d-md-block">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item d-none d-md-block">
+            <a href="{{ url_for('about') }}" class="nav-link">About</a>
+          </li>
+        </ul>
+        <!--end::Start Navbar Links-->
+
+        <!--begin::End Navbar Links-->
+        <ul class="navbar-nav ms-auto">
+          <!--begin::Navbar Search-->
+          <li class="nav-item">
+            <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+              <i class="bi bi-search"></i>
+            </a>
+          </li>
+          <!--end::Navbar Search-->
+
+          <!--begin::Messages Dropdown Menu-->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+              <i class="bi bi-chat-text"></i>
+              <span class="navbar-badge badge text-bg-danger">3</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <a href="#" class="dropdown-item">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <img src="{{ url_for('static', filename='assets/img/avatar.png')}}" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
+                  </div>
+                  <div class="flex-grow-1">
+                    <h3 class="dropdown-item-title">
+                      Utente Demo
+                      <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
+                    </h3>
+                    <p class="fs-7">Messaggio di esempio...</p>
+                    <p class="fs-7 text-secondary">
+                      <i class="bi bi-clock-fill me-1"></i> 4 Ore fa
+                    </p>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item dropdown-footer">Vedi tutti i messaggi</a>
+            </div>
+          </li>
+          <!--end::Messages Dropdown Menu-->
+
+          <!--begin::Notifications Dropdown Menu-->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+              <i class="bi bi-bell-fill"></i>
+              <span class="navbar-badge badge text-bg-warning">15</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <span class="dropdown-item dropdown-header">15 Notifiche</span>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <i class="bi bi-envelope me-2"></i> 4 nuovi messaggi
+                <span class="float-end text-secondary fs-7">3 min</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item dropdown-footer">Vedi tutte le notifiche</a>
+            </div>
+          </li>
+          <!--end::Notifications Dropdown Menu-->
+
+          <!--begin::Fullscreen Toggle-->
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+              <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+              <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+            </a>
+          </li>
+          <!--end::Fullscreen Toggle-->
+
+          <!--begin::User Menu Dropdown-->
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <img src="{{ url_for('static', filename='assets/img/daniele.png')}}" class="user-image rounded-circle shadow" alt="User Image" />
+              <span class="d-none d-md-inline">Admin User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <li class="user-header text-bg-primary">
+                <img src="" class="rounded-circle shadow" alt="User Image" />
+                <p>
+                  Admin User - Web Developer
+                  <small>Membro da Nov. 2023</small>
+                </p>
+              </li>
+              <li class="user-body">
+                <div class="row">
+                  <div class="col-4 text-center"><a href="#">Followers</a></div>
+                  <div class="col-4 text-center"><a href="#">Vendite</a></div>
+                  <div class="col-4 text-center"><a href="#">Amici</a></div>
+                </div>
+              </li>
+              <li class="user-footer">
+                <a href="#" class="btn btn-default btn-flat">Profilo</a>
+                <a href="#" class="btn btn-default btn-flat float-end">Logout</a>
+              </li>
+            </ul>
+          </li>
+          <!--end::User Menu Dropdown-->
+        </ul>
+        <!--end::End Navbar Links-->
+      </div>
+      <!--end::Container-->
+    </nav>
+    <!--end::Header-->
+
+    <!--begin::Sidebar-->
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="light">
+      <!--begin::Sidebar Brand-->
+      <div class="sidebar-brand">
+        <a href="{{ url_for('index') }}" class="brand-link">
+          <img src="{{ url_for('static', filename='assets/img/AdminLTELogo.png')}}" alt="AdminLTE Logo"
+               class="brand-image opacity-75 shadow" />
+          <span class="brand-text fw-light">AdminLTE 4</span>
+        </a>
+      </div>
+      <!--end::Sidebar Brand-->
+
+      <!--begin::Sidebar Wrapper-->
+      <div class="sidebar-wrapper">
+        <nav class="mt-2">
+          <!--begin::Sidebar Menu-->
+          <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
+              aria-label="Main navigation" data-accordion="false" id="navigation">
+
+            <li class="nav-item {% if request.endpoint == 'index' %}menu-open{% endif %}">
+              <a href="#" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="nav-icon bi bi-speedometer"></i>
+                <p>
+                  Dashboard
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Dashboard v1</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Dashboard v2</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Dashboard v3</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-palette"></i>
+                <p>Theme Generate</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-box-seam-fill"></i>
+                <p>
+                  Widgets
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ url_for('widgets') }}" class="nav-link {% if request.endpoint == 'widgets' %}active{% endif %}">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Small Box</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Info Box</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Cards</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-clipboard-fill"></i>
+                <p>
+                  Layout Options
+                  <span class="nav-badge badge text-bg-secondary me-3">6</span>
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Default Sidebar</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Fixed Sidebar</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Fixed Header</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Fixed Footer</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Fixed Complete</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Layout <small>+ Custom Area </small></p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Sidebar Mini</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Sidebar Mini <small>+ Collapsed</small></p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Sidebar Mini <small>+ Logo Switch</small></p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Layout RTL</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-tree-fill"></i>
+                <p>
+                  UI Elements
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>General</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Icons</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Timeline</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-pencil-square"></i>
+                <p>
+                  Forms
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ url_for('forms') }}" class="nav-link {% if request.endpoint == 'forms' %}active{% endif %}">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>General Elements</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-table"></i>
+                <p>
+                  Tables
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{{ url_for('tables') }}" class="nav-link {% if request.endpoint == 'tables' %}active{% endif %}">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Simple Tables</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-header">EXAMPLES</li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                <p>
+                  Auth
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                    <p>
+                      Version 1
+                      <i class="nav-arrow bi bi-chevron-right"></i>
+                    </p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-circle"></i>
+                        <p>Login</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-circle"></i>
+                        <p>Register</p>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                    <p>
+                      Version 2
+                      <i class="nav-arrow bi bi-chevron-right"></i>
+                    </p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-circle"></i>
+                        <p>Login</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-circle"></i>
+                        <p>Register</p>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Lockscreen</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-header">DOCUMENTATIONS</li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-download"></i>
+                <p>Installation</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-grip-horizontal"></i>
+                <p>Layout</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-star-half"></i>
+                <p>Color Mode</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-ui-checks-grid"></i>
+                <p>
+                  Components
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Main Header</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Main Sidebar</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-filetype-js"></i>
+                <p>
+                  Javascript
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Treeview</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-browser-edge"></i>
+                <p>Browser Support</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-hand-thumbs-up-fill"></i>
+                <p>How To Contribute</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-question-circle-fill"></i>
+                <p>FAQ</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+                <i class="nav-icon bi bi-patch-check-fill"></i>
+                <p>License</p>
+              </a>
+            </li>
+
+            <li class="nav-header">MULTI LEVEL EXAMPLE</li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle-fill"></i>
+                <p>Level 1</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle-fill"></i>
+                <p>
+                  Level 1
+                  <i class="nav-arrow bi bi-chevron-right"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Level 2</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>
+                      Level 2
+                      <i class="nav-arrow bi bi-chevron-right"></i>
+                    </p>
+                  </a>
+                  <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-record-circle-fill"></i>
+                        <p>Level 3</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-record-circle-fill"></i>
+                        <p>Level 3</p>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-record-circle-fill"></i>
+                        <p>Level 3</p>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="nav-item">
+                  <a href="#" class="nav-link">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Level 2</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle-fill"></i>
+                <p>Level 1</p>
+              </a>
+            </li>
+
+            <li class="nav-header">LABELS</li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle text-danger"></i>
+                <p class="text">Important</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle text-warning"></i>
+                <p>Warning</p>
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon bi bi-circle text-info"></i>
+                <p>Informational</p>
+              </a>
+            </li>
+          </ul>
+          <!--end::Sidebar Menu-->
+        </nav>
+      </div>
+      <!--end::Sidebar Wrapper-->
+    </aside>
+    <!--end::Sidebar-->
+
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-end">
+                {% block breadcrumbs %}
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                {% endblock %}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end::App Content Header-->
+
+      <!--begin::App Content-->
+      <div class="app-content">
+        <div class="container-fluid">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+
+    <!--begin::Footer-->
+    <footer class="app-footer">
+      <div class="float-end d-none d-sm-inline">{% block footer_right %}Qualsiasi cosa tu voglia{% endblock %}</div>
+      <strong>
+        Copyright &copy; 2014-2025&nbsp;
+        <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
+      </strong>
+      Tutti i diritti riservati.
+    </footer>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Third Party Plugin(OverlayScrollbars)-->
+
+  <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Required Plugin(popperjs for Bootstrap 5)-->
+
+  <!--begin::Required Plugin(Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Required Plugin(Bootstrap 5)-->
+
+  <!--begin::Required Plugin(AdminLTE)-->
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/js/adminlte.min.js"></script>
+  <!--end::Required Plugin(AdminLTE)-->
+
+  <!--begin::OverlayScrollbars Configure-->
+  <script>
+    const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+    const Default = {
+      scrollbarTheme: 'os-theme-light',
+      scrollbarAutoHide: 'leave',
+      scrollbarClickScroll: true,
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+      if (sidebarWrapper && typeof OverlayScrollbarsGlobal !== 'undefined') {
+        OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+          scrollbars: {
+            theme: Default.scrollbarTheme,
+            autoHide: Default.scrollbarAutoHide,
+            clickScroll: Default.scrollbarClickScroll,
+          },
+        });
+      }
+    });
+  </script>
+  <!--end::OverlayScrollbars Configure-->
+
+  {% block extra_js %}{% endblock %}
+  <!--end::Script-->
+</body>
+<!--end::Body-->
+</html>
