@@ -115,6 +115,18 @@
     .navbar-nav .nav-link:hover {
       color: #007bff !important;
     }
+
+    /* Loading spinner per il menu */
+    .menu-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .menu-loading .spinner-border {
+      color: #007bff;
+    }
   </style>
   {% endblock %}
 </head>
@@ -164,7 +176,7 @@
               <a href="#" class="dropdown-item">
                 <div class="d-flex">
                   <div class="flex-shrink-0">
-                    <img src="{{ url_for('static', filename='assets/img/avatar.png')}}" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
+                    <img src="{{ url_for('static', filename='assets/img/avatar.png') if url_for else '#' }}" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
                   </div>
                   <div class="flex-grow-1">
                     <h3 class="dropdown-item-title">
@@ -215,7 +227,7 @@
           <!--begin::User Menu Dropdown-->
           <li class="nav-item dropdown user-menu">
             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-              <img src="{{ url_for('static', filename='assets/img/daniele.png')}}" class="user-image rounded-circle shadow" alt="User Image" />
+              <img src="{{ url_for('static', filename='assets/img/daniele.png') if url_for else '#' }}" class="user-image rounded-circle shadow" alt="User Image" />
               <span class="d-none d-md-inline">Admin User</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
@@ -252,7 +264,7 @@
       <!--begin::Sidebar Brand-->
       <div class="sidebar-brand">
         <a href="{{ url_for('index') }}" class="brand-link">
-          <img src="{{ url_for('static', filename='assets/img/AdminLTELogo.png')}}" alt="AdminLTE Logo"
+          <img src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') if url_for else '#' }}" alt="AdminLTE Logo"
                class="brand-image opacity-75 shadow" />
           <span class="brand-text fw-light">AdminLTE 4</span>
         </a>
@@ -266,461 +278,11 @@
           <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
               aria-label="Main navigation" data-accordion="false" id="navigation">
 
-            <li class="nav-item {% if request.endpoint == 'index' %}menu-open{% endif %}">
-              <a href="#" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
-                <i class="nav-icon bi bi-speedometer"></i>
-                <p>
-                  Dashboard
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Dashboard v1</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Dashboard v2</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Dashboard v3</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-palette"></i>
-                <p>Theme Generate</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-box-seam-fill"></i>
-                <p>
-                  Widgets
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="{{ url_for('widgets') }}" class="nav-link {% if request.endpoint == 'widgets' %}active{% endif %}">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Small Box</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Info Box</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Cards</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-clipboard-fill"></i>
-                <p>
-                  Layout Options
-                  <span class="nav-badge badge text-bg-secondary me-3">6</span>
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Default Sidebar</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Fixed Sidebar</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Fixed Header</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Fixed Footer</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Fixed Complete</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Layout <small>+ Custom Area </small></p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Sidebar Mini</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Sidebar Mini <small>+ Collapsed</small></p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Sidebar Mini <small>+ Logo Switch</small></p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Layout RTL</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-tree-fill"></i>
-                <p>
-                  UI Elements
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>General</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Icons</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Timeline</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-pencil-square"></i>
-                <p>
-                  Forms
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="{{ url_for('forms') }}" class="nav-link {% if request.endpoint == 'forms' %}active{% endif %}">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>General Elements</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-table"></i>
-                <p>
-                  Tables
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="{{ url_for('tables') }}" class="nav-link {% if request.endpoint == 'tables' %}active{% endif %}">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Simple Tables</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-header">EXAMPLES</li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                <p>
-                  Auth
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                    <p>
-                      Version 1
-                      <i class="nav-arrow bi bi-chevron-right"></i>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-circle"></i>
-                        <p>Login</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-circle"></i>
-                        <p>Register</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                    <p>
-                      Version 2
-                      <i class="nav-arrow bi bi-chevron-right"></i>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-circle"></i>
-                        <p>Login</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-circle"></i>
-                        <p>Register</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Lockscreen</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-header">DOCUMENTATIONS</li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-download"></i>
-                <p>Installation</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-grip-horizontal"></i>
-                <p>Layout</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-star-half"></i>
-                <p>Color Mode</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-ui-checks-grid"></i>
-                <p>
-                  Components
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Main Header</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Main Sidebar</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-filetype-js"></i>
-                <p>
-                  Javascript
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Treeview</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-browser-edge"></i>
-                <p>Browser Support</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-hand-thumbs-up-fill"></i>
-                <p>How To Contribute</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-question-circle-fill"></i>
-                <p>FAQ</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
-                <i class="nav-icon bi bi-patch-check-fill"></i>
-                <p>License</p>
-              </a>
-            </li>
-
-            <li class="nav-header">MULTI LEVEL EXAMPLE</li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle-fill"></i>
-                <p>Level 1</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle-fill"></i>
-                <p>
-                  Level 1
-                  <i class="nav-arrow bi bi-chevron-right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Level 2</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>
-                      Level 2
-                      <i class="nav-arrow bi bi-chevron-right"></i>
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-record-circle-fill"></i>
-                        <p>Level 3</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-record-circle-fill"></i>
-                        <p>Level 3</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-record-circle-fill"></i>
-                        <p>Level 3</p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Level 2</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle-fill"></i>
-                <p>Level 1</p>
-              </a>
-            </li>
-
-            <li class="nav-header">LABELS</li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle text-danger"></i>
-                <p class="text">Important</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle text-warning"></i>
-                <p>Warning</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon bi bi-circle text-info"></i>
-                <p>Informational</p>
-              </a>
+            <!-- Loading placeholder -->
+            <li class="menu-loading">
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Caricamento menu...</span>
+              </div>
             </li>
           </ul>
           <!--end::Sidebar Menu-->
@@ -828,6 +390,158 @@
     });
   </script>
   <!--end::OverlayScrollbars Configure-->
+
+  <!-- Menu AJAX Management -->
+  <script>
+    class MenuManager {
+      constructor() {
+        this.currentEndpoint = '{{ request.endpoint }}';
+        this.menuContainer = document.getElementById('navigation');
+        this.init();
+      }
+
+      init() {
+        this.loadMenu();
+        this.setupEventHandlers();
+      }
+
+      async loadMenu() {
+        try {
+          console.log('Caricamento menu per endpoint:', this.currentEndpoint);
+          const response = await fetch(`/menu/render?endpoint=${this.currentEndpoint}`);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Risposta non JSON ricevuta:', text);
+            throw new Error('Risposta del server non è JSON valido');
+          }
+
+          const data = await response.json();
+          console.log('Dati menu ricevuti:', data);
+
+          if (data.status === 'success' && data.html) {
+            this.menuContainer.innerHTML = data.html;
+            this.activateTreeview();
+            this.setupMenuClickHandlers();
+          } else {
+            throw new Error(data.error || 'Errore sconosciuto nel caricamento del menu');
+          }
+        } catch (error) {
+          console.error('Errore nel caricamento del menu:', error);
+          this.showMenuError(error.message);
+        }
+      }
+
+      showMenuError(message = 'Errore nel caricamento del menu') {
+        this.menuContainer.innerHTML = `
+          <li class="nav-item">
+            <a href="#" class="nav-link text-danger">
+              <i class="nav-icon bi bi-exclamation-triangle"></i>
+              <p>${message}</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link text-info" onclick="window.menuManager.loadMenu()">
+              <i class="nav-icon bi bi-arrow-clockwise"></i>
+              <p>Riprova</p>
+            </a>
+          </li>
+        `;
+      }
+
+      activateTreeview() {
+        // Riattiva la funzionalità treeview di AdminLTE
+        const treeviewElements = this.menuContainer.querySelectorAll('[data-lte-toggle="treeview"]');
+        treeviewElements.forEach(element => {
+          // AdminLTE gestirà automaticamente il treeview se ha l'attributo corretto
+        });
+      }
+
+      setupMenuClickHandlers() {
+        // Gestisce i click sui link del menu che hanno URL reali
+        const menuLinks = this.menuContainer.querySelectorAll('a[href]:not([href="#"])');
+        menuLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+
+            // Solo per link interni (non esterni)
+            if (href && href.startsWith('/')) {
+              e.preventDefault();
+              this.navigateToPage(href, link);
+            }
+          });
+        });
+      }
+
+      async navigateToPage(url, linkElement) {
+        try {
+          // Aggiorna visualmente il menu prima del caricamento della pagina
+          this.updateActiveStates(linkElement);
+
+          // Naviga alla pagina
+          window.location.href = url;
+
+        } catch (error) {
+          console.error('Errore nella navigazione:', error);
+        }
+      }
+
+      updateActiveStates(activeLink) {
+        // Rimuovi tutte le classi active
+        this.menuContainer.querySelectorAll('.nav-link.active').forEach(link => {
+          link.classList.remove('active');
+        });
+
+        this.menuContainer.querySelectorAll('.nav-item.menu-open').forEach(item => {
+          item.classList.remove('menu-open');
+        });
+
+        // Aggiungi active al link cliccato
+        activeLink.classList.add('active');
+
+        // Aggiungi menu-open ai parent
+        let parent = activeLink.closest('li').parentElement;
+        while (parent) {
+          if (parent.classList.contains('nav-treeview')) {
+            const parentLi = parent.parentElement;
+            if (parentLi && parentLi.classList.contains('nav-item')) {
+              parentLi.classList.add('menu-open');
+              const parentLink = parentLi.querySelector('.nav-link');
+              if (parentLink) {
+                parentLink.classList.add('active');
+              }
+            }
+          }
+          parent = parent.parentElement;
+        }
+      }
+
+      setupEventHandlers() {
+        // Listener per aggiornamenti del menu se necessario
+        window.addEventListener('menuUpdate', () => {
+          this.loadMenu();
+        });
+      }
+
+      // Metodo pubblico per aggiornare il menu
+      refreshMenu(newEndpoint = null) {
+        if (newEndpoint) {
+          this.currentEndpoint = newEndpoint;
+        }
+        this.loadMenu();
+      }
+    }
+
+    // Inizializza il menu quando il DOM è pronto
+    document.addEventListener('DOMContentLoaded', function() {
+      window.menuManager = new MenuManager();
+    });
+  </script>
 
   {% block extra_js %}{% endblock %}
   <!--end::Script-->

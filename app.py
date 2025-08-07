@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, g
 import os
 
 # Crea l'applicazione Flask
@@ -6,6 +6,10 @@ app = Flask(__name__)
 
 # Configurazione
 app.config['SECRET_KEY'] = 'your-secret-key-here'
+
+# Importa e registra la blueprint del menu dopo aver creato l'app
+from menu import menu_bp
+app.register_blueprint(menu_bp)
 
 
 @app.route('/')
@@ -65,6 +69,22 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('errors/500.html'), 500
+
+
+# Context processor per rendere disponibili alcune variabili in tutti i template
+@app.context_processor
+def inject_template_vars():
+    """Inietta variabili in tutti i template"""
+    return {
+        'current_endpoint': getattr(g, 'current_endpoint', None)
+    }
+
+
+@app.before_request
+def before_request():
+    """Eseguito prima di ogni richiesta"""
+    from flask import request
+    g.current_endpoint = request.endpoint
 
 
 if __name__ == '__main__':
