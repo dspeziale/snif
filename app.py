@@ -57,7 +57,7 @@ def tables():
 @app.route('/about')
 def about():
     """Pagina about"""
-    return render_template('about.html')
+    return render_template('prova.html')
 
 
 # Error handlers
@@ -99,4 +99,4 @@ if __name__ == '__main__':
         os.makedirs('static/js')
         os.makedirs('static/img')
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8132)

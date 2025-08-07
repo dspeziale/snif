@@ -27,7 +27,7 @@ MENU_STRUCTURE = {
     'theme_generate': {
         'icon': 'bi bi-palette',
         'label': 'Theme Generate',
-        'url': '#'
+        'url': '/about'
     },
     '_header_multilevel': {
         'type': 'header',
