@@ -1,3 +1,4 @@
+# scanner/cache_manager.py
 import requests
 import os
 import sqlite3
@@ -144,13 +145,22 @@ class CacheManager:
     def _fetch_cve_from_nvd(self, cve_id):
         """Recupera informazioni CVE da NVD"""
         try:
-            url = f"https://services.nvd.nist.gov/rest/json/cve/1.0/{cve_id}"
-            response = requests.get(url, timeout=10)
+            # Utilizza la nuova API NVD 2.0
+            url = f"https://services.nvd.nist.gov/rest/json/cves/2.0"
+            params = {
+                'cveId': cve_id
+            }
+
+            headers = {
+                'Accept': 'application/json'
+            }
+
+            response = requests.get(url, params=params, headers=headers, timeout=10)
 
             if response.status_code == 200:
                 data = response.json()
-                if 'result' in data and 'CVE_Items' in data['result']:
-                    cve_item = data['result']['CVE_Items'][0]
+                if 'vulnerabilities' in data and data['vulnerabilities']:
+                    cve_item = data['vulnerabilities'][0]['cve']
 
                     # Estrae informazioni rilevanti
                     cve_info = {
@@ -163,27 +173,42 @@ class CacheManager:
                     }
 
                     # Descrizione
-                    if 'cve' in cve_item and 'description' in cve_item['cve']:
-                        descriptions = cve_item['cve']['description']['description_data']
-                        if descriptions:
-                            cve_info['description'] = descriptions[0]['value']
+                    if 'descriptions' in cve_item:
+                        for desc in cve_item['descriptions']:
+                            if desc.get('lang') == 'en':
+                                cve_info['description'] = desc.get('value', '')
+                                break
 
                     # Score CVSS
-                    if 'impact' in cve_item:
-                        if 'baseMetricV3' in cve_item['impact']:
-                            cvss_v3 = cve_item['impact']['baseMetricV3']['cvssV3']
-                            cve_info['score'] = cvss_v3['baseScore']
-                            cve_info['severity'] = cvss_v3['baseSeverity']
-                        elif 'baseMetricV2' in cve_item['impact']:
-                            cvss_v2 = cve_item['impact']['baseMetricV2']['cvssV2']
-                            cve_info['score'] = cvss_v2['baseScore']
-                            cve_info['severity'] = cvss_v2['severity']
+                    if 'metrics' in cve_item:
+                        # Prova prima CVSS v3
+                        if 'cvssMetricV31' in cve_item['metrics']:
+                            cvss_data = cve_item['metrics']['cvssMetricV31'][0]['cvssData']
+                            cve_info['score'] = cvss_data.get('baseScore', 0.0)
+                            cve_info['severity'] = cvss_data.get('baseSeverity', 'Unknown')
+                        elif 'cvssMetricV30' in cve_item['metrics']:
+                            cvss_data = cve_item['metrics']['cvssMetricV30'][0]['cvssData']
+                            cve_info['score'] = cvss_data.get('baseScore', 0.0)
+                            cve_info['severity'] = cvss_data.get('baseSeverity', 'Unknown')
+                        elif 'cvssMetricV2' in cve_item['metrics']:
+                            cvss_data = cve_item['metrics']['cvssMetricV2'][0]['cvssData']
+                            cve_info['score'] = cvss_data.get('baseScore', 0.0)
+                            # CVSS v2 non ha baseSeverity, calcoliamolo
+                            score = cvss_data.get('baseScore', 0.0)
+                            if score >= 9.0:
+                                cve_info['severity'] = 'CRITICAL'
+                            elif score >= 7.0:
+                                cve_info['severity'] = 'HIGH'
+                            elif score >= 4.0:
+                                cve_info['severity'] = 'MEDIUM'
+                            else:
+                                cve_info['severity'] = 'LOW'
 
                     # Date
-                    if 'publishedDate' in cve_item:
-                        cve_info['published_date'] = cve_item['publishedDate']
-                    if 'lastModifiedDate' in cve_item:
-                        cve_info['modified_date'] = cve_item['lastModifiedDate']
+                    if 'published' in cve_item:
+                        cve_info['published_date'] = cve_item['published']
+                    if 'lastModified' in cve_item:
+                        cve_info['modified_date'] = cve_item['lastModified']
 
                     return cve_info
 

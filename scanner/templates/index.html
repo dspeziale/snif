@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Scanner Dashboard</title>
+    <title>Network Scanner Dashboard - Multi-Subnet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-shield-check"></i> Network Scanner
+                <i class="bi bi-shield-check"></i> Network Scanner Multi-Subnet
             </a>
         </div>
     </nav>
@@ -52,6 +52,22 @@
             </div>
 
             <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ stats.total_ranges }}</h4>
+                                <p class="mb-0">Range di Rete</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-diagram-3 fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
                 <div class="card bg-warning text-white">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
@@ -66,18 +82,41 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-3">
-                <div class="card bg-info text-white">
+        <!-- Network Ranges Info -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Range di Rete Configurati</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary me-2" onclick="detectNetworks()">
+                                <i class="bi bi-search"></i> Rileva Automaticamente
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="refreshRanges()">
+                                <i class="bi bi-arrow-clockwise"></i> Aggiorna
+                            </button>
+                        </div>
+                    </div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h4>{{ stats.total_services }}</h4>
-                                <p class="mb-0">Servizi</p>
-                            </div>
-                            <div class="align-self-center">
-                                <i class="bi bi-hdd-network fs-1"></i>
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="rangesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Range</th>
+                                        <th>Network</th>
+                                        <th>Broadcast</th>
+                                        <th>Host Possibili</th>
+                                        <th>Privato</th>
+                                        <th>Stato</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -89,16 +128,22 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Controlli Scansione</h5>
+                        <h5 class="card-title mb-0">Controlli Scansione Multi-Subnet</h5>
                     </div>
                     <div class="card-body">
                         <div class="btn-group me-2" role="group">
-                            <button type="button" class="btn btn-primary" onclick="runDiscovery()">
-                                <i class="bi bi-search"></i> Scansione Discovery
+                            <button type="button" class="btn btn-primary" onclick="runDiscoveryAll()">
+                                <i class="bi bi-search"></i> Scansione Discovery (Tutti)
                             </button>
                             <button type="button" class="btn btn-secondary" onclick="updateCache()">
                                 <i class="bi bi-arrow-clockwise"></i> Aggiorna Cache
                             </button>
+                        </div>
+                        <div class="form-check form-switch d-inline-block ms-3">
+                            <input class="form-check-input" type="checkbox" id="parallelScans" checked>
+                            <label class="form-check-label" for="parallelScans">
+                                Scansioni Parallele
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -124,6 +169,7 @@
                                         <th>MAC Address</th>
                                         <th>Hostname</th>
                                         <th>Vendor</th>
+                                        <th>Subnet</th>
                                         <th>OS</th>
                                         <th>Servizi</th>
                                         <th>Vulnerabilità</th>
@@ -162,12 +208,69 @@
     <script>
         // Global variables
         let devices = [];
+        let networkRanges = [];
         const deviceModal = new bootstrap.Modal(document.getElementById('deviceModal'));
 
-        // Load devices on page load
+        // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
+            refreshRanges();
             refreshDevices();
         });
+
+        async function refreshRanges() {
+            try {
+                const response = await fetch('/api/network/ranges');
+                const data = await response.json();
+                networkRanges = data.ranges;
+                updateRangesTable();
+            } catch (error) {
+                console.error('Errore caricamento range:', error);
+                showAlert('Errore caricamento range di rete', 'danger');
+            }
+        }
+
+        function updateRangesTable() {
+            const tbody = document.querySelector('#rangesTable tbody');
+            tbody.innerHTML = '';
+
+            networkRanges.forEach((range, index) => {
+                const row = document.createElement('tr');
+
+                if (!range.valid) {
+                    row.classList.add('table-danger');
+                }
+
+                const subnet = range.range ? range.range.split('/')[0].split('.').slice(0, 3).join('.') : 'N/A';
+
+                row.innerHTML = `
+                    <td><strong>${range.range}</strong></td>
+                    <td>${range.network_address || 'N/A'}</td>
+                    <td>${range.broadcast_address || 'N/A'}</td>
+                    <td>${range.num_hosts || 0}</td>
+                    <td>
+                        ${range.is_private ?
+                            '<span class="badge bg-success">Sì</span>' :
+                            '<span class="badge bg-warning">No</span>'
+                        }
+                    </td>
+                    <td>
+                        ${range.valid ?
+                            '<span class="badge bg-success">Valido</span>' :
+                            '<span class="badge bg-danger" title="' + (range.error || '') + '">Errore</span>'
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-primary" onclick="scanRange('${range.range}')" title="Scansiona Range"
+                                    ${!range.valid ? 'disabled' : ''}>
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
 
         async function refreshDevices() {
             try {
@@ -186,11 +289,17 @@
 
             devices.forEach(device => {
                 const row = document.createElement('tr');
+
+                // Determina subnet dall'IP
+                const subnet = device.ip_address ?
+                    device.ip_address.split('.').slice(0, 3).join('.') + '.x' : 'N/A';
+
                 row.innerHTML = `
-                    <td>${device.ip_address}</td>
+                    <td><strong>${device.ip_address}</strong></td>
                     <td>${device.mac_address || '-'}</td>
                     <td>${device.hostname || '-'}</td>
                     <td>${device.vendor || '-'}</td>
+                    <td><span class="badge bg-info">${subnet}</span></td>
                     <td>${device.os_name || '-'}</td>
                     <td>
                         <span class="badge bg-primary">${device.services_count}</span>
@@ -227,6 +336,64 @@
             });
         }
 
+        async function detectNetworks() {
+            showAlert('Rilevamento reti locali in corso...', 'info');
+            try {
+                const response = await fetch('/api/network/detect');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert(`Rilevamento completato: ${result.ranges.length} reti trovate`, 'success');
+                    networkRanges = result.ranges;
+                    updateRangesTable();
+                } else {
+                    showAlert(`Errore rilevamento: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante il rilevamento reti', 'danger');
+            }
+        }
+
+        async function runDiscoveryAll() {
+            showAlert('Avvio scansione discovery su tutti i range...', 'info');
+            try {
+                const response = await fetch('/api/scan/discovery');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const totalDevices = result.result.total_devices_found;
+                    const rangesScanned = result.result.ranges_scanned;
+                    showAlert(`Scansione completata: ${totalDevices} dispositivi trovati su ${rangesScanned} range`, 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Errore scansione:', error);
+                showAlert('Errore durante la scansione', 'danger');
+            }
+        }
+
+        async function scanRange(networkRange) {
+            // Codifica il range per l'URL (sostituisce . con _ e / con -)
+            const encodedRange = networkRange.replace(/\./g, '_').replace(/\//g, '-');
+
+            showAlert(`Avvio scansione su range ${networkRange}...`, 'info');
+            try {
+                const response = await fetch(`/api/scan/discovery/${encodedRange}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert(`Scansione range completata: ${result.result.devices_found} dispositivi trovati`, 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione range: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante la scansione del range', 'danger');
+            }
+        }
+
         async function showDeviceDetails(deviceId) {
             try {
                 const response = await fetch(`/api/device/${deviceId}`);
@@ -237,6 +404,10 @@
                         <div class="col-md-6">
                             <h6>Informazioni Base</h6>
                             <table class="table table-sm">
+                                <tr><td><strong>IP:</strong></td><td>${device.ip_address}</td></tr>
+                                <tr><td><strong>MAC:</strong></td><td>${device.mac_address || '-'}</td></tr>
+                                <tr><td><strong>Hostname:</strong></td><td>${device.hostname || '-'}</td></tr>
+                                <tr><td><strong>Vendor:</strong></td><td>${device.vendor || '-'}</td></tr>
                                 <tr><td><strong>OS:</strong></td><td>${device.os_name || '-'}</td></tr>
                                 <tr><td><strong>Primo visto:</strong></td><td>${new Date(device.first_seen).toLocaleString()}</td></tr>
                                 <tr><td><strong>Ultimo visto:</strong></td><td>${new Date(device.last_seen).toLocaleString()}</td></tr>
@@ -245,6 +416,7 @@
                         <div class="col-md-6">
                             <h6>Statistiche</h6>
                             <table class="table table-sm">
+                                <tr><td><strong>Subnet:</strong></td><td>${device.ip_address ? device.ip_address.split('.').slice(0, 3).join('.') + '.x' : '-'}</td></tr>
                                 <tr><td><strong>Servizi attivi:</strong></td><td>${device.services ? device.services.length : 0}</td></tr>
                                 <tr><td><strong>Vulnerabilità:</strong></td><td>${device.vulnerabilities ? device.vulnerabilities.length : 0}</td></tr>
                                 <tr><td><strong>SNMP disponibile:</strong></td><td>${device.snmp ? 'Sì' : 'No'}</td></tr>
@@ -322,24 +494,6 @@
             } catch (error) {
                 console.error('Errore caricamento dettagli:', error);
                 showAlert('Errore caricamento dettagli dispositivo', 'danger');
-            }
-        }
-
-        async function runDiscovery() {
-            showAlert('Avvio scansione discovery...', 'info');
-            try {
-                const response = await fetch('/api/scan/discovery');
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    showAlert(`Scansione completata: ${result.result.devices_found} dispositivi trovati`, 'success');
-                    setTimeout(() => refreshDevices(), 2000);
-                } else {
-                    showAlert(`Errore scansione: ${result.message}`, 'danger');
-                }
-            } catch (error) {
-                console.error('Errore scansione:', error);
-                showAlert('Errore durante la scansione', 'danger');
             }
         }
 
@@ -449,6 +603,32 @@
                 }
             }, 5000);
         }
+
+        // Event listeners
+        document.getElementById('parallelScans').addEventListener('change', async function() {
+            try {
+                const response = await fetch('/api/config/ranges', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        parallel_scans: this.checked
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert(`Scansioni parallele ${this.checked ? 'abilitate' : 'disabilitate'}`, 'info');
+                }
+            } catch (error) {
+                console.error('Errore aggiornamento configurazione:', error);
+            }
+        });
+
+        // Auto-refresh ogni 30 secondi
+        setInterval(() => {
+            refreshDevices();
+        }, 30000);
     </script>
 </body>
 </html>

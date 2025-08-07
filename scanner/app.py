@@ -17,7 +17,7 @@ app.config['SECRET_KEY'] = 'your-secret-key-for-scanner'
 # Inizializzazione componenti
 config_manager = ConfigManager()
 db_manager = DatabaseManager()
-cache_manager = CacheManager()
+cache_manager = CacheManager(db_manager)
 scanner = NetworkScanner(config_manager, db_manager, cache_manager)
 
 # Thread di scansione
@@ -32,7 +32,7 @@ def scanner_daemon():
 
     while scanner_running:
         try:
-            # Scansione discovery ogni 10 minuti
+            # Scansione discovery ogni 10 minuti su tutti i range
             scanner.run_discovery_scan()
 
             # Aspetta 10 minuti (600 secondi)
@@ -50,6 +50,13 @@ def scanner_daemon():
 def index():
     """Dashboard principale"""
     stats = db_manager.get_dashboard_stats()
+
+    # Aggiungi informazioni sui range di rete
+    ranges_info = scanner.get_scan_ranges_info()
+    stats['network_ranges'] = ranges_info
+    stats['total_ranges'] = len(ranges_info)
+    stats['valid_ranges'] = len([r for r in ranges_info if r.get('valid', True)])
+
     return render_template('index.html', stats=stats)
 
 
@@ -67,11 +74,60 @@ def api_device_details(device_id):
     return jsonify(device)
 
 
+@app.route('/api/network/ranges')
+def api_network_ranges():
+    """API per ottenere informazioni sui range di rete"""
+    ranges_info = scanner.get_scan_ranges_info()
+    return jsonify({
+        'ranges': ranges_info,
+        'total_count': len(ranges_info),
+        'valid_count': len([r for r in ranges_info if r.get('valid', True)])
+    })
+
+
+@app.route('/api/network/detect')
+def api_detect_networks():
+    """API per rilevare automaticamente le reti locali"""
+    try:
+        # Forza il rilevamento delle reti locali
+        original_auto_detect = config_manager.get('network.auto_detect_local_networks')
+        config_manager.set('network.auto_detect_local_networks', True)
+
+        # Ottieni i range aggiornati
+        ranges_info = scanner.get_scan_ranges_info()
+
+        # Ripristina impostazione originale
+        config_manager.set('network.auto_detect_local_networks', original_auto_detect)
+
+        return jsonify({
+            'status': 'success',
+            'ranges': ranges_info,
+            'message': f'Rilevate {len(ranges_info)} reti'
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        })
+
+
 @app.route('/api/scan/discovery')
 def api_scan_discovery():
-    """API per avviare scansione discovery manuale"""
+    """API per avviare scansione discovery manuale su tutti i range"""
     try:
         result = scanner.run_discovery_scan()
+        return jsonify({'status': 'success', 'result': result})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
+
+@app.route('/api/scan/discovery/<path:network_range>')
+def api_scan_discovery_range(network_range):
+    """API per avviare scansione discovery su un range specifico"""
+    try:
+        # Decodifica il range (sostituisce _ con . e - con /)
+        decoded_range = network_range.replace('_', '.').replace('-', '/')
+        result = scanner._run_single_discovery(decoded_range)
         return jsonify({'status': 'success', 'result': result})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
@@ -131,7 +187,60 @@ def api_cache_update():
 def api_stats():
     """API per statistiche dashboard"""
     stats = db_manager.get_dashboard_stats()
+
+    # Aggiungi statistiche sui range di rete
+    ranges_info = scanner.get_scan_ranges_info()
+    stats['network_ranges'] = ranges_info
+    stats['total_ranges'] = len(ranges_info)
+    stats['valid_ranges'] = len([r for r in ranges_info if r.get('valid', True)])
+
     return jsonify(stats)
+
+
+@app.route('/api/config/ranges', methods=['GET', 'POST'])
+def api_config_ranges():
+    """API per gestire configurazione range di rete"""
+    if request.method == 'GET':
+        # Ottieni configurazione attuale
+        current_ranges = config_manager.get('network.scan_ranges', [])
+        auto_detect = config_manager.get('network.auto_detect_local_networks', False)
+
+        return jsonify({
+            'scan_ranges': current_ranges,
+            'auto_detect_local_networks': auto_detect,
+            'parallel_scans': config_manager.get('network.parallel_scans', True),
+            'max_concurrent_ranges': config_manager.get('network.max_concurrent_ranges', 3)
+        })
+
+    elif request.method == 'POST':
+        # Aggiorna configurazione
+        try:
+            data = request.get_json()
+
+            if 'scan_ranges' in data:
+                config_manager.set('network.scan_ranges', data['scan_ranges'])
+
+            if 'auto_detect_local_networks' in data:
+                config_manager.set('network.auto_detect_local_networks',
+                                   data['auto_detect_local_networks'])
+
+            if 'parallel_scans' in data:
+                config_manager.set('network.parallel_scans', data['parallel_scans'])
+
+            if 'max_concurrent_ranges' in data:
+                config_manager.set('network.max_concurrent_ranges',
+                                   data['max_concurrent_ranges'])
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Configurazione aggiornata'
+            })
+
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
+            })
 
 
 def setup_directories():
@@ -156,6 +265,15 @@ if __name__ == '__main__':
     # Avvia thread scanner
     scanning_thread = threading.Thread(target=scanner_daemon, daemon=True)
     scanning_thread.start()
+
+    # Log informazioni sui range configurati
+    ranges_info = scanner.get_scan_ranges_info()
+    print(f"Range di rete configurati: {len(ranges_info)}")
+    for range_info in ranges_info:
+        if range_info.get('valid', True):
+            print(f"  - {range_info['range']}: {range_info.get('num_hosts', 0)} host possibili")
+        else:
+            print(f"  - {range_info['range']}: ERRORE - {range_info.get('error', 'Sconosciuto')}")
 
     # Avvia Flask
     app.run(debug=True, host='0.0.0.0', port=5000)

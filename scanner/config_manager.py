@@ -15,9 +15,19 @@ class ConfigManager:
         """Carica la configurazione dal file JSON"""
         default_config = {
             "network": {
-                "scan_range": "192.168.1.0/24",
-                "timeout": 10,
-                "max_retries": 3
+                "scan_ranges": [
+                    "192.168.20.0/24",
+                    "192.168.30.0/24",
+                    "192.168.40.0/24",
+                    "192.168.50.0/24",
+                    "192.168.60.0/24",
+                    "192.168.70.0/24"
+                ],
+                "auto_detect_local_networks": 'true',
+                "timeout": 300,
+                "max_retries": 3,
+                "parallel_scans": 'true',
+                "max_concurrent_ranges": 3
             },
             "nmap": {
                 "path": "nmap",
