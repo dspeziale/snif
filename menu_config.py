@@ -27,7 +27,8 @@ MENU_STRUCTURE = {
     'theme_generate': {
         'icon': 'bi bi-palette',
         'label': 'Theme Generate',
-        'url': '/about'
+        'url': '/about',
+        'endpoint': 'about'  # Aggiunta questa riga per collegare l'endpoint
     },
     '_header_multilevel': {
         'type': 'header',
@@ -56,7 +57,7 @@ MENU_STRUCTURE = {
                     'level3_1': {
                         'icon': 'bi bi-record-circle-fill',
                         'label': 'Level 3',
-                        'url': '#'
+                        'url': '/tables'
                     },
                     'level3_2': {
                         'icon': 'bi bi-record-circle-fill',

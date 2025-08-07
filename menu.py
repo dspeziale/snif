@@ -1,15 +1,23 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, url_for
 from menu_config import MENU_STRUCTURE
 
 # Crea la blueprint per il menu
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
 
 
-def find_active_path(menu_dict, current_endpoint):
+def get_current_url():
+    """Ottiene l'URL corrente della richiesta"""
+    try:
+        return request.path
+    except:
+        return '/'
+
+
+def find_active_path_smart(menu_dict, current_endpoint, current_url):
     """
-    Trova il percorso dell'elemento attivo nel menu
+    Trova il percorso dell'elemento attivo nel menu usando multiple strategie
     """
-    if not current_endpoint:
+    if not current_endpoint and not current_url:
         return []
 
     def search_recursive(items, current_path):
@@ -25,10 +33,43 @@ def find_active_path(menu_dict, current_endpoint):
 
             new_path = current_path + [key]
 
-            # Controlla se questo è l'elemento attivo
+            # STRATEGIA 1: Match esatto per endpoint (se specificato)
             item_endpoint = item.get('endpoint')
-            if item_endpoint and item_endpoint == current_endpoint:
+            if item_endpoint and current_endpoint and item_endpoint == current_endpoint:
                 return new_path
+
+            # STRATEGIA 2: Match per URL esatto
+            item_url = item.get('url')
+            if item_url and current_url:
+                if item_url == current_url:
+                    return new_path
+                # Match per URL base (es. '/about' match '/about/')
+                if item_url.rstrip('/') == current_url.rstrip('/'):
+                    return new_path
+
+            # STRATEGIA 3: Match per URL che inizia con il path (per sotto-pagine)
+            if item_url and current_url and item_url != '/' and item_url != '#':
+                if current_url.startswith(item_url.rstrip('/')):
+                    return new_path
+
+            # STRATEGIA 4: Match automatico basato su nome endpoint
+            if current_endpoint and not item_endpoint and item_url and item_url != '#':
+                # Prova a generare l'URL dall'endpoint per vedere se coincide
+                try:
+                    expected_url = url_for(current_endpoint)
+                    if item_url == expected_url:
+                        return new_path
+                except:
+                    pass
+
+            # STRATEGIA 5: Match fuzzy basato sul nome della chiave
+            if current_endpoint:
+                # Se il nome della chiave del menu contiene l'endpoint
+                if current_endpoint.lower() in key.lower():
+                    return new_path
+                # Se l'endpoint contiene il nome della chiave
+                if key.lower() in current_endpoint.lower():
+                    return new_path
 
             # Cerca ricorsivamente nei children
             children = item.get('children')
@@ -43,7 +84,7 @@ def find_active_path(menu_dict, current_endpoint):
         result = search_recursive(menu_dict, [])
         return result if result else []
     except Exception as e:
-        print(f"Errore in find_active_path: {str(e)}")
+        print(f"Errore in find_active_path_smart: {str(e)}")
         return []
 
 
@@ -76,10 +117,17 @@ def render_menu_item(key, item, active_path, level=0):
         elif has_children and is_open:
             nav_link_class += ' active'
 
-        # URL del link
+        # URL del link - se non specificato, prova a generarlo automaticamente
         url = item.get('url', '#')
         if url is None:
             url = '#'
+
+        # Se l'URL è vuoto ma c'è un endpoint, prova a generarlo
+        if (url == '#' or not url) and item.get('endpoint'):
+            try:
+                url = url_for(item['endpoint'])
+            except:
+                url = '#'
 
         # Badge
         badge_html = ''
@@ -141,13 +189,19 @@ def render_menu_item(key, item, active_path, level=0):
 @menu_bp.route('/render')
 def render_menu():
     """
-    Renderizza il menu completo
+    Renderizza il menu completo con rilevamento automatico dell'elemento attivo
     """
     try:
         current_endpoint = request.args.get('endpoint', 'index')
+        current_url = get_current_url()
 
-        # Step 1: Find active path
-        active_path = find_active_path(MENU_STRUCTURE, current_endpoint)
+        print(f"DEBUG - Endpoint corrente: {current_endpoint}")
+        print(f"DEBUG - URL corrente: {current_url}")
+
+        # Step 1: Find active path usando il nuovo algoritmo smart
+        active_path = find_active_path_smart(MENU_STRUCTURE, current_endpoint, current_url)
+
+        print(f"DEBUG - Percorso attivo trovato: {active_path}")
 
         # Step 2: Render menu items
         menu_html = ''
@@ -166,6 +220,8 @@ def render_menu():
         return jsonify({
             'html': menu_html,
             'active_path': active_path,
+            'current_endpoint': current_endpoint,
+            'current_url': current_url,
             'status': 'success',
             'items_rendered': item_count,
             'total_items': len(MENU_STRUCTURE)
@@ -201,11 +257,13 @@ def get_menu_state():
     """
     try:
         current_endpoint = request.args.get('endpoint', 'index')
-        active_path = find_active_path(MENU_STRUCTURE, current_endpoint)
+        current_url = get_current_url()
+        active_path = find_active_path_smart(MENU_STRUCTURE, current_endpoint, current_url)
 
         return jsonify({
             'active_path': active_path,
             'endpoint': current_endpoint,
+            'url': current_url,
             'status': 'success'
         })
     except Exception as e:
@@ -213,6 +271,7 @@ def get_menu_state():
         return jsonify({
             'active_path': [],
             'endpoint': current_endpoint,
+            'url': current_url,
             'status': 'error',
             'error': str(e)
         }), 500
@@ -242,30 +301,43 @@ def debug_menu():
     """Endpoint di debug per identificare problemi"""
     try:
         current_endpoint = request.args.get('endpoint', 'index')
+        current_url = get_current_url()
 
         # Test step by step
         debug_info = {
             'step1_import': 'OK - MENU_STRUCTURE imported',
             'step2_endpoint': f'Current endpoint: {current_endpoint}',
-            'step3_structure_type': str(type(MENU_STRUCTURE)),
-            'step4_structure_len': len(MENU_STRUCTURE),
+            'step3_url': f'Current URL: {current_url}',
+            'step4_structure_type': str(type(MENU_STRUCTURE)),
+            'step5_structure_len': len(MENU_STRUCTURE),
         }
 
-        # Test find_active_path
+        # Test find_active_path_smart
         try:
-            active_path = find_active_path(MENU_STRUCTURE, current_endpoint)
-            debug_info['step5_active_path'] = f'Active path: {active_path}'
+            active_path = find_active_path_smart(MENU_STRUCTURE, current_endpoint, current_url)
+            debug_info['step6_active_path'] = f'Active path: {active_path}'
         except Exception as e:
-            debug_info['step5_active_path'] = f'ERROR: {str(e)}'
+            debug_info['step6_active_path'] = f'ERROR: {str(e)}'
 
         # Test render_menu_item on first item
         try:
             first_key = next(iter(MENU_STRUCTURE.keys()))
             first_item = MENU_STRUCTURE[first_key]
             test_html = render_menu_item(first_key, first_item, [])
-            debug_info['step6_render_test'] = 'OK - render_menu_item works'
+            debug_info['step7_render_test'] = 'OK - render_menu_item works'
         except Exception as e:
-            debug_info['step6_render_test'] = f'ERROR: {str(e)}'
+            debug_info['step7_render_test'] = f'ERROR: {str(e)}'
+
+        # Test ogni elemento del menu
+        debug_info['menu_items_analysis'] = {}
+        for key, item in MENU_STRUCTURE.items():
+            if not key.startswith('_header'):
+                item_info = {
+                    'url': item.get('url', 'NOT_SET'),
+                    'endpoint': item.get('endpoint', 'NOT_SET'),
+                    'has_children': 'children' in item
+                }
+                debug_info['menu_items_analysis'][key] = item_info
 
         return jsonify({
             'status': 'debug_complete',

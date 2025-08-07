@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Scanner Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-check"></i> Network Scanner
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ stats.total_devices }}</h4>
+                                <p class="mb-0">Dispositivi Totali</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-router fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ stats.devices_24h }}</h4>
+                                <p class="mb-0">Attivi (24h)</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-activity fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ stats.total_vulnerabilities }}</h4>
+                                <p class="mb-0">Vulnerabilità</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-bug fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ stats.total_services }}</h4>
+                                <p class="mb-0">Servizi</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="bi bi-hdd-network fs-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Controlli Scansione</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="btn-group me-2" role="group">
+                            <button type="button" class="btn btn-primary" onclick="runDiscovery()">
+                                <i class="bi bi-search"></i> Scansione Discovery
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="updateCache()">
+                                <i class="bi bi-arrow-clockwise"></i> Aggiorna Cache
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Dispositivi Rilevati</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshDevices()">
+                            <i class="bi bi-arrow-clockwise"></i> Aggiorna
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="devicesTable">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address</th>
+                                        <th>MAC Address</th>
+                                        <th>Hostname</th>
+                                        <th>Vendor</th>
+                                        <th>OS</th>
+                                        <th>Servizi</th>
+                                        <th>Vulnerabilità</th>
+                                        <th>SNMP</th>
+                                        <th>Ultimo Visto</th>
+                                        <th>Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Details Modal -->
+    <div class="modal fade" id="deviceModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dettagli Dispositivo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="deviceModalBody">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let devices = [];
+        const deviceModal = new bootstrap.Modal(document.getElementById('deviceModal'));
+
+        // Load devices on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDevices();
+        });
+
+        async function refreshDevices() {
+            try {
+                const response = await fetch('/api/devices');
+                devices = await response.json();
+                updateDevicesTable();
+            } catch (error) {
+                console.error('Errore caricamento dispositivi:', error);
+                showAlert('Errore caricamento dispositivi', 'danger');
+            }
+        }
+
+        function updateDevicesTable() {
+            const tbody = document.querySelector('#devicesTable tbody');
+            tbody.innerHTML = '';
+
+            devices.forEach(device => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${device.ip_address}</td>
+                    <td>${device.mac_address || '-'}</td>
+                    <td>${device.hostname || '-'}</td>
+                    <td>${device.vendor || '-'}</td>
+                    <td>${device.os_name || '-'}</td>
+                    <td>
+                        <span class="badge bg-primary">${device.services_count}</span>
+                    </td>
+                    <td>
+                        <span class="badge ${device.vulnerabilities_count > 0 ? 'bg-danger' : 'bg-success'}">
+                            ${device.vulnerabilities_count}
+                        </span>
+                    </td>
+                    <td>
+                        ${device.has_snmp ? '<i class="bi bi-check-circle text-success"></i>' : '-'}
+                    </td>
+                    <td>${new Date(device.last_seen).toLocaleString()}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-primary" onclick="showDeviceDetails(${device.id})" title="Dettagli">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Scansioni">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="runServicesScan(${device.id})">Servizi</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="runOSScan(${device.id})">OS Detection</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="runVulnScan(${device.id})">Vulnerabilità</a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="runSNMPScan(${device.id})">SNMP</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function showDeviceDetails(deviceId) {
+            try {
+                const response = await fetch(`/api/device/${deviceId}`);
+                const device = await response.json();
+
+                let modalContent = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Informazioni Base</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>OS:</strong></td><td>${device.os_name || '-'}</td></tr>
+                                <tr><td><strong>Primo visto:</strong></td><td>${new Date(device.first_seen).toLocaleString()}</td></tr>
+                                <tr><td><strong>Ultimo visto:</strong></td><td>${new Date(device.last_seen).toLocaleString()}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Statistiche</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Servizi attivi:</strong></td><td>${device.services ? device.services.length : 0}</td></tr>
+                                <tr><td><strong>Vulnerabilità:</strong></td><td>${device.vulnerabilities ? device.vulnerabilities.length : 0}</td></tr>
+                                <tr><td><strong>SNMP disponibile:</strong></td><td>${device.snmp ? 'Sì' : 'No'}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                if (device.services && device.services.length > 0) {
+                    modalContent += `
+                        <hr>
+                        <h6>Servizi</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead><tr><th>Porta</th><th>Protocollo</th><th>Servizio</th><th>Versione</th><th>Stato</th></tr></thead>
+                                <tbody>
+                    `;
+                    device.services.forEach(service => {
+                        modalContent += `
+                            <tr>
+                                <td>${service.port}</td>
+                                <td>${service.protocol.toUpperCase()}</td>
+                                <td>${service.service_name || '-'}</td>
+                                <td>${service.version || '-'}</td>
+                                <td><span class="badge bg-success">${service.state}</span></td>
+                            </tr>
+                        `;
+                    });
+                    modalContent += '</tbody></table></div>';
+                }
+
+                if (device.vulnerabilities && device.vulnerabilities.length > 0) {
+                    modalContent += `
+                        <hr>
+                        <h6>Vulnerabilità</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead><tr><th>CVE</th><th>Severity</th><th>Score</th><th>Descrizione</th></tr></thead>
+                                <tbody>
+                    `;
+                    device.vulnerabilities.forEach(vuln => {
+                        const severityClass = vuln.severity === 'HIGH' ? 'danger' : vuln.severity === 'MEDIUM' ? 'warning' : 'info';
+                        modalContent += `
+                            <tr>
+                                <td>${vuln.cve_id}</td>
+                                <td><span class="badge bg-${severityClass}">${vuln.severity}</span></td>
+                                <td>${vuln.score || '-'}</td>
+                                <td>${vuln.description ? vuln.description.substring(0, 100) + '...' : '-'}</td>
+                            </tr>
+                        `;
+                    });
+                    modalContent += '</tbody></table></div>';
+                }
+
+                if (device.snmp) {
+                    modalContent += `
+                        <hr>
+                        <h6>Informazioni SNMP</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr><td><strong>Community:</strong></td><td>${device.snmp.community_string}</td></tr>
+                                    <tr><td><strong>Version:</strong></td><td>${device.snmp.version}</td></tr>
+                                    <tr><td><strong>System Name:</strong></td><td>${device.snmp.system_name || '-'}</td></tr>
+                                    <tr><td><strong>System Description:</strong></td><td>${device.snmp.system_descr || '-'}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('deviceModalBody').innerHTML = modalContent;
+                deviceModal.show();
+
+            } catch (error) {
+                console.error('Errore caricamento dettagli:', error);
+                showAlert('Errore caricamento dettagli dispositivo', 'danger');
+            }
+        }
+
+        async function runDiscovery() {
+            showAlert('Avvio scansione discovery...', 'info');
+            try {
+                const response = await fetch('/api/scan/discovery');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert(`Scansione completata: ${result.result.devices_found} dispositivi trovati`, 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Errore scansione:', error);
+                showAlert('Errore durante la scansione', 'danger');
+            }
+        }
+
+        async function runServicesScan(deviceId) {
+            showAlert('Avvio scansione servizi...', 'info');
+            try {
+                const response = await fetch(`/api/scan/services/${deviceId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert(`Scansione servizi completata: ${result.result.services_found} servizi trovati`, 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione servizi: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante la scansione servizi', 'danger');
+            }
+        }
+
+        async function runOSScan(deviceId) {
+            showAlert('Avvio rilevamento OS...', 'info');
+            try {
+                const response = await fetch(`/api/scan/os/${deviceId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('Rilevamento OS completato', 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore rilevamento OS: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante il rilevamento OS', 'danger');
+            }
+        }
+
+        async function runVulnScan(deviceId) {
+            showAlert('Avvio scansione vulnerabilità...', 'info');
+            try {
+                const response = await fetch(`/api/scan/vulnerabilities/${deviceId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert(`Scansione vulnerabilità completata: ${result.result.vulnerabilities_found} vulnerabilità trovate`, 'success');
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione vulnerabilità: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante la scansione vulnerabilità', 'danger');
+            }
+        }
+
+        async function runSNMPScan(deviceId) {
+            showAlert('Avvio scansione SNMP...', 'info');
+            try {
+                const response = await fetch(`/api/scan/snmp/${deviceId}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    if (result.result.snmp_available) {
+                        showAlert('Scansione SNMP completata', 'success');
+                    } else {
+                        showAlert('SNMP non disponibile su questo dispositivo', 'warning');
+                    }
+                    setTimeout(() => refreshDevices(), 2000);
+                } else {
+                    showAlert(`Errore scansione SNMP: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante la scansione SNMP', 'danger');
+            }
+        }
+
+        async function updateCache() {
+            showAlert('Aggiornamento cache in corso...', 'info');
+            try {
+                const response = await fetch('/api/cache/update');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('Cache aggiornata con successo', 'success');
+                } else {
+                    showAlert(`Errore aggiornamento cache: ${result.message}`, 'danger');
+                }
+            } catch (error) {
+                showAlert('Errore durante aggiornamento cache', 'danger');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
