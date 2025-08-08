@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block title %}Host Network - Nmap Scanner{% endblock %}
+{% block page_title %}Gestione Host{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.dashboard') }}">Network</a></li>
+<li class="breadcrumb-item active" aria-current="page">Host</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- Filtri e ricerca -->
+<div class="row mb-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-funnel me-1"></i>
+          Filtri di Ricerca
+        </h3>
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-lte-toggle="card-collapse">
+            <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+            <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <form method="GET" id="filterForm">
+          <div class="row">
+            <div class="col-md-4">
+              <label for="search" class="form-label">Ricerca IP/MAC/Vendor</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ search }}" placeholder="192.168.1.1 o vendor">
+            </div>
+            <div class="col-md-3">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-select" id="status" name="status">
+                <option value="">Tutti gli status</option>
+                <option value="up" {% if status_filter == 'up' %}selected{% endif %}>Host Attivi</option>
+                <option value="down" {% if status_filter == 'down' %}selected{% endif %}>Host Down</option>
+                <option value="unknown" {% if status_filter == 'unknown' %}selected{% endif %}>Sconosciuti</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="per_page" class="form-label">Elementi per pagina</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-search"></i> Cerca
+              </button>
+              <a href="{{ url_for('network.hosts') }}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Reset
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistiche rapide -->
+<div class="row mb-3">
+  <div class="col-md-3">
+    <div class="info-box">
+      <span class="info-box-icon bg-info">
+        <i class="bi bi-pc-display"></i>
+      </span>
+      <div class="info-box-content">
+        <span class="info-box-text">Totale Host</span>
+        <span class="info-box-number">{{ total }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box">
+      <span class="info-box-icon bg-success">
+        <i class="bi bi-check-circle"></i>
+      </span>
+      <div class="info-box-content">
+        <span class="info-box-text">Host Attivi</span>
+        <span class="info-box-number">
+          {{ hosts | selectattr('status', 'equalto', 'up') | list | length }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box">
+      <span class="info-box-icon bg-warning">
+        <i class="bi bi-door-open"></i>
+      </span>
+      <div class="info-box-content">
+        <span class="info-box-text">Porte Aperte</span>
+        <span class="info-box-number">
+          {{ hosts | sum(attribute='open_ports') or 0 }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="info-box">
+      <span class="info-box-icon bg-danger">
+        <i class="bi bi-bug"></i>
+      </span>
+      <div class="info-box-content">
+        <span class="info-box-text">Vulnerabilità</span>
+        <span class="info-box-number">
+          {{ hosts | sum(attribute='vuln_count') or 0 }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabella host -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-list me-1"></i>
+          Lista Host
+          {% if search or status_filter %}
+            <small class="text-muted">(filtrata)</small>
+          {% endif %}
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-primary">{{ total }} host trovati</span>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if hosts %}
+        <div class="table-responsive">
+          <table class="table table-striped table-hover" id="hostsTable">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Status</th>
+                <th>MAC Address</th>
+                <th>Vendor</th>
+                <th>Porte</th>
+                <th>Aperte</th>
+                <th>Vulnerabilità</th>
+                <th>Ultimo Scan</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for host in hosts %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('network.host_detail', host_id=host.id) }}"
+                     class="fw-bold text-decoration-none">
+                    {{ host.ip_address }}
+                  </a>
+                </td>
+                <td>
+                  {% if host.status == 'up' %}
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>UP
+                    </span>
+                  {% elif host.status == 'down' %}
+                    <span class="badge bg-danger">
+                      <i class="bi bi-x-circle me-1"></i>DOWN
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary">
+                      <i class="bi bi-question-circle me-1"></i>{{ host.status | upper }}
+                    </span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if host.mac_address %}
+                    <code class="small">{{ host.mac_address }}</code>
+                  {% else %}
+                    <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if host.vendor %}
+                    <span class="small">{{ host.vendor }}</span>
+                  {% else %}
+                    <span class="text-muted">Sconosciuto</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge bg-info">{{ host.port_count or 0 }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-warning">{{ host.open_ports or 0 }}</span>
+                </td>
+                <td>
+                  {% if host.vuln_count > 0 %}
+                    <span class="badge bg-danger">{{ host.vuln_count }}</span>
+                  {% else %}
+                    <span class="badge bg-success">0</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <small class="text-muted">
+                    {% if host.start_time %}
+                      {{ host.start_time | timestamp }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </small>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('network.host_detail', host_id=host.id) }}"
+                       class="btn btn-primary btn-sm" title="Dettagli">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('network.ports') }}?search={{ host.ip_address }}"
+                       class="btn btn-info btn-sm" title="Porte">
+                      <i class="bi bi-door-open"></i>
+                    </a>
+                    {% if host.vuln_count > 0 %}
+                    <a href="{{ url_for('network.vulnerabilities') }}?search={{ host.ip_address }}"
+                       class="btn btn-warning btn-sm" title="Vulnerabilità">
+                      <i class="bi bi-bug"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginazione -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Paginazione host">
+          <ul class="pagination justify-content-center">
+            <!-- Prima pagina -->
+            {% if page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.hosts', page=1, search=search, status=status_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-double-left"></i>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.hosts', page=page-1, search=search, status=status_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Pagine centrali -->
+            {% for p in range([1, page-2]|max, [total_pages+1, page+3]|min) %}
+              {% if p == page %}
+                <li class="page-item active">
+                  <span class="page-link">{{ p }}</span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ url_for('network.hosts', page=p, search=search, status=status_filter, per_page=per_page) }}">{{ p }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            <!-- Ultima pagina -->
+            {% if page < total_pages %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.hosts', page=page+1, search=search, status=status_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.hosts', page=total_pages, search=search, status=status_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-double-right"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Mostra da {{ (page-1) * per_page + 1 }} a {{ [page * per_page, total]|min }} di {{ total }} host
+          </small>
+          <div class="text-end">
+            <small class="text-muted">Pagina {{ page }} di {{ total_pages }}</small>
+          </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-pc-display display-1 text-muted"></i>
+          <h4 class="mt-3">Nessun host trovato</h4>
+          <p class="text-muted">
+            {% if search or status_filter %}
+              Prova a modificare i filtri di ricerca.
+            {% else %}
+              Non sono stati trovati host nel database.
+            {% endif %}
+          </p>
+          {% if search or status_filter %}
+          <a href="{{ url_for('network.hosts') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            Resetta filtri
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions floating button -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056;">
+  <div class="btn-group-vertical">
+    <a href="{{ url_for('network.search') }}" class="btn btn-primary btn-floating mb-2" title="Ricerca Avanzata">
+      <i class="bi bi-search"></i>
+    </a>
+    <a href="{{ url_for('network.dashboard') }}" class="btn btn-secondary btn-floating" title="Dashboard">
+      <i class="bi bi-house"></i>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables -->
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Auto-submit del form quando cambiano i filtri
+    $('#status, #per_page').change(function() {
+        $('#filterForm').submit();
+    });
+
+    // Inizializza DataTable se ci sono pochi risultati (per ordinamento locale)
+    {% if hosts and hosts|length <= 100 %}
+    $('#hostsTable').DataTable({
+        "paging": false,
+        "searching": false,
+        "info": false,
+        "language": {
+            "emptyTable": "Nessun host trovato"
+        },
+        "columnDefs": [
+            { "orderable": false, "targets": [8] } // Disabilita ordinamento per colonna azioni
+        ]
+    });
+    {% endif %}
+
+    // Tooltip per i pulsanti di azione
+    $('[title]').tooltip();
+});
+</script>
+
+<style>
+.btn-floating {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.info-box-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    border-radius: 5px;
+    font-size: 30px;
+    color: white;
+    margin-right: 15px;
+}
+
+.info-box-content {
+    flex: 1;
+}
+
+.info-box-text {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.info-box-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+</style>
+{% endblock %}
