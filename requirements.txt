@@ -1,79 +1,20 @@
-# Network Scanner Application - Requirements
-# Python 3.8+ required
+# Network Scanner Requirements - CORRECTED
+flask>=2.3.0
+pysnmp
+requests>=2.31.0
+python-nmap>=0.7.1
 
-# ===== CORE DEPENDENCIES =====
-# Async SQLite database
-aiosqlite==0.19.0
+# Database
+sqlite3  # Built-in with Python
 
-# Async HTTP client for external APIs
-aiohttp==3.9.1
+# XML Processing
+lxml>=4.9.0  # Better XML parsing
 
-# File I/O async operations
-aiofiles==23.2.1
+# Network utilities
+netifaces
 
-# HTTP requests for CVE/NVD API
-requests==2.31.0
+# System utilities
+psutil>=5.9.0  # For system monitoring
 
-# ===== NETWORK SCANNING =====
-# Python wrapper for Nmap
-python-nmap==0.7.1
-
-# ===== SNMP SUPPORT =====
-# SNMP library for device information gathering
-pysnmp==4.4.12
-
-# ===== DEVELOPMENT & TESTING =====
-# Testing framework
-pytest==7.4.3
-
-# Async testing support
-pytest-asyncio==0.21.1
-
-# ===== OPTIONAL DEPENDENCIES =====
-# Better JSON handling (optional, standard json is fine)
-# orjson==3.9.10
-
-# Progress bars for long operations (optional)
-# tqdm==4.66.1
-
-# Rich console output (optional)
-# rich==13.7.0
-
-# ===== SYSTEM REQUIREMENTS =====
-# The following are built-in Python modules (no installation needed):
-# - asyncio
-# - json
-# - logging
-# - datetime
-# - pathlib
-# - typing
-# - re
-# - subprocess
-# - ipaddress
-# - time
-# - os
-# - sys
-
-# ===== EXTERNAL SYSTEM DEPENDENCIES =====
-# These must be installed separately on the system:
-# - nmap (https://nmap.org/download.html)
-# - For Windows: Npcap (included with Nmap installer)
-# - For Linux: sudo apt-get install nmap
-# - For macOS: brew install nmap
-
-# ===== VERSION COMPATIBILITY =====
-# Tested on:
-# - Python 3.8, 3.9, 3.10, 3.11, 3.12
-# - Windows 10/11
-# - Ubuntu 20.04+
-# - CentOS 8+
-# - macOS 12+
-
-# ===== INSTALLATION NOTES =====
-# Install with: pip install -r requirements.txt
-# 
-# For development: pip install -r requirements.txt pytest pytest-asyncio
-# For minimal install: pip install aiosqlite requests python-nmap
-#
-# If you encounter SSL issues with aiohttp, you might need:
-# pip install aiohttp[speedups]
+# Optional but recommended
+colorama>=0.4.6  # For colored console output on Windows
