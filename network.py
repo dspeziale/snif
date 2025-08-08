@@ -40,9 +40,9 @@ def dashboard():
             """)
             stats['total_networks'] = len(networks)
 
-            # Host attivi
+            # Host attivi - CORREZIONE: status -> status_state
             active_hosts = db.execute_query("""
-                SELECT COUNT(*) as count FROM hosts WHERE status = 'up'
+                SELECT COUNT(*) as count FROM hosts WHERE status_state = 'up'
             """)
             stats['active_hosts'] = active_hosts[0]['count'] if active_hosts else 0
 
@@ -58,7 +58,7 @@ def dashboard():
             """)
             stats['vulnerabilities'] = vulns[0]['count'] if vulns else 0
 
-            # Top 10 reti per numero di host
+            # Top 10 reti per numero di host - CORREZIONE: status -> status_state
             top_networks = db.execute_query("""
                 SELECT substr(ip_address, 1, 
                     CASE 
@@ -68,7 +68,7 @@ def dashboard():
                     END
                 ) as network,
                 COUNT(*) as host_count,
-                SUM(CASE WHEN status = 'up' THEN 1 ELSE 0 END) as active_count
+                SUM(CASE WHEN status_state = 'up' THEN 1 ELSE 0 END) as active_count
                 FROM hosts
                 WHERE ip_address IS NOT NULL
                 GROUP BY network
@@ -132,7 +132,8 @@ def hosts():
                 params.extend([search_term, search_term, search_term])
 
             if status_filter:
-                where_clauses.append("h.status = ?")
+                # CORREZIONE: status -> status_state
+                where_clauses.append("h.status_state = ?")
                 params.append(status_filter)
 
             where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
@@ -147,9 +148,9 @@ def hosts():
             total_result = db.execute_query(count_query, tuple(params))
             total = total_result[0]['total'] if total_result else 0
 
-            # Ottieni gli host
+            # Ottieni gli host - CORREZIONE: h.status -> h.status_state
             hosts_query = f"""
-                SELECT h.id, h.ip_address, h.status, h.mac_address, h.vendor,
+                SELECT h.id, h.ip_address, h.status_state as status, h.mac_address, h.vendor,
                        sr.filename, sr.start_time,
                        COUNT(p.id) as port_count,
                        SUM(CASE WHEN p.state = 'open' THEN 1 ELSE 0 END) as open_ports,
@@ -189,9 +190,9 @@ def host_detail(host_id):
     """Dettaglio singolo host"""
     try:
         with get_network_db() as db:
-            # Dettagli host
+            # Dettagli host - Aggiunto alias per status_state
             host = db.execute_query("""
-                SELECT h.*, sr.filename, sr.start_time, sr.args
+                SELECT h.*, h.status_state as status, sr.filename, sr.start_time, sr.args
                 FROM hosts h
                 JOIN scan_runs sr ON h.scan_run_id = sr.id
                 WHERE h.id = ?
@@ -264,7 +265,7 @@ def host_detail(host_id):
 def ports():
     """Pagina lista porte"""
     page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 50))
+    per_page = int(request.args.get('per_page', 25))
     search = request.args.get('search', '').strip()
     state_filter = request.args.get('state', '')
     service_filter = request.args.get('service', '')
@@ -439,10 +440,10 @@ def search():
             results = []
 
             if search_type in ['all', 'hosts']:
-                # Ricerca host
+                # Ricerca host - CORREZIONE: h.status -> h.status_state
                 host_results = db.execute_query("""
                     SELECT 'host' as result_type, h.id, h.ip_address as title,
-                           h.status as description, sr.filename as context,
+                           h.status_state as description, sr.filename as context,
                            '/network/host/' || h.id as url
                     FROM hosts h
                     JOIN scan_runs sr ON h.scan_run_id = sr.id
@@ -509,11 +510,11 @@ def scans():
             total_result = db.execute_query("SELECT COUNT(*) as total FROM scan_runs")
             total = total_result[0]['total'] if total_result else 0
 
-            # Ottieni gli scan
+            # Ottieni gli scan - CORREZIONE: h.status -> h.status_state per conteggio host attivi
             scans = db.execute_query("""
                 SELECT sr.*, 
                        COUNT(h.id) as host_count,
-                       SUM(CASE WHEN h.status = 'up' THEN 1 ELSE 0 END) as active_hosts
+                       SUM(CASE WHEN h.status_state = 'up' THEN 1 ELSE 0 END) as active_hosts
                 FROM scan_runs sr
                 LEFT JOIN hosts h ON sr.id = h.scan_run_id
                 GROUP BY sr.id
@@ -553,9 +554,9 @@ def scan_detail(scan_id):
 
             scan = scan[0]
 
-            # Host del scan
+            # Host del scan - CORREZIONE: h.status -> h.status_state
             hosts = db.execute_query("""
-                SELECT h.*, 
+                SELECT h.*, h.status_state as status,
                        COUNT(p.id) as port_count,
                        SUM(CASE WHEN p.state = 'open' THEN 1 ELSE 0 END) as open_ports
                 FROM hosts h
@@ -565,11 +566,11 @@ def scan_detail(scan_id):
                 ORDER BY h.ip_address
             """, (scan_id,))
 
-            # Statistiche del scan
+            # Statistiche del scan - CORREZIONE: h.status -> h.status_state
             stats = db.execute_query("""
                 SELECT 
                     COUNT(DISTINCT h.id) as total_hosts,
-                    SUM(CASE WHEN h.status = 'up' THEN 1 ELSE 0 END) as active_hosts,
+                    SUM(CASE WHEN h.status_state = 'up' THEN 1 ELSE 0 END) as active_hosts,
                     COUNT(DISTINCT p.id) as total_ports,
                     SUM(CASE WHEN p.state = 'open' THEN 1 ELSE 0 END) as open_ports
                 FROM hosts h

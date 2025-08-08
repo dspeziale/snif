@@ -85,9 +85,9 @@ def index():
                 LIMIT 5
             """)
 
-            # Host più scansionati
+            # Host più scansionati - CORREZIONE: h.status -> h.status_state
             top_hosts = db.execute_query("""
-                SELECT h.ip_address, h.status, COUNT(sr.id) as scan_count,
+                SELECT h.ip_address, h.status_state as status, COUNT(sr.id) as scan_count,
                        MAX(sr.start_time) as last_scan
                 FROM hosts h
                 JOIN scan_runs sr ON h.scan_run_id = sr.id
@@ -242,9 +242,9 @@ def tables():
                 LIMIT 50
             """)
 
-            # Ottieni tutti gli host
+            # Ottieni tutti gli host - CORREZIONE: h.status -> h.status_state
             hosts = db.execute_query("""
-                SELECT h.id, h.ip_address, h.status, h.mac_address, h.vendor,
+                SELECT h.id, h.ip_address, h.status_state as status, h.mac_address, h.vendor,
                        sr.filename, sr.start_time,
                        COUNT(p.id) as port_count
                 FROM hosts h
@@ -282,9 +282,9 @@ def api_scan_details(scan_id):
             if not scan:
                 return jsonify({'error': 'Scan non trovato'}), 404
 
-            # Host del scan
+            # Host del scan - CORREZIONE: h.status -> h.status_state
             hosts = db.execute_query("""
-                SELECT h.*, COUNT(p.id) as port_count
+                SELECT h.*, h.status_state as status, COUNT(p.id) as port_count
                 FROM hosts h
                 LEFT JOIN ports p ON h.id = p.host_id
                 WHERE h.scan_run_id = ?
@@ -305,9 +305,9 @@ def api_host_details(host_id):
     """API per dettagli host"""
     try:
         with get_db() as db:
-            # Dettagli host
+            # Dettagli host - CORREZIONE: Aggiunto alias per status_state
             host = db.execute_query("""
-                SELECT h.*, sr.filename, sr.start_time as scan_time
+                SELECT h.*, h.status_state as status, sr.filename, sr.start_time as scan_time
                 FROM hosts h
                 JOIN scan_runs sr ON h.scan_run_id = sr.id
                 WHERE h.id = ?
@@ -361,10 +361,10 @@ def api_search():
 
         with get_db() as db:
             if search_type == 'hosts' or search_type == 'all':
-                # Ricerca negli host
+                # Ricerca negli host - CORREZIONE: h.status -> h.status_state
                 host_query = """
                     SELECT 'host' as type, h.id, h.ip_address as title, 
-                           h.status as description, sr.filename as context
+                           h.status_state as description, sr.filename as context
                     FROM hosts h
                     JOIN scan_runs sr ON h.scan_run_id = sr.id
                     WHERE h.ip_address LIKE ? OR h.vendor LIKE ?
