@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///C:/Program Files (x86)/Nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.97 scan initiated Fri Aug  8 12:03:18 2025 as: &quot;C:\\Program Files (x86)\\Nmap\\nmap.exe&quot; -sn -oX uno.xml 192.168.30.220-230 -->
+<nmaprun scanner="nmap" args="&quot;C:\\Program Files (x86)\\Nmap\\nmap.exe&quot; -sn -oX uno.xml 192.168.30.220-230" start="1754647398" startstr="Fri Aug  8 12:03:18 2025" version="7.97" xmloutputversion="1.05">

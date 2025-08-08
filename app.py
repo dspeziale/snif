@@ -1,6 +1,10 @@
 from flask import Flask, render_template, abort, g
 import os
 
+from core.nmap_xml_parser import NmapXMLParser
+from core.nmap_db_manager import NmapDatabaseManager
+
+
 # Crea l'applicazione Flask
 app = Flask(__name__)
 
@@ -44,7 +48,12 @@ def widgets():
 
 @app.route('/forms')
 def forms():
-    """Pagina forms"""
+    parser = NmapXMLParser()
+    scan_id = parser.parse_xml_file("scans/sei.xml")
+
+    db = NmapDatabaseManager()
+    host_details = db.get_host_by_ip("192.168.1.100")
+    print(host_details)
     return render_template('forms.html')
 
 
