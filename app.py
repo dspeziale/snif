@@ -63,70 +63,7 @@ app.jinja_env.filters['timestamp'] = format_timestamp
 @app.route('/')
 def index():
     """Homepage con dashboard principale"""
-    try:
-        with get_db() as db:
-            # Statistiche generali
-            stats = db.get_database_stats()
-
-            # Statistiche personalizzate
-            dashboard_stats = {
-                'total_scans': stats.get('scan_runs_count', 0),
-                'total_hosts': stats.get('hosts_count', 0),
-                'total_ports': stats.get('ports_count', 0),
-                'total_vulnerabilities': stats.get('vulnerabilities_count', 0),
-                'database_size_mb': stats.get('database_size_mb', 0)
-            }
-
-            # Ultimi scan
-            recent_scans = db.execute_query("""
-                SELECT id, scanner, version, args, start_time, end_time, filename
-                FROM scan_runs 
-                ORDER BY created_at DESC 
-                LIMIT 5
-            """)
-
-            # Host più scansionati - CORREZIONE: h.status -> h.status_state
-            top_hosts = db.execute_query("""
-                SELECT h.ip_address, h.status_state as status, COUNT(sr.id) as scan_count,
-                       MAX(sr.start_time) as last_scan
-                FROM hosts h
-                JOIN scan_runs sr ON h.scan_run_id = sr.id
-                GROUP BY h.ip_address
-                ORDER BY scan_count DESC
-                LIMIT 10
-            """)
-
-            # Servizi più comuni
-            top_services = db.execute_query("""
-                SELECT service, state, COUNT(*) as count
-                FROM ports
-                WHERE service IS NOT NULL AND service != ''
-                GROUP BY service, state
-                ORDER BY count DESC
-                LIMIT 10
-            """)
-
-            # Vulnerabilità recenti
-            recent_vulns = db.execute_query("""
-                SELECT v.cvss_score, v.type, v.severity, h.ip_address, v.created_at
-                FROM vulnerabilities v
-                JOIN hosts h ON v.host_id = h.id
-                ORDER BY v.created_at DESC
-                LIMIT 5
-            """)
-
-            return render_template('index.html',
-                                   stats=dashboard_stats,
-                                   recent_scans=recent_scans,
-                                   top_hosts=top_hosts,
-                                   top_services=top_services,
-                                   recent_vulns=recent_vulns)
-
-    except Exception as e:
-        flash(f'Errore nel caricamento della dashboard: {str(e)}', 'error')
-        return render_template('index.html',
-                               stats={}, recent_scans=[], top_hosts=[],
-                               top_services=[], recent_vulns=[])
+    return redirect(url_for('network.dashboard'))
 
 
 @app.route('/widgets')

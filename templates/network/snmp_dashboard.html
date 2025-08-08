@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard SNMP - Nmap Scanner{% endblock %}
+{% block page_title %}Dashboard SNMP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.dashboard') }}">Network</a></li>
+<li class="breadcrumb-item active" aria-current="page">SNMP</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Header e statistiche generali -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="alert alert-info">
+      <h4><i class="bi bi-router me-2"></i>Dashboard SNMP</h4>
+      <p class="mb-0">Panoramica completa dei dati SNMP raccolti da tutti gli host della rete.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Statistiche principali -->
+<div class="row mb-4">
+  <div class="col-lg-3 col-6">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0">{{ stats.snmp_hosts or 0 }}</h3>
+            <small>Host con dati SNMP</small>
+          </div>
+          <i class="bi bi-hdd-network display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0">{{ stats.total_services or 0 }}</h3>
+            <small>Servizi Totali</small>
+          </div>
+          <i class="bi bi-gear-wide display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0">{{ stats.software_installs or 0 }}</h3>
+            <small>Installazioni Software</small>
+          </div>
+          <i class="bi bi-box display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-6">
+    <div class="card bg-warning text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0">{{ stats.system_users or 0 }}</h3>
+            <small>Utenti di Sistema</small>
+          </div>
+          <i class="bi bi-people display-4 opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grafici e tabelle -->
+<div class="row">
+  <!-- Top servizi -->
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-bar-chart me-1"></i>
+          Servizi Più Comuni
+        </h4>
+      </div>
+      <div class="card-body">
+        {% if top_services %}
+        <canvas id="servicesChart" width="400" height="300"></canvas>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Nessun dato sui servizi disponibile.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Host più attivi -->
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-cpu me-1"></i>
+          Host con Più Servizi
+        </h4>
+      </div>
+      <div class="card-body">
+        {% if busy_hosts %}
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Servizi</th>
+                <th>Azione</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for host in busy_hosts %}
+              <tr>
+                <td>
+                  <code>{{ host.ip_address }}</code>
+                </td>
+                <td>
+                  <span class="badge bg-primary">{{ host.service_count }}</span>
+                </td>
+                <td>
+                  <a href="{{ url_for('network.host_snmp_detail', host_id=host.id) }}"
+                     class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye me-1"></i>Vedi
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Nessun host con servizi SNMP trovato.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Software più installato -->
+  <div class="col-lg-8 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-box me-1"></i>
+          Software Più Diffuso
+        </h4>
+        <div class="card-tools">
+          <a href="{{ url_for('network.snmp_software') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-list me-1"></i>Vedi Tutto
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if popular_software %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Nome Software</th>
+                <th>Host</th>
+                <th>Installazioni</th>
+                <th>Diffusione</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sw in popular_software %}
+              <tr>
+                <td>
+                  <strong>{{ sw.software_name }}</strong>
+                </td>
+                <td>
+                  <span class="badge bg-info">{{ sw.host_count }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ sw.install_count }}</span>
+                </td>
+                <td>
+                  {% set percentage = (sw.host_count / stats.snmp_hosts * 100) | round(1) if stats.snmp_hosts > 0 else 0 %}
+                  <div class="progress" style="height: 20px;">
+                    <div class="progress-bar
+                      {% if percentage > 70 %}bg-success
+                      {% elif percentage > 40 %}bg-warning
+                      {% else %}bg-info{% endif %}"
+                      style="width: {{ percentage }}%">
+                      {{ percentage }}%
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Nessun dato sul software disponibile.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiche interfacce -->
+  <div class="col-lg-4 mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-ethernet me-1"></i>
+          Tipi di Interfacce
+        </h4>
+      </div>
+      <div class="card-body">
+        {% if interface_stats %}
+        {% for iface in interface_stats %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div>
+            <strong>{{ iface.interface_type }}</strong>
+            <br>
+            <small class="text-muted">
+              {% if iface.avg_speed %}
+                Media: {% if iface.avg_speed >= 1000000000 %}{{ (iface.avg_speed / 1000000000) | round(1) }} Gbps
+                {% elif iface.avg_speed >= 1000000 %}{{ (iface.avg_speed / 1000000) | round(0) }} Mbps
+                {% else %}{{ iface.avg_speed }} bps{% endif %}
+              {% else %}
+                Velocità N/A
+              {% endif %}
+            </small>
+          </div>
+          <span class="badge bg-primary">{{ iface.count }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          Nessun dato sulle interfacce disponibile.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation rapida -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-compass me-1"></i>
+          Navigazione SNMP
+        </h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <div class="d-grid">
+              <a href="{{ url_for('network.snmp_services') }}" class="btn btn-outline-primary">
+                <i class="bi bi-gear-wide me-2"></i>
+                <div>
+                  <strong>Servizi</strong>
+                  <br><small>Visualizza tutti i servizi</small>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="d-grid">
+              <a href="{{ url_for('network.snmp_software') }}" class="btn btn-outline-info">
+                <i class="bi bi-box me-2"></i>
+                <div>
+                  <strong>Software</strong>
+                  <br><small>Inventario software</small>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="d-grid">
+              <a href="{{ url_for('network.hosts') }}?snmp=1" class="btn btn-outline-success">
+                <i class="bi bi-hdd-network me-2"></i>
+                <div>
+                  <strong>Host SNMP</strong>
+                  <br><small>Solo host con dati SNMP</small>
+                </div>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="d-grid">
+              <a href="{{ url_for('network.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                <div>
+                  <strong>Dashboard Network</strong>
+                  <br><small>Torna alla dashboard principale</small>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Grafico servizi più comuni
+{% if top_services %}
+const servicesCtx = document.getElementById('servicesChart').getContext('2d');
+new Chart(servicesCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for service in top_services[:10] %}
+            '{{ service.service_name }}'{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for service in top_services[:10] %}
+                {{ service.host_count }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.label + ': ' + context.parsed + ' host';
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}Software SNMP - Nmap Scanner{% endblock %}
+{% block page_title %}Inventario Software SNMP{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.dashboard') }}">Network</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.snmp_dashboard') }}">SNMP</a></li>
+<li class="breadcrumb-item active" aria-current="page">Software</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css">
+<style>
+.software-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  margin-right: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content -->
+<!-- Header e filtri -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-box-seam me-2"></i>
+          Inventario Software SNMP
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-primary">{{ total }} installazioni</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Filtro di ricerca -->
+        <form method="GET" class="row g-3 mb-4">
+          <div class="col-md-8">
+            <label for="search" class="form-label">Cerca Software</label>
+            <input type="text" class="form-control" id="search" name="search"
+                   value="{{ search }}" placeholder="Nome software, produttore o IP host...">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">
+              <i class="bi bi-search me-1"></i>Cerca
+            </button>
+            <a href="{{ url_for('network.snmp_software') }}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Reset
+            </a>
+          </div>
+        </form>
+
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          <strong>Inventario Automatico:</strong>
+          Questo elenco mostra tutto il software rilevato automaticamente tramite SNMP sui sistemi della rete.
+          I dati vengono raccolti durante le scansioni Nmap con script SNMP abilitati.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabella software -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4>
+          <i class="bi bi-list me-1"></i>
+          Elenco Software Installato
+        </h4>
+        <div class="card-tools">
+          {% if search %}
+          <span class="badge bg-info">Filtrato</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        {% if software %}
+        <div class="table-responsive">
+          <table class="table table-striped" id="softwareTable">
+            <thead>
+              <tr>
+                <th>Software</th>
+                <th>Versione</th>
+                <th>Produttore</th>
+                <th>Host</th>
+                <th>Data Installazione</th>
+                <th>Rilevato</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sw in software %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <!-- Icona software (se disponibile) -->
+                    <div class="flex-shrink-0">
+                      {% if 'Microsoft' in (sw.vendor or '') %}
+                        <i class="bi bi-microsoft text-primary fs-4 me-2"></i>
+                      {% elif 'Adobe' in (sw.vendor or '') %}
+                        <i class="bi bi-palette text-danger fs-4 me-2"></i>
+                      {% elif 'Google' in (sw.vendor or '') %}
+                        <i class="bi bi-google text-warning fs-4 me-2"></i>
+                      {% elif 'Java' in (sw.software_name or '') or 'JRE' in (sw.software_name or '') %}
+                        <i class="bi bi-cup-hot text-warning fs-4 me-2"></i>
+                      {% elif 'SQL' in (sw.software_name or '') or 'Database' in (sw.software_name or '') %}
+                        <i class="bi bi-database text-info fs-4 me-2"></i>
+                      {% else %}
+                        <i class="bi bi-app text-secondary fs-4 me-2"></i>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <strong>{{ sw.software_name }}</strong>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {% if sw.version %}
+                    <code class="small">{{ sw.version }}</code>
+                  {% else %}
+                    <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <small>{{ sw.vendor or 'N/A' }}</small>
+                </td>
+                <td>
+                  <a href="{{ url_for('network.host_detail', host_id=sw.host_id) }}"
+                     class="text-decoration-none">
+                    <code>{{ sw.ip_address }}</code>
+                  </a>
+                </td>
+                <td>
+                  {% if sw.install_date %}
+                    <small>{{ sw.install_date }}</small>
+                  {% else %}
+                    <small class="text-muted">N/A</small>
+                  {% endif %}
+                </td>
+                <td>
+                  <small class="text-muted">{{ sw.created_at | datetime }}</small>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('network.host_snmp_detail', host_id=sw.host_id) }}"
+                       class="btn btn-primary btn-sm" title="SNMP Host">
+                      <i class="bi bi-router"></i>
+                    </a>
+                    <a href="{{ url_for('network.host_detail', host_id=sw.host_id) }}"
+                       class="btn btn-info btn-sm" title="Dettagli Host">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="copyToClipboard('{{ sw.software_name }}')" title="Copia nome">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginazione -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Paginazione software SNMP" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <!-- Prima pagina -->
+            {% if page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.snmp_software', page=1, search=search) }}">
+                <i class="bi bi-chevron-double-left"></i>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.snmp_software', page=page-1, search=search) }}">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Pagine numeriche -->
+            {% for p in range([1, page-2]|max, [total_pages, page+2]|min + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('network.snmp_software', page=p, search=search) }}">
+                {{ p }}
+              </a>
+            </li>
+            {% endfor %}
+
+            <!-- Ultima pagina -->
+            {% if page < total_pages %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.snmp_software', page=page+1, search=search) }}">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.snmp_software', page=total_pages, search=search) }}">
+                <i class="bi bi-chevron-double-right"></i>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-info">
+          <h4><i class="bi bi-info-circle me-2"></i>Nessun software trovato</h4>
+          <p class="mb-0">
+            {% if search %}
+            Non sono stati trovati software che corrispondono ai criteri di ricerca.
+            <br>
+            <a href="{{ url_for('network.snmp_software') }}" class="alert-link">
+              <i class="bi bi-x-circle me-1"></i>Rimuovi filtri
+            </a>
+            {% else %}
+            Non sono stati trovati dati SNMP sul software nel database.
+            <br>
+            Assicurati che le scansioni Nmap includano script SNMP per raccogliere queste informazioni.
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistiche e suggerimenti -->
+{% if software %}
+<div class="row mt-4">
+  <div class="col-lg-8">
+    <div class="card border-success">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">
+          <i class="bi bi-graph-up me-2"></i>
+          Analisi Software
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Software Più Comune:</h6>
+            <p>Usa i filtri per identificare il software più installato nella tua rete e verificare versioni obsolete.</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Sicurezza:</h6>
+            <p>Monitora regolarmente il software installato per identificare versioni vulnerabili o non autorizzate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-info">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">
+          <i class="bi bi-compass me-2"></i>
+          Navigazione
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('network.snmp_dashboard') }}" class="btn btn-outline-primary">
+            <i class="bi bi-house me-1"></i>Dashboard SNMP
+          </a>
+          <a href="{{ url_for('network.snmp_services') }}" class="btn btn-outline-success">
+            <i class="bi bi-gear-wide me-1"></i>Servizi
+          </a>
+          <a href="{{ url_for('network.hosts') }}" class="btn btn-outline-info">
+            <i class="bi bi-hdd-network me-1"></i>Host
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Informazioni sui dati -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card border-warning">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Note sui Dati SNMP
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <h6>Disponibilità:</h6>
+            <p class="small">I dati software SNMP sono disponibili solo per sistemi Windows e alcuni sistemi Unix/Linux che supportano gli OID specifici per l'inventario software.</p>
+          </div>
+          <div class="col-md-4">
+            <h6>Precisione:</h6>
+            <p class="small">Le informazioni dipendono dalla configurazione SNMP del sistema target e potrebbero non essere complete per tutti i software installati.</p>
+          </div>
+          <div class="col-md-4">
+            <h6>Aggiornamento:</h6>
+            <p class="small">I dati vengono aggiornati ad ogni scansione Nmap con script SNMP. Per informazioni aggiornate, esegui nuove scansioni regolarmente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables -->
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Inizializza DataTable
+    $('#softwareTable').DataTable({
+        pageLength: 25,
+        responsive: true,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/it-IT.json'
+        },
+        order: [[4, 'desc'], [0, 'asc']], // Ordina per data installazione, poi per nome
+        columnDefs: [
+            {
+                targets: [6], // Colonna azioni
+                orderable: false,
+                searchable: false
+            },
+            {
+                targets: [4], // Data installazione
+                type: 'date'
+            }
+        ]
+    });
+
+    // Focus automatico sul campo di ricerca
+    $('#search').focus();
+});
+
+// Funzione per copiare negli appunti
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Feedback visivo
+        const button = event.target.closest('button');
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'bi bi-check';
+        setTimeout(function() {
+            icon.className = originalClass;
+        }, 2000);
+    });
+}
+</script>
+{% endblock %>

@@ -1,12 +1,5 @@
-# Configurazione del menu con sezioni Network
+# Configurazione del menu con sezioni Network e SNMP
 MENU_STRUCTURE = {
-    'dashboard': {
-        'icon': 'bi bi-speedometer',
-        'label': 'Dashboard Principale',
-        'url': '/',
-        'endpoint': 'index'
-    },
-
     '_header_network': {
         'type': 'header',
         'label': 'NETWORK ANALYSIS'
@@ -117,6 +110,108 @@ MENU_STRUCTURE = {
         }
     },
 
+    # ===========================
+    # NUOVA SEZIONE SNMP
+    # ===========================
+    '_header_snmp': {
+        'type': 'header',
+        'label': 'SNMP ANALYSIS'
+    },
+
+    'snmp_dashboard': {
+        'icon': 'bi bi-router',
+        'label': 'SNMP Dashboard',
+        'url': '/network/snmp',
+        'endpoint': 'network.snmp_dashboard'
+    },
+
+    'snmp_inventory': {
+        'icon': 'bi bi-clipboard-data',
+        'label': 'Inventario SNMP',
+        'url': None,
+        'children': {
+            'snmp_services': {
+                'icon': 'bi bi-gear-wide-connected',
+                'label': 'Servizi Sistema',
+                'url': '/network/snmp/services',
+                'endpoint': 'network.snmp_services'
+            },
+            'snmp_software': {
+                'icon': 'bi bi-box-seam',
+                'label': 'Software Installato',
+                'url': '/network/snmp/software',
+                'endpoint': 'network.snmp_software'
+            },
+            'snmp_processes': {
+                'icon': 'bi bi-cpu',
+                'label': 'Processi Attivi',
+                'url': '/network/snmp/processes',
+                'endpoint': 'network.snmp_processes'
+            },
+            'snmp_users': {
+                'icon': 'bi bi-people',
+                'label': 'Utenti Sistema',
+                'url': '/network/snmp/users',
+                'endpoint': 'network.snmp_users'
+            }
+        }
+    },
+
+    'snmp_network': {
+        'icon': 'bi bi-diagram-2',
+        'label': 'Rete SNMP',
+        'url': None,
+        'children': {
+            'snmp_interfaces': {
+                'icon': 'bi bi-ethernet',
+                'label': 'Interfacce di Rete',
+                'url': '/network/snmp/interfaces',
+                'endpoint': 'network.snmp_interfaces'
+            },
+            'snmp_connections': {
+                'icon': 'bi bi-diagram-3',
+                'label': 'Connessioni Attive',
+                'url': '/network/snmp/connections',
+                'endpoint': 'network.snmp_connections'
+            },
+            'snmp_shares': {
+                'icon': 'bi bi-folder-shared',
+                'label': 'Condivisioni',
+                'url': '/network/snmp/shares',
+                'endpoint': 'network.snmp_shares'
+            }
+        }
+    },
+
+    'snmp_analysis': {
+        'icon': 'bi bi-graph-up',
+        'label': 'Analisi SNMP',
+        'url': None,
+        'children': {
+            'snmp_hosts_summary': {
+                'icon': 'bi bi-hdd-network',
+                'label': 'Riepilogo Host',
+                'url': '/network/hosts?snmp=1',
+                'endpoint': 'network.hosts'
+            },
+            'snmp_statistics': {
+                'icon': 'bi bi-bar-chart',
+                'label': 'Statistiche Dettagliate',
+                'url': '/network/snmp/stats',
+                'endpoint': 'network.snmp_statistics'
+            },
+            'snmp_reports': {
+                'icon': 'bi bi-file-earmark-bar-graph',
+                'label': 'Report SNMP',
+                'url': '/network/snmp/reports',
+                'endpoint': 'network.snmp_reports'
+            }
+        }
+    },
+
+    # ===========================
+    # SEZIONI ESISTENTI
+    # ===========================
     'network_search': {
         'icon': 'bi bi-search',
         'label': 'Ricerca Avanzata',
@@ -124,65 +219,4 @@ MENU_STRUCTURE = {
         'endpoint': 'network.search'
     },
 
-    '_header_tools': {
-        'type': 'header',
-        'label': 'TOOLS & UTILITIES'
-    },
-
-    'widgets': {
-        'icon': 'bi bi-bar-chart',
-        'label': 'Grafici & Statistiche',
-        'url': '/widgets',
-        'endpoint': 'widgets'
-    },
-
-    'tables': {
-        'icon': 'bi bi-table',
-        'label': 'Tabelle Dati',
-        'url': '/tables',
-        'endpoint': 'tables'
-    },
-
-    'system_tools': {
-        'icon': 'bi bi-tools',
-        'label': 'Strumenti Sistema',
-        'url': None,
-        'children': {
-            'forms': {
-                'icon': 'bi bi-file-earmark-text',
-                'label': 'Test & Config',
-                'url': '/forms',
-                'endpoint': 'forms'
-            },
-            'about': {
-                'icon': 'bi bi-info-circle',
-                'label': 'Info Sistema',
-                'url': '/about',
-                'endpoint': 'about'
-            }
-        }
-    },
-
-    '_header_examples': {
-        'type': 'header',
-        'label': 'EXAMPLES'
-    },
-
-    'examples': {
-        'icon': 'bi bi-collection',
-        'label': 'Esempi',
-        'url': None,
-        'children': {
-            'example_1': {
-                'icon': 'bi bi-1-circle',
-                'label': 'Esempio 1',
-                'url': '#'
-            },
-            'example_2': {
-                'icon': 'bi bi-2-circle',
-                'label': 'Esempio 2',
-                'url': '#'
-            }
-        }
-    }
 }

@@ -559,3 +559,364 @@ def api_search():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ===============================
+# AGGIUNGI QUESTE ROUTE AL FILE network.py
+# ===============================
+
+@network_bp.route('/host/<int:host_id>/snmp')
+def host_snmp_detail(host_id):
+    """Dettaglio SNMP completo per un host"""
+    try:
+        with get_network_db() as db:
+            # Informazioni base host
+            host = db.execute_query("""
+                SELECT h.*, sr.filename, sr.start_time, sr.args
+                FROM hosts h
+                JOIN scan_runs sr ON h.scan_run_id = sr.id
+                WHERE h.id = ?
+            """, (host_id,))
+
+            if not host:
+                flash('Host non trovato', 'error')
+                return redirect(url_for('network.hosts'))
+
+            host = host[0]
+
+            # Dati SNMP - Servizi
+            services = db.execute_query("""
+                SELECT * FROM snmp_services
+                WHERE host_id = ?
+                ORDER BY service_name
+            """, (host_id,))
+
+            # Dati SNMP - Processi
+            processes = db.execute_query("""
+                SELECT * FROM snmp_processes
+                WHERE host_id = ?
+                ORDER BY memory_usage DESC, process_name
+            """, (host_id,))
+
+            # Dati SNMP - Software installato
+            software = db.execute_query("""
+                SELECT * FROM snmp_software
+                WHERE host_id = ?
+                ORDER BY install_date DESC, software_name
+            """, (host_id,))
+
+            # Dati SNMP - Utenti
+            users = db.execute_query("""
+                SELECT * FROM snmp_users
+                WHERE host_id = ?
+                ORDER BY username
+            """, (host_id,))
+
+            # Dati SNMP - Interfacce di rete
+            interfaces = db.execute_query("""
+                SELECT * FROM snmp_interfaces
+                WHERE host_id = ?
+                ORDER BY interface_index, interface_name
+            """, (host_id,))
+
+            # Dati SNMP - Connessioni di rete
+            connections = db.execute_query("""
+                SELECT * FROM snmp_network_connections
+                WHERE host_id = ?
+                ORDER BY protocol, local_port
+            """, (host_id,))
+
+            # Dati SNMP - Condivisioni
+            shares = db.execute_query("""
+                SELECT * FROM snmp_shares
+                WHERE host_id = ?
+                ORDER BY share_name
+            """, (host_id,))
+
+            # Informazioni di sistema SNMP
+            system_info = db.execute_query("""
+                SELECT * FROM snmp_system_info
+                WHERE host_id = ?
+                LIMIT 1
+            """, (host_id,))
+
+            system_info = system_info[0] if system_info else None
+
+            return render_template('network/host_snmp_detail.html',
+                                   host=host,
+                                   services=services,
+                                   processes=processes,
+                                   software=software,
+                                   users=users,
+                                   interfaces=interfaces,
+                                   connections=connections,
+                                   shares=shares,
+                                   system_info=system_info)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento dettagli SNMP: {str(e)}', 'error')
+        return redirect(url_for('network.host_detail', host_id=host_id))
+
+
+@network_bp.route('/snmp')
+@network_bp.route('/snmp/dashboard')
+def snmp_dashboard():
+    """Dashboard SNMP generale"""
+    try:
+        with get_network_db() as db:
+            # Statistiche SNMP generali
+            stats = {}
+
+            # Host con dati SNMP
+            stats['snmp_hosts'] = db.execute_query("""
+                SELECT COUNT(DISTINCT host_id) as count
+                FROM snmp_services
+            """)[0]['count']
+
+            # Servizi totali
+            stats['total_services'] = db.execute_query("""
+                SELECT COUNT(*) as count
+                FROM snmp_services
+            """)[0]['count']
+
+            # Software installazioni
+            stats['software_installs'] = db.execute_query("""
+                SELECT COUNT(*) as count
+                FROM snmp_software
+            """)[0]['count']
+
+            # Utenti di sistema
+            stats['system_users'] = db.execute_query("""
+                SELECT COUNT(*) as count
+                FROM snmp_users
+            """)[0]['count']
+
+            # Top servizi più comuni
+            top_services = db.execute_query("""
+                SELECT service_name, COUNT(*) as host_count
+                FROM snmp_services
+                GROUP BY service_name
+                ORDER BY host_count DESC
+                LIMIT 15
+            """)
+
+            # Host con più servizi
+            busy_hosts = db.execute_query("""
+                SELECT h.ip_address, h.id, COUNT(s.id) as service_count
+                FROM hosts h
+                JOIN snmp_services s ON h.id = s.host_id
+                GROUP BY h.id, h.ip_address
+                ORDER BY service_count DESC
+                LIMIT 10
+            """)
+
+            # Software più installato
+            popular_software = db.execute_query("""
+                SELECT software_name, COUNT(*) as install_count,
+                       COUNT(DISTINCT host_id) as host_count
+                FROM snmp_software
+                WHERE software_name IS NOT NULL
+                GROUP BY software_name
+                ORDER BY host_count DESC, install_count DESC
+                LIMIT 15
+            """)
+
+            # Statistiche interfacce di rete
+            interface_stats = db.execute_query("""
+                SELECT interface_type, COUNT(*) as count,
+                       AVG(CASE WHEN speed > 0 THEN speed END) as avg_speed
+                FROM snmp_interfaces
+                WHERE interface_type IS NOT NULL
+                GROUP BY interface_type
+                ORDER BY count DESC
+            """)
+
+            return render_template('network/snmp_dashboard.html',
+                                   stats=stats,
+                                   top_services=top_services,
+                                   busy_hosts=busy_hosts,
+                                   popular_software=popular_software,
+                                   interface_stats=interface_stats)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento dashboard SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_dashboard.html',
+                               stats={}, top_services=[], busy_hosts=[],
+                               popular_software=[], interface_stats=[])
+
+
+@network_bp.route('/snmp/services')
+def snmp_services():
+    """Lista servizi SNMP con filtri"""
+    # Parametri di ricerca e paginazione
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
+    search = request.args.get('search', '').strip()
+    status_filter = request.args.get('status', '')
+
+    try:
+        with get_network_db() as db:
+            # Query base
+            base_query = """
+                SELECT s.*, h.ip_address, h.vendor
+                FROM snmp_services s
+                JOIN hosts h ON s.host_id = h.id
+            """
+
+            conditions = []
+            params = []
+
+            if search:
+                conditions.append("(s.service_name LIKE ? OR h.ip_address LIKE ?)")
+                params.extend([f'%{search}%', f'%{search}%'])
+
+            if status_filter:
+                conditions.append("s.status = ?")
+                params.append(status_filter)
+
+            if conditions:
+                base_query += " WHERE " + " AND ".join(conditions)
+
+            # Count totale
+            count_query = base_query.replace(
+                "SELECT s.*, h.ip_address, h.vendor",
+                "SELECT COUNT(*)"
+            )
+            total = db.execute_query(count_query, params)[0]['COUNT(*)']
+
+            # Query con paginazione
+            offset = (page - 1) * per_page
+            services_query = base_query + f" ORDER BY s.service_name LIMIT {per_page} OFFSET {offset}"
+            services = db.execute_query(services_query, params)
+
+            # Statistiche per filtri
+            status_counts = db.execute_query("""
+                SELECT status, COUNT(*) as count
+                FROM snmp_services
+                GROUP BY status
+                ORDER BY count DESC
+            """)
+
+            total_pages = (total + per_page - 1) // per_page
+
+            return render_template('network/snmp_services.html',
+                                   services=services,
+                                   page=page,
+                                   total_pages=total_pages,
+                                   total=total,
+                                   search=search,
+                                   status_filter=status_filter,
+                                   status_counts=status_counts)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento servizi SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_services.html',
+                               services=[], page=1, total_pages=0, total=0,
+                               search='', status_filter='', status_counts=[])
+
+
+@network_bp.route('/snmp/software')
+def snmp_software():
+    """Lista software SNMP installato"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
+    search = request.args.get('search', '').strip()
+
+    try:
+        with get_network_db() as db:
+            # Query base
+            base_query = """
+                SELECT sw.*, h.ip_address
+                FROM snmp_software sw
+                JOIN hosts h ON sw.host_id = h.id
+            """
+
+            params = []
+
+            if search:
+                base_query += " WHERE (sw.software_name LIKE ? OR sw.vendor LIKE ? OR h.ip_address LIKE ?)"
+                params.extend([f'%{search}%', f'%{search}%', f'%{search}%'])
+
+            # Count totale
+            count_query = base_query.replace(
+                "SELECT sw.*, h.ip_address",
+                "SELECT COUNT(*)"
+            )
+            total = db.execute_query(count_query, params)[0]['COUNT(*)']
+
+            # Query con paginazione
+            offset = (page - 1) * per_page
+            software_query = base_query + f" ORDER BY sw.install_date DESC, sw.software_name LIMIT {per_page} OFFSET {offset}"
+            software = db.execute_query(software_query, params)
+
+            total_pages = (total + per_page - 1) // per_page
+
+            return render_template('network/snmp_software.html',
+                                   software=software,
+                                   page=page,
+                                   total_pages=total_pages,
+                                   total=total,
+                                   search=search)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento software SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_software.html',
+                               software=[], page=1, total_pages=0, total=0, search='')
+
+
+@network_bp.route('/api/snmp/host/<int:host_id>/summary')
+def api_snmp_summary(host_id):
+    """API per riassunto SNMP di un host - per widget nella pagina host_detail"""
+    try:
+        with get_network_db() as db:
+            summary = {}
+
+            # Conta servizi
+            services_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_services WHERE host_id = ?
+            """, (host_id,))
+            summary['services'] = services_count[0]['count'] if services_count else 0
+
+            # Conta processi
+            processes_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_processes WHERE host_id = ?
+            """, (host_id,))
+            summary['processes'] = processes_count[0]['count'] if processes_count else 0
+
+            # Conta software
+            software_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_software WHERE host_id = ?
+            """, (host_id,))
+            summary['software'] = software_count[0]['count'] if software_count else 0
+
+            # Conta utenti
+            users_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_users WHERE host_id = ?
+            """, (host_id,))
+            summary['users'] = users_count[0]['count'] if users_count else 0
+
+            # Conta interfacce
+            interfaces_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_interfaces WHERE host_id = ?
+            """, (host_id,))
+            summary['interfaces'] = interfaces_count[0]['count'] if interfaces_count else 0
+
+            # Conta connessioni
+            connections_count = db.execute_query("""
+                SELECT COUNT(*) as count FROM snmp_network_connections WHERE host_id = ?
+            """, (host_id,))
+            summary['connections'] = connections_count[0]['count'] if connections_count else 0
+
+            # Informazioni sistema se disponibili
+            system_info = db.execute_query("""
+                SELECT * FROM snmp_system_info WHERE host_id = ? LIMIT 1
+            """, (host_id,))
+
+            if system_info:
+                summary['system'] = system_info[0]
+
+            return jsonify(summary)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
