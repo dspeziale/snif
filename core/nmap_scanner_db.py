@@ -1,18 +1,23 @@
+#!/usr/bin/env python3
 """
-Nmap Scanner Database Schema - Versione Completa
-Comprehensive SQLite database for storing Nmap XML scan results with SNMP support
+Nmap Scanner Database Schema - VERSIONE COMPLETA FINALE
+Comprehensive SQLite database for storing Nmap XML scan results with full SNMP support
 """
 
 import sqlite3
 import os
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict
+
 
 class NmapScannerDB:
+    """Database handler for Nmap scan results with complete SNMP support"""
+
     def __init__(self, db_path: str = "instance/nmap_scans.db"):
-        """Initialize the database connection and create tables if they don't exist"""
-        # Setup logging FIRST before anything else
+        """Initialize the database connection and create all tables"""
+
+        # Setup logging FIRST
         self.logger = self._setup_logger()
 
         # Ensure instance directory exists
@@ -21,35 +26,28 @@ class NmapScannerDB:
         self.db_path = db_path
         self.conn = sqlite3.connect(db_path)
         self.conn.execute("PRAGMA foreign_keys = ON")
+
+        # Create all tables with complete schema
         self.create_tables()
 
     def _setup_logger(self):
         """Setup logger for this instance"""
-        # Ensure logs directory exists
         os.makedirs("logs", exist_ok=True)
 
-        # Create logger
         logger = logging.getLogger(f"{__name__}_{id(self)}")
 
-        # Only add handler if not already added
         if not logger.handlers:
             logger.setLevel(logging.INFO)
-
-            # Create file handler
             handler = logging.FileHandler('logs/nmap_scanner.log')
             handler.setLevel(logging.INFO)
-
-            # Create formatter
             formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
             handler.setFormatter(formatter)
-
-            # Add handler to logger
             logger.addHandler(handler)
 
         return logger
 
     def create_tables(self):
-        """Create all necessary tables for storing Nmap scan data"""
+        """Create ALL necessary tables including SNMP tables"""
 
         # =====================================================
         # TABELLE PRINCIPALI NMAP
@@ -74,7 +72,7 @@ class NmapScannerDB:
         )
         """)
 
-        # Scan info table (different scan types)
+        # Scan info table
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS scan_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +85,7 @@ class NmapScannerDB:
         )
         """)
 
-        # Host hints table (for discovered hosts before detailed scanning)
+        # Host hints table
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS host_hints (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -172,7 +170,7 @@ class NmapScannerDB:
         )
         """)
 
-        # Script elements table (structured script data)
+        # Script elements table
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS script_elements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -184,7 +182,7 @@ class NmapScannerDB:
         )
         """)
 
-        # Script tables (nested script data structures)
+        # Script tables
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS script_tables (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -218,6 +216,7 @@ class NmapScannerDB:
             host_id INTEGER,
             port_used_state VARCHAR(20),
             port_used_proto VARCHAR(10),
+            port_used_port_id INTEGER,
             port_used_portid INTEGER,
             FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE
         )
@@ -228,6 +227,9 @@ class NmapScannerDB:
         CREATE TABLE IF NOT EXISTS os_matches (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             os_detection_id INTEGER,
+            match_name VARCHAR(300),
+            match_accuracy INTEGER,
+            match_line INTEGER,
             os_name VARCHAR(200),
             accuracy INTEGER,
             line INTEGER,
@@ -240,11 +242,13 @@ class NmapScannerDB:
         CREATE TABLE IF NOT EXISTS os_classes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             os_match_id INTEGER,
-            os_type VARCHAR(100),
+            os_class_type VARCHAR(100),
             vendor VARCHAR(100),
             os_family VARCHAR(100),
-            os_gen VARCHAR(100),
+            os_gen VARCHAR(50),
             accuracy INTEGER,
+            cpe TEXT,
+            os_type VARCHAR(100),
             FOREIGN KEY (os_match_id) REFERENCES os_matches(id) ON DELETE CASCADE
         )
         """)
@@ -254,8 +258,11 @@ class NmapScannerDB:
         CREATE TABLE IF NOT EXISTS task_progress (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             scan_run_id INTEGER,
-            task VARCHAR(50),
-            time INTEGER,
+            task_name VARCHAR(100),
+            task_begin INTEGER,
+            task_end INTEGER,
+            task_time INTEGER,
+            task_extrainfo TEXT,
             percent REAL,
             remaining INTEGER,
             etc INTEGER,
@@ -267,15 +274,12 @@ class NmapScannerDB:
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS runtime_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            scan_run_id INTEGER,
+            scan_run_id INTEGER UNIQUE,
             finished_time INTEGER,
             finished_time_str VARCHAR(50),
-            elapsed REAL,
+            elapsed_time TEXT,
             summary TEXT,
             exit_status VARCHAR(20),
-            hosts_up INTEGER,
-            hosts_down INTEGER,
-            hosts_total INTEGER,
             FOREIGN KEY (scan_run_id) REFERENCES scan_runs(id) ON DELETE CASCADE
         )
         """)
@@ -284,20 +288,22 @@ class NmapScannerDB:
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS vulnerabilities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            script_id INTEGER,
             host_id INTEGER,
             port_id INTEGER,
-            vuln_id VARCHAR(50),
-            title VARCHAR(200),
+            script_id INTEGER,
+            vuln_id VARCHAR(100),
+            title VARCHAR(500),
+            description TEXT,
+            severity VARCHAR(20),
+            cvss_score REAL,
             state VARCHAR(20),
             risk_factor VARCHAR(20),
-            cvss_score REAL,
-            description TEXT,
-            disclosure_date VARCHAR(20),
+            disclosure_date TEXT,
             exploit_available BOOLEAN,
-            FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE,
+            discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE,
-            FOREIGN KEY (port_id) REFERENCES ports(id) ON DELETE CASCADE
+            FOREIGN KEY (port_id) REFERENCES ports(id) ON DELETE CASCADE,
+            FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
         )
         """)
 
@@ -305,17 +311,19 @@ class NmapScannerDB:
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS vuln_references (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            vulnerability_id INTEGER,
+            vuln_id INTEGER,
+            reference_type VARCHAR(50),
+            reference_id VARCHAR(100),
             reference_url TEXT,
-            FOREIGN KEY (vulnerability_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE
+            FOREIGN KEY (vuln_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE
         )
         """)
 
         # =====================================================
-        # TABELLE SNMP SPECIALIZZATE
+        # TABELLE SNMP - COMPLETE E CORRETTE
         # =====================================================
 
-        # SNMP Services (servizi Windows/Linux)
+        # SNMP Services (servizi Windows/Unix)
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS snmp_services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -323,7 +331,6 @@ class NmapScannerDB:
             service_name TEXT NOT NULL,
             status TEXT DEFAULT 'unknown',
             startup_type TEXT DEFAULT 'unknown',
-            description TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE,
             UNIQUE(host_id, service_name)
@@ -338,9 +345,7 @@ class NmapScannerDB:
             process_id INTEGER,
             process_name TEXT NOT NULL,
             process_path TEXT,
-            process_args TEXT,
             memory_usage INTEGER,
-            cpu_usage REAL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE
         )
@@ -355,7 +360,6 @@ class NmapScannerDB:
             version TEXT,
             install_date TEXT,
             vendor TEXT,
-            install_location TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE,
             UNIQUE(host_id, software_name, version, install_date)
@@ -378,7 +382,7 @@ class NmapScannerDB:
         )
         """)
 
-        # SNMP Network Interfaces (interfacce di rete)
+        # SNMP Network Interfaces
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS snmp_interfaces (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -397,7 +401,7 @@ class NmapScannerDB:
         )
         """)
 
-        # SNMP Network Connections (connessioni di rete attive)
+        # SNMP Network Connections
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS snmp_network_connections (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -414,7 +418,7 @@ class NmapScannerDB:
         )
         """)
 
-        # SNMP System Information (informazioni di sistema)
+        # SNMP System Information
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS snmp_system_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -427,7 +431,6 @@ class NmapScannerDB:
             system_location TEXT,
             system_name TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE
         )
         """)
@@ -438,11 +441,9 @@ class NmapScannerDB:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             host_id INTEGER NOT NULL,
             share_name TEXT NOT NULL,
-            share_path TEXT NOT NULL,
-            share_type TEXT,
+            share_path TEXT,
+            share_type TEXT DEFAULT 'unknown',
             description TEXT,
-            max_users INTEGER,
-            current_users INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE,
             UNIQUE(host_id, share_name)
@@ -450,10 +451,10 @@ class NmapScannerDB:
         """)
 
         # =====================================================
-        # TABELLE AGGIUNTIVE PER SICUREZZA
+        # TABELLE SICUREZZA AGGIUNTIVE
         # =====================================================
 
-        # SSL Certificates (certificati SSL)
+        # SSL Certificates
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS ssl_certificates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -463,26 +464,23 @@ class NmapScannerDB:
             issuer TEXT,
             not_before TEXT,
             not_after TEXT,
-            serial_number TEXT,
+            serial TEXT,
             signature_algorithm TEXT,
-            key_size INTEGER,
-            fingerprint_md5 TEXT,
-            fingerprint_sha1 TEXT,
-            fingerprint_sha256 TEXT,
+            key_length INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (host_id) REFERENCES hosts (id) ON DELETE CASCADE,
             FOREIGN KEY (port_id) REFERENCES ports (id) ON DELETE CASCADE
         )
         """)
 
-        # SSH Host Keys (chiavi host SSH)
+        # SSH Host Keys
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS ssh_hostkeys (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             host_id INTEGER NOT NULL,
             port_id INTEGER NOT NULL,
-            key_type TEXT,
-            key_size TEXT,
+            key_type TEXT NOT NULL,
+            key_size INTEGER,
             fingerprint TEXT,
             key_data TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -491,7 +489,7 @@ class NmapScannerDB:
         )
         """)
 
-        # HTTP Information (informazioni HTTP)
+        # HTTP Information
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS http_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -509,7 +507,7 @@ class NmapScannerDB:
         )
         """)
 
-        # SMB Information (informazioni SMB/CIFS)
+        # SMB Information
         self.conn.execute("""
         CREATE TABLE IF NOT EXISTS smb_info (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -528,16 +526,17 @@ class NmapScannerDB:
         )
         """)
 
-        # Create indexes for better performance
+        # Create indexes for performance
         self._create_indexes()
 
+        # Commit all changes
         self.conn.commit()
         self.logger.info("Database tables created successfully")
 
     def _create_indexes(self):
-        """Create indexes for better query performance"""
+        """Create indexes for better performance"""
         indexes = [
-            # Indexes principali
+            # Main table indexes
             "CREATE INDEX IF NOT EXISTS idx_hosts_ip ON hosts(ip_address)",
             "CREATE INDEX IF NOT EXISTS idx_hosts_scan_run ON hosts(scan_run_id)",
             "CREATE INDEX IF NOT EXISTS idx_ports_host ON ports(host_id)",
@@ -547,79 +546,123 @@ class NmapScannerDB:
             "CREATE INDEX IF NOT EXISTS idx_scan_runs_filename ON scan_runs(filename)",
             "CREATE INDEX IF NOT EXISTS idx_scan_runs_hash ON scan_runs(file_hash)",
 
-            # Indexes per vulnerabilità
-            "CREATE INDEX IF NOT EXISTS idx_vulnerabilities_script ON vulnerabilities(script_id)",
-            "CREATE INDEX IF NOT EXISTS idx_vulnerabilities_host ON vulnerabilities(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_vulnerabilities_vuln_id ON vulnerabilities(vuln_id)",
-
-            # Indexes SNMP
+            # SNMP table indexes
             "CREATE INDEX IF NOT EXISTS idx_snmp_services_host ON snmp_services(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_snmp_services_name ON snmp_services(service_name)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_processes_host ON snmp_processes(host_id)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_processes_name ON snmp_processes(process_name)",
-            "CREATE INDEX IF NOT EXISTS idx_snmp_processes_pid ON snmp_processes(process_id)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_software_host ON snmp_software(host_id)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_software_name ON snmp_software(software_name)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_users_host ON snmp_users(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_snmp_users_username ON snmp_users(username)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_interfaces_host ON snmp_interfaces(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_snmp_interfaces_ip ON snmp_interfaces(ip_address)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_connections_host ON snmp_network_connections(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_snmp_connections_local ON snmp_network_connections(local_address)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_system_host ON snmp_system_info(host_id)",
             "CREATE INDEX IF NOT EXISTS idx_snmp_shares_host ON snmp_shares(host_id)",
 
-            # Indexes per sicurezza
+            # Security table indexes
             "CREATE INDEX IF NOT EXISTS idx_ssl_certs_host ON ssl_certificates(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_ssl_certs_port ON ssl_certificates(port_id)",
             "CREATE INDEX IF NOT EXISTS idx_ssh_keys_host ON ssh_hostkeys(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_ssh_keys_port ON ssh_hostkeys(port_id)",
-            "CREATE INDEX IF NOT EXISTS idx_http_info_host ON http_info(host_id)",
-            "CREATE INDEX IF NOT EXISTS idx_smb_info_host ON smb_info(host_id)"
+            "CREATE INDEX IF NOT EXISTS idx_vulnerabilities_host ON vulnerabilities(host_id)",
+            "CREATE INDEX IF NOT EXISTS idx_vulnerabilities_script ON vulnerabilities(script_id)"
         ]
 
-        for index in indexes:
+        for index_sql in indexes:
             try:
-                self.conn.execute(index)
+                self.conn.execute(index_sql)
             except Exception as e:
-                self.logger.error(f"Error creating index: {e}")
+                self.logger.warning(f"Index creation failed: {e}")
 
     def get_scan_by_hash(self, file_hash: str) -> Optional[int]:
-        """Check if a scan with this hash already exists"""
+        """Check if a scan with the given hash already exists"""
         cursor = self.conn.execute(
-            "SELECT id FROM scan_runs WHERE file_hash = ?", (file_hash,)
+            "SELECT id FROM scan_runs WHERE file_hash = ?",
+            (file_hash,)
         )
         result = cursor.fetchone()
         return result[0] if result else None
 
-    def get_database_stats(self) -> dict:
-        """Get statistics about the database"""
+    def get_scan_by_filename(self, filename: str) -> Optional[int]:
+        """Get scan ID by filename"""
+        cursor = self.conn.execute(
+            "SELECT id FROM scan_runs WHERE filename = ?",
+            (filename,)
+        )
+        result = cursor.fetchone()
+        return result[0] if result else None
+
+    def get_all_scans(self) -> List[Dict]:
+        """Get all scan runs with basic info"""
+        cursor = self.conn.execute("""
+        SELECT id, filename, start_time_str, end_time_str, args 
+        FROM scan_runs 
+        ORDER BY created_at DESC
+        """)
+
+        scans = []
+        for row in cursor.fetchall():
+            scans.append({
+                'id': row[0],
+                'filename': row[1],
+                'start_time': row[2],
+                'end_time': row[3],
+                'args': row[4]
+            })
+        return scans
+
+    def get_hosts_for_scan(self, scan_run_id: int) -> List[Dict]:
+        """Get all hosts for a specific scan"""
+        cursor = self.conn.execute("""
+        SELECT id, ip_address, status_state, mac_address, vendor
+        FROM hosts 
+        WHERE scan_run_id = ?
+        ORDER BY ip_address
+        """, (scan_run_id,))
+
+        hosts = []
+        for row in cursor.fetchall():
+            hosts.append({
+                'id': row[0],
+                'ip_address': row[1],
+                'status': row[2],
+                'mac_address': row[3],
+                'vendor': row[4]
+            })
+        return hosts
+
+    def execute_query(self, query: str, params: tuple = ()) -> List[Dict]:
+        """Execute a custom query and return results as list of dicts"""
+        cursor = self.conn.execute(query, params)
+        columns = [description[0] for description in cursor.description]
+
+        results = []
+        for row in cursor.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+    def get_database_stats(self):
+        """Get comprehensive database statistics"""
         stats = {}
 
-        # Get table counts
-        cursor = self.conn.execute("""
-        SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
-        """)
+        # Database file size
+        stats['database_size_mb'] = round(os.path.getsize(self.db_path) / (1024 * 1024), 2)
+
+        # Get all table names
+        cursor = self.conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [row[0] for row in cursor.fetchall()]
 
+        # Count records in each table
         for table in tables:
             try:
                 cursor = self.conn.execute(f"SELECT COUNT(*) FROM {table}")
                 count = cursor.fetchone()[0]
-                stats[f'{table}_count'] = count
+                stats[f"{table}_count"] = count
             except Exception as e:
-                stats[f'{table}_count'] = f"Error: {e}"
-
-        # Get total database size
-        cursor = self.conn.execute("SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()")
-        db_size = cursor.fetchone()[0]
-        stats['database_size_bytes'] = db_size
-        stats['database_size_mb'] = round(db_size / (1024 * 1024), 2)
+                self.logger.warning(f"Could not count {table}: {e}")
+                stats[f"{table}_count"] = 0
 
         return stats
 
     def cleanup_old_scans(self, keep_last_n: int = 10):
-        """Remove old scan data, keeping only the last N scans"""
+        """Remove old scan runs, keeping only the most recent N"""
         cursor = self.conn.execute("""
         SELECT id FROM scan_runs 
         ORDER BY created_at DESC 
@@ -641,7 +684,7 @@ class NmapScannerDB:
         return 0
 
     def vacuum_database(self):
-        """Vacuum the database to reclaim space and optimize performance"""
+        """Vacuum the database to reclaim space"""
         self.conn.execute("VACUUM")
         self.logger.info("Database vacuumed successfully")
 
@@ -656,16 +699,17 @@ class NmapScannerDB:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-# Utility functions per testare il database
+
+# Test function
 def test_database_creation():
-    """Test function to verify database creation"""
-    test_db_path = "test_nmap_scans.db"
+    """Test database creation with all tables"""
+    test_db_path = "test_complete_db.db"
 
     # Remove existing test database
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
 
-    print("🧪 Testing database creation...")
+    print("🧪 Testing complete database creation...")
 
     with NmapScannerDB(test_db_path) as db:
         stats = db.get_database_stats()
@@ -673,29 +717,54 @@ def test_database_creation():
         print(f"✅ Database created successfully")
         print(f"📊 Database size: {stats['database_size_mb']} MB")
 
-        # Count tables by category
-        nmap_tables = sum(1 for k in stats.keys() if k.endswith('_count') and
-                         not k.startswith('snmp_') and not k.startswith('ssl_') and
-                         not k.startswith('ssh_') and not k.startswith('http_') and
-                         not k.startswith('smb_'))
+        # Count different types of tables
+        main_tables = [k for k in stats.keys() if k.endswith('_count') and
+                       not k.startswith('snmp_') and not k.startswith('ssl_') and
+                       not k.startswith('ssh_') and not k.startswith('http_') and
+                       not k.startswith('smb_')]
 
-        snmp_tables = sum(1 for k in stats.keys() if k.startswith('snmp_') and k.endswith('_count'))
-        security_tables = sum(1 for k in stats.keys() if k.endswith('_count') and
-                            (k.startswith('ssl_') or k.startswith('ssh_') or k.startswith('http_') or k.startswith('smb_')))
+        snmp_tables = [k for k in stats.keys() if k.startswith('snmp_') and k.endswith('_count')]
+        security_tables = [k for k in stats.keys() if k.endswith('_count') and
+                           (k.startswith('ssl_') or k.startswith('ssh_') or
+                            k.startswith('http_') or k.startswith('smb_'))]
 
         print(f"📋 Tables created:")
-        print(f"   • {nmap_tables} tabelle Nmap principali")
-        print(f"   • {snmp_tables} tabelle SNMP")
-        print(f"   • {security_tables} tabelle sicurezza aggiuntive")
+        print(f"   • {len(main_tables)} tabelle Nmap principali")
+        print(f"   • {len(snmp_tables)} tabelle SNMP")
+        print(f"   • {len(security_tables)} tabelle sicurezza")
+        print(f"   • {len(main_tables) + len(snmp_tables) + len(security_tables)} tabelle totali")
 
-        total_tables = nmap_tables + snmp_tables + security_tables
-        print(f"   • {total_tables} tabelle totali")
+        # Test SNMP tables specifically
+        snmp_table_names = [
+            'snmp_services', 'snmp_processes', 'snmp_software', 'snmp_users',
+            'snmp_interfaces', 'snmp_network_connections', 'snmp_system_info', 'snmp_shares'
+        ]
+
+        print(f"\n🔍 Verifica tabelle SNMP:")
+        all_snmp_present = True
+        for table in snmp_table_names:
+            if f"{table}_count" in stats:
+                print(f"   ✅ {table}")
+            else:
+                print(f"   ❌ {table} MANCANTE!")
+                all_snmp_present = False
+
+        if all_snmp_present:
+            print(f"\n🎉 TUTTI I COMPONENTI CREATI CORRETTAMENTE!")
+            print(f"   Database pronto per il parsing SNMP")
+        else:
+            print(f"\n🚨 Alcune tabelle SNMP mancanti!")
 
     # Clean up test database
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
 
-    print("🎉 Test completato con successo!")
+    return all_snmp_present
+
 
 if __name__ == "__main__":
-    test_database_creation()
+    success = test_database_creation()
+    if success:
+        print("\n🚀 Database schema completo e pronto!")
+    else:
+        print("\n❌ Problemi con lo schema database")
