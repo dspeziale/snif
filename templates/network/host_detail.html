@@ -13,8 +13,6 @@
 {% block extra_css %}
 <!-- DataTables -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css">
-<!-- Prism.js per syntax highlighting -->
-<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -28,12 +26,12 @@
           Informazioni Generali
         </h3>
         <div class="card-tools">
-          {% if host.status == 'up' %}
+          {% if host.status_state == 'up' %}
             <span class="badge bg-success">HOST ATTIVO</span>
-          {% elif host.status == 'down' %}
+          {% elif host.status_state == 'down' %}
             <span class="badge bg-danger">HOST DOWN</span>
           {% else %}
-            <span class="badge bg-secondary">{{ host.status | upper }}</span>
+            <span class="badge bg-secondary">{{ host.status_state | upper }}</span>
           {% endif %}
         </div>
       </div>
@@ -49,16 +47,16 @@
 
           <dt class="col-sm-3">Status:</dt>
           <dd class="col-sm-9">
-            {% if host.status == 'up' %}
+            {% if host.status_state == 'up' %}
               <span class="badge bg-success fs-6">
                 <i class="bi bi-check-circle me-1"></i>ATTIVO
               </span>
-            {% elif host.status == 'down' %}
+            {% elif host.status_state == 'down' %}
               <span class="badge bg-danger fs-6">
                 <i class="bi bi-x-circle me-1"></i>DOWN
               </span>
             {% else %}
-              <span class="badge bg-secondary fs-6">{{ host.status | upper }}</span>
+              <span class="badge bg-secondary fs-6">{{ host.status_state | upper }}</span>
             {% endif %}
           </dd>
 
@@ -147,8 +145,8 @@
         {% for hostname in hostnames %}
         <span class="badge bg-info me-2 mb-2">
           <i class="bi bi-dns me-1"></i>
-          {{ hostname.name }}
-          <small>({{ hostname.type }})</small>
+          {{ hostname.hostname }}
+          <small class="ms-1">({{ hostname.hostname_type }})</small>
         </span>
         {% endfor %}
       </div>
@@ -157,62 +155,8 @@
 </div>
 {% endif %}
 
-<!-- OS Detection -->
-{% if os_info %}
-<div class="row mb-4">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="bi bi-laptop me-1"></i>
-          Sistema Operativo Rilevato
-        </h3>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th>Sistema Operativo</th>
-                <th>Accuratezza</th>
-                <th>Vendor</th>
-                <th>Famiglia</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for os in os_info %}
-              <tr>
-                <td>
-                  <strong>{{ os.name }}</strong>
-                  {% if os.version %}
-                    <br><small class="text-muted">Versione: {{ os.version }}</small>
-                  {% endif %}
-                </td>
-                <td>
-                  <div class="progress" style="height: 20px;">
-                    <div class="progress-bar
-                      {% if os.accuracy >= 90 %}bg-success
-                      {% elif os.accuracy >= 70 %}bg-warning
-                      {% else %}bg-danger{% endif %}"
-                      style="width: {{ os.accuracy }}%">
-                      {{ os.accuracy }}%
-                    </div>
-                  </div>
-                </td>
-                <td>{{ os.vendor or 'N/A' }}</td>
-                <td>{{ os.family or 'N/A' }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<!-- Porte e Servizi -->
+<!-- Porte -->
+{% if ports %}
 <div class="row mb-4">
   <div class="col-12">
     <div class="card">
@@ -222,156 +166,71 @@
           Porte e Servizi
         </h3>
         <div class="card-tools">
-          <span class="badge bg-primary">{{ ports | length }} porte</span>
+          <span class="badge bg-success">{{ ports | selectattr('state', 'equalto', 'open') | list | length }} aperte</span>
+          <span class="badge bg-warning">{{ ports | selectattr('state', 'equalto', 'filtered') | list | length }} filtrate</span>
+          <span class="badge bg-danger">{{ ports | selectattr('state', 'equalto', 'closed') | list | length }} chiuse</span>
         </div>
       </div>
       <div class="card-body">
-        {% if ports %}
         <div class="table-responsive">
-          <table class="table table-striped" id="portsTable">
+          <table class="table table-striped table-hover" id="portsTable">
             <thead>
               <tr>
                 <th>Porta</th>
                 <th>Protocollo</th>
                 <th>Stato</th>
                 <th>Servizio</th>
+                <th>Prodotto</th>
                 <th>Versione</th>
-                <th>Extra Info</th>
+                <th>Info</th>
               </tr>
             </thead>
             <tbody>
               {% for port in ports %}
               <tr>
                 <td>
-                  <strong>{{ port.port_number }}</strong>
+                  <strong>{{ port.port_id }}</strong>
                 </td>
                 <td>
                   <span class="badge bg-secondary">{{ port.protocol | upper }}</span>
                 </td>
                 <td>
                   {% if port.state == 'open' %}
-                    <span class="badge bg-success">APERTA</span>
+                    <span class="badge bg-success">
+                      <i class="bi bi-check-circle me-1"></i>{{ port.state | upper }}
+                    </span>
                   {% elif port.state == 'closed' %}
-                    <span class="badge bg-danger">CHIUSA</span>
+                    <span class="badge bg-danger">
+                      <i class="bi bi-x-circle me-1"></i>{{ port.state | upper }}
+                    </span>
                   {% elif port.state == 'filtered' %}
-                    <span class="badge bg-warning">FILTRATA</span>
+                    <span class="badge bg-warning">
+                      <i class="bi bi-shield me-1"></i>{{ port.state | upper }}
+                    </span>
                   {% else %}
                     <span class="badge bg-secondary">{{ port.state | upper }}</span>
                   {% endif %}
                 </td>
                 <td>
-                  {% if port.service %}
-                    <i class="bi bi-gear-fill text-primary me-1"></i>
-                    <strong>{{ port.service }}</strong>
-                  {% else %}
-                    <span class="text-muted">Sconosciuto</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if port.version %}
-                    <code class="small">{{ port.version }}</code>
+                  {% if port.service_name %}
+                    <strong>{{ port.service_name }}</strong>
                   {% else %}
                     <span class="text-muted">N/A</span>
                   {% endif %}
                 </td>
                 <td>
-                  {% if port.extra_info %}
-                    <small class="text-muted">{{ port.extra_info }}</small>
-                  {% else %}
-                    <span class="text-muted">-</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <div class="text-center py-4">
-          <i class="bi bi-door-closed display-4 text-muted"></i>
-          <h5 class="mt-3">Nessuna porta rilevata</h5>
-          <p class="text-muted">Non sono state trovate porte per questo host.</p>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Vulnerabilità -->
-{% if vulnerabilities %}
-<div class="row mb-4">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="bi bi-shield-exclamation me-1"></i>
-          Vulnerabilità Rilevate
-        </h3>
-        <div class="card-tools">
-          <span class="badge bg-danger">{{ vulnerabilities | length }} vulnerabilità</span>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped" id="vulnTable">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>CVSS Score</th>
-                <th>Severità</th>
-                <th>Descrizione</th>
-                <th>Rilevato il</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for vuln in vulnerabilities %}
-              <tr>
-                <td>
-                  <strong>{{ vuln.type }}</strong>
-                </td>
-                <td>
-                  {% if vuln.cvss_score %}
-                    <span class="badge
-                      {% if vuln.cvss_score >= 9 %}bg-danger
-                      {% elif vuln.cvss_score >= 7 %}bg-warning
-                      {% elif vuln.cvss_score >= 4 %}bg-info
-                      {% else %}bg-secondary{% endif %}">
-                      {{ vuln.cvss_score }}
-                    </span>
-                  {% else %}
-                    <span class="badge bg-secondary">N/A</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if vuln.severity %}
-                    {% set severity_class = {
-                      'critical': 'bg-danger',
-                      'high': 'bg-warning',
-                      'medium': 'bg-info',
-                      'low': 'bg-secondary'
-                    } %}
-                    <span class="badge {{ severity_class.get(vuln.severity|lower, 'bg-secondary') }}">
-                      {{ vuln.severity | upper }}
-                    </span>
-                  {% else %}
-                    <span class="badge bg-secondary">N/A</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if vuln.description %}
-                    <small>{{ vuln.description[:100] }}{% if vuln.description|length > 100 %}...{% endif %}</small>
-                  {% else %}
-                    <span class="text-muted">Nessuna descrizione</span>
-                  {% endif %}
+                  <small class="text-muted">
+                    {{ port.service_product or 'N/A' }}
+                  </small>
                 </td>
                 <td>
                   <small class="text-muted">
-                    {% if vuln.created_at %}
-                      {{ vuln.created_at | datetime }}
-                    {% else %}
-                      N/A
-                    {% endif %}
+                    {{ port.service_version or 'N/A' }}
+                  </small>
+                </td>
+                <td>
+                  <small class="text-muted">
+                    {{ port.service_extra_info or '' }}
                   </small>
                 </td>
               </tr>
@@ -385,150 +244,85 @@
 </div>
 {% endif %}
 
-<!-- Informazioni SNMP -->
-{% if snmp_system or snmp_processes or snmp_services %}
+<!-- Vulnerabilità -->
+{% if vulnerabilities %}
 <div class="row mb-4">
   <div class="col-12">
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="bi bi-router me-1"></i>
-          Informazioni SNMP
+          <i class="bi bi-bug me-1"></i>
+          Vulnerabilità
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-danger">{{ vulnerabilities | length }} trovate</span>
+        </div>
+      </div>
+      <div class="card-body">
+        {% for vuln in vulnerabilities %}
+        <div class="alert alert-{% if vuln.severity == 'critical' %}danger{% elif vuln.severity == 'high' %}warning{% elif vuln.severity == 'medium' %}info{% else %}secondary{% endif %} mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="alert-heading mb-1">
+                {% if vuln.cve_id %}
+                  {{ vuln.cve_id }}
+                {% else %}
+                  Vulnerabilità #{{ vuln.id }}
+                {% endif %}
+              </h6>
+              <p class="mb-2">{{ vuln.description or 'Nessuna descrizione disponibile' }}</p>
+              {% if vuln.cvss_score %}
+              <div>
+                <span class="badge bg-dark">CVSS: {{ vuln.cvss_score }}</span>
+              </div>
+              {% endif %}
+            </div>
+            <div class="text-end">
+              <span class="badge bg-{% if vuln.severity == 'critical' %}danger{% elif vuln.severity == 'high' %}warning{% elif vuln.severity == 'medium' %}info{% else %}secondary{% endif %}">
+                {{ vuln.severity | upper }}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Script NSE -->
+{% if scripts %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-code-slash me-1"></i>
+          Script NSE
         </h3>
       </div>
       <div class="card-body">
-        <ul class="nav nav-tabs" id="snmpTabs" role="tablist">
-          {% if snmp_system %}
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
-              <i class="bi bi-info-circle me-1"></i>Sistema
-            </button>
-          </li>
-          {% endif %}
-          {% if snmp_processes %}
-          <li class="nav-item" role="presentation">
-            <button class="nav-link {% if not snmp_system %}active{% endif %}" id="processes-tab" data-bs-toggle="tab" data-bs-target="#processes" type="button" role="tab">
-              <i class="bi bi-cpu me-1"></i>Processi ({{ snmp_processes | length }})
-            </button>
-          </li>
-          {% endif %}
-          {% if snmp_services %}
-          <li class="nav-item" role="presentation">
-            <button class="nav-link {% if not snmp_system and not snmp_processes %}active{% endif %}" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab">
-              <i class="bi bi-gear me-1"></i>Servizi ({{ snmp_services | length }})
-            </button>
-          </li>
-          {% endif %}
-        </ul>
-
-        <div class="tab-content mt-3" id="snmpTabContent">
-          <!-- Sistema -->
-          {% if snmp_system %}
-          <div class="tab-pane fade show active" id="system" role="tabpanel">
-            <dl class="row">
-              {% if snmp_system.system_name %}
-              <dt class="col-sm-3">Nome Sistema:</dt>
-              <dd class="col-sm-9">{{ snmp_system.system_name }}</dd>
-              {% endif %}
-
-              {% if snmp_system.system_description %}
-              <dt class="col-sm-3">Descrizione:</dt>
-              <dd class="col-sm-9">{{ snmp_system.system_description }}</dd>
-              {% endif %}
-
-              {% if snmp_system.system_contact %}
-              <dt class="col-sm-3">Contatto:</dt>
-              <dd class="col-sm-9">{{ snmp_system.system_contact }}</dd>
-              {% endif %}
-
-              {% if snmp_system.system_location %}
-              <dt class="col-sm-3">Posizione:</dt>
-              <dd class="col-sm-9">{{ snmp_system.system_location }}</dd>
-              {% endif %}
-
-              {% if snmp_system.system_uptime %}
-              <dt class="col-sm-3">Uptime:</dt>
-              <dd class="col-sm-9">{{ snmp_system.system_uptime }}</dd>
-              {% endif %}
-            </dl>
-          </div>
-          {% endif %}
-
-          <!-- Processi -->
-          {% if snmp_processes %}
-          <div class="tab-pane fade {% if not snmp_system %}show active{% endif %}" id="processes" role="tabpanel">
-            <div class="table-responsive">
-              <table class="table table-sm" id="processesTable">
-                <thead>
-                  <tr>
-                    <th>PID</th>
-                    <th>Nome Processo</th>
-                    <th>Percorso</th>
-                    <th>Memoria</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for process in snmp_processes %}
-                  <tr>
-                    <td>{{ process.process_id or 'N/A' }}</td>
-                    <td><strong>{{ process.process_name }}</strong></td>
-                    <td>
-                      {% if process.process_path %}
-                        <code class="small">{{ process.process_path }}</code>
-                      {% else %}
-                        <span class="text-muted">N/A</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if process.memory_usage %}
-                        {{ (process.memory_usage / 1024 / 1024) | round(2) }} MB
-                      {% else %}
-                        <span class="text-muted">N/A</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+        <div class="accordion" id="scriptsAccordion">
+          {% for script in scripts %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ loop.index }}">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                <strong>{{ script.script_id }}</strong>
+                <small class="ms-2 text-muted">
+                  {% if script.port_id %}
+                    Porta {{ script.port_id }}/{{ script.protocol }}
+                  {% endif %}
+                </small>
+              </button>
+            </h2>
+            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#scriptsAccordion">
+              <div class="accordion-body">
+                <pre class="language-none"><code>{{ script.script_output }}</code></pre>
+              </div>
             </div>
           </div>
-          {% endif %}
-
-          <!-- Servizi -->
-          {% if snmp_services %}
-          <div class="tab-pane fade {% if not snmp_system and not snmp_processes %}show active{% endif %}" id="services" role="tabpanel">
-            <div class="table-responsive">
-              <table class="table table-sm" id="servicesTable">
-                <thead>
-                  <tr>
-                    <th>Nome Servizio</th>
-                    <th>Status</th>
-                    <th>Tipo Avvio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for service in snmp_services %}
-                  <tr>
-                    <td><strong>{{ service.service_name }}</strong></td>
-                    <td>
-                      {% if service.status == 'running' %}
-                        <span class="badge bg-success">In esecuzione</span>
-                      {% elif service.status == 'stopped' %}
-                        <span class="badge bg-danger">Fermato</span>
-                      {% else %}
-                        <span class="badge bg-secondary">{{ service.status | default('Sconosciuto') }}</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <span class="badge bg-info">{{ service.startup_type | default('Sconosciuto') }}</span>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {% endif %}
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -540,43 +334,26 @@
 <div class="row">
   <div class="col-12">
     <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">
-          <i class="bi bi-tools me-1"></i>
-          Azioni Disponibili
-        </h3>
-      </div>
-      <div class="card-body">
-        <div class="btn-group me-2 mb-2">
-          <a href="{{ url_for('network.hosts') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
-            Torna alla Lista
-          </a>
-          <a href="{{ url_for('network.ports') }}?search={{ host.ip_address }}" class="btn btn-info">
-            <i class="bi bi-door-open me-1"></i>
-            Vedi Tutte le Porte
-          </a>
-        </div>
-
+      <div class="card-body text-center">
+        <a href="{{ url_for('network.hosts') }}" class="btn btn-secondary me-2">
+          <i class="bi bi-arrow-left me-1"></i>
+          Torna alla Lista
+        </a>
+        <a href="{{ url_for('network.ports') }}?search={{ host.ip_address }}" class="btn btn-info me-2">
+          <i class="bi bi-door-open me-1"></i>
+          Tutte le Porte
+        </a>
         {% if vulnerabilities %}
-        <div class="btn-group me-2 mb-2">
-          <a href="{{ url_for('network.vulnerabilities') }}?search={{ host.ip_address }}" class="btn btn-warning">
-            <i class="bi bi-bug me-1"></i>
-            Vedi Vulnerabilità
-          </a>
-        </div>
+        <a href="{{ url_for('network.vulnerabilities') }}?search={{ host.ip_address }}" class="btn btn-warning">
+          <i class="bi bi-bug me-1"></i>
+          Vulnerabilità
+        </a>
         {% endif %}
-
-        <div class="btn-group me-2 mb-2">
-          <a href="{{ url_for('network.search') }}?q={{ host.ip_address }}" class="btn btn-primary">
-            <i class="bi bi-search me-1"></i>
-            Ricerca Correlata
-          </a>
-        </div>
       </div>
     </div>
   </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -586,83 +363,41 @@
 
 <script>
 $(document).ready(function() {
-    // Inizializza DataTables
+    // Inizializza DataTable per le porte
+    {% if ports %}
     $('#portsTable').DataTable({
-        "pageLength": 25,
+        "paging": false,
+        "searching": true,
+        "info": false,
         "language": {
-            "search": "Cerca:",
-            "lengthMenu": "Mostra _MENU_ elementi per pagina",
-            "info": "Mostra da _START_ a _END_ di _TOTAL_ elementi",
-            "paginate": {
-                "first": "Primo",
-                "last": "Ultimo",
-                "next": "Successivo",
-                "previous": "Precedente"
-            }
+            "search": "Cerca porte:",
+            "emptyTable": "Nessuna porta trovata"
         },
         "order": [[ 0, "asc" ]] // Ordina per numero porta
     });
+    {% endif %}
 
-    $('#vulnTable').DataTable({
-        "pageLength": 10,
-        "language": {
-            "search": "Cerca:",
-            "lengthMenu": "Mostra _MENU_ elementi per pagina",
-            "info": "Mostra da _START_ a _END_ di _TOTAL_ elementi",
-            "paginate": {
-                "first": "Primo",
-                "last": "Ultimo",
-                "next": "Successivo",
-                "previous": "Precedente"
-            }
-        },
-        "order": [[ 1, "desc" ]] // Ordina per CVSS score
-    });
-
-    $('#processesTable').DataTable({
-        "pageLength": 15,
-        "language": {
-            "search": "Cerca:",
-            "lengthMenu": "Mostra _MENU_ elementi per pagina",
-            "info": "Mostra da _START_ a _END_ di _TOTAL_ elementi"
-        },
-        "order": [[ 1, "asc" ]] // Ordina per nome processo
-    });
-
-    $('#servicesTable').DataTable({
-        "pageLength": 15,
-        "language": {
-            "search": "Cerca:",
-            "lengthMenu": "Mostra _MENU_ elementi per pagina",
-            "info": "Mostra da _START_ a _END_ di _TOTAL_ elementi"
-        },
-        "order": [[ 0, "asc" ]] // Ordina per nome servizio
-    });
+    // Tooltip
+    $('[title]').tooltip();
 });
 
-// Funzione per copiare IP negli appunti
+// Funzione per copiare negli appunti
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
-        // Mostra notifica di successo
-        const toast = document.createElement('div');
-        toast.className = 'toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3';
-        toast.style.zIndex = '9999';
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    IP copiato negli appunti: ${text}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-        document.body.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
+        // Mostra feedback
+        const button = event.target.closest('button');
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
 
-        // Rimuovi il toast dopo che è nascosto
-        toast.addEventListener('hidden.bs.toast', function() {
-            document.body.removeChild(toast);
-        });
+        setTimeout(function() {
+            button.innerHTML = originalHtml;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 1500);
+    }, function(err) {
+        console.error('Could not copy text: ', err);
     });
 }
 </script>

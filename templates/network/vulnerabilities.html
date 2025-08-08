@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+
+{% block title %}Vulnerabilità - Nmap Scanner{% endblock %}
+{% block page_title %}Vulnerabilità{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.dashboard') }}">Network</a></li>
+<li class="breadcrumb-item active" aria-current="page">Vulnerabilità</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/css/dataTables.bootstrap5.min.css">
+<!-- Chart.js -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- Filtri di ricerca -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-funnel me-1"></i>
+          Filtri di Ricerca
+        </h3>
+      </div>
+      <div class="card-body">
+        <form method="GET" id="filterForm">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="search" class="form-label">Ricerca</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ search }}" placeholder="IP, CVE, descrizione...">
+            </div>
+            <div class="col-md-3">
+              <label for="severity" class="form-label">Severità</label>
+              <select class="form-select" id="severity" name="severity">
+                <option value="">Tutte le severità</option>
+                <option value="critical" {% if severity_filter == 'critical' %}selected{% endif %}>Critica</option>
+                <option value="high" {% if severity_filter == 'high' %}selected{% endif %}>Alta</option>
+                <option value="medium" {% if severity_filter == 'medium' %}selected{% endif %}>Media</option>
+                <option value="low" {% if severity_filter == 'low' %}selected{% endif %}>Bassa</option>
+                <option value="info" {% if severity_filter == 'info' %}selected{% endif %}>Informativa</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="per_page" class="form-label">Risultati per pagina</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">&nbsp;</label>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-search me-1"></i>
+                  Cerca
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistiche severità -->
+{% if severity_stats %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-pie-chart me-1"></i>
+          Distribuzione per Severità
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          {% for stat in severity_stats %}
+          <div class="col-lg-2 col-md-4 col-6 text-center">
+            <div class="info-box mb-3">
+              <div class="info-box-icon bg-{% if stat.severity == 'critical' %}danger{% elif stat.severity == 'high' %}warning{% elif stat.severity == 'medium' %}info{% elif stat.severity == 'low' %}success{% else %}secondary{% endif %}">
+                <i class="bi bi-{% if stat.severity == 'critical' %}exclamation-triangle-fill{% elif stat.severity == 'high' %}exclamation-triangle{% elif stat.severity == 'medium' %}exclamation-circle{% elif stat.severity == 'low' %}info-circle{% else %}question-circle{% endif %}"></i>
+              </div>
+              <div class="info-box-content">
+                <span class="info-box-text">{{ stat.severity | title }}</span>
+                <span class="info-box-number">{{ stat.count }}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Lista vulnerabilità -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="bi bi-bug me-1"></i>
+          Lista Vulnerabilità
+          {% if search or severity_filter %}
+            <small class="text-muted">(filtrata)</small>
+          {% endif %}
+        </h3>
+        <div class="card-tools">
+          <span class="badge bg-primary">{{ total }} vulnerabilità trovate</span>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if vulnerabilities %}
+        <div class="row">
+          {% for vuln in vulnerabilities %}
+          <div class="col-lg-6 col-12 mb-4">
+            <div class="card border-{% if vuln.severity == 'critical' %}danger{% elif vuln.severity == 'high' %}warning{% elif vuln.severity == 'medium' %}info{% elif vuln.severity == 'low' %}success{% else %}secondary{% endif %}">
+              <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="card-title mb-0">
+                      {% if vuln.vuln_id %}
+                        <strong>{{ vuln.vuln_id }}</strong>
+                      {% else %}
+                        <strong>{{ vuln.title or ('Vulnerabilità #' + vuln.id|string) }}</strong>
+                      {% endif %}
+                    </h6>
+                    <small class="text-muted">
+                      Host: <a href="{{ url_for('network.host_detail', host_id=vuln.host_id) }}" class="text-decoration-none">
+                        {{ vuln.ip_address }}
+                      </a>
+                    </small>
+                  </div>
+                  <div class="text-end">
+                    <span class="badge bg-{% if vuln.severity == 'critical' %}danger{% elif vuln.severity == 'high' %}warning{% elif vuln.severity == 'medium' %}info{% elif vuln.severity == 'low' %}success{% else %}secondary{% endif %} fs-6">
+                      {{ vuln.severity | upper }}
+                    </span>
+                    {% if vuln.cvss_score %}
+                    <br><small class="badge bg-dark mt-1">CVSS: {{ vuln.cvss_score }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <p class="card-text">
+                  {{ vuln.description or 'Nessuna descrizione disponibile' }}
+                </p>
+
+                {% if vuln.solution %}
+                <div class="alert alert-info py-2">
+                  <h6 class="alert-heading"><i class="bi bi-lightbulb me-1"></i>Soluzione:</h6>
+                  <p class="mb-0 small">{{ vuln.solution }}</p>
+                </div>
+                {% endif %}
+
+                <div class="row mt-3">
+                  <div class="col-6">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar me-1"></i>
+                      {% if vuln.discovered_at %}
+                        {{ vuln.discovered_at | datetime }}
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </small>
+                  </div>
+                  <div class="col-6 text-end">
+                    {% if vuln.port_id %}
+                    <small class="badge bg-secondary">
+                      Porta {{ vuln.port_id }}
+                    </small>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="btn-group w-100">
+                  <a href="{{ url_for('network.host_detail', host_id=vuln.host_id) }}"
+                     class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-pc-display me-1"></i>
+                    Dettagli Host
+                  </a>
+                  {% if vuln.vuln_id %}
+                  <a href="https://nvd.nist.gov/vuln/detail/{{ vuln.vuln_id }}"
+                     target="_blank" class="btn btn-outline-info btn-sm">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    NVD
+                  </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Paginazione -->
+        {% if total_pages > 1 %}
+        <nav aria-label="Paginazione vulnerabilità" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <!-- Prima pagina -->
+            {% if page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.vulnerabilities', page=1, search=search, severity=severity_filter, per_page=per_page) }}">Prima</a>
+            </li>
+            {% endif %}
+
+            <!-- Pagina precedente -->
+            {% if has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.vulnerabilities', page=page-1, search=search, severity=severity_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Pagine numeriche -->
+            {% set start_page = [page - 2, 1] | max %}
+            {% set end_page = [page + 2, total_pages] | min %}
+
+            {% for p in range(start_page, end_page + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('network.vulnerabilities', page=p, search=search, severity=severity_filter, per_page=per_page) }}">{{ p }}</a>
+            </li>
+            {% endfor %}
+
+            <!-- Pagina successiva -->
+            {% if has_next %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.vulnerabilities', page=page+1, search=search, severity=severity_filter, per_page=per_page) }}">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Ultima pagina -->
+            {% if page < total_pages %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.vulnerabilities', page=total_pages, search=search, severity=severity_filter, per_page=per_page) }}">Ultima</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Nessuna vulnerabilità trovata -->
+        <div class="text-center py-5">
+          <i class="bi bi-shield-check text-success" style="font-size: 4rem;"></i>
+          <h4 class="mt-3">Nessuna vulnerabilità trovata</h4>
+          <p class="text-muted">
+            {% if search or severity_filter %}
+              Non sono state trovate vulnerabilità che corrispondono ai filtri specificati.
+            {% else %}
+              Non sono presenti vulnerabilità nel database.
+            {% endif %}
+          </p>
+          {% if search or severity_filter %}
+          <a href="{{ url_for('network.vulnerabilities') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            Resetta filtri
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions floating button -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1056;">
+  <div class="btn-group-vertical">
+    <a href="{{ url_for('network.dashboard') }}" class="btn btn-secondary btn-floating mb-2" title="Dashboard">
+      <i class="bi bi-house"></i>
+    </a>
+    <a href="{{ url_for('network.hosts') }}" class="btn btn-info btn-floating" title="Host">
+      <i class="bi bi-pc-display"></i>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables -->
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Auto-submit del form quando cambiano i filtri
+    $('#severity, #per_page').change(function() {
+        $('#filterForm').submit();
+    });
+
+    // Tooltip per i pulsanti di azione
+    $('[title]').tooltip();
+
+    // Highlight del termine cercato nelle descrizioni
+    {% if search %}
+    const searchTerm = '{{ search }}';
+    highlightSearchTerm(searchTerm);
+    {% endif %}
+
+    // Crea grafico distribuzione severità se ci sono dati
+    {% if severity_stats %}
+    createSeverityChart();
+    {% endif %}
+});
+
+{% if search %}
+function highlightSearchTerm(term) {
+    $('.card-text').each(function() {
+        const text = $(this).html();
+        const regex = new RegExp(`(${term})`, 'gi');
+        const highlightedText = text.replace(regex, '<mark>$1</mark>');
+        $(this).html(highlightedText);
+    });
+}
+{% endif %}
+
+{% if severity_stats %}
+function createSeverityChart() {
+    const ctx = document.createElement('canvas');
+    ctx.width = 300;
+    ctx.height = 150;
+
+    const chartContainer = document.createElement('div');
+    chartContainer.className = 'text-center mt-3';
+    chartContainer.appendChild(ctx);
+
+    document.querySelector('.card-body .row').after(chartContainer);
+
+    const severityData = [
+        {% for stat in severity_stats %}
+        {
+            severity: '{{ stat.severity }}',
+            count: {{ stat.count }},
+            color: '{% if stat.severity == "critical" %}#dc3545{% elif stat.severity == "high" %}#fd7e14{% elif stat.severity == "medium" %}#0dcaf0{% elif stat.severity == "low" %}#198754{% else %}#6c757d{% endif %}'
+        },
+        {% endfor %}
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: severityData.map(d => d.severity.toUpperCase()),
+            datasets: [{
+                data: severityData.map(d => d.count),
+                backgroundColor: severityData.map(d => d.color),
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label;
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+</script>
+
+<style>
+.btn-floating {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.info-box-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    font-size: 24px;
+    color: white;
+    margin-right: 15px;
+}
+
+.info-box-content {
+    flex: 1;
+}
+
+.info-box-text {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #666;
+}
+
+.info-box-number {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Evidenziazione termini di ricerca */
+mark {
+    background-color: #fff3cd;
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
+/* Stile per le card vulnerabilità */
+.card.border-danger { border-width: 2px !important; }
+.card.border-warning { border-width: 2px !important; }
+.card.border-info { border-width: 2px !important; }
+.card.border-success { border-width: 2px !important; }
+.card.border-secondary { border-width: 2px !important; }
+
+/* Responsive per mobile */
+@media (max-width: 768px) {
+    .col-lg-6 {
+        margin-bottom: 1rem;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        margin-bottom: 2px;
+    }
+}
+</style>
+{% endblock %}
