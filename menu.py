@@ -15,7 +15,7 @@ def get_current_url():
 
 def find_active_path_smart(menu_dict, current_endpoint, current_url):
     """
-    Trova il percorso dell'elemento attivo nel menu usando multiple strategie
+    Trova il percorso dell'elemento attivo nel menu usando multiple strategie MIGLIORATE
     """
     if not current_endpoint and not current_url:
         return []
@@ -33,43 +33,74 @@ def find_active_path_smart(menu_dict, current_endpoint, current_url):
 
             new_path = current_path + [key]
 
-            # STRATEGIA 1: Match esatto per endpoint (se specificato)
+            # STRATEGIA 1: Match esatto per endpoint (PRIORITÀ MASSIMA)
             item_endpoint = item.get('endpoint')
             if item_endpoint and current_endpoint and item_endpoint == current_endpoint:
+                print(f"✅ Match ENDPOINT esatto: {item_endpoint} == {current_endpoint}")
                 return new_path
 
-            # STRATEGIA 2: Match per URL esatto
+            # STRATEGIA 2: Match per URL esatto (PRIORITÀ ALTA)
             item_url = item.get('url')
             if item_url and current_url:
+                # Match esatto
                 if item_url == current_url:
+                    print(f"✅ Match URL esatto: {item_url} == {current_url}")
                     return new_path
-                # Match per URL base (es. '/about' match '/about/')
+                # Match rimuovendo trailing slash
                 if item_url.rstrip('/') == current_url.rstrip('/'):
+                    print(f"✅ Match URL (no slash): {item_url} == {current_url}")
                     return new_path
 
             # STRATEGIA 3: Match per URL che inizia con il path (per sotto-pagine)
             if item_url and current_url and item_url != '/' and item_url != '#':
                 if current_url.startswith(item_url.rstrip('/')):
+                    print(f"✅ Match URL prefisso: {current_url} inizia con {item_url}")
                     return new_path
 
-            # STRATEGIA 4: Match automatico basato su nome endpoint
-            if current_endpoint and not item_endpoint and item_url and item_url != '#':
-                # Prova a generare l'URL dall'endpoint per vedere se coincide
-                try:
-                    expected_url = url_for(current_endpoint)
-                    if item_url == expected_url:
-                        return new_path
-                except:
-                    pass
+            # STRATEGIA 4: Match avanzato per endpoint con parametri
+            if current_endpoint and item_endpoint:
+                # Per endpoint come 'network.hosts' che potrebbero avere ?status=up
+                base_current = current_endpoint.split('?')[0] if '?' in current_endpoint else current_endpoint
+                base_item = item_endpoint.split('?')[0] if '?' in item_endpoint else item_endpoint
 
-            # STRATEGIA 5: Match fuzzy basato sul nome della chiave
+                if base_current == base_item:
+                    print(f"✅ Match ENDPOINT base: {base_current} == {base_item}")
+                    return new_path
+
+            # STRATEGIA 5: Match per URL con query parameters
+            if item_url and current_url and '?' in item_url:
+                # Estrai il base URL (senza query params) dall'item
+                item_base_url = item_url.split('?')[0]
+                if item_base_url == current_url:
+                    print(f"✅ Match URL base con query: {item_base_url} == {current_url}")
+                    return new_path
+
+            # STRATEGIA 6: Match intelligente per route con blueprint
+            if current_endpoint and item_endpoint:
+                # Rimuovi il prefisso blueprint per confronto
+                current_clean = current_endpoint.replace('network.', '').replace('snmp_', '')
+                item_clean = item_endpoint.replace('network.', '').replace('snmp_', '')
+
+                if current_clean == item_clean:
+                    print(f"✅ Match ENDPOINT pulito: {current_clean} == {item_clean}")
+                    return new_path
+
+            # STRATEGIA 7: Match fuzzy migliorato
             if current_endpoint:
-                # Se il nome della chiave del menu contiene l'endpoint
-                if current_endpoint.lower() in key.lower():
-                    return new_path
-                # Se l'endpoint contiene il nome della chiave
-                if key.lower() in current_endpoint.lower():
-                    return new_path
+                # Per endpoint come 'network.snmp_interfaces'
+                endpoint_parts = current_endpoint.split('.')
+                if len(endpoint_parts) > 1:
+                    endpoint_name = endpoint_parts[-1]  # es: 'snmp_interfaces'
+
+                    # Verifica se il nome dell'endpoint è contenuto nella chiave
+                    if endpoint_name in key:
+                        print(f"✅ Match FUZZY endpoint nella chiave: {endpoint_name} in {key}")
+                        return new_path
+
+                    # Verifica se la chiave è contenuta nell'endpoint
+                    if key in endpoint_name:
+                        print(f"✅ Match FUZZY chiave nell'endpoint: {key} in {endpoint_name}")
+                        return new_path
 
             # Cerca ricorsivamente nei children
             children = item.get('children')
@@ -81,43 +112,68 @@ def find_active_path_smart(menu_dict, current_endpoint, current_url):
         return None
 
     try:
+        print(f"🔍 Ricerca percorso attivo per:")
+        print(f"   Current Endpoint: {current_endpoint}")
+        print(f"   Current URL: {current_url}")
+
         result = search_recursive(menu_dict, [])
+
+        if result:
+            print(f"✅ Percorso trovato: {' → '.join(result)}")
+        else:
+            print("❌ Nessun percorso trovato")
+
         return result if result else []
     except Exception as e:
-        print(f"Errore in find_active_path_smart: {str(e)}")
+        print(f"❌ Errore in find_active_path_smart: {str(e)}")
         return []
 
 
 def render_menu_item(key, item, active_path, level=0):
     """
-    Renderizza un singolo elemento del menu
+    Renderizza un singolo elemento del menu con highlighting migliorato
     """
     try:
         # Gestisci gli header
         if key.startswith('_header'):
             return f'<li class="nav-header">{item.get("label", "")}</li>'
 
-        # Verifica se è attivo
+        # Verifica se è attivo (LOGICA MIGLIORATA)
         is_active = key in active_path if active_path else False
-        has_children = 'children' in item
+        has_children = 'children' in item and item['children']
         is_open = False
 
+        # Se ha figli, controlla se qualche figlio è attivo
         if active_path and has_children:
-            is_open = any(child_key in active_path for child_key in item.get('children', {}).keys())
+            children_keys = list(item.get('children', {}).keys())
+            is_open = any(child_key in active_path for child_key in children_keys)
 
-        # Classe CSS per l'elemento
+            # Se un figlio è attivo, anche il parent dovrebbe essere considerato "attivo"
+            if is_open and not is_active:
+                # Il parent è "attivo" se ha un child attivo
+                parent_active = True
+            else:
+                parent_active = is_active
+        else:
+            parent_active = is_active
+
+        # Classe CSS per l'elemento del menu
         nav_item_class = 'nav-item'
         if has_children and (is_active or is_open):
             nav_item_class += ' menu-open'
 
-        # Classe CSS per il link
+        # Classe CSS per il link (LOGICA MIGLIORATA)
         nav_link_class = 'nav-link'
-        if is_active and not has_children:
+
+        # Per elementi senza figli: attivo se è nel percorso
+        if not has_children and is_active:
             nav_link_class += ' active'
+
+        # Per elementi con figli: attivo se ha un figlio attivo
         elif has_children and is_open:
             nav_link_class += ' active'
 
-        # URL del link - se non specificato, prova a generarlo automaticamente
+        # URL del link
         url = item.get('url', '#')
         if url is None:
             url = '#'
@@ -128,6 +184,12 @@ def render_menu_item(key, item, active_path, level=0):
                 url = url_for(item['endpoint'])
             except:
                 url = '#'
+
+        # Icona
+        icon = item.get('icon', 'bi bi-circle')
+
+        # Label
+        label = item.get('label', 'Unknown')
 
         # Badge
         badge_html = ''
@@ -151,11 +213,13 @@ def render_menu_item(key, item, active_path, level=0):
         # Classe per il testo
         text_class = item.get('text_class', '')
 
-        # Icona - gestisci il caso in cui non ci sia
-        icon = item.get('icon', 'bi bi-circle')
-
-        # Label - gestisci il caso in cui non ci sia
-        label = item.get('label', 'Unknown')
+        # Debug info
+        print(f"🎨 Rendering {key}:")
+        print(f"   is_active: {is_active}")
+        print(f"   has_children: {has_children}")
+        print(f"   is_open: {is_open}")
+        print(f"   CSS classes: {nav_link_class}")
+        print(f"   URL: {url}")
 
         # HTML principale dell'elemento
         html = f'''<li class="{nav_item_class}">
@@ -181,11 +245,9 @@ def render_menu_item(key, item, active_path, level=0):
         return html
 
     except Exception as e:
-        # Ritorna un elemento di errore invece di far crashare tutto
         error_msg = f"Error rendering {key}: {str(e)}"
+        print(f"❌ {error_msg}")
         return f'<li class="nav-item"><a href="#" class="nav-link text-danger"><i class="nav-icon bi bi-exclamation-triangle"></i><p>{error_msg}</p></a></li>'
-
-
 @menu_bp.route('/render')
 def render_menu():
     """

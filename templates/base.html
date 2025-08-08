@@ -383,16 +383,28 @@
     });
   </script>
   <!--end::OverlayScrollbars Configure-->
-
-  <!-- Menu AJAX Management - VERSIONE UNICA -->
+<!-- Menu AJAX Management - VERSIONE CORRETTA -->
   <script>
     // Evita dichiarazioni multiple
     if (typeof MenuManager === 'undefined') {
       class MenuManager {
         constructor() {
-          this.currentEndpoint = '{{ request.endpoint }}';
+          // ✅ CORREZIONE: Usa g.current_endpoint che viene settato in before_request
+          this.currentEndpoint = '{{ g.current_endpoint or request.endpoint or "index" }}';
           this.currentUrl = '{{ request.path }}';
           this.menuContainer = document.getElementById('navigation');
+
+          // Debug dettagliato
+          console.log('🔧 MenuManager inizializzato:');
+          console.log('   Endpoint:', this.currentEndpoint);
+          console.log('   URL:', this.currentUrl);
+          console.log('   Container:', this.menuContainer ? 'trovato' : 'NON TROVATO');
+
+          if (!this.menuContainer) {
+            console.error('❌ Container del menu non trovato! Controlla che esista <nav id="navigation">');
+            return;
+          }
+
           this.init();
         }
 
@@ -403,10 +415,15 @@
 
         async loadMenu() {
           try {
-            console.log('Caricamento menu per endpoint:', this.currentEndpoint);
-            console.log('URL corrente:', this.currentUrl);
+            console.log('📥 Caricamento menu per:');
+            console.log('   Endpoint:', this.currentEndpoint);
+            console.log('   URL:', this.currentUrl);
 
-            const response = await fetch(`/menu/render?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}`);
+            // ✅ CORREZIONE: Assicurati che endpoint sia passato correttamente
+            const endpoint = this.currentEndpoint || 'index';
+            const url = encodeURIComponent(this.currentUrl || '/');
+
+            const response = await fetch(`/menu/render?endpoint=${endpoint}&url=${url}`);
 
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -415,31 +432,47 @@
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
               const text = await response.text();
-              console.error('Risposta non JSON ricevuta:', text);
+              console.error('❌ Risposta non JSON ricevuta:', text);
               throw new Error('Risposta del server non è JSON valido');
             }
 
             const data = await response.json();
-            console.log('Dati menu ricevuti:', data);
+            console.log('📨 Risposta menu ricevuta:', data);
 
             if (data.status === 'success' && data.html) {
               this.menuContainer.innerHTML = data.html;
               this.activateTreeview();
               this.setupMenuClickHandlers();
 
-              // Log per debug
+              // ✅ CORREZIONE: Log più dettagliato per debug
               if (data.active_path && data.active_path.length > 0) {
-                console.log('Percorso attivo:', data.active_path);
+                console.log('✅ Percorso attivo trovato:', data.active_path);
+                console.log('🎨 Elementi che dovrebbero essere blu:',
+                  data.active_path.map(path => `"${path}"`).join(' → '));
               } else {
-                console.log('Nessun percorso attivo trovato - il sistema userà il matching automatico');
+                console.log('⚠️ Nessun percorso attivo trovato per:');
+                console.log('   Endpoint cercato:', data.current_endpoint);
+                console.log('   URL cercato:', data.current_url);
+
+                // Mostra suggerimenti
+                this.showDebugSuggestions(data);
               }
             } else {
               throw new Error(data.error || 'Errore sconosciuto nel caricamento del menu');
             }
           } catch (error) {
-            console.error('Errore nel caricamento del menu:', error);
+            console.error('❌ Errore nel caricamento del menu:', error);
             this.showMenuError(error.message);
           }
+        }
+
+        // ✅ NUOVO: Mostra suggerimenti di debug
+        showDebugSuggestions(data) {
+          console.log('🔧 SUGGERIMENTI DEBUG:');
+          console.log('1. Controlla che il menu_config.py contenga endpoint:', data.current_endpoint);
+          console.log('2. Verifica che URL corrisponda:', data.current_url);
+          console.log('3. Apri /menu/debug per analisi completa');
+          console.log('4. Confronta con elementi SNMP che funzionano');
         }
 
         showMenuError(message = 'Errore nel caricamento del menu') {
@@ -457,7 +490,8 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}" class="nav-link text-warning" target="_blank">
+              <a href="/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}"
+                 class="nav-link text-warning" target="_blank">
                 <i class="nav-icon bi bi-bug"></i>
                 <p>Debug Info</p>
               </a>
@@ -466,7 +500,7 @@
         }
 
         activateTreeview() {
-          // Riattiva la funzionalità treeview di AdminLTE
+          // ✅ Riattiva la funzionalità treeview di AdminLTE
           const treeviewElements = this.menuContainer.querySelectorAll('[data-lte-toggle="treeview"]');
           treeviewElements.forEach(element => {
             // AdminLTE gestirà automaticamente il treeview se ha l'attributo corretto
@@ -474,34 +508,29 @@
         }
 
         setupMenuClickHandlers() {
-          // Gestisce i click sui link del menu che hanno URL reali
+          // ✅ CORREZIONE: Gestisce i click sui link del menu
           const menuLinks = this.menuContainer.querySelectorAll('a[href]:not([href="#"])');
+          console.log(`🔗 Configurati ${menuLinks.length} link del menu`);
+
           menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
               const href = link.getAttribute('href');
 
               // Solo per link interni (non esterni)
               if (href && href.startsWith('/')) {
-                e.preventDefault();
-                this.navigateToPage(href, link);
+                console.log('🖱️ Click su link menu:', href);
+
+                // ✅ NON prevenire il default - lascia che la pagina si ricarichi normalmente
+                // Il nuovo sistema server-side gestirà l'highlighting corretto
+
+                // Feedback visivo temporaneo
+                this.updateActiveStates(link);
               }
             });
           });
         }
 
-        async navigateToPage(url, linkElement) {
-          try {
-            // Aggiorna visivamente il menu prima del caricamento della pagina
-            this.updateActiveStates(linkElement);
-
-            // Naviga alla pagina
-            window.location.href = url;
-
-          } catch (error) {
-            console.error('Errore nella navigazione:', error);
-          }
-        }
-
+        // ✅ SEMPLIFICATO: Solo feedback visivo temporaneo
         updateActiveStates(activeLink) {
           // Rimuovi tutte le classi active
           this.menuContainer.querySelectorAll('.nav-link.active').forEach(link => {
@@ -512,7 +541,7 @@
             item.classList.remove('menu-open');
           });
 
-          // Aggiungi active al link cliccato
+          // Aggiungi active al link cliccato (temporaneo)
           activeLink.classList.add('active');
 
           // Aggiungi menu-open ai parent
@@ -550,15 +579,25 @@
           this.loadMenu();
         }
 
-        // Metodo per debug
+        // ✅ MIGLIORATO: Metodo per debug con più informazioni
         async debugMenu() {
           try {
+            console.log('🔍 Avvio debug completo...');
+
             const response = await fetch(`/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}`);
             const data = await response.json();
-            console.log('Debug Info:', data);
+
+            console.log('📋 DEBUG COMPLETO:');
+            console.log('='.repeat(50));
+            console.log(data);
+            console.log('='.repeat(50));
+
+            // Apri anche in una nuova finestra per analisi dettagliata
+            window.open(`/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}`, '_blank');
+
             return data;
           } catch (error) {
-            console.error('Errore nel debug:', error);
+            console.error('❌ Errore nel debug:', error);
           }
         }
       }
@@ -569,14 +608,16 @@
         if (!window.menuManager) {
           window.menuManager = new MenuManager();
 
-          // Aggiungi comando di debug alla console
+          // ✅ Aggiungi comandi di debug utili alla console
           window.debugMenu = () => window.menuManager.debugMenu();
-          console.log('Menu Manager inizializzato. Usa debugMenu() per informazioni di debug.');
+          window.refreshMenu = () => window.menuManager.loadMenu();
+
+          console.log('✅ Menu Manager inizializzato.');
+          console.log('💡 Comandi disponibili: debugMenu(), refreshMenu()');
         }
       });
     }
   </script>
-
 {% block extra_js_libs %}
 <!-- jQuery - DEVE essere caricato per PRIMO -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>

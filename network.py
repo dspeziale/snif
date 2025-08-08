@@ -439,24 +439,74 @@ def host_detail(host_id):
 
 @network_bp.route('/scans')
 def scans():
-    """Lista delle scansioni"""
+    """Lista delle scansioni con paginazione"""
+    # Parametri paginazione
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+    search = request.args.get('search', '').strip()
+
+    offset = (page - 1) * per_page
+
     try:
         with get_network_db() as db:
-            scans_list = db.execute_query("""
+            # Costruisci query base
+            where_clauses = []
+            params = []
+
+            if search:
+                where_clauses.append("(filename LIKE ? OR args LIKE ?)")
+                search_term = f'%{search}%'
+                params.extend([search_term, search_term])
+
+            where_sql = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
+
+            # Count totale
+            count_query = f"SELECT COUNT(*) as total FROM scan_runs{where_sql}"
+            total_result = db.execute_query(count_query, tuple(params))
+            total = total_result[0]['total'] if total_result else 0
+
+            # Query principale con statistiche
+            scans_query = f"""
                 SELECT s.*,
                        (SELECT COUNT(*) FROM hosts WHERE scan_run_id = s.id) as host_count,
-                       (SELECT COUNT(*) FROM ports p JOIN hosts h ON p.host_id = h.id WHERE h.scan_run_id = s.id) as port_count
+                       (SELECT COUNT(*) FROM hosts WHERE scan_run_id = s.id AND status_state = 'up') as active_hosts,
+                       (SELECT COUNT(*) FROM ports p JOIN hosts h ON p.host_id = h.id WHERE h.scan_run_id = s.id) as port_count,
+                       (SELECT COUNT(*) FROM ports p JOIN hosts h ON p.host_id = h.id WHERE h.scan_run_id = s.id AND p.state = 'open') as open_ports
                 FROM scan_runs s
+                {where_sql}
                 ORDER BY s.created_at DESC
-                LIMIT 50
-            """)
+                LIMIT ? OFFSET ?
+            """
+            params_with_limit = list(params) + [per_page, offset]
+            scans_list = db.execute_query(scans_query, tuple(params_with_limit))
 
-            return render_template('network/scans.html', scans=scans_list)
+            # Calcola paginazione
+            total_pages = (total + per_page - 1) // per_page
+            has_prev = page > 1
+            has_next = page < total_pages
+
+            return render_template('network/scans.html',
+                                   scans=scans_list,
+                                   page=page,
+                                   per_page=per_page,
+                                   total=total,
+                                   total_pages=total_pages,
+                                   has_prev=has_prev,
+                                   has_next=has_next,
+                                   search=search)
 
     except Exception as e:
         flash(f'Errore nel caricamento scansioni: {str(e)}', 'error')
-        return render_template('network/scans.html', scans=[])
-
+        # Anche in caso di errore, passa tutte le variabili necessarie
+        return render_template('network/scans.html',
+                               scans=[],
+                               page=1,
+                               per_page=per_page,
+                               total=0,
+                               total_pages=0,
+                               has_prev=False,
+                               has_next=False,
+                               search=search)
 
 @network_bp.route('/scan/<int:scan_id>')
 def scan_detail(scan_id):
@@ -920,3 +970,269 @@ def api_snmp_summary(host_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# ===============================
+# ROUTE SNMP MANCANTI DA AGGIUNGERE A network.py
+# ===============================
+
+@network_bp.route('/snmp/interfaces')
+def snmp_interfaces():
+    """Lista interfacce di rete SNMP"""
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 25))
+    search = request.args.get('search', '').strip()
+    type_filter = request.args.get('type', '')
+
+    offset = (page - 1) * per_page
+
+    try:
+        with get_network_db() as db:
+            # Query base
+            base_query = """
+                SELECT i.*, h.ip_address
+                FROM snmp_interfaces i
+                JOIN hosts h ON i.host_id = h.id
+            """
+
+            params = []
+
+            if search:
+                base_query += " WHERE (i.interface_name LIKE ? OR h.ip_address LIKE ?)"
+                params.extend([f'%{search}%', f'%{search}%'])
+
+                if type_filter:
+                    base_query += " AND i.interface_type = ?"
+                    params.append(type_filter)
+            elif type_filter:
+                base_query += " WHERE i.interface_type = ?"
+                params.append(type_filter)
+
+            # Count totale
+            count_query = base_query.replace(
+                "SELECT i.*, h.ip_address",
+                "SELECT COUNT(*)"
+            )
+            total = db.execute_query(count_query, params)[0]['COUNT(*)']
+
+            # Query con paginazione
+            offset = (page - 1) * per_page
+            interfaces_query = base_query + f" ORDER BY h.ip_address, i.interface_index LIMIT {per_page} OFFSET {offset}"
+            interfaces = db.execute_query(interfaces_query, params)
+
+            # Tipi di interfacce per filtro
+            interface_types = db.execute_query("""
+                SELECT DISTINCT interface_type 
+                FROM snmp_interfaces 
+                WHERE interface_type IS NOT NULL 
+                ORDER BY interface_type
+            """)
+
+            total_pages = (total + per_page - 1) // per_page
+
+            return render_template('network/snmp_interfaces.html',
+                                   interfaces=interfaces,
+                                   interface_types=[t['interface_type'] for t in interface_types],
+                                   page=page,
+                                   total_pages=total_pages,
+                                   total=total,
+                                   search=search,
+                                   type_filter=type_filter)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento interfacce SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_interfaces.html',
+                               interfaces=[], interface_types=[], page=1,
+                               total_pages=0, total=0, search='', type_filter='')
+
+
+@network_bp.route('/snmp/connections')
+def snmp_connections():
+    """Lista connessioni di rete SNMP"""
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 25))
+    search = request.args.get('search', '').strip()
+    protocol_filter = request.args.get('protocol', '')
+
+    offset = (page - 1) * per_page
+
+    try:
+        with get_network_db() as db:
+            base_query = """
+                SELECT c.*, h.ip_address
+                FROM snmp_network_connections c
+                JOIN hosts h ON c.host_id = h.id
+            """
+
+            params = []
+
+            if search:
+                base_query += " WHERE (c.remote_address LIKE ? OR h.ip_address LIKE ?)"
+                params.extend([f'%{search}%', f'%{search}%'])
+
+                if protocol_filter:
+                    base_query += " AND c.protocol = ?"
+                    params.append(protocol_filter)
+            elif protocol_filter:
+                base_query += " WHERE c.protocol = ?"
+                params.append(protocol_filter)
+
+            # Count totale
+            count_query = base_query.replace(
+                "SELECT c.*, h.ip_address",
+                "SELECT COUNT(*)"
+            )
+            total = db.execute_query(count_query, params)[0]['COUNT(*)']
+
+            # Query con paginazione
+            connections_query = base_query + f" ORDER BY h.ip_address, c.local_port LIMIT {per_page} OFFSET {offset}"
+            connections = db.execute_query(connections_query, params)
+
+            # Protocolli per filtro
+            protocols = db.execute_query("""
+                SELECT DISTINCT protocol 
+                FROM snmp_network_connections 
+                WHERE protocol IS NOT NULL 
+                ORDER BY protocol
+            """)
+
+            total_pages = (total + per_page - 1) // per_page
+
+            return render_template('network/snmp_connections.html',
+                                   connections=connections,
+                                   protocols=[p['protocol'] for p in protocols],
+                                   page=page,
+                                   total_pages=total_pages,
+                                   total=total,
+                                   search=search,
+                                   protocol_filter=protocol_filter)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento connessioni SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_connections.html',
+                               connections=[], protocols=[], page=1,
+                               total_pages=0, total=0, search='', protocol_filter='')
+
+
+@network_bp.route('/snmp/shares')
+def snmp_shares():
+    """Lista condivisioni SNMP"""
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 25))
+    search = request.args.get('search', '').strip()
+
+    offset = (page - 1) * per_page
+
+    try:
+        with get_network_db() as db:
+            base_query = """
+                SELECT s.*, h.ip_address
+                FROM snmp_shares s
+                JOIN hosts h ON s.host_id = h.id
+            """
+
+            params = []
+
+            if search:
+                base_query += " WHERE (s.share_name LIKE ? OR s.share_path LIKE ? OR h.ip_address LIKE ?)"
+                params.extend([f'%{search}%', f'%{search}%', f'%{search}%'])
+
+            # Count totale
+            count_query = base_query.replace(
+                "SELECT s.*, h.ip_address",
+                "SELECT COUNT(*)"
+            )
+            total = db.execute_query(count_query, params)[0]['COUNT(*)']
+
+            # Query con paginazione
+            shares_query = base_query + f" ORDER BY h.ip_address, s.share_name LIMIT {per_page} OFFSET {offset}"
+            shares = db.execute_query(shares_query, params)
+
+            total_pages = (total + per_page - 1) // per_page
+
+            return render_template('network/snmp_shares.html',
+                                   shares=shares,
+                                   page=page,
+                                   total_pages=total_pages,
+                                   total=total,
+                                   search=search)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento condivisioni SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_shares.html',
+                               shares=[], page=1, total_pages=0, total=0, search='')
+
+
+@network_bp.route('/snmp/stats')
+def snmp_statistics():
+    """Statistiche SNMP dettagliate"""
+    try:
+        with get_network_db() as db:
+            # Statistiche generali
+            general_stats = {
+                'total_hosts_with_snmp': db.execute_query("""
+                    SELECT COUNT(DISTINCT host_id) as count 
+                    FROM snmp_interfaces
+                """)[0]['count'],
+
+                'total_interfaces': db.execute_query("""
+                    SELECT COUNT(*) as count 
+                    FROM snmp_interfaces
+                """)[0]['count'],
+
+                'total_connections': db.execute_query("""
+                    SELECT COUNT(*) as count 
+                    FROM snmp_network_connections
+                """)[0]['count'],
+
+                'total_shares': db.execute_query("""
+                    SELECT COUNT(*) as count 
+                    FROM snmp_shares
+                """)[0]['count']
+            }
+
+            # Statistiche interfacce per tipo
+            interface_stats = db.execute_query("""
+                SELECT interface_type, COUNT(*) as count,
+                       AVG(CASE WHEN speed > 0 THEN speed END) as avg_speed
+                FROM snmp_interfaces
+                WHERE interface_type IS NOT NULL
+                GROUP BY interface_type
+                ORDER BY count DESC
+            """)
+
+            # Top host per numero di interfacce
+            top_hosts = db.execute_query("""
+                SELECT h.ip_address, COUNT(i.id) as interface_count
+                FROM hosts h
+                JOIN snmp_interfaces i ON h.id = i.host_id
+                GROUP BY h.id, h.ip_address
+                ORDER BY interface_count DESC
+                LIMIT 10
+            """)
+
+            # Protocolli di connessione più usati
+            protocol_stats = db.execute_query("""
+                SELECT protocol, COUNT(*) as count
+                FROM snmp_network_connections
+                WHERE protocol IS NOT NULL
+                GROUP BY protocol
+                ORDER BY count DESC
+            """)
+
+            return render_template('network/snmp_statistics.html',
+                                   general_stats=general_stats,
+                                   interface_stats=interface_stats,
+                                   top_hosts=top_hosts,
+                                   protocol_stats=protocol_stats)
+
+    except Exception as e:
+        flash(f'Errore nel caricamento statistiche SNMP: {str(e)}', 'error')
+        return render_template('network/snmp_statistics.html',
+                               general_stats={}, interface_stats=[],
+                               top_hosts=[], protocol_stats=[])
+
+
+@network_bp.route('/snmp/reports')
+def snmp_reports():
+    """Report SNMP"""
+    return render_template('network/snmp_reports.html')
