@@ -136,166 +136,6 @@ def classification_overview():
 # ===========================
 # DEVICE CLASSIFICATION LIST
 # ===========================
-@devices_bp.route('/classification')
-def classification():
-    """Lista dispositivi classificati con filtri"""
-    try:
-        db = get_db()
-
-        # Filtri dalla query string
-        device_type = request.args.get('type')
-        device_subtype = request.args.get('subtype')
-        vendor = request.args.get('vendor')
-        confidence_min = request.args.get('confidence_min', type=float)
-        confidence_max = request.args.get('confidence_max', type=float)
-        search = request.args.get('search', '').strip()
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 50))
-
-        # ✅ DEFINIRE current_filters SUBITO (prima di qualsiasi possibile errore)
-        current_filters = {
-            'type': device_type,
-            'subtype': device_subtype,
-            'vendor': vendor,
-            'confidence_min': confidence_min,
-            'confidence_max': confidence_max,
-            'search': search
-        }
-
-        # Query base
-        query = '''
-            SELECT dc.*, h.hostname, h.mac_address, h.vendor as host_vendor, h.status,
-                   COUNT(DISTINCT p.port_number) as open_ports,
-                   COUNT(DISTINCT v.vuln_id) as vulnerabilities_count
-            FROM device_classification dc
-            LEFT JOIN hosts h ON dc.ip_address = h.ip_address
-            LEFT JOIN ports p ON dc.ip_address = p.ip_address AND p.state = 'open'
-            LEFT JOIN vulnerabilities v ON dc.ip_address = v.ip_address
-        '''
-
-        params = []
-        conditions = []
-
-        # Applica filtri
-        if device_type:
-            conditions.append('dc.device_type = ?')
-            params.append(device_type)
-
-        if device_subtype:
-            conditions.append('dc.device_subtype = ?')
-            params.append(device_subtype)
-
-        if vendor:
-            conditions.append('(dc.vendor_oui LIKE ? OR h.vendor LIKE ?)')
-            vendor_param = f'%{vendor}%'
-            params.extend([vendor_param, vendor_param])
-
-        if confidence_min is not None:
-            conditions.append('dc.confidence_score >= ?')
-            params.append(confidence_min)
-
-        if confidence_max is not None:
-            conditions.append('dc.confidence_score <= ?')
-            params.append(confidence_max)
-
-        if search:
-            conditions.append('''(
-                dc.ip_address LIKE ? OR 
-                h.hostname LIKE ? OR 
-                dc.device_type LIKE ? OR
-                dc.vendor_oui LIKE ?
-            )''')
-            search_param = f'%{search}%'
-            params.extend([search_param, search_param, search_param, search_param])
-
-        if conditions:
-            query += ' WHERE ' + ' AND '.join(conditions)
-
-        query += '''
-            GROUP BY dc.ip_address, dc.device_type, dc.device_subtype, dc.vendor, 
-                     dc.vendor_oui, dc.confidence_score, dc.classification_reasons, 
-                     dc.os_detected, dc.main_services, dc.hostname_pattern, dc.mac_vendor
-            ORDER BY dc.confidence_score DESC, dc.ip_address
-        '''
-
-        # Conteggio totale
-        count_query = query.replace(
-            'SELECT dc.*, h.hostname, h.mac_address, h.vendor as host_vendor, h.status, COUNT(DISTINCT p.port_number) as open_ports, COUNT(DISTINCT v.vuln_id) as vulnerabilities_count',
-            'SELECT COUNT(DISTINCT dc.ip_address)'
-        ).replace(
-            'GROUP BY dc.ip_address, dc.device_type, dc.device_subtype, dc.vendor, dc.vendor_oui, dc.confidence_score, dc.classification_reasons, dc.os_detected, dc.main_services, dc.hostname_pattern, dc.mac_vendor',
-            '')
-
-        total_count = db.execute(count_query, params).fetchone()[0]
-
-        # Paginazione
-        offset = (page - 1) * per_page
-        paginated_query = query + f' LIMIT {per_page} OFFSET {offset}'
-        devices_data = db.execute(paginated_query, params).fetchall()
-
-        # Informazioni paginazione
-        total_pages = (total_count + per_page - 1) // per_page
-        pagination = {
-            'page': page,
-            'per_page': per_page,
-            'total': total_count,
-            'total_pages': total_pages,
-            'has_prev': page > 1,
-            'has_next': page < total_pages
-        }
-
-        # Ottieni valori unici per filtri dropdown
-        available_types = db.execute('''
-            SELECT DISTINCT device_type 
-            FROM device_classification 
-            WHERE device_type IS NOT NULL 
-            ORDER BY device_type
-        ''').fetchall()
-
-        available_subtypes = db.execute('''
-            SELECT DISTINCT device_subtype 
-            FROM device_classification 
-            WHERE device_subtype IS NOT NULL 
-            ORDER BY device_subtype
-        ''').fetchall()
-
-        available_vendors = db.execute('''
-            SELECT DISTINCT vendor_oui 
-            FROM device_classification 
-            WHERE vendor_oui IS NOT NULL 
-            ORDER BY vendor_oui
-        ''').fetchall()
-
-        return render_template('devices/classification.html',
-                               devices=devices_data,
-                               pagination=pagination,
-                               current_filters=current_filters,
-                               available_types=available_types,
-                               available_subtypes=available_subtypes,
-                               available_vendors=available_vendors)
-
-    except Exception as e:
-        current_app.logger.error(f"Errore in classification: {e}")
-
-        # ✅ ASSICURATI CHE current_filters SIA SEMPRE DEFINITO ANCHE IN CASO DI ERRORE
-        current_filters = {
-            'type': request.args.get('type'),
-            'subtype': request.args.get('subtype'),
-            'vendor': request.args.get('vendor'),
-            'confidence_min': request.args.get('confidence_min', type=float),
-            'confidence_max': request.args.get('confidence_max', type=float),
-            'search': request.args.get('search', '').strip()
-        }
-
-        return render_template('devices/classification.html',
-                               devices=[],
-                               pagination={'page': 1, 'per_page': 50, 'total': 0, 'total_pages': 0, 'has_prev': False,
-                                           'has_next': False},
-                               current_filters=current_filters,
-                               available_types=[],
-                               available_subtypes=[],
-                               available_vendors=[],
-                               error=str(e))
 
 @devices_bp.route('/device/<ip_address>')
 def device_detail(ip_address):
@@ -667,6 +507,270 @@ def confidence():
                                confidence_distribution=[],
                                top_vendors=[],
                                error=str(e))
+
+
+@devices_bp.route('/classification')
+def classification():
+    """Lista dispositivi classificati con filtri - VERSIONE CORRETTA"""
+    try:
+        db = get_db()
+
+        # ===== STEP 1: DEBUG E VERIFICA DATI =====
+
+        # Verifica presenza dati nella tabella device_classification
+        classification_count = db.execute('SELECT COUNT(*) FROM device_classification').fetchone()[0]
+        hosts_count = db.execute('SELECT COUNT(*) FROM hosts WHERE status = "up"').fetchone()[0]
+
+        current_app.logger.info(f"Debug Classification: {classification_count} classificati, {hosts_count} host attivi")
+
+        # Se non ci sono dispositivi classificati, esegui la classificazione
+        if classification_count == 0 and hosts_count > 0:
+            current_app.logger.warning("Tabella device_classification vuota - Eseguendo classificazione automatica...")
+            try:
+                from core.device_classifier import DeviceClassifier
+                from core.database_manager import DatabaseManager
+
+                db_manager = DatabaseManager()
+                classifier = DeviceClassifier(db_manager)
+                classifier.classify_all_devices()
+
+                # Ricontrolla dopo classificazione
+                classification_count = db.execute('SELECT COUNT(*) FROM device_classification').fetchone()[0]
+                current_app.logger.info(f"Dopo classificazione: {classification_count} dispositivi classificati")
+
+            except Exception as e:
+                current_app.logger.error(f"Errore durante classificazione automatica: {e}")
+
+        # ===== STEP 2: GESTIONE FILTRI =====
+
+        # Parametri dalla query string
+        device_type = request.args.get('type')
+        device_subtype = request.args.get('subtype')
+        vendor = request.args.get('vendor')
+        confidence_min = request.args.get('confidence_min', type=float)
+        confidence_max = request.args.get('confidence_max', type=float)
+        search = request.args.get('search', '').strip()
+        page = max(1, int(request.args.get('page', 1)))
+        per_page = min(100, max(10, int(request.args.get('per_page', 50))))
+
+        # Dizionario filtri corrente
+        current_filters = {
+            'type': device_type,
+            'subtype': device_subtype,
+            'vendor': vendor,
+            'confidence_min': confidence_min,
+            'confidence_max': confidence_max,
+            'search': search
+        }
+
+        # ===== STEP 3: COSTRUZIONE QUERY SEMPLIFICATA =====
+
+        # Query base semplificata (senza aggregazioni complesse)
+        base_query = '''
+            SELECT 
+                dc.ip_address,
+                dc.device_type,
+                dc.device_subtype,
+                dc.vendor,
+                dc.vendor_oui,
+                dc.confidence_score,
+                dc.classification_reasons,
+                dc.os_detected,
+                dc.updated_at,
+                h.hostname,
+                h.mac_address,
+                h.vendor as host_vendor,
+                h.status
+            FROM device_classification dc
+            LEFT JOIN hosts h ON dc.ip_address = h.ip_address
+        '''
+
+        params = []
+        conditions = []
+
+        # Applica filtri
+        if device_type:
+            conditions.append('dc.device_type = ?')
+            params.append(device_type)
+
+        if device_subtype:
+            conditions.append('dc.device_subtype = ?')
+            params.append(device_subtype)
+
+        if vendor:
+            conditions.append('(dc.vendor_oui LIKE ? OR dc.vendor LIKE ? OR h.vendor LIKE ?)')
+            vendor_param = f'%{vendor}%'
+            params.extend([vendor_param, vendor_param, vendor_param])
+
+        if confidence_min is not None:
+            conditions.append('dc.confidence_score >= ?')
+            params.append(confidence_min)
+
+        if confidence_max is not None:
+            conditions.append('dc.confidence_score <= ?')
+            params.append(confidence_max)
+
+        if search:
+            conditions.append('''(
+                dc.ip_address LIKE ? OR 
+                h.hostname LIKE ? OR 
+                dc.device_type LIKE ? OR
+                dc.device_subtype LIKE ? OR
+                dc.vendor_oui LIKE ?
+            )''')
+            search_param = f'%{search}%'
+            params.extend([search_param] * 5)
+
+        # Costruisci query completa
+        if conditions:
+            query = base_query + ' WHERE ' + ' AND '.join(conditions)
+        else:
+            query = base_query
+
+        query += ' ORDER BY dc.confidence_score DESC, dc.ip_address'
+
+        current_app.logger.debug(f"Query costruita: {query}")
+        current_app.logger.debug(f"Parametri: {params}")
+
+        # ===== STEP 4: CONTEGGIO TOTALE =====
+
+        count_query = base_query.replace(
+            'SELECT dc.ip_address, dc.device_type, dc.device_subtype, dc.vendor, dc.vendor_oui, dc.confidence_score, dc.classification_reasons, dc.os_detected, dc.updated_at, h.hostname, h.mac_address, h.vendor as host_vendor, h.status',
+            'SELECT COUNT(*)'
+        )
+
+        if conditions:
+            count_query += ' WHERE ' + ' AND '.join(conditions)
+
+        try:
+            total_count = db.execute(count_query, params).fetchone()[0]
+            current_app.logger.info(f"Totale dispositivi trovati: {total_count}")
+        except Exception as e:
+            current_app.logger.error(f"Errore nel conteggio: {e}")
+            total_count = 0
+
+        # ===== STEP 5: PAGINAZIONE =====
+
+        total_pages = max(1, (total_count + per_page - 1) // per_page)
+        page = min(page, total_pages)  # Assicurati che page non superi total_pages
+
+        offset = (page - 1) * per_page
+        paginated_query = query + f' LIMIT {per_page} OFFSET {offset}'
+
+        try:
+            devices_data = db.execute(paginated_query, params).fetchall()
+            current_app.logger.info(f"Query paginata restituisce {len(devices_data)} dispositivi")
+        except Exception as e:
+            current_app.logger.error(f"Errore nella query paginata: {e}")
+            devices_data = []
+
+        # Informazioni paginazione
+        pagination = {
+            'page': page,
+            'per_page': per_page,
+            'total': total_count,
+            'total_pages': total_pages,
+            'has_prev': page > 1,
+            'has_next': page < total_pages
+        }
+
+        # ===== STEP 6: DATI PER DROPDOWN FILTRI =====
+
+        try:
+            available_types = db.execute('''
+                SELECT DISTINCT device_type 
+                FROM device_classification 
+                WHERE device_type IS NOT NULL 
+                ORDER BY device_type
+            ''').fetchall()
+
+            available_subtypes = db.execute('''
+                SELECT DISTINCT device_subtype 
+                FROM device_classification 
+                WHERE device_subtype IS NOT NULL 
+                ORDER BY device_subtype
+            ''').fetchall()
+
+            available_vendors = db.execute('''
+                SELECT DISTINCT vendor_oui 
+                FROM device_classification 
+                WHERE vendor_oui IS NOT NULL 
+                ORDER BY vendor_oui
+            ''').fetchall()
+
+        except Exception as e:
+            current_app.logger.error(f"Errore nel caricamento filtri: {e}")
+            available_types = []
+            available_subtypes = []
+            available_vendors = []
+
+        # ===== STEP 7: RENDERING TEMPLATE =====
+
+        # Aggiungi statistiche aggiuntive per ports e vulnerabilities se necessario
+        enhanced_devices = []
+        for device in devices_data:
+            device_dict = dict(device)
+
+            # Conta porte aperte (query semplice)
+            try:
+                open_ports = db.execute('''
+                    SELECT COUNT(*) FROM ports 
+                    WHERE ip_address = ? AND state = 'open'
+                ''', (device['ip_address'],)).fetchone()[0]
+                device_dict['open_ports'] = open_ports
+            except:
+                device_dict['open_ports'] = 0
+
+            # Conta vulnerabilità (query semplice)
+            try:
+                vulns = db.execute('''
+                    SELECT COUNT(*) FROM vulnerabilities 
+                    WHERE ip_address = ?
+                ''', (device['ip_address'],)).fetchone()[0]
+                device_dict['vulnerabilities_count'] = vulns
+            except:
+                device_dict['vulnerabilities_count'] = 0
+
+            enhanced_devices.append(device_dict)
+
+        return render_template('devices/classification.html',
+                               devices=enhanced_devices,
+                               pagination=pagination,
+                               current_filters=current_filters,
+                               available_types=available_types,
+                               available_subtypes=available_subtypes,
+                               available_vendors=available_vendors)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore critico in classification: {e}")
+        import traceback
+        current_app.logger.error(f"Stack trace: {traceback.format_exc()}")
+
+        # Fallback con filtri di base
+        current_filters = {
+            'type': request.args.get('type'),
+            'subtype': request.args.get('subtype'),
+            'vendor': request.args.get('vendor'),
+            'confidence_min': request.args.get('confidence_min', type=float),
+            'confidence_max': request.args.get('confidence_max', type=float),
+            'search': request.args.get('search', '').strip()
+        }
+
+        return render_template('devices/classification.html',
+                               devices=[],
+                               pagination={
+                                   'page': 1,
+                                   'per_page': 50,
+                                   'total': 0,
+                                   'total_pages': 0,
+                                   'has_prev': False,
+                                   'has_next': False
+                               },
+                               current_filters=current_filters,
+                               available_types=[],
+                               available_subtypes=[],
+                               available_vendors=[],
+                               error=f"Errore nel caricamento dei dispositivi: {str(e)}")
 
 # ===========================
 # API ENDPOINTS

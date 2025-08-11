@@ -114,7 +114,7 @@
             <i class="bi bi-graph-up"></i> Scan Timeline
           </h3>
           <div class="card-tools">
-            <button type="button" class="btn btn-sm btn-primary" onclick="exportScanTimeline()">
+            <button type="button" class="btn btn-sm btn-primary" onclick="ScanInfoManager.exportScanTimeline()">
               <i class="bi bi-download"></i> Export
             </button>
           </div>
@@ -158,7 +158,7 @@
                 </button>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-success ms-2" onclick="exportAllScans()">
+            <button type="button" class="btn btn-sm btn-success ms-2" onclick="ScanInfoManager.exportAllScans()">
               <i class="bi bi-download"></i> Export All
             </button>
           </div>
@@ -207,7 +207,7 @@
                   </td>
                   <td>
                     {% if scan.command_line %}
-                    <div class="text-truncate" style="max-width: 200px;" title="{{ scan.command_line }}">
+                    <div class="text-truncate" style="max-width: 200px;" title="{{ scan.command_line|e }}">
                       <small><code>{{ scan.command_line[:50] }}{% if scan.command_line|length > 50 %}...{% endif %}</code></small>
                     </div>
                     {% else %}
@@ -236,12 +236,12 @@
                   <td class="text-center">
                     <div class="btn-group btn-group-sm">
                       <button type="button" class="btn btn-outline-primary"
-                              onclick="viewScanDetails('{{ scan.id }}')" title="View Details">
+                              onclick="ScanInfoManager.viewScanDetails({{ loop.index0 }})" title="View Details">
                         <i class="bi bi-eye"></i>
                       </button>
                       {% if scan.command_line %}
                       <button type="button" class="btn btn-outline-secondary"
-                              onclick="copyToClipboard('{{ scan.command_line }}')" title="Copy Command">
+                              onclick="ScanInfoManager.copyToClipboard({{ scan.command_line|tojson|safe }})" title="Copy Command">
                         <i class="bi bi-clipboard"></i>
                       </button>
                       {% endif %}
@@ -309,28 +309,62 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
 <script>
-// Scan Timeline Chart
-{% if scans %}
-document.addEventListener('DOMContentLoaded', function() {
-  const timelineCtx = document.getElementById('scanTimelineChart');
-  if (timelineCtx) {
-    const scanDates = [{% for scan in scans %}'{{ scan.start_time[:10] if scan.start_time else "Unknown" }}'{% if not loop.last %}, {% endif %}{% endfor %}];
-    const hostsCounts = [{% for scan in scans %}{{ scan.total_hosts or 0 }}{% if not loop.last %}, {% endif %}{% endfor %}];
-    const upHostsCounts = [{% for scan in scans %}{{ scan.up_hosts or 0 }}{% if not loop.last %}, {% endif %}{% endfor %}];
+// ✅ CORREZIONE PRINCIPALE: Namespace per evitare conflitti
+window.ScanInfoManager = {
+  // Dati scansioni (generati server-side una volta sola)
+  scansData: [
+    {% if scans %}
+    {% for scan in scans %}
+    {
+      index: {{ loop.index0 }},
+      id: '{{ scan.id if scan.id else loop.index0 }}',
+      start_time: {{ scan.start_time|tojson|safe }},
+      scanner: {{ scan.scanner|tojson|safe }},
+      nmap_version: {{ scan.nmap_version|tojson|safe }},
+      scan_type: {{ scan.scan_type|tojson|safe }},
+      protocol: {{ scan.protocol|tojson|safe }},
+      total_hosts: {{ scan.total_hosts or 0 }},
+      up_hosts: {{ scan.up_hosts or 0 }},
+      elapsed_time: {{ scan.elapsed_time or 0 }},
+      command_line: {{ scan.command_line|tojson|safe }},
+      file_source: {{ scan.file_source|tojson|safe }},
+      services_scanned: {{ scan.services_scanned|tojson|safe }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% endif %}
+  ],
+
+  // Inizializza grafici
+  initCharts: function() {
+    this.initTimelineChart();
+    this.initTypesChart();
+  },
+
+  // Grafico Timeline
+  initTimelineChart: function() {
+    const timelineCtx = document.getElementById('scanTimelineChart');
+    if (!timelineCtx || this.scansData.length === 0) return;
+
+    // ✅ FIX: Estrai dati senza conflitti di variabili
+    const chartData = this.scansData.map(scan => ({
+      date: scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown',
+      totalHosts: scan.total_hosts || 0,
+      upHosts: scan.up_hosts || 0
+    })).reverse(); // Ordine cronologico
 
     new Chart(timelineCtx, {
       type: 'line',
       data: {
-        labels: scanDates.reverse(),
+        labels: chartData.map(d => d.date),
         datasets: [{
           label: 'Total Hosts',
-          data: hostsCounts.reverse(),
+          data: chartData.map(d => d.totalHosts),
           borderColor: 'rgb(54, 162, 235)',
           backgroundColor: 'rgba(54, 162, 235, 0.1)',
           tension: 0.1
         }, {
           label: 'Hosts Up',
-          data: upHostsCounts.reverse(),
+          data: chartData.map(d => d.upHosts),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.1)',
           tension: 0.1
@@ -351,22 +385,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     });
-  }
-});
+  },
 
-// Scan Types Chart
-document.addEventListener('DOMContentLoaded', function() {
-  const typesCtx = document.getElementById('scanTypesChart');
-  if (typesCtx) {
-    // Count scan types
-    const scanTypes = {};
-    {% for scan in scans %}
-    const scanType = '{{ scan.scan_type or "Unknown" }}';
-    scanTypes[scanType] = (scanTypes[scanType] || 0) + 1;
-    {% endfor %}
+  // Grafico Tipi Scansione
+  initTypesChart: function() {
+    const typesCtx = document.getElementById('scanTypesChart');
+    if (!typesCtx || this.scansData.length === 0) return;
 
-    const labels = Object.keys(scanTypes);
-    const data = Object.values(scanTypes);
+    // ✅ FIX: Conta tipi di scansione senza conflitti
+    const typeCounts = {};
+    this.scansData.forEach(scan => {
+      const type = scan.scan_type || 'Unknown';
+      typeCounts[type] = (typeCounts[type] || 0) + 1;
+    });
+
+    const labels = Object.keys(typeCounts);
+    const data = Object.values(typeCounts);
+    const colors = [
+      'rgba(255, 99, 132, 0.8)',
+      'rgba(54, 162, 235, 0.8)',
+      'rgba(255, 205, 86, 0.8)',
+      'rgba(75, 192, 192, 0.8)',
+      'rgba(153, 102, 255, 0.8)',
+      'rgba(255, 159, 64, 0.8)'
+    ];
 
     new Chart(typesCtx, {
       type: 'doughnut',
@@ -374,14 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: labels,
         datasets: [{
           data: data,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.8)',
-            'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 205, 86, 0.8)',
-            'rgba(75, 192, 192, 0.8)',
-            'rgba(153, 102, 255, 0.8)',
-            'rgba(255, 159, 64, 0.8)'
-          ],
+          backgroundColor: colors.slice(0, labels.length),
           borderWidth: 2
         }]
       },
@@ -398,207 +433,237 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     });
-  }
-});
-{% endif %}
+  },
 
-// Search functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const searchInput = document.getElementById('scanSearch');
-  const table = document.getElementById('scansTable');
+  // ✅ FIX: Funzione viewScanDetails correttamente definita
+  viewScanDetails: function(scanIndex) {
+    const modal = new bootstrap.Modal(document.getElementById('scanDetailModal'));
+    const content = document.getElementById('scanDetailContent');
 
-  if (searchInput && table) {
-    searchInput.addEventListener('keyup', function() {
-      const filter = searchInput.value.toLowerCase();
-      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    if (scanIndex >= 0 && scanIndex < this.scansData.length) {
+      const scan = this.scansData[scanIndex];
 
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const text = row.textContent.toLowerCase();
+      content.innerHTML = `
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Scan Information</h6>
+            <table class="table table-sm">
+              <tr><td><strong>Date:</strong></td><td>${scan.start_time || 'Unknown'}</td></tr>
+              <tr><td><strong>Scanner:</strong></td><td>${scan.scanner || 'nmap'}</td></tr>
+              <tr><td><strong>Version:</strong></td><td>${scan.nmap_version || 'Unknown'}</td></tr>
+              <tr><td><strong>Scan Type:</strong></td><td>${scan.scan_type || 'Unknown'}</td></tr>
+              <tr><td><strong>Protocol:</strong></td><td>${scan.protocol || 'Unknown'}</td></tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6>Results</h6>
+            <table class="table table-sm">
+              <tr><td><strong>Total Hosts:</strong></td><td>${scan.total_hosts}</td></tr>
+              <tr><td><strong>Hosts Up:</strong></td><td>${scan.up_hosts}</td></tr>
+              <tr><td><strong>Success Rate:</strong></td><td>${scan.total_hosts > 0 ? (scan.up_hosts / scan.total_hosts * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
+              <tr><td><strong>Duration:</strong></td><td>${scan.elapsed_time ? (scan.elapsed_time / 60).toFixed(1) + ' minutes' : 'Unknown'}</td></tr>
+              <tr><td><strong>Source File:</strong></td><td>${scan.file_source || 'N/A'}</td></tr>
+            </table>
+          </div>
+        </div>
+        ${scan.command_line ? `
+        <div class="mt-3">
+          <h6>Command Line</h6>
+          <div class="bg-dark text-light p-3 rounded">
+            <code>${this.escapeHtml(scan.command_line)}</code>
+          </div>
+          <button class="btn btn-sm btn-outline-primary mt-2" onclick="ScanInfoManager.copyToClipboard('${this.escapeHtml(scan.command_line)}')">
+            <i class="bi bi-clipboard"></i> Copy Command
+          </button>
+        </div>
+        ` : ''}
+        ${scan.services_scanned ? `
+        <div class="mt-3">
+          <h6>Services Scanned</h6>
+          <p class="text-muted">${this.escapeHtml(scan.services_scanned)}</p>
+        </div>
+        ` : ''}
+      `;
+    } else {
+      content.innerHTML = '<div class="alert alert-warning">No detailed information available for this scan.</div>';
+    }
 
-        if (text.includes(filter)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      }
+    modal.show();
+  },
+
+  // Utility per escape HTML
+  escapeHtml: function(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  },
+
+  // Export funzioni
+  exportScanTimeline: function() {
+    let csv = 'Date,Scanner,Total Hosts,Hosts Up,Duration (seconds)\n';
+    this.scansData.forEach(scan => {
+      const date = scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown';
+      csv += `"${date}","${scan.scanner || 'nmap'}",${scan.total_hosts},${scan.up_hosts},${scan.elapsed_time}\n`;
     });
-  }
-});
+    this.downloadCSV(csv, 'scan_timeline.csv');
+  },
 
-// Export functions - Generate CSV client-side
-function exportScanTimeline() {
-  let csv = 'Date,Scanner,Total Hosts,Hosts Up,Duration (seconds)\n';
-  {% if scans %}
-  {% for scan in scans %}
-  csv += '"{{ scan.start_time[:10] if scan.start_time else "Unknown" }}","{{ scan.scanner or "nmap" }}",{{ scan.total_hosts or 0 }},{{ scan.up_hosts or 0 }},{{ scan.elapsed_time or 0 }}\n';
-  {% endfor %}
-  {% endif %}
-  downloadCSV(csv, 'scan_timeline.csv');
-}
+  exportAllScans: function() {
+    let csv = 'Date,Time,Scanner,Version,Total Hosts,Hosts Up,Duration,Command\n';
+    this.scansData.forEach(scan => {
+      const date = scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown';
+      const time = scan.start_time ? scan.start_time.slice(11, 19) : '';
+      csv += `"${date}","${time}","${scan.scanner || 'nmap'}","${scan.nmap_version || ''}",${scan.total_hosts},${scan.up_hosts},${scan.elapsed_time},"${scan.command_line || ''}"\n`;
+    });
+    this.downloadCSV(csv, 'all_scans.csv');
+  },
 
-function exportAllScans() {
-  let csv = 'Date,Time,Scanner,Version,Total Hosts,Hosts Up,Duration,Command\n';
-  {% if scans %}
-  {% for scan in scans %}
-  csv += '"{{ scan.start_time[:10] if scan.start_time else "Unknown" }}","{{ scan.start_time[11:19] if scan.start_time else "" }}","{{ scan.scanner or "nmap" }}","{{ scan.nmap_version or "" }}",{{ scan.total_hosts or 0 }},{{ scan.up_hosts or 0 }},{{ scan.elapsed_time or 0 }},"{{ scan.command_line or "" }}"\n';
-  {% endfor %}
-  {% endif %}
-  downloadCSV(csv, 'all_scans.csv');
-}
+  downloadCSV: function(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  },
 
-function downloadCSV(csv, filename) {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-}
+  // Copy to clipboard
+  copyToClipboard: function(text) {
+    if (!text) return;
 
-// View scan details modal
-function viewScanDetails(scanId) {
-  const modal = new bootstrap.Modal(document.getElementById('scanDetailModal'));
-  const content = document.getElementById('scanDetailContent');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showToast('Copied to clipboard!', 'success');
+      }).catch(() => {
+        this.fallbackCopyTextToClipboard(text);
+      });
+    } else {
+      this.fallbackCopyTextToClipboard(text);
+    }
+  },
 
-  content.innerHTML = '<div class="text-center"><i class="bi bi-hourglass-split"></i> Loading...</div>';
-  modal.show();
-
-  // Find scan data from current page
-  const scanData = findScanInPageData(scanId);
-
-  if (scanData) {
-    content.innerHTML = `
-      <div class="row">
-        <div class="col-md-6">
-          <h6>Scan Information</h6>
-          <table class="table table-sm">
-            <tr><td><strong>Date:</strong></td><td>${scanData.start_time || 'Unknown'}</td></tr>
-            <tr><td><strong>Scanner:</strong></td><td>${scanData.scanner || 'nmap'}</td></tr>
-            <tr><td><strong>Version:</strong></td><td>${scanData.nmap_version || 'Unknown'}</td></tr>
-            <tr><td><strong>Scan Type:</strong></td><td>${scanData.scan_type || 'Unknown'}</td></tr>
-            <tr><td><strong>Protocol:</strong></td><td>${scanData.protocol || 'Unknown'}</td></tr>
-          </table>
-        </div>
-        <div class="col-md-6">
-          <h6>Results</h6>
-          <table class="table table-sm">
-            <tr><td><strong>Total Hosts:</strong></td><td>${scanData.total_hosts || 0}</td></tr>
-            <tr><td><strong>Hosts Up:</strong></td><td>${scanData.up_hosts || 0}</td></tr>
-            <tr><td><strong>Success Rate:</strong></td><td>${scanData.total_hosts && scanData.total_hosts > 0 ? ((scanData.up_hosts || 0) / scanData.total_hosts * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
-            <tr><td><strong>Duration:</strong></td><td>${scanData.elapsed_time ? (scanData.elapsed_time / 60).toFixed(1) + ' minutes' : 'Unknown'}</td></tr>
-            <tr><td><strong>Source File:</strong></td><td>${scanData.file_source || 'N/A'}</td></tr>
-          </table>
-        </div>
-      </div>
-      ${scanData.command_line ? `
-      <div class="mt-3">
-        <h6>Command Line</h6>
-        <div class="bg-dark text-light p-3 rounded">
-          <code>${scanData.command_line}</code>
-        </div>
-        <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard('${scanData.command_line}')">
-          <i class="bi bi-clipboard"></i> Copy Command
-        </button>
-      </div>
-      ` : ''}
-      ${scanData.services_scanned ? `
-      <div class="mt-3">
-        <h6>Services Scanned</h6>
-        <p class="text-muted">${scanData.services_scanned}</p>
-      </div>
-      ` : ''}
-    `;
-  } else {
-    content.innerHTML = '<div class="alert alert-warning">No detailed information available for this scan.</div>';
-  }
-}
-
-function findScanInPageData(scanId) {
-  // This would extract scan data from the page based on scanId
-  // For now, we'll use a placeholder implementation
-  {% if scans %}
-  const scansData = [
-    {% for scan in scans %}
-    {
-      id: '{{ scan.id }}',
-      start_time: '{{ scan.start_time }}',
-      scanner: '{{ scan.scanner }}',
-      nmap_version: '{{ scan.nmap_version }}',
-      scan_type: '{{ scan.scan_type }}',
-      protocol: '{{ scan.protocol }}',
-      total_hosts: {{ scan.total_hosts or 0 }},
-      up_hosts: {{ scan.up_hosts or 0 }},
-      elapsed_time: {{ scan.elapsed_time or 0 }},
-      command_line: '{{ scan.command_line }}',
-      file_source: '{{ scan.file_source }}',
-      services_scanned: '{{ scan.services_scanned }}'
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ];
-
-  return scansData.find(scan => scan.id == scanId);
-  {% else %}
-  return null;
-  {% endif %}
-}
-
-// Copy to clipboard function
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(function() {
-    showToast('Copied to clipboard!', 'success');
-  }).catch(function(err) {
-    // Fallback for older browsers
+  fallbackCopyTextToClipboard: function(text) {
     const textArea = document.createElement('textarea');
     textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
     document.body.appendChild(textArea);
+    textArea.focus();
     textArea.select();
+
     try {
       document.execCommand('copy');
-      showToast('Copied to clipboard!', 'success');
-    } catch (fallbackErr) {
-      showToast('Failed to copy to clipboard', 'error');
+      this.showToast('Copied to clipboard!', 'success');
+    } catch (err) {
+      this.showToast('Failed to copy to clipboard', 'error');
     }
+
     document.body.removeChild(textArea);
-  });
-}
+  },
 
-// Toast notification function
-function showToast(message, type = 'info') {
-  const toast = document.createElement('div');
-  toast.className = `toast-notification alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'}`;
-  toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-  toast.innerHTML = `
-    <div class="d-flex align-items-center">
-      <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-      ${message}
-    </div>
-  `;
+  // Toast notifications
+  showToast: function(message, type = 'info') {
+    const toast = document.createElement('div');
+    const iconClass = type === 'success' ? 'bi-check-circle' :
+                      type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
+    const alertClass = type === 'success' ? 'alert-success' :
+                       type === 'error' ? 'alert-danger' : 'alert-info';
 
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    if (document.body.contains(toast)) {
-      document.body.removeChild(toast);
-    }
-  }, 3000);
-}
+    toast.className = `toast-notification alert ${alertClass}`;
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px; opacity: 0; transition: opacity 0.3s;';
+    toast.innerHTML = `
+      <div class="d-flex align-items-center">
+        <i class="bi ${iconClass} me-2"></i>
+        ${message}
+      </div>
+    `;
 
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Ctrl+F or Cmd+F to focus search
-  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-    e.preventDefault();
+    document.body.appendChild(toast);
+
+    // Fade in
+    setTimeout(() => toast.style.opacity = '1', 10);
+
+    // Fade out and remove
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  },
+
+  // Inizializza ricerca
+  initSearch: function() {
     const searchInput = document.getElementById('scanSearch');
-    if (searchInput) {
-      searchInput.focus();
-      searchInput.select();
+    const table = document.getElementById('scansTable');
+
+    if (searchInput && table) {
+      searchInput.addEventListener('keyup', () => {
+        const filter = searchInput.value.toLowerCase();
+        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(filter) ? '' : 'none';
+        }
+      });
     }
   }
+};
+
+// ✅ Inizializzazione al caricamento DOM
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔧 ScanInfo: Inizializzazione...');
+
+  // Inizializza tutti i componenti
+  ScanInfoManager.initCharts();
+  ScanInfoManager.initSearch();
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      const searchInput = document.getElementById('scanSearch');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+  });
+
+  console.log('✅ ScanInfo: Inizializzazione completata');
 });
+
+// ✅ Esponi funzioni globalmente per compatibilità (deprecato ma funzionante)
+window.viewScanDetails = function(scanIndex) {
+  ScanInfoManager.viewScanDetails(scanIndex);
+};
+
+window.copyToClipboard = function(text) {
+  ScanInfoManager.copyToClipboard(text);
+};
+
+window.exportScanTimeline = function() {
+  ScanInfoManager.exportScanTimeline();
+};
+
+window.exportAllScans = function() {
+  ScanInfoManager.exportAllScans();
+};
+
 </script>
 {% endblock %}
