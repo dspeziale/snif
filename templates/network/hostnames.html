@@ -1,0 +1,732 @@
+{% extends "base.html" %}
+
+{% block title %}Hostname Discovery - AdminLTE{% endblock %}
+{% block page_title %}Hostname Discovery{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">Hostname Discovery</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Hostname Discovery Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ hostnames_data|length if hostnames_data else 0 }}</h3>
+          <p>Total Hostnames</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-dns"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ hostnames_data|map(attribute='ip_address')|unique|list|length if hostnames_data else 0 }}</h3>
+          <p>Unique Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hdd-network"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ hostname_stats|length if hostname_stats else 0 }}</h3>
+          <p>Discovery Methods</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-search"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ hostnames_data|selectattr('status', 'eq', 'up')|list|length if hostnames_data else 0 }}</h3>
+          <p>Active Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hostname Statistics -->
+  {% if hostname_stats %}
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Discovery Methods Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Discovery Method</th>
+                  <th class="text-center">Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_stats = hostname_stats | map(attribute='count') | sum %}
+                {% for stat in hostname_stats %}
+                <tr>
+                  <td>
+                    {% if stat.hostname_type == 'PTR' %}
+                    <span class="badge bg-primary">{{ stat.hostname_type }}</span>
+                    <small class="text-muted ms-1">Reverse DNS</small>
+                    {% elif stat.hostname_type == 'NetBIOS' %}
+                    <span class="badge bg-info">{{ stat.hostname_type }}</span>
+                    <small class="text-muted ms-1">NetBIOS Name</small>
+                    {% elif stat.hostname_type == 'user' %}
+                    <span class="badge bg-success">{{ stat.hostname_type }}</span>
+                    <small class="text-muted ms-1">User Provided</small>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ stat.hostname_type or 'Unknown' }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <strong>{{ stat.count }}</strong>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar
+                        {% if stat.hostname_type == 'PTR' %}bg-primary
+                        {% elif stat.hostname_type == 'NetBIOS' %}bg-info
+                        {% elif stat.hostname_type == 'user' %}bg-success
+                        {% else %}bg-secondary{% endif %}"
+                           style="width: {{ (stat.count / total_stats * 100) if total_stats > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((stat.count / total_stats * 100)) if total_stats > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Discovery Methods Chart
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="hostnameMethodsChart" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Filter and Search -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-funnel"></i> Filter Hostnames
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label for="searchHostname" class="form-label">Search Hostname</label>
+                <input type="text" class="form-control" id="searchHostname"
+                       placeholder="Search hostnames...">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label for="filterMethod" class="form-label">Discovery Method</label>
+                <select class="form-select" id="filterMethod">
+                  <option value="">All Methods</option>
+                  {% for stat in hostname_stats %}
+                  <option value="{{ stat.hostname_type }}">{{ stat.hostname_type or 'Unknown' }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label for="filterStatus" class="form-label">Host Status</label>
+                <select class="form-select" id="filterStatus">
+                  <option value="">All Statuses</option>
+                  <option value="up">Up</option>
+                  <option value="down">Down</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="mb-3">
+                <label for="filterDomain" class="form-label">Domain Filter</label>
+                <input type="text" class="form-control" id="filterDomain"
+                       placeholder="e.g., .local, .com">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                <i class="bi bi-search"></i> Apply Filters
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                <i class="bi bi-x-circle"></i> Clear Filters
+              </button>
+              <button type="button" class="btn btn-success" onclick="exportHostnames()">
+                <i class="bi bi-download"></i> Export CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hostnames Results -->
+  {% if hostnames_data %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list-ul"></i> Discovered Hostnames
+            <span class="badge bg-info">{{ hostnames_data|length }} results</span>
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleView('table')" id="table-view-btn">
+                <i class="bi bi-table"></i> Table
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleView('cards')" id="cards-view-btn">
+                <i class="bi bi-grid-3x3-gap"></i> Cards
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <!-- Table View -->
+          <div id="table-view" class="view-container">
+            <div class="table-responsive">
+              <table class="table table-striped table-hover" id="hostnamesTable">
+                <thead>
+                  <tr>
+                    <th>Hostname</th>
+                    <th>IP Address</th>
+                    <th>Discovery Method</th>
+                    <th>Host Status</th>
+                    <th>Vendor</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for hostname in hostnames_data %}
+                  <tr data-hostname="{{ hostname.hostname }}"
+                      data-method="{{ hostname.hostname_type }}"
+                      data-status="{{ hostname.status }}"
+                      data-ip="{{ hostname.ip_address }}">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <i class="bi bi-dns text-primary me-2"></i>
+                        <div>
+                          <strong>{{ hostname.hostname }}</strong>
+                          {% if hostname.hostname.count('.') >= 2 %}
+                          <br><small class="text-muted">FQDN</small>
+                          {% elif hostname.hostname.count('.') == 1 %}
+                          <br><small class="text-muted">Domain</small>
+                          {% else %}
+                          <br><small class="text-muted">Short Name</small>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <a href="{{ url_for('network.host_detail', ip_address=hostname.ip_address) }}"
+                         class="text-decoration-none">
+                        <strong>{{ hostname.ip_address }}</strong>
+                      </a>
+                    </td>
+                    <td>
+                      {% if hostname.hostname_type == 'PTR' %}
+                      <span class="badge bg-primary">PTR</span>
+                      <small class="text-muted d-block">Reverse DNS</small>
+                      {% elif hostname.hostname_type == 'NetBIOS' %}
+                      <span class="badge bg-info">NetBIOS</span>
+                      <small class="text-muted d-block">NetBIOS Name</small>
+                      {% elif hostname.hostname_type == 'user' %}
+                      <span class="badge bg-success">User</span>
+                      <small class="text-muted d-block">User Provided</small>
+                      {% else %}
+                      <span class="badge bg-secondary">{{ hostname.hostname_type or 'Unknown' }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if hostname.status == 'up' %}
+                      <span class="badge bg-success">
+                        <i class="bi bi-check-circle"></i> Up
+                      </span>
+                      {% elif hostname.status == 'down' %}
+                      <span class="badge bg-danger">
+                        <i class="bi bi-x-circle"></i> Down
+                      </span>
+                      {% else %}
+                      <span class="badge bg-warning">
+                        <i class="bi bi-question-circle"></i> {{ hostname.status or 'Unknown' }}
+                      </span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if hostname.vendor %}
+                      <span class="text-info">{{ hostname.vendor }}</span>
+                      {% else %}
+                      <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('network.host_detail', ip_address=hostname.ip_address) }}"
+                           class="btn btn-outline-primary" title="View Host Details">
+                          <i class="bi bi-pc-display"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline-info"
+                                onclick="pingHostname('{{ hostname.hostname }}')" title="Test Connectivity">
+                          <i class="bi bi-wifi"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary"
+                                onclick="copyToClipboard('{{ hostname.hostname }}')" title="Copy Hostname">
+                          <i class="bi bi-clipboard"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-success"
+                                onclick="lookupDNS('{{ hostname.hostname }}')" title="DNS Lookup">
+                          <i class="bi bi-search"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cards View -->
+          <div id="cards-view" class="view-container" style="display: none;">
+            <div class="row">
+              {% for hostname in hostnames_data %}
+              <div class="col-md-6 col-lg-4 mb-3"
+                   data-hostname="{{ hostname.hostname }}"
+                   data-method="{{ hostname.hostname_type }}"
+                   data-status="{{ hostname.status }}"
+                   data-ip="{{ hostname.ip_address }}">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                        <h5 class="card-title mb-1">
+                          <i class="bi bi-dns text-primary me-1"></i>
+                          {{ hostname.hostname }}
+                        </h5>
+                        {% if hostname.hostname.count('.') >= 2 %}
+                        <small class="text-muted">FQDN</small>
+                        {% elif hostname.hostname.count('.') == 1 %}
+                        <small class="text-muted">Domain</small>
+                        {% else %}
+                        <small class="text-muted">Short Name</small>
+                        {% endif %}
+                      </div>
+                      {% if hostname.status == 'up' %}
+                      <span class="badge bg-success">Up</span>
+                      {% elif hostname.status == 'down' %}
+                      <span class="badge bg-danger">Down</span>
+                      {% else %}
+                      <span class="badge bg-warning">{{ hostname.status or 'Unknown' }}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="card-text">
+                      <div class="mb-2">
+                        <strong>IP Address:</strong>
+                        <a href="{{ url_for('network.host_detail', ip_address=hostname.ip_address) }}"
+                           class="text-decoration-none">
+                          {{ hostname.ip_address }}
+                        </a>
+                      </div>
+                      <div class="mb-2">
+                        <strong>Discovery:</strong>
+                        {% if hostname.hostname_type == 'PTR' %}
+                        <span class="badge bg-primary">PTR (Reverse DNS)</span>
+                        {% elif hostname.hostname_type == 'NetBIOS' %}
+                        <span class="badge bg-info">NetBIOS Name</span>
+                        {% elif hostname.hostname_type == 'user' %}
+                        <span class="badge bg-success">User Provided</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ hostname.hostname_type or 'Unknown' }}</span>
+                        {% endif %}
+                      </div>
+                      {% if hostname.vendor %}
+                      <div class="mb-2">
+                        <strong>Vendor:</strong>
+                        <span class="text-info">{{ hostname.vendor }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="btn-group btn-group-sm w-100">
+                      <a href="{{ url_for('network.host_detail', ip_address=hostname.ip_address) }}"
+                         class="btn btn-outline-primary">
+                        <i class="bi bi-pc-display"></i> Host
+                      </a>
+                      <button type="button" class="btn btn-outline-info"
+                              onclick="pingHostname('{{ hostname.hostname }}')">
+                        <i class="bi bi-wifi"></i> Ping
+                      </button>
+                      <button type="button" class="btn btn-outline-success"
+                              onclick="lookupDNS('{{ hostname.hostname }}')">
+                        <i class="bi bi-search"></i> DNS
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-dns display-1 text-muted"></i>
+          <h4 class="text-muted mt-3">No Hostnames Discovered</h4>
+          <p class="text-muted">No hostname discovery results found. This could mean:</p>
+          <ul class="list-unstyled text-muted">
+            <li>• Reverse DNS lookups were not performed</li>
+            <li>• No PTR records exist for scanned hosts</li>
+            <li>• NetBIOS name discovery was not enabled</li>
+            <li>• Hosts don't respond to hostname queries</li>
+          </ul>
+          <a href="{{ url_for('network.hosts') }}" class="btn btn-primary">
+            <i class="bi bi-hdd-network"></i> View All Hosts
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<!-- DNS Lookup Modal -->
+<div class="modal fade" id="dnsLookupModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">DNS Lookup Results</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="dnsLookupContent">
+        <!-- Content will be loaded via JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+// Discovery Methods Chart
+{% if hostname_stats %}
+document.addEventListener('DOMContentLoaded', function() {
+  const methodsCtx = document.getElementById('hostnameMethodsChart');
+  if (methodsCtx) {
+    new Chart(methodsCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [{% for stat in hostname_stats %}'{{ stat.hostname_type or "Unknown" }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          data: [{% for stat in hostname_stats %}{{ stat.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          backgroundColor: [
+            'rgba(13, 110, 253, 0.8)',   // PTR - Blue
+            'rgba(13, 202, 240, 0.8)',   // NetBIOS - Cyan
+            'rgba(25, 135, 84, 0.8)',    // User - Green
+            'rgba(108, 117, 125, 0.8)',  // Unknown - Gray
+            'rgba(220, 53, 69, 0.8)',    // Other - Red
+            'rgba(255, 193, 7, 0.8)'     // Other2 - Yellow
+          ],
+          borderColor: [
+            'rgba(13, 110, 253, 1)',
+            'rgba(13, 202, 240, 1)',
+            'rgba(25, 135, 84, 1)',
+            'rgba(108, 117, 125, 1)',
+            'rgba(220, 53, 69, 1)',
+            'rgba(255, 193, 7, 1)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Hostname Discovery Methods'
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  }
+});
+{% endif %}
+
+// View toggle functionality
+function toggleView(viewType) {
+  const tableView = document.getElementById('table-view');
+  const cardsView = document.getElementById('cards-view');
+  const tableBtn = document.getElementById('table-view-btn');
+  const cardsBtn = document.getElementById('cards-view-btn');
+
+  if (viewType === 'table') {
+    tableView.style.display = 'block';
+    cardsView.style.display = 'none';
+    tableBtn.classList.add('active');
+    cardsBtn.classList.remove('active');
+  } else {
+    tableView.style.display = 'none';
+    cardsView.style.display = 'block';
+    tableBtn.classList.remove('active');
+    cardsBtn.classList.add('active');
+  }
+
+  localStorage.setItem('hostname-view-preference', viewType);
+}
+
+// Apply filters
+function applyFilters() {
+  const hostname = document.getElementById('searchHostname').value.toLowerCase();
+  const method = document.getElementById('filterMethod').value;
+  const status = document.getElementById('filterStatus').value;
+  const domain = document.getElementById('filterDomain').value.toLowerCase();
+
+  const tableRows = document.querySelectorAll('#table-view tbody tr');
+  const cardItems = document.querySelectorAll('#cards-view .col-md-6');
+
+  // Filter table rows
+  tableRows.forEach(row => {
+    const rowHostname = row.dataset.hostname.toLowerCase();
+    const rowMethod = row.dataset.method;
+    const rowStatus = row.dataset.status;
+
+    let show = true;
+
+    if (hostname && !rowHostname.includes(hostname)) show = false;
+    if (method && rowMethod !== method) show = false;
+    if (status && rowStatus !== status) show = false;
+    if (domain && !rowHostname.includes(domain)) show = false;
+
+    row.style.display = show ? '' : 'none';
+  });
+
+  // Filter card items
+  cardItems.forEach(card => {
+    const cardHostname = card.dataset.hostname.toLowerCase();
+    const cardMethod = card.dataset.method;
+    const cardStatus = card.dataset.status;
+
+    let show = true;
+
+    if (hostname && !cardHostname.includes(hostname)) show = false;
+    if (method && cardMethod !== method) show = false;
+    if (status && cardStatus !== status) show = false;
+    if (domain && !cardHostname.includes(domain)) show = false;
+
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+// Clear filters
+function clearFilters() {
+  document.getElementById('searchHostname').value = '';
+  document.getElementById('filterMethod').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterDomain').value = '';
+  applyFilters();
+}
+
+// Export hostnames to CSV
+function exportHostnames() {
+  let csv = 'Hostname,IP Address,Discovery Method,Status,Vendor\n';
+  {% if hostnames_data %}
+  {% for hostname in hostnames_data %}
+  csv += '"{{ hostname.hostname }}","{{ hostname.ip_address }}","{{ hostname.hostname_type or "" }}","{{ hostname.status or "" }}","{{ hostname.vendor or "" }}"\n';
+  {% endfor %}
+  {% endif %}
+  downloadCSV(csv, 'hostnames_discovery.csv');
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+// Copy to clipboard
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Copied to clipboard: ' + text, 'success');
+  }).catch(function(err) {
+    // Fallback
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showToast('Copied to clipboard: ' + text, 'success');
+    } catch (fallbackErr) {
+      showToast('Failed to copy to clipboard', 'error');
+    }
+    document.body.removeChild(textArea);
+  });
+}
+
+// Ping hostname (simulated)
+function pingHostname(hostname) {
+  showToast(`Simulating ping to ${hostname}...`, 'info');
+  // In a real implementation, this would make an AJAX call to a backend ping service
+  setTimeout(() => {
+    showToast(`Ping to ${hostname} completed (simulated)`, 'success');
+  }, 2000);
+}
+
+// DNS Lookup
+function lookupDNS(hostname) {
+  const modal = new bootstrap.Modal(document.getElementById('dnsLookupModal'));
+  const content = document.getElementById('dnsLookupContent');
+
+  content.innerHTML = '<div class="text-center"><i class="bi bi-hourglass-split"></i> Looking up DNS records...</div>';
+  modal.show();
+
+  // Simulate DNS lookup
+  setTimeout(() => {
+    content.innerHTML = `
+      <h6>DNS Records for: <code>${hostname}</code></h6>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <tr>
+            <td><strong>A Record:</strong></td>
+            <td>{% if hostnames_data %}{{ hostnames_data|selectattr('hostname', 'eq', hostname)|map(attribute='ip_address')|first or 'Not found' }}{% else %}Not found{% endif %}</td>
+          </tr>
+          <tr>
+            <td><strong>PTR Record:</strong></td>
+            <td>${hostname}</td>
+          </tr>
+          <tr>
+            <td><strong>Status:</strong></td>
+            <td><span class="badge bg-success">Resolved</span></td>
+          </tr>
+        </table>
+      </div>
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> This is a simulated DNS lookup. In a real implementation, this would query actual DNS servers.
+      </div>
+    `;
+  }, 1500);
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast-notification alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'}`;
+  toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+  toast.innerHTML = `
+    <div class="d-flex align-items-center">
+      <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+      ${message}
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    if (document.body.contains(toast)) {
+      document.body.removeChild(toast);
+    }
+  }, 3000);
+}
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+  const savedView = localStorage.getItem('hostname-view-preference') || 'table';
+  toggleView(savedView);
+
+  // Add real-time search
+  document.getElementById('searchHostname').addEventListener('input', applyFilters);
+  document.getElementById('filterMethod').addEventListener('change', applyFilters);
+  document.getElementById('filterStatus').addEventListener('change', applyFilters);
+  document.getElementById('filterDomain').addEventListener('input', applyFilters);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  // Ctrl+F to focus search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    document.getElementById('searchHostname').focus();
+  }
+
+  // V to toggle view
+  if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const activeElement = document.activeElement;
+    if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'SELECT') {
+      const currentView = localStorage.getItem('hostname-view-preference') || 'table';
+      toggleView(currentView === 'table' ? 'cards' : 'table');
+    }
+  }
+});
+</script>
+{% endblock %}
