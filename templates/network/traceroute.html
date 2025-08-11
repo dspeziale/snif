@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}Network Traceroute - AdminLTE{% endblock %}
+{% block page_title %}Network Traceroute{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">Traceroute</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Traceroute Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ traces|length if traces else 0 }}</h3>
+          <p>Traced Routes</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-diagram-2"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ traces.values()|map('attribute', 'hops')|map('length')|sum if traces else 0 }}</h3>
+          <p>Total Hops</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-arrow-right-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ (traces.values()|map('attribute', 'hops')|map('length')|sum / traces|length)|round(1) if traces and traces|length > 0 else 0 }}</h3>
+          <p>Avg Hops</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-graph-up"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ traces.values()|map('attribute', 'hops')|selectattr('hop_ip')|map('attribute', 'hop_ip')|unique|list|length if traces else 0 }}</h3>
+          <p>Unique Gateways</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-router"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Traceroute Results -->
+  {% if traces %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Traceroute Results
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportTraceroutes()">
+              <i class="bi bi-download"></i> Export
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="refreshTraceroutes()">
+              <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="tracerouteAccordion">
+            {% for destination, trace in traces.items() %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+                        type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ loop.index }}">
+                  <div class="d-flex justify-content-between w-100 me-3">
+                    <div>
+                      <i class="bi bi-bullseye"></i>
+                      <strong>{{ destination }}</strong>
+                      {% if trace.hostname %}
+                      <small class="text-muted ms-2">({{ trace.hostname }})</small>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <span class="badge bg-info">{{ trace.hops|length }} hops</span>
+                    </div>
+                  </div>
+                </button>
+              </h2>
+              <div id="collapse{{ loop.index }}"
+                   class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+                   data-bs-parent="#tracerouteAccordion">
+                <div class="accordion-body">
+                  <!-- Traceroute Visualization -->
+                  <div class="traceroute-visual mb-4">
+                    <div class="d-flex align-items-center justify-content-start flex-wrap">
+                      <div class="hop-node source">
+                        <i class="bi bi-pc-display text-success"></i>
+                        <div class="hop-label">Source</div>
+                      </div>
+                      {% for hop in trace.hops %}
+                      <div class="hop-arrow">
+                        <i class="bi bi-arrow-right text-muted"></i>
+                        {% if hop.rtt %}
+                        <small class="rtt-label">{{ hop.rtt }}</small>
+                        {% endif %}
+                      </div>
+                      <div class="hop-node" data-hop="{{ hop.hop_number }}">
+                        {% if hop.hop_ip %}
+                        <i class="bi bi-router text-primary"></i>
+                        <div class="hop-label">
+                          <strong>{{ hop.hop_number }}</strong>
+                          <br>{{ hop.hop_ip }}
+                          {% if hop.hop_hostname %}
+                          <br><small>{{ hop.hop_hostname }}</small>
+                          {% endif %}
+                        </div>
+                        {% else %}
+                        <i class="bi bi-question-circle text-muted"></i>
+                        <div class="hop-label">
+                          <strong>{{ hop.hop_number }}</strong>
+                          <br>* * *
+                        </div>
+                        {% endif %}
+                      </div>
+                      {% endfor %}
+                      <div class="hop-arrow">
+                        <i class="bi bi-arrow-right text-success"></i>
+                      </div>
+                      <div class="hop-node destination">
+                        <i class="bi bi-bullseye text-danger"></i>
+                        <div class="hop-label">{{ destination }}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Detailed Hop Table -->
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                      <thead>
+                        <tr>
+                          <th>Hop</th>
+                          <th>IP Address</th>
+                          <th>Hostname</th>
+                          <th>RTT</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for hop in trace.hops %}
+                        <tr>
+                          <td>
+                            <span class="badge bg-primary">{{ hop.hop_number }}</span>
+                          </td>
+                          <td>
+                            {% if hop.hop_ip %}
+                            <a href="{{ url_for('network.host_detail', ip_address=hop.hop_ip) }}"
+                               class="text-decoration-none">
+                              {{ hop.hop_ip }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">* * *</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if hop.hop_hostname %}
+                            {{ hop.hop_hostname }}
+                            {% else %}
+                            <span class="text-muted">Unknown</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if hop.rtt %}
+                            <span class="badge bg-{{ 'success' if hop.rtt|float < 50 else 'warning' if hop.rtt|float < 200 else 'danger' }}">
+                              {{ hop.rtt }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">Timeout</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if hop.hop_ip %}
+                            <span class="badge bg-success">Responsive</span>
+                            {% else %}
+                            <span class="badge bg-warning">No Response</span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if hop.hop_ip %}
+                            <div class="btn-group btn-group-sm">
+                              <a href="{{ url_for('network.host_detail', ip_address=hop.hop_ip) }}"
+                                 class="btn btn-outline-primary" title="View Host">
+                                <i class="bi bi-eye"></i>
+                              </a>
+                              <button type="button" class="btn btn-outline-info"
+                                      onclick="pingHost('{{ hop.hop_ip }}')" title="Ping Host">
+                                <i class="bi bi-wifi"></i>
+                              </button>
+                              <button type="button" class="btn btn-outline-secondary"
+                                      onclick="whoisLookup('{{ hop.hop_ip }}')" title="WHOIS Lookup">
+                                <i class="bi bi-info-circle"></i>
+                              </button>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Route Analysis -->
+                  <div class="row mt-3">
+                    <div class="col-md-6">
+                      <h6><i class="bi bi-graph-up"></i> Route Statistics</h6>
+                      <ul class="list-unstyled">
+                        <li><strong>Total Hops:</strong> {{ trace.hops|length }}</li>
+                        <li><strong>Responsive Hops:</strong> {{ trace.hops|selectattr('hop_ip')|list|length }}</li>
+                        <li><strong>Timeouts:</strong> {{ trace.hops|rejectattr('hop_ip')|list|length }}</li>
+                        {% set rtts = trace.hops|selectattr('rtt')|map('attribute', 'rtt')|map('float')|list %}
+                        {% if rtts %}
+                        <li><strong>Min RTT:</strong> {{ rtts|min }}ms</li>
+                        <li><strong>Max RTT:</strong> {{ rtts|max }}ms</li>
+                        <li><strong>Avg RTT:</strong> {{ (rtts|sum / rtts|length)|round(2) }}ms</li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                    <div class="col-md-6">
+                      <h6><i class="bi bi-shield-check"></i> Route Analysis</h6>
+                      <ul class="list-unstyled">
+                        {% set responsive_hops = trace.hops|selectattr('hop_ip')|list|length %}
+                        {% set total_hops = trace.hops|length %}
+                        {% if responsive_hops / total_hops > 0.8 %}
+                        <li class="text-success">
+                          <i class="bi bi-check-circle"></i> Route appears stable
+                        </li>
+                        {% elif responsive_hops / total_hops > 0.5 %}
+                        <li class="text-warning">
+                          <i class="bi bi-exclamation-triangle"></i> Some timeouts detected
+                        </li>
+                        {% else %}
+                        <li class="text-danger">
+                          <i class="bi bi-x-circle"></i> High packet loss detected
+                        </li>
+                        {% endif %}
+
+                        {% if rtts and rtts|max > 500 %}
+                        <li class="text-warning">
+                          <i class="bi bi-clock"></i> High latency detected ({{ rtts|max }}ms)
+                        </li>
+                        {% endif %}
+
+                        {% if trace.hops|length > 20 %}
+                        <li class="text-info">
+                          <i class="bi bi-info-circle"></i> Long route ({{ trace.hops|length }} hops)
+                        </li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Path Analysis -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Gateway Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="gatewayChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-speedometer2"></i> Latency Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="latencyChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-diagram-2" style="font-size: 4rem; color: #6c757d;"></i>
+          <h4 class="mt-3">No Traceroute Data</h4>
+          <p class="text-muted">No traceroute information available. Network paths have not been traced yet.</p>
+          <button type="button" class="btn btn-primary" onclick="initiateTraceroute()">
+            <i class="bi bi-play-circle"></i> Start Traceroute
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+
+<!-- WHOIS Modal -->
+<div class="modal fade" id="whoisModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">WHOIS Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="whoisContent">
+          <div class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.traceroute-visual {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.hop-node {
+    text-align: center;
+    padding: 10px;
+    min-width: 80px;
+}
+
+.hop-node i {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.hop-label {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.hop-arrow {
+    position: relative;
+    margin: 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rtt-label {
+    position: absolute;
+    top: -15px;
+    font-size: 0.7rem;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.source, .destination {
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    background: white;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize charts if data exists
+{% if traces %}
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // Gateway Distribution Chart
+    const gateways = {};
+    {% for destination, trace in traces.items() %}
+    {% for hop in trace.hops %}
+    {% if hop.hop_ip %}
+    const ip = '{{ hop.hop_ip }}';
+    gateways[ip] = (gateways[ip] || 0) + 1;
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+
+    const gatewayCtx = document.getElementById('gatewayChart').getContext('2d');
+    const gatewayChart = new Chart(gatewayCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(gateways),
+            datasets: [{
+                data: Object.values(gateways),
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545',
+                    '#17a2b8', '#6c757d', '#e83e8c', '#20c997'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Latency Chart
+    const latencyData = [];
+    {% for destination, trace in traces.items() %}
+    {% for hop in trace.hops %}
+    {% if hop.rtt %}
+    latencyData.push({
+        x: {{ hop.hop_number }},
+        y: {{ hop.rtt|float }},
+        destination: '{{ destination }}'
+    });
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+
+    const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+    const latencyChart = new Chart(latencyCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'RTT (ms)',
+                data: latencyData,
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Hop Number'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'RTT (ms)'
+                    }
+                }
+            }
+        }
+    });
+}
+{% endif %}
+
+function exportTraceroutes() {
+    const data = {
+        traces: {{ traces|tojson if traces else '{}' }},
+        exportDate: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'traceroute_data_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function refreshTraceroutes() {
+    location.reload();
+}
+
+function pingHost(ip) {
+    alert(`Ping test for ${ip} would be initiated here.`);
+}
+
+function whoisLookup(ip) {
+    $('#whoisModal').modal('show');
+    $('#whoisContent').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `);
+
+    // Simulate WHOIS lookup
+    setTimeout(function() {
+        $('#whoisContent').html(`
+            <h6>WHOIS Information for ${ip}</h6>
+            <dl class="row">
+                <dt class="col-sm-3">IP Address:</dt>
+                <dd class="col-sm-9">${ip}</dd>
+                <dt class="col-sm-3">Organization:</dt>
+                <dd class="col-sm-9">Example Organization</dd>
+                <dt class="col-sm-3">Country:</dt>
+                <dd class="col-sm-9">Unknown</dd>
+                <dt class="col-sm-3">ASN:</dt>
+                <dd class="col-sm-9">AS12345</dd>
+            </dl>
+            <p class="text-muted"><em>Note: This is simulated data. Actual WHOIS lookup would provide real information.</em></p>
+        `);
+    }, 1500);
+}
+
+function initiateTraceroute() {
+    alert('Traceroute initiation would be implemented here. This would trigger a new network path discovery.');
+}
+
+// Auto-refresh every 10 minutes
+setTimeout(function() {
+    location.reload();
+}, 600000);
+</script>
+{% endblock %}

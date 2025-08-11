@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block title %}Host Details - {{ host.ip_address }} - AdminLTE{% endblock %}
+{% block page_title %}Host Details - {{ host.ip_address }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.hosts') }}">Hosts</a></li>
+<li class="breadcrumb-item active">{{ host.ip_address }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Host Overview -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card card-primary card-outline">
+        <div class="card-body box-profile">
+          <div class="text-center">
+            <i class="bi bi-pc-display" style="font-size: 4rem; color: #007bff;"></i>
+          </div>
+
+          <h3 class="profile-username text-center">{{ host.ip_address }}</h3>
+
+          <p class="text-muted text-center">
+            {% if host.hostname %}{{ host.hostname }}{% else %}No hostname{% endif %}
+          </p>
+
+          <ul class="list-group list-group-unbordered mb-3">
+            <li class="list-group-item">
+              <b>Status</b>
+              <a class="float-right">
+                {% if host.status == 'up' %}
+                <span class="badge bg-success">{{ host.status|title }}</span>
+                {% elif host.status == 'down' %}
+                <span class="badge bg-danger">{{ host.status|title }}</span>
+                {% else %}
+                <span class="badge bg-warning">{{ host.status|title }}</span>
+                {% endif %}
+              </a>
+            </li>
+            <li class="list-group-item">
+              <b>Vendor</b> <a class="float-right">{{ host.vendor or 'Unknown' }}</a>
+            </li>
+            <li class="list-group-item">
+              <b>MAC Address</b> <a class="float-right"><code>{{ host.mac_address or 'N/A' }}</code></a>
+            </li>
+            <li class="list-group-item">
+              <b>Open Ports</b> <a class="float-right"><span class="badge bg-info">{{ stats.open_ports }}</span></a>
+            </li>
+            <li class="list-group-item">
+              <b>Vulnerabilities</b>
+              <a class="float-right">
+                {% if stats.critical_vulns > 0 %}
+                <span class="badge bg-danger">{{ stats.total_vulnerabilities }}</span>
+                {% elif stats.high_vulns > 0 %}
+                <span class="badge bg-warning">{{ stats.total_vulnerabilities }}</span>
+                {% elif stats.total_vulnerabilities > 0 %}
+                <span class="badge bg-info">{{ stats.total_vulnerabilities }}</span>
+                {% else %}
+                <span class="badge bg-success">0</span>
+                {% endif %}
+              </a>
+            </li>
+          </ul>
+
+          <div class="row">
+            <div class="col-6">
+              <a href="{{ url_for('network.ports') }}?host_ip={{ host.ip_address }}" class="btn btn-primary btn-block">
+                <b>View Ports</b>
+              </a>
+            </div>
+            <div class="col-6">
+              <a href="{{ url_for('security.vulnerabilities') }}?host_ip={{ host.ip_address }}" class="btn btn-warning btn-block">
+                <b>Vulnerabilities</b>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device Classification -->
+      {% if host.device_type or host.device_subtype %}
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-cpu"></i> Device Classification
+          </h3>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-4">Type:</dt>
+            <dd class="col-sm-8">{{ host.device_type or 'Unknown' }}</dd>
+            <dt class="col-sm-4">Subtype:</dt>
+            <dd class="col-sm-8">{{ host.device_subtype or 'N/A' }}</dd>
+            <dt class="col-sm-4">Confidence:</dt>
+            <dd class="col-sm-8">
+              {% if host.confidence_score %}
+              <div class="progress">
+                <div class="progress-bar bg-{{ 'success' if host.confidence_score > 0.8 else 'warning' if host.confidence_score > 0.5 else 'danger' }}"
+                     style="width: {{ (host.confidence_score * 100)|round }}%">
+                  {{ (host.confidence_score * 100)|round }}%
+                </div>
+              </div>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-8">
+      <!-- Navigation Tabs -->
+      <div class="card">
+        <div class="card-header p-2">
+          <ul class="nav nav-pills">
+            <li class="nav-item"><a class="nav-link active" href="#overview" data-bs-toggle="tab">Overview</a></li>
+            <li class="nav-item"><a class="nav-link" href="#ports" data-bs-toggle="tab">Ports & Services</a></li>
+            <li class="nav-item"><a class="nav-link" href="#vulnerabilities" data-bs-toggle="tab">Vulnerabilities</a></li>
+            <li class="nav-item"><a class="nav-link" href="#system" data-bs-toggle="tab">System Info</a></li>
+            <li class="nav-item"><a class="nav-link" href="#advanced" data-bs-toggle="tab">Advanced</a></li>
+          </ul>
+        </div>
+        <div class="card-body">
+          <div class="tab-content">
+            <!-- Overview Tab -->
+            <div class="active tab-pane" id="overview">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Operating System</h3>
+                    </div>
+                    <div class="card-body">
+                      {% if os_info %}
+                      <dl class="row">
+                        <dt class="col-sm-4">OS Name:</dt>
+                        <dd class="col-sm-8">{{ os_info.os_name or 'Unknown' }}</dd>
+                        <dt class="col-sm-4">Family:</dt>
+                        <dd class="col-sm-8">{{ os_info.os_family or 'Unknown' }}</dd>
+                        <dt class="col-sm-4">Type:</dt>
+                        <dd class="col-sm-8">{{ os_info.os_type or 'Unknown' }}</dd>
+                        <dt class="col-sm-4">Vendor:</dt>
+                        <dd class="col-sm-8">{{ os_info.os_vendor or 'Unknown' }}</dd>
+                        <dt class="col-sm-4">Accuracy:</dt>
+                        <dd class="col-sm-8">
+                          {% if os_info.accuracy %}
+                          <span class="badge bg-{{ 'success' if os_info.accuracy > 80 else 'warning' if os_info.accuracy > 50 else 'danger' }}">
+                            {{ os_info.accuracy }}%
+                          </span>
+                          {% else %}
+                          <span class="text-muted">N/A</span>
+                          {% endif %}
+                        </dd>
+                      </dl>
+                      {% else %}
+                      <p class="text-muted">No operating system information available.</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Host Statistics</h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-6">
+                          <div class="description-block border-right">
+                            <h5 class="description-header">{{ stats.total_ports }}</h5>
+                            <span class="description-text">Total Ports</span>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="description-block">
+                            <h5 class="description-header">{{ stats.open_ports }}</h5>
+                            <span class="description-text">Open Ports</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row mt-3">
+                        <div class="col-6">
+                          <div class="description-block border-right">
+                            <h5 class="description-header">{{ stats.total_software }}</h5>
+                            <span class="description-text">Software</span>
+                          </div>
+                        </div>
+                        <div class="col-6">
+                          <div class="description-block">
+                            <h5 class="description-header">{{ stats.total_processes }}</h5>
+                            <span class="description-text">Processes</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hostnames -->
+              {% if hostnames %}
+              <div class="card mt-3">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="bi bi-globe"></i> Discovered Hostnames
+                  </h3>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    {% for hostname in hostnames %}
+                    <div class="col-md-4 mb-2">
+                      <span class="badge bg-info">{{ hostname.hostname }}</span>
+                      {% if hostname.hostname_type %}
+                      <small class="text-muted">({{ hostname.hostname_type }})</small>
+                      {% endif %}
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Ports & Services Tab -->
+            <div class="tab-pane" id="ports">
+              {% if ports %}
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>Port</th>
+                      <th>Protocol</th>
+                      <th>State</th>
+                      <th>Service</th>
+                      <th>Product</th>
+                      <th>Version</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for port in ports %}
+                    <tr>
+                      <td><span class="badge bg-primary">{{ port.port_number }}</span></td>
+                      <td><code>{{ port.protocol|upper }}</code></td>
+                      <td>
+                        {% if port.state == 'open' %}
+                        <span class="badge bg-success">{{ port.state|title }}</span>
+                        {% elif port.state == 'closed' %}
+                        <span class="badge bg-danger">{{ port.state|title }}</span>
+                        {% else %}
+                        <span class="badge bg-warning">{{ port.state|title }}</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ port.service_name or '-' }}</td>
+                      <td>{{ port.service_product or '-' }}</td>
+                      <td>
+                        {% if port.service_version %}
+                        <code class="text-success">{{ port.service_version }}</code>
+                        {% else %}
+                        -
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No port information available for this host.
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Vulnerabilities Tab -->
+            <div class="tab-pane" id="vulnerabilities">
+              {% if vulnerabilities %}
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th>CVE ID</th>
+                      <th>Title</th>
+                      <th>Severity</th>
+                      <th>CVSS Score</th>
+                      <th>Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for vuln in vulnerabilities %}
+                    <tr>
+                      <td>
+                        {% if vuln.cve_id %}
+                        <a href="{{ url_for('security.cve_detail', cve_id=vuln.cve_id) }}"
+                           class="text-decoration-none">
+                          <code>{{ vuln.cve_id }}</code>
+                        </a>
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="text-truncate" style="max-width: 300px;" title="{{ vuln.title }}">
+                          {{ vuln.title }}
+                        </div>
+                      </td>
+                      <td>
+                        {% if vuln.severity == 'CRITICAL' %}
+                        <span class="badge bg-danger">{{ vuln.severity }}</span>
+                        {% elif vuln.severity == 'HIGH' %}
+                        <span class="badge bg-warning">{{ vuln.severity }}</span>
+                        {% elif vuln.severity == 'MEDIUM' %}
+                        <span class="badge bg-info">{{ vuln.severity }}</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ vuln.severity }}</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if vuln.cvss_score %}
+                        <span class="badge bg-{{ 'danger' if vuln.cvss_score >= 7 else 'warning' if vuln.cvss_score >= 4 else 'info' }}">
+                          {{ vuln.cvss_score }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ vuln.vuln_type or 'General' }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% else %}
+              <div class="alert alert-success">
+                <i class="bi bi-check-circle"></i> No vulnerabilities detected for this host.
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- System Info Tab -->
+            <div class="tab-pane" id="system">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">
+                        <i class="bi bi-box"></i> Installed Software (Sample)
+                      </h3>
+                    </div>
+                    <div class="card-body">
+                      {% if software %}
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Software</th>
+                              <th>Version</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for sw in software %}
+                            <tr>
+                              <td>{{ sw.software_name }}</td>
+                              <td>
+                                {% if sw.version %}
+                                <code>{{ sw.version }}</code>
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                      <a href="{{ url_for('system.installed_software') }}?host_ip={{ host.ip_address }}"
+                         class="btn btn-sm btn-primary">View All Software</a>
+                      {% else %}
+                      <p class="text-muted">No software information available.</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">
+                        <i class="bi bi-play-circle"></i> Running Processes (Sample)
+                      </h3>
+                    </div>
+                    <div class="card-body">
+                      {% if processes %}
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Process</th>
+                              <th>PID</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for proc in processes %}
+                            <tr>
+                              <td><code>{{ proc.process_name }}</code></td>
+                              <td>{{ proc.pid }}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                      <a href="{{ url_for('system.processes') }}?host_ip={{ host.ip_address }}"
+                         class="btn btn-sm btn-primary">View All Processes</a>
+                      {% else %}
+                      <p class="text-muted">No process information available.</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div class="tab-pane" id="advanced">
+              <div class="row">
+                <!-- NSE Scripts -->
+                {% if nse_scripts %}
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">
+                        <i class="bi bi-code"></i> NSE Scripts Output
+                      </h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="accordion" id="nseAccordion">
+                        {% for script in nse_scripts %}
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="nse{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                              {{ script.script_name }}
+                            </button>
+                          </h2>
+                          <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                               data-bs-parent="#nseAccordion">
+                            <div class="accordion-body">
+                              <pre class="text-muted small">{{ script.script_output }}</pre>
+                            </div>
+                          </div>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Traceroute -->
+                {% if traceroute %}
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">
+                        <i class="bi bi-diagram-2"></i> Traceroute
+                      </h3>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Hop</th>
+                              <th>IP Address</th>
+                              <th>Hostname</th>
+                              <th>RTT</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for hop in traceroute %}
+                            <tr>
+                              <td>{{ hop.hop_number }}</td>
+                              <td>{{ hop.hop_ip or '-' }}</td>
+                              <td>{{ hop.hop_hostname or '-' }}</td>
+                              <td>{{ hop.rtt or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh every 2 minutes for host details
+setTimeout(function() {
+    location.reload();
+}, 120000);
+</script>
+{% endblock %}

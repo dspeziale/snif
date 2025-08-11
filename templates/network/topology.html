@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Network Topology - AdminLTE{% endblock %}
+{% block page_title %}Network Topology{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">Topology</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Network Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ subnets|length if subnets else 0 }}</h3>
+          <p>Detected Subnets</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-diagram-2"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ hosts_data|length if hosts_data else 0 }}</h3>
+          <p>Total Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-pc-display"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ hosts_data|selectattr('status', 'equalto', 'up')|list|length if hosts_data else 0 }}</h3>
+          <p>Active Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ hosts_data|selectattr('status', 'equalto', 'down')|list|length if hosts_data else 0 }}</h3>
+          <p>Inactive Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-x-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-sliders"></i> View Controls
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <label for="filterStatus" class="form-label">Filter by Status</label>
+              <select class="form-select" id="filterStatus" onchange="filterHostsByStatus()">
+                <option value="all">All Hosts</option>
+                <option value="up">Active Only</option>
+                <option value="down">Inactive Only</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Actions</label>
+              <div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="refreshPage()">
+                  <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-sm btn-info" onclick="exportTopologyData()">
+                  <i class="bi bi-download"></i> Export
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Topology Map -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-diagram-3"></i> Network Map
+          </h3>
+        </div>
+        <div class="card-body p-0">
+          {% if subnets %}
+          {% for subnet, hosts in subnets.items() %}
+          <div class="subnet-container mb-4 p-3" style="border: 2px solid #007bff; border-radius: 10px; margin: 10px;">
+            <h5 class="subnet-title mb-3">
+              <i class="bi bi-diagram-2"></i> {{ subnet }}
+              <span class="badge bg-secondary ms-2">{{ hosts|length }} hosts</span>
+            </h5>
+            <div class="row">
+              {% for host in hosts %}
+              <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                <div class="host-card"
+                     data-status="{{ host.status }}"
+                     data-ip="{{ host.ip_address }}"
+                     style="border: 2px solid {{ '#28a745' if host.status == 'up' else '#dc3545' if host.status == 'down' else '#ffc107' }};
+                            border-radius: 8px;
+                            padding: 15px;
+                            background-color: {{ '#f8fff9' if host.status == 'up' else '#fff8f8' if host.status == 'down' else '#fffbf0' }};
+                            cursor: pointer;
+                            transition: all 0.3s ease;"
+                     onclick="window.location.href='/network/hosts/{{ host.ip_address }}'"
+                     onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.1)'"
+                     onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
+
+                  <div class="host-icon text-center mb-2">
+                    {% if host.device_type == 'Router' %}
+                    <i class="bi bi-router" style="font-size: 2rem; color: #007bff;"></i>
+                    {% elif host.device_type == 'Switch' %}
+                    <i class="bi bi-hdd-network" style="font-size: 2rem; color: #28a745;"></i>
+                    {% elif host.device_type == 'Server' %}
+                    <i class="bi bi-server" style="font-size: 2rem; color: #ffc107;"></i>
+                    {% elif host.device_type == 'Firewall' %}
+                    <i class="bi bi-shield" style="font-size: 2rem; color: #dc3545;"></i>
+                    {% else %}
+                    <i class="bi bi-pc-display" style="font-size: 2rem; color: #6c757d;"></i>
+                    {% endif %}
+                  </div>
+
+                  <div class="host-info text-center">
+                    <div class="fw-bold text-primary">{{ host.ip_address }}</div>
+                    {% if host.hostname %}
+                    <div class="small text-muted">{{ host.hostname }}</div>
+                    {% endif %}
+                    {% if host.vendor %}
+                    <div class="small text-info">{{ host.vendor }}</div>
+                    {% endif %}
+
+                    <div class="mt-2">
+                      <span class="badge bg-{{ 'success' if host.status == 'up' else 'danger' if host.status == 'down' else 'warning' }}">
+                        {{ host.status|title }}
+                      </span>
+                      {% if host.open_ports and host.open_ports > 0 %}
+                      <span class="badge bg-info">{{ host.open_ports }} ports</span>
+                      {% endif %}
+                    </div>
+
+                    {% if host.device_type %}
+                    <div class="mt-1">
+                      <small class="badge bg-secondary">{{ host.device_type }}</small>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center p-5">
+            <i class="bi bi-diagram-2" style="font-size: 4rem; color: #6c757d;"></i>
+            <h4 class="mt-3">No Network Data</h4>
+            <p class="text-muted">No hosts or subnets detected. Run a network scan to discover devices.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Statistics -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Network Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="networkChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Device Types
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="deviceChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+// FUNZIONI GLOBALI SEMPLICI - DEFINITE IMMEDIATAMENTE
+console.log('🚀 Defining simple global functions...');
+
+// Dati di rete dal server (semplificati per evitare errori JSON)
+const NETWORK_DATA = {
+    hosts: [
+        {% if hosts_data %}
+        {% for host in hosts_data %}
+        {
+            ip_address: "{{ host.ip_address }}",
+            hostname: "{{ host.hostname or '' }}",
+            status: "{{ host.status }}",
+            vendor: "{{ host.vendor or '' }}",
+            device_type: "{{ host.device_type or '' }}",
+            open_ports: {{ host.open_ports or 0 }}
+        }{{ ',' if not loop.last }}
+        {% endfor %}
+        {% endif %}
+    ],
+    subnets: {
+        {% if subnets %}
+        {% for subnet, hosts in subnets.items() %}
+        "{{ subnet }}": [
+            {% for host in hosts %}
+            {
+                ip_address: "{{ host.ip_address }}",
+                hostname: "{{ host.hostname or '' }}",
+                status: "{{ host.status }}",
+                vendor: "{{ host.vendor or '' }}",
+                device_type: "{{ host.device_type or '' }}",
+                open_ports: {{ host.open_ports or 0 }}
+            }{{ ',' if not loop.last }}
+            {% endfor %}
+        ]{{ ',' if not loop.last }}
+        {% endfor %}
+        {% endif %}
+    }
+};
+
+// Filtra hosts per status
+function filterHostsByStatus() {
+    console.log('🔍 Filtering hosts...');
+    const filter = document.getElementById('filterStatus').value;
+    const hostCards = document.querySelectorAll('.host-card');
+
+    hostCards.forEach(function(card) {
+        const status = card.getAttribute('data-status');
+        const parentCol = card.closest('.col-lg-3');
+        if (parentCol) {
+            if (filter === 'all' || status === filter) {
+                parentCol.style.display = 'block';
+            } else {
+                parentCol.style.display = 'none';
+            }
+        }
+    });
+
+    console.log('✅ Hosts filtered by:', filter);
+}
+
+// Refresh pagina
+function refreshPage() {
+    console.log('🔄 Refreshing page...');
+    location.reload();
+}
+
+// Export dati
+function exportTopologyData() {
+    console.log('📤 Exporting data...');
+    const data = {
+        networkData: NETWORK_DATA,
+        exportDate: new Date().toISOString(),
+        totalHosts: NETWORK_DATA.hosts.length,
+        totalSubnets: Object.keys(NETWORK_DATA.subnets).length
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'network_topology_' + new Date().toISOString().split('T')[0] + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('✅ Export complete');
+}
+
+console.log('✅ Global functions defined successfully');
+console.log('📊 Network data loaded:', NETWORK_DATA.hosts.length, 'hosts');
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Grafici - caricati dopo DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📊 Initializing charts...');
+
+    if (NETWORK_DATA.hosts.length === 0) {
+        console.log('ℹ️ No data for charts');
+        return;
+    }
+
+    // Network Distribution Chart
+    const networkLabels = Object.keys(NETWORK_DATA.subnets);
+    const networkData = Object.values(NETWORK_DATA.subnets).map(hosts => hosts.length);
+
+    const networkCtx = document.getElementById('networkChart');
+    if (networkCtx) {
+        new Chart(networkCtx, {
+            type: 'doughnut',
+            data: {
+                labels: networkLabels,
+                datasets: [{
+                    data: networkData,
+                    backgroundColor: [
+                        '#007bff', '#28a745', '#ffc107', '#dc3545',
+                        '#17a2b8', '#6c757d', '#e83e8c', '#20c997'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // Device Types Chart
+    const deviceTypes = {};
+    NETWORK_DATA.hosts.forEach(host => {
+        const type = host.device_type || 'Unknown';
+        deviceTypes[type] = (deviceTypes[type] || 0) + 1;
+    });
+
+    const deviceCtx = document.getElementById('deviceChart');
+    if (deviceCtx) {
+        new Chart(deviceCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(deviceTypes),
+                datasets: [{
+                    label: 'Count',
+                    data: Object.values(deviceTypes),
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    console.log('✅ Charts initialized');
+});
+</script>
+{% endblock %}

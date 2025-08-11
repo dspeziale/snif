@@ -1,0 +1,558 @@
+{% extends "base.html" %}
+
+{% block title %}Operating Systems - AdminLTE{% endblock %}
+{% block page_title %}Operating Systems{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">Operating Systems</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- OS Statistics -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ os_stats.total_identified if os_stats else 0 }}</h3>
+          <p>OS Identified</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-pc-display"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ os_stats.unique_os if os_stats else 0 }}</h3>
+          <p>Unique OS</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-collection"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ os_stats.families if os_stats else 0 }}</h3>
+          <p>OS Families</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-diagram-3"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ "%.1f"|format(os_stats.avg_accuracy) if os_stats and os_stats.avg_accuracy else 0 }}%</h3>
+          <p>Avg Accuracy</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-bullseye"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-funnel"></i> Filters
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="GET" class="row g-3">
+            <div class="col-md-3">
+              <label for="os_family" class="form-label">OS Family</label>
+              <select class="form-select" id="os_family" name="os_family">
+                <option value="">All Families</option>
+                {% if available_filters and available_filters.families %}
+                {% for family in available_filters.families %}
+                <option value="{{ family.os_family }}" {% if request.args.get('os_family') == family.os_family %}selected{% endif %}>
+                  {{ family.os_family }} ({{ family.count }})
+                </option>
+                {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="os_vendor" class="form-label">Vendor</label>
+              <select class="form-select" id="os_vendor" name="os_vendor">
+                <option value="">All Vendors</option>
+                {% if available_filters and available_filters.vendors %}
+                {% for vendor in available_filters.vendors %}
+                <option value="{{ vendor.os_vendor }}" {% if request.args.get('os_vendor') == vendor.os_vendor %}selected{% endif %}>
+                  {{ vendor.os_vendor }} ({{ vendor.count }})
+                </option>
+                {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label for="min_accuracy" class="form-label">Min Accuracy (%)</label>
+              <input type="number" class="form-control" id="min_accuracy" name="min_accuracy"
+                     value="{{ request.args.get('min_accuracy', '') }}" min="0" max="100" placeholder="80">
+            </div>
+            <div class="col-md-2">
+              <label for="search" class="form-label">Search OS</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ request.args.get('search', '') }}" placeholder="Windows, Linux...">
+            </div>
+            <div class="col-md-2">
+              <label for="per_page" class="form-label">Per Page</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="50" {% if request.args.get('per_page', '50') == '50' %}selected{% endif %}>50</option>
+                <option value="100" {% if request.args.get('per_page') == '100' %}selected{% endif %}>100</option>
+                <option value="200" {% if request.args.get('per_page') == '200' %}selected{% endif %}>200</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Filter
+              </button>
+              <a href="{{ url_for('network.os_info') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Reset
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OS Information List -->
+  {% if os_data %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Operating Systems
+            <span class="badge bg-secondary ms-2">{{ total_count if total_count is defined else os_data|length }} systems</span>
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i> Export
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportOSData('csv')">CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportOSData('json')">JSON</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Host</th>
+                <th>Operating System</th>
+                <th>Family</th>
+                <th>Type</th>
+                <th>Vendor</th>
+                <th>Accuracy</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for os in os_data %}
+              <tr>
+                <td>
+                  <div>
+                    <a href="{{ url_for('network.host_detail', ip_address=os.ip_address) }}"
+                       class="text-decoration-none">
+                      <strong>{{ os.ip_address }}</strong>
+                    </a>
+                    {% if os.hostname %}
+                    <br>
+                    <small class="text-muted">{{ os.hostname }}</small>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    {% if os.os_name %}
+                    <strong>{{ os.os_name }}</strong>
+                    {% if os.os_generation %}
+                    <br><small class="text-info">{{ os.os_generation }}</small>
+                    {% endif %}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  {% if os.os_family %}
+                  <span class="badge bg-primary">{{ os.os_family }}</span>
+                  {% else %}
+                  <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if os.os_type %}
+                  <span class="badge bg-info">{{ os.os_type }}</span>
+                  {% else %}
+                  <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if os.os_vendor %}
+                  {{ os.os_vendor }}
+                  {% else %}
+                  <span class="text-muted">Unknown</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if os.accuracy %}
+                  <div class="progress" style="width: 80px; height: 20px;">
+                    <div class="progress-bar bg-{{ 'success' if os.accuracy >= 80 else 'warning' if os.accuracy >= 50 else 'danger' }}"
+                         style="width: {{ os.accuracy }}%"
+                         title="{{ os.accuracy }}% accuracy">
+                      {{ os.accuracy }}%
+                    </div>
+                  </div>
+                  {% else %}
+                  <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('network.host_detail', ip_address=os.ip_address) }}"
+                       class="btn btn-primary" title="View Host">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('security.vulnerabilities') }}?host_ip={{ os.ip_address }}"
+                       class="btn btn-warning" title="Vulnerabilities">
+                      <i class="bi bi-shield-exclamation"></i>
+                    </a>
+                    <button type="button" class="btn btn-info"
+                            onclick="showOSDetails('{{ os.ip_address }}', '{{ os.os_name or 'Unknown' }}')"
+                            title="OS Details">
+                      <i class="bi bi-info-circle"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages and total_pages > 1 %}
+        <div class="card-footer">
+          <nav aria-label="OS pagination">
+            <ul class="pagination pagination-sm m-0 float-end">
+              {% set current_filters = request.args.to_dict() %}
+              {% if page > 1 %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.os_info', page=page-1, **current_filters) }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+
+              {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('network.os_info', page=p, **current_filters) }}">{{ p }}</a>
+              </li>
+              {% endfor %}
+
+              {% if page < total_pages %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.os_info', page=page+1, **current_filters) }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          <div class="float-start">
+            {% set current_page = page or 1 %}
+            {% set current_per_page = request.args.get('per_page', 50)|int %}
+            Showing {{ (current_page-1)*current_per_page + 1 }} to {{ min(current_page*current_per_page, total_count) if total_count else 0 }} of {{ total_count or 0 }} systems
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- OS Analytics -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> OS Family Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="osFamilyChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Top Operating Systems
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="topOSChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accuracy Analysis -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bullseye"></i> Detection Accuracy Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-success">
+                  <i class="bi bi-check-circle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">High Accuracy (≥80%)</span>
+                  <span class="info-box-number">{{ accuracy_stats.high if accuracy_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-warning">
+                  <i class="bi bi-dash-circle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Medium Accuracy (50-79%)</span>
+                  <span class="info-box-number">{{ accuracy_stats.medium if accuracy_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-danger">
+                  <i class="bi bi-x-circle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Low Accuracy (<50%)</span>
+                  <span class="info-box-number">{{ accuracy_stats.low if accuracy_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-secondary">
+                  <i class="bi bi-question-circle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Unknown</span>
+                  <span class="info-box-number">{{ accuracy_stats.unknown if accuracy_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-pc-display" style="font-size: 4rem; color: #6c757d;"></i>
+          <h4 class="mt-3">No OS Information</h4>
+          <p class="text-muted">No operating system information has been detected yet. Run a detailed scan to identify OS fingerprints.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+
+<!-- OS Details Modal -->
+<div class="modal fade" id="osDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Operating System Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="osDetailsContent">
+          <div class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Initialize charts if data exists
+{% if os_data %}
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // OS Family Distribution Chart
+    const familyData = {};
+    {% for os in os_data %}
+    {% if os.os_family %}
+    const family = '{{ os.os_family }}';
+    familyData[family] = (familyData[family] || 0) + 1;
+    {% endif %}
+    {% endfor %}
+
+    const familyCtx = document.getElementById('osFamilyChart').getContext('2d');
+    const familyChart = new Chart(familyCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(familyData),
+            datasets: [{
+                data: Object.values(familyData),
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545',
+                    '#17a2b8', '#6c757d', '#e83e8c', '#20c997'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Top OS Chart
+    const osData = {};
+    {% for os in os_data %}
+    {% if os.os_name %}
+    const osName = '{{ os.os_name }}';
+    osData[osName] = (osData[osName] || 0) + 1;
+    {% endif %}
+    {% endfor %}
+
+    // Get top 10 OS
+    const topOS = Object.entries(osData)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 10);
+
+    const topOSCtx = document.getElementById('topOSChart').getContext('2d');
+    const topOSChart = new Chart(topOSCtx, {
+        type: 'bar',
+        data: {
+            labels: topOS.map(([name]) => name),
+            datasets: [{
+                label: 'Count',
+                data: topOS.map(([, count]) => count),
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+{% endif %}
+
+function exportOSData(format) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('format', format);
+    const exportUrl = '/tools/database/export?table=os_info&' + urlParams.toString();
+    window.open(exportUrl, '_blank');
+}
+
+function showOSDetails(ip, osName) {
+    $('#osDetailsModal').modal('show');
+    $('#osDetailsContent').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `);
+
+    // Simulate loading OS details
+    setTimeout(function() {
+        $('#osDetailsContent').html(`
+            <h6>Operating System Details for ${ip}</h6>
+            <dl class="row">
+                <dt class="col-sm-3">Host:</dt>
+                <dd class="col-sm-9">${ip}</dd>
+                <dt class="col-sm-3">OS Name:</dt>
+                <dd class="col-sm-9">${osName}</dd>
+                <dt class="col-sm-3">Detection Method:</dt>
+                <dd class="col-sm-9">TCP/IP Fingerprinting</dd>
+                <dt class="col-sm-3">Last Updated:</dt>
+                <dd class="col-sm-9">${new Date().toLocaleString()}</dd>
+            </dl>
+            <p><em>Additional OS detection details would be displayed here.</em></p>
+            <div class="mt-3">
+                <a href="/network/hosts/${ip}" class="btn btn-sm btn-primary">View Host Details</a>
+            </div>
+        `);
+    }, 1000);
+}
+
+// Auto-refresh every 5 minutes
+setTimeout(function() {
+    location.reload();
+}, 300000);
+</script>
+{% endblock %}
