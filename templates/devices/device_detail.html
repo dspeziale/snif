@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+
+{% block title %}Device {{ device.ip_address }}{% endblock %}
+{% block page_title %}Device Details - {{ device.ip_address }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification_overview') }}">Devices</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification') }}">Classification</a></li>
+<li class="breadcrumb-item active">{{ device.ip_address }}</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .device-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  .confidence-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  .info-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .service-port {
+    display: inline-block;
+    background: rgba(0,123,255,0.1);
+    color: #007bff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    margin: 1px;
+  }
+  .classification-reason {
+    background: rgba(40,167,69,0.1);
+    color: #28a745;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin: 2px;
+    display: inline-block;
+  }
+  .vuln-badge {
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .vuln-badge:hover {
+    transform: scale(1.05);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header dispositivo -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card device-header">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                {% if device.device_type == 'Server' %}
+                  <i class="bi bi-server display-4 me-3"></i>
+                {% elif device.device_type == 'Workstation' %}
+                  <i class="bi bi-pc-display display-4 me-3"></i>
+                {% elif device.device_type == 'Network Device' %}
+                  <i class="bi bi-router display-4 me-3"></i>
+                {% elif device.device_type == 'Printer' %}
+                  <i class="bi bi-printer display-4 me-3"></i>
+                {% elif device.device_type == 'IoT Device' %}
+                  <i class="bi bi-cpu display-4 me-3"></i>
+                {% else %}
+                  <i class="bi bi-question-circle display-4 me-3"></i>
+                {% endif %}
+
+                <div>
+                  <h2 class="mb-1">{{ device.ip_address }}</h2>
+                  {% if device.hostname %}
+                    <p class="mb-1 opacity-75">{{ device.hostname }}</p>
+                  {% endif %}
+                  {% if device.device_type %}
+                    <span class="badge bg-white text-dark">{{ device.device_type }}</span>
+                  {% endif %}
+                  {% if device.device_subtype %}
+                    <span class="badge bg-light text-dark ms-1">{{ device.device_subtype }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 text-center">
+              {% set confidence = (device.confidence_score or 0) * 100 %}
+              <div class="confidence-circle mx-auto
+                {% if confidence >= 80 %}bg-success
+                {% elif confidence >= 60 %}bg-primary
+                {% elif confidence >= 40 %}bg-warning text-dark
+                {% else %}bg-danger
+                {% endif %}">
+                {{ "%.0f"|format(confidence) }}%
+              </div>
+              <small class="opacity-75 mt-2 d-block">Confidence Score</small>
+            </div>
+
+            <div class="col-md-3 text-end">
+              <div class="btn-group">
+                {% if device.vendor_oui %}
+                <a href="{{ url_for('devices.vendor_detail', vendor_name=device.vendor_oui) }}"
+                   class="btn btn-light">
+                  <i class="bi bi-building"></i> Vendor Analysis
+                </a>
+                {% endif %}
+                {% if device.device_type %}
+                <a href="{{ url_for('devices.classification', type=device.device_type) }}"
+                   class="btn btn-outline-light">
+                  <i class="bi bi-funnel"></i> Similar Devices
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiche rapide -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-sm-6">
+      <div class="card info-card">
+        <div class="card-body text-center">
+          <i class="bi bi-door-open display-6 text-primary"></i>
+          <h3 class="mt-2">{{ device_stats.total_ports or 0 }}</h3>
+          <p class="text-muted mb-0">Open Ports</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card info-card">
+        <div class="card-body text-center">
+          <i class="bi bi-shield-exclamation display-6 text-danger"></i>
+          <h3 class="mt-2">{{ device_stats.total_vulnerabilities or 0 }}</h3>
+          <p class="text-muted mb-0">Vulnerabilities</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card info-card">
+        <div class="card-body text-center">
+          <i class="bi bi-app-indicator display-6 text-info"></i>
+          <h3 class="mt-2">{{ device_stats.total_software or 0 }}</h3>
+          <p class="text-muted mb-0">Software</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card info-card">
+        <div class="card-body text-center">
+          <i class="bi bi-gear display-6 text-success"></i>
+          <h3 class="mt-2">{{ device_stats.total_processes or 0 }}</h3>
+          <p class="text-muted mb-0">Processes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Informazioni dispositivo -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-info-circle"></i> Device Information
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <strong>IP Address:</strong><br>
+              <span class="text-primary">{{ device.ip_address }}</span>
+            </div>
+            <div class="col-sm-6">
+              <strong>Status:</strong><br>
+              {% if device.status %}
+                <span class="badge
+                  {% if device.status == 'up' %}bg-success
+                  {% elif device.status == 'down' %}bg-danger
+                  {% else %}bg-warning
+                  {% endif %}">
+                  {{ device.status.title() }}
+                </span>
+              {% else %}
+                <span class="text-muted">Unknown</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <strong>MAC Address:</strong><br>
+              {% if device.mac_address %}
+                <code>{{ device.mac_address }}</code>
+              {% else %}
+                <span class="text-muted">Not available</span>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <strong>Vendor (OUI):</strong><br>
+              {% if device.vendor_oui %}
+                <a href="{{ url_for('devices.vendor_detail', vendor_name=device.vendor_oui) }}"
+                   class="text-decoration-none">
+                  {{ device.vendor_oui }}
+                </a>
+              {% else %}
+                <span class="text-muted">Unknown</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if device.os_detected %}
+          <hr>
+          <div class="row">
+            <div class="col-12">
+              <strong>Operating System:</strong><br>
+              <span class="badge bg-info">{{ device.os_detected }}</span>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if device.hostname_pattern %}
+          <hr>
+          <div class="row">
+            <div class="col-12">
+              <strong>Hostname Pattern:</strong><br>
+              <code>{{ device.hostname_pattern }}</code>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Analisi classificazione -->
+      {% if classification_analysis %}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-clipboard-data"></i> Classification Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if device.classification_reasons %}
+          <div class="mb-3">
+            <strong>Classification Methods:</strong><br>
+            {% set reasons = device.classification_reasons.split(',') if device.classification_reasons else [] %}
+            {% for reason in reasons %}
+              <span class="classification-reason">{{ reason.strip() }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if device.main_services %}
+          <div class="mb-3">
+            <strong>Main Services:</strong><br>
+            <span class="text-info">{{ device.main_services }}</span>
+          </div>
+          {% endif %}
+
+          <div class="row">
+            <div class="col-6">
+              <strong>Confidence Score:</strong><br>
+              <div class="progress">
+                <div class="progress-bar
+                  {% if confidence >= 80 %}bg-success
+                  {% elif confidence >= 60 %}bg-primary
+                  {% elif confidence >= 40 %}bg-warning
+                  {% else %}bg-danger
+                  {% endif %}"
+                     style="width: {{ confidence }}%">
+                  {{ "%.0f"|format(confidence) }}%
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <strong>Classification Date:</strong><br>
+              <span class="text-muted">{{ device.created_at or 'Unknown' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Servizi e vulnerabilità -->
+    <div class="col-lg-6">
+      <!-- Servizi/Porte aperte -->
+      {% if services %}
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-door-open"></i> Open Services
+            <span class="badge bg-primary ms-2">{{ services|length }}</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Port</th>
+                  <th>Service</th>
+                  <th>Version</th>
+                  <th>State</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for service in services[:10] %}
+                <tr>
+                  <td>
+                    <span class="service-port">
+                      {{ service.port_number }}/{{ service.protocol or 'tcp' }}
+                    </span>
+                  </td>
+                  <td>
+                    <strong>{{ service.service_name or '-' }}</strong>
+                  </td>
+                  <td>
+                    <small class="text-muted">{{ service.service_version or '-' }}</small>
+                  </td>
+                  <td>
+                    <span class="badge
+                      {% if service.port_state == 'open' %}bg-success
+                      {% elif service.port_state == 'closed' %}bg-danger
+                      {% else %}bg-warning
+                      {% endif %} badge-sm">
+                      {{ service.port_state or 'unknown' }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if services|length > 10 %}
+            <div class="text-center">
+              <small class="text-muted">... and {{ services|length - 10 }} more services</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Vulnerabilità -->
+      {% if vulnerabilities %}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-shield-exclamation"></i> Vulnerabilities
+            <span class="badge bg-danger ms-2">{{ vulnerabilities|sum(attribute='count') }}</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          {% for vuln in vulnerabilities %}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span>{{ vuln.severity }}</span>
+            <span class="badge vuln-badge
+              {% if vuln.severity == 'CRITICAL' %}bg-danger
+              {% elif vuln.severity == 'HIGH' %}bg-warning text-dark
+              {% elif vuln.severity == 'MEDIUM' %}bg-primary
+              {% else %}bg-info
+              {% endif %}"
+              title="{{ vuln.severity }} vulnerabilities">
+              {{ vuln.count }}
+            </span>
+          </div>
+          {% endfor %}
+
+          {% if device_stats.critical_vulns > 0 %}
+          <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>{{ device_stats.critical_vulns }} critical vulnerabilities</strong> require immediate attention.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Software e processi -->
+  <div class="row mt-4">
+    <!-- Software -->
+    {% if software %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-app-indicator"></i> Installed Software
+            <span class="badge bg-info ms-2">{{ software|length }}</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Software</th>
+                  <th>Version</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for sw in software[:10] %}
+                <tr>
+                  <td><strong>{{ sw.software_name }}</strong></td>
+                  <td>
+                    <small class="text-muted">{{ sw.software_version or '-' }}</small>
+                  </td>
+                  <td>
+                    {% if sw.software_type %}
+                      <span class="badge bg-secondary badge-sm">{{ sw.software_type }}</span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if software|length > 10 %}
+            <div class="text-center">
+              <small class="text-muted">... and {{ software|length - 10 }} more software packages</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Processi -->
+    {% if processes %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-gear"></i> Running Processes
+            <span class="badge bg-success ms-2">{{ processes|length }}</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Process</th>
+                  <th>PID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for proc in processes[:10] %}
+                <tr>
+                  <td>
+                    <strong>{{ proc.process_name }}</strong>
+                    {% if proc.process_path %}
+                      <br><small class="text-muted">{{ proc.process_path }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if proc.process_pid %}
+                      <code>{{ proc.process_pid }}</code>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if proc.process_status %}
+                      <span class="badge
+                        {% if proc.process_status == 'running' %}bg-success
+                        {% elif proc.process_status == 'stopped' %}bg-danger
+                        {% else %}bg-warning
+                        {% endif %} badge-sm">
+                        {{ proc.process_status }}
+                      </span>
+                    {% else %}
+                      <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if processes|length > 10 %}
+            <div class="text-center">
+              <small class="text-muted">... and {{ processes|length - 10 }} more processes</small>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Hostnames e dispositivi simili -->
+  <div class="row mt-4">
+    <!-- Hostnames -->
+    {% if hostnames %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-dns"></i> DNS/Hostnames
+            <span class="badge bg-warning ms-2">{{ hostnames|length }}</span>
+          </h3>
+        </div>
+        <div class="card-body">
+          {% for hostname in hostnames %}
+            <div class="mb-2">
+              <span class="badge bg-light text-dark">{{ hostname.hostname }}</span>
+              {% if hostname.hostname_type %}
+                <small class="text-muted">({{ hostname.hostname_type }})</small>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Dispositivi simili -->
+    {% if similar_devices %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-diagram-2"></i> Similar Devices
+            <small class="text-muted">(Same type: {{ device.device_type }})</small>
+          </h3>
+        </div>
+        <div class="card-body">
+          {% for similar in similar_devices %}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <a href="{{ url_for('devices.device_detail', ip_address=similar.ip_address) }}"
+                 class="text-decoration-none fw-bold">
+                {{ similar.ip_address }}
+              </a>
+              {% if similar.hostname %}
+                <br><small class="text-muted">{{ similar.hostname }}</small>
+              {% endif %}
+            </div>
+            <div class="text-end">
+              {% set sim_confidence = (similar.confidence_score or 0) * 100 %}
+              <span class="badge
+                {% if sim_confidence >= 80 %}bg-success
+                {% elif sim_confidence >= 60 %}bg-primary
+                {% elif sim_confidence >= 40 %}bg-warning
+                {% else %}bg-danger
+                {% endif %} badge-sm">
+                {{ "%.0f"|format(sim_confidence) }}%
+              </span>
+              {% if similar.status %}
+                <span class="badge
+                  {% if similar.status == 'up' %}bg-success
+                  {% else %}bg-secondary
+                  {% endif %} badge-sm ms-1">
+                  {{ similar.status }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if device.device_type %}
+          <div class="text-center mt-3">
+            <a href="{{ url_for('devices.classification', type=device.device_type) }}"
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-arrow-right"></i> View All {{ device.device_type }}s
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Timeline di attività (se disponibile) -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-clock-history"></i> Activity Timeline
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            {% if device.created_at %}
+            <div class="timeline-item">
+              <div class="timeline-marker bg-primary"></div>
+              <div class="timeline-content">
+                <h6 class="timeline-title">Device Classified</h6>
+                <p class="timeline-text">Device was classified as {{ device.device_type or 'Unknown' }}</p>
+                <small class="timeline-time text-muted">{{ device.created_at }}</small>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if device_stats.total_vulnerabilities > 0 %}
+            <div class="timeline-item">
+              <div class="timeline-marker bg-danger"></div>
+              <div class="timeline-content">
+                <h6 class="timeline-title">Vulnerabilities Detected</h6>
+                <p class="timeline-text">{{ device_stats.total_vulnerabilities }} vulnerabilities found</p>
+                <small class="timeline-time text-muted">Last scan</small>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if device_stats.total_ports > 0 %}
+            <div class="timeline-item">
+              <div class="timeline-marker bg-info"></div>
+              <div class="timeline-content">
+                <h6 class="timeline-title">Port Scan Completed</h6>
+                <p class="timeline-text">{{ device_stats.total_ports }} open ports discovered</p>
+                <small class="timeline-time text-muted">Network scan</small>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="timeline-item">
+              <div class="timeline-marker bg-success"></div>
+              <div class="timeline-content">
+                <h6 class="timeline-title">Device Discovered</h6>
+                <p class="timeline-text">Device first detected on network</p>
+                <small class="timeline-time text-muted">Initial discovery</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #dee2e6;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -23px;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.timeline-content {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.timeline-title {
+  margin: 0 0 5px 0;
+  font-weight: 600;
+}
+
+.timeline-text {
+  margin: 0 0 10px 0;
+  color: #6c757d;
+}
+
+.timeline-time {
+  color: #adb5bd;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tooltip per i badge delle vulnerabilità
+    const vulnBadges = document.querySelectorAll('.vuln-badge');
+    vulnBadges.forEach(badge => {
+        badge.addEventListener('click', function() {
+            // Qui potresti implementare un modal con dettagli delle vulnerabilità
+            console.log('Clicked vulnerability badge:', this.textContent.trim());
+        });
+    });
+
+    // Animazione per le cards info
+    const infoCards = document.querySelectorAll('.info-card');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '0';
+                entry.target.style.transform = 'translateY(20px)';
+                entry.target.style.transition = 'all 0.6s ease';
+
+                setTimeout(() => {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, 100);
+
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    infoCards.forEach(card => {
+        observer.observe(card);
+    });
+
+    // Copia IP address al click
+    const ipAddress = document.querySelector('.text-primary');
+    if (ipAddress && ipAddress.textContent.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        ipAddress.style.cursor = 'pointer';
+        ipAddress.title = 'Click to copy IP address';
+
+        ipAddress.addEventListener('click', function() {
+            navigator.clipboard.writeText(this.textContent).then(() => {
+                // Feedback visivo
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                this.classList.add('text-success');
+
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.classList.remove('text-success');
+                    this.classList.add('text-primary');
+                }, 1000);
+            });
+        });
+    }
+
+    // Shortcut per tornare alla lista
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.history.back();
+        }
+        if (e.ctrlKey && e.key === 'b') {
+            e.preventDefault();
+            window.location.href = "{{ url_for('devices.classification') }}";
+        }
+    });
+});
+</script>
+{% endblock %}

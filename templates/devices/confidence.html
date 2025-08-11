@@ -1,0 +1,709 @@
+{% extends "base.html" %}
+
+{% block title %}Confidence Score Analysis{% endblock %}
+{% block page_title %}Confidence Score Analysis{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification_overview') }}">Devices</a></li>
+<li class="breadcrumb-item active">Confidence Analysis</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .confidence-hero {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+  }
+  .confidence-meter {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    margin: 0 auto;
+  }
+  .confidence-meter svg {
+    transform: rotate(-90deg);
+  }
+  .confidence-meter-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  .confidence-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+  }
+  .confidence-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+  .confidence-high { border-left-color: #28a745; }
+  .confidence-medium { border-left-color: #007bff; }
+  .confidence-low { border-left-color: #ffc107; }
+  .confidence-very-low { border-left-color: #dc3545; }
+
+  .filter-tabs {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 5px;
+  }
+  .filter-tab {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  .filter-tab.active {
+    background: rgba(255,255,255,0.2);
+    color: white !important;
+  }
+  .device-row {
+    transition: all 0.2s ease;
+  }
+  .device-row:hover {
+    background-color: rgba(40,167,69,0.05);
+  }
+  .confidence-distribution-bar {
+    height: 30px;
+    border-radius: 15px;
+    background: #e9ecef;
+    overflow: hidden;
+    position: relative;
+  }
+  .confidence-segment {
+    height: 100%;
+    float: left;
+    transition: width 1s ease;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Hero Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card confidence-hero">
+        <div class="card-body py-5">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h1 class="display-4 fw-bold mb-3">Confidence Score Analysis</h1>
+              <p class="lead mb-2">
+                Analyze the reliability and accuracy of device classifications across your network.
+              </p>
+              <p class="mb-0 opacity-75">
+                <i class="bi bi-info-circle"></i>
+                Confidence scores range from 0% to 100%, indicating classification certainty.
+              </p>
+            </div>
+
+            <div class="col-md-4 text-center">
+              {% if confidence_stats %}
+              <div class="confidence-meter">
+                {% set avg_confidence = (confidence_stats.avg_confidence or 0) * 100 %}
+                <svg width="150" height="150">
+                  <circle cx="75" cy="75" r="65" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+                  <circle cx="75" cy="75" r="65" fill="none"
+                          stroke="white"
+                          stroke-width="8"
+                          stroke-dasharray="{{ (avg_confidence/100*408)|round(2) }} 408"
+                          stroke-linecap="round"/>
+                </svg>
+                <div class="confidence-meter-text">{{ "%.0f"|format(avg_confidence) }}%</div>
+              </div>
+              <small class="d-block mt-2 opacity-75">Network Average</small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row mb-4">
+    {% if confidence_stats %}
+    <div class="col-lg-3 col-sm-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-check-circle display-4 text-success"></i>
+          <h3 class="mt-3 mb-1">{{ confidence_stats.high_confidence or 0 }}</h3>
+          <p class="text-muted mb-0">High Confidence</p>
+          <small class="text-success">(≥80%)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-shield-check display-4 text-primary"></i>
+          <h3 class="mt-3 mb-1">{{ confidence_stats.medium_confidence or 0 }}</h3>
+          <p class="text-muted mb-0">Medium Confidence</p>
+          <small class="text-primary">(60-80%)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-exclamation-triangle display-4 text-warning"></i>
+          <h3 class="mt-3 mb-1">{{ confidence_stats.low_confidence or 0 }}</h3>
+          <p class="text-muted mb-0">Low Confidence</p>
+          <small class="text-warning">(40-60%)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <i class="bi bi-x-circle display-4 text-danger"></i>
+          <h3 class="mt-3 mb-1">{{ confidence_stats.very_low_confidence or 0 }}</h3>
+          <p class="text-muted mb-0">Very Low</p>
+          <small class="text-danger">(<40%)</small>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Filters -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="filter-tabs d-inline-flex p-1">
+            <a href="{{ url_for('devices.confidence') }}"
+               class="btn filter-tab {{ 'active' if not current_filter else '' }}">
+              All Devices
+            </a>
+            <a href="{{ url_for('devices.confidence', confidence='high') }}"
+               class="btn filter-tab {{ 'active' if current_filter == 'high' else '' }}">
+              High (≥80%)
+            </a>
+            <a href="{{ url_for('devices.confidence', confidence='medium') }}"
+               class="btn filter-tab {{ 'active' if current_filter == 'medium' else '' }}">
+              Medium (60-80%)
+            </a>
+            <a href="{{ url_for('devices.confidence', confidence='low') }}"
+               class="btn filter-tab {{ 'active' if current_filter == 'low' else '' }}">
+              Low (40-60%)
+            </a>
+            <a href="{{ url_for('devices.confidence', confidence='very_low') }}"
+               class="btn filter-tab {{ 'active' if current_filter == 'very_low' else '' }}">
+              Very Low (<40%)
+            </a>
+          </div>
+
+          <div class="float-end">
+            <div class="btn-group">
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i> Export
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-csv"></i> CSV Report</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-pdf"></i> PDF Summary</a></li>
+                <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-excel"></i> Excel Report</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Confidence Distribution Chart -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Confidence Score Distribution
+            {% if current_filter %}
+              <small class="text-muted">({{ current_filter.replace('_', ' ').title() }} only)</small>
+            {% endif %}
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if confidence_distribution %}
+            <!-- Overall distribution bar -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Overall Distribution</label>
+              <div class="confidence-distribution-bar">
+                {% set total = confidence_distribution.values() | sum %}
+                {% for range_name, count in confidence_distribution.items() %}
+                {% set percentage = (count / total * 100) if total > 0 else 0 %}
+                <div class="confidence-segment
+                  {% if 'High' in range_name or 'Excellent' in range_name %}bg-success
+                  {% elif 'Medium' in range_name or 'Good' in range_name %}bg-primary
+                  {% elif 'Fair' in range_name or 'Low' in range_name %}bg-warning
+                  {% else %}bg-danger
+                  {% endif %}"
+                     style="width: {{ percentage }}%"
+                     title="{{ range_name }}: {{ count }} devices ({{ '%.1f'|format(percentage) }}%)">
+                </div>
+                {% endfor %}
+              </div>
+              <div class="d-flex justify-content-between mt-2">
+                {% for range_name, count in confidence_distribution.items() %}
+                <small class="text-muted">
+                  {{ range_name.split('(')[0].strip() }}: {{ count }}
+                </small>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Detailed chart -->
+            <canvas id="confidenceChart" width="400" height="300"></canvas>
+          {% else %}
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-info-circle display-4"></i>
+              <h5 class="mt-3">No confidence data available</h5>
+              <p>Device classification confidence information is not available.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence Insights -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-lightbulb"></i> Insights & Recommendations
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if confidence_stats %}
+          <!-- Network Health Score -->
+          <div class="mb-4">
+            <h6 class="fw-bold">Network Classification Health</h6>
+            {% set health_score = ((confidence_stats.high_confidence or 0) * 100 + (confidence_stats.medium_confidence or 0) * 70) / (confidence_stats.total_devices or 1) %}
+            <div class="progress mb-2" style="height: 20px;">
+              <div class="progress-bar
+                {% if health_score >= 80 %}bg-success
+                {% elif health_score >= 60 %}bg-primary
+                {% elif health_score >= 40 %}bg-warning
+                {% else %}bg-danger
+                {% endif %}"
+                   style="width: {{ health_score }}%">
+                {{ "%.0f"|format(health_score) }}%
+              </div>
+            </div>
+            <small class="text-muted">
+              Based on high and medium confidence classifications
+            </small>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="alert alert-info">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Recommendations</h6>
+            <ul class="mb-0 ps-3">
+              {% if (confidence_stats.very_low_confidence or 0) > 0 %}
+              <li class="small">Review {{ confidence_stats.very_low_confidence }} very low confidence devices</li>
+              {% endif %}
+              {% if (confidence_stats.low_confidence or 0) > 0 %}
+              <li class="small">Investigate {{ confidence_stats.low_confidence }} low confidence classifications</li>
+              {% endif %}
+              {% if ((confidence_stats.high_confidence or 0) / (confidence_stats.total_devices or 1)) < 0.5 %}
+              <li class="small">Consider additional network scanning for better classification</li>
+              {% endif %}
+              <li class="small">Regular review of classification rules recommended</li>
+            </ul>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="d-grid gap-2">
+            {% if (confidence_stats.very_low_confidence or 0) > 0 %}
+            <a href="{{ url_for('devices.confidence', confidence='very_low') }}"
+               class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-exclamation-triangle"></i> Review Critical Cases
+            </a>
+            {% endif %}
+            {% if (confidence_stats.low_confidence or 0) > 0 %}
+            <a href="{{ url_for('devices.confidence', confidence='low') }}"
+               class="btn btn-outline-warning btn-sm">
+              <i class="bi bi-search"></i> Investigate Low Confidence
+            </a>
+            {% endif %}
+            <a href="{{ url_for('devices.classification_overview') }}"
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-arrow-left"></i> Back to Overview
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Top Performing Vendors -->
+      {% if top_vendors %}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-trophy"></i> Top Performing Vendors
+          </h3>
+        </div>
+        <div class="card-body">
+          {% for vendor in top_vendors %}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <a href="{{ url_for('devices.vendor_detail', vendor_name=vendor.vendor_oui) }}"
+                 class="text-decoration-none fw-medium">
+                {{ vendor.vendor_oui }}
+              </a>
+              <div class="small text-muted">{{ vendor.device_count }} devices</div>
+            </div>
+            <span class="badge bg-success">{{ "%.0f"|format((vendor.avg_confidence or 0) * 100) }}%</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Device List -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Device Details
+            {% if current_filter %}
+              <small class="text-muted">({{ current_filter.replace('_', ' ').title() }} Confidence)</small>
+            {% endif %}
+            {% if pagination and pagination.total %}
+              <span class="badge bg-secondary ms-2">{{ pagination.total }}</span>
+            {% endif %}
+          </h3>
+        </div>
+
+        <div class="card-body p-0">
+          {% if devices %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Device</th>
+                    <th>Type</th>
+                    <th>Vendor</th>
+                    <th>Confidence Score</th>
+                    <th>Classification Method</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for device in devices %}
+                  <tr class="device-row confidence-card
+                    {% set confidence = (device.confidence_score or 0) * 100 %}
+                    {% if confidence >= 80 %}confidence-high
+                    {% elif confidence >= 60 %}confidence-medium
+                    {% elif confidence >= 40 %}confidence-low
+                    {% else %}confidence-very-low
+                    {% endif %}">
+                    <!-- Device Info -->
+                    <td>
+                      <div>
+                        <strong>
+                          <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                             class="text-decoration-none">
+                            {{ device.ip_address }}
+                          </a>
+                        </strong>
+                        {% if device.hostname %}
+                          <div class="small text-muted">{{ device.hostname }}</div>
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <!-- Device Type -->
+                    <td>
+                      {% if device.device_type %}
+                        <span class="badge
+                          {% if device.device_type == 'Server' %}bg-danger
+                          {% elif device.device_type == 'Workstation' %}bg-primary
+                          {% elif device.device_type == 'Network Device' %}bg-warning text-dark
+                          {% elif device.device_type == 'Printer' %}bg-info
+                          {% elif device.device_type == 'IoT Device' %}bg-success
+                          {% else %}bg-secondary
+                          {% endif %}">
+                          {{ device.device_type }}
+                        </span>
+                        {% if device.device_subtype %}
+                          <div class="small text-muted mt-1">{{ device.device_subtype }}</div>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Vendor -->
+                    <td>
+                      {% if device.vendor_oui %}
+                        <a href="{{ url_for('devices.vendor_detail', vendor_name=device.vendor_oui) }}"
+                           class="text-decoration-none">
+                          {{ device.vendor_oui }}
+                        </a>
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Confidence Score -->
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="me-2">
+                          <div class="progress" style="width: 80px; height: 8px;">
+                            <div class="progress-bar
+                              {% if confidence >= 80 %}bg-success
+                              {% elif confidence >= 60 %}bg-primary
+                              {% elif confidence >= 40 %}bg-warning
+                              {% else %}bg-danger
+                              {% endif %}"
+                                 style="width: {{ confidence }}%"></div>
+                          </div>
+                        </div>
+                        <span class="badge
+                          {% if confidence >= 80 %}bg-success
+                          {% elif confidence >= 60 %}bg-primary
+                          {% elif confidence >= 40 %}bg-warning text-dark
+                          {% else %}bg-danger
+                          {% endif %}">
+                          {{ "%.1f"|format(confidence) }}%
+                        </span>
+                      </div>
+                    </td>
+
+                    <!-- Classification Method -->
+                    <td>
+                      {% if device.classification_reasons %}
+                        {% set reasons = device.classification_reasons.split(',') %}
+                        {% for reason in reasons[:2] %}
+                          <span class="badge bg-light text-dark me-1">{{ reason.strip() }}</span>
+                        {% endfor %}
+                        {% if reasons|length > 2 %}
+                          <small class="text-muted">+{{ reasons|length - 2 }}</small>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                           class="btn btn-outline-primary"
+                           title="View Details">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        {% if confidence < 60 %}
+                        <button type="button"
+                                class="btn btn-outline-warning"
+                                title="Review Classification"
+                                onclick="reviewDevice('{{ device.ip_address }}')">
+                          <i class="bi bi-flag"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if pagination and pagination.total_pages > 1 %}
+            <div class="card-footer">
+              <nav aria-label="Confidence analysis pagination">
+                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                  <!-- Previous -->
+                  {% if pagination.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link"
+                         href="{{ url_for('devices.confidence', page=pagination.page-1, confidence=current_filter) }}">
+                        <i class="bi bi-chevron-left"></i>
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  <!-- Page Numbers -->
+                  {% set start_page = [1, pagination.page - 2] | max %}
+                  {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+
+                  {% for page_num in range(start_page, end_page + 1) %}
+                    <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+                      <a class="page-link"
+                         href="{{ url_for('devices.confidence', page=page_num, confidence=current_filter) }}">
+                        {{ page_num }}
+                      </a>
+                    </li>
+                  {% endfor %}
+
+                  <!-- Next -->
+                  {% if pagination.has_next %}
+                    <li class="page-item">
+                      <a class="page-link"
+                         href="{{ url_for('devices.confidence', page=pagination.page+1, confidence=current_filter) }}">
+                        <i class="bi bi-chevron-right"></i>
+                      </a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+            {% endif %}
+
+          {% else %}
+            <div class="text-center py-5">
+              <i class="bi bi-search display-4 text-muted"></i>
+              <h4 class="text-muted mt-3">No devices found</h4>
+              <p class="text-muted">
+                {% if current_filter %}
+                  No devices with {{ current_filter.replace('_', ' ').lower() }} confidence scores found.
+                {% else %}
+                  No device confidence information available.
+                {% endif %}
+              </p>
+              {% if current_filter %}
+                <a href="{{ url_for('devices.confidence') }}" class="btn btn-outline-primary">
+                  <i class="bi bi-arrow-counterclockwise"></i> View All Devices
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confidence Distribution Chart
+    {% if confidence_distribution %}
+    const ctx = document.getElementById('confidenceChart');
+    if (ctx) {
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    {% for range_name in confidence_distribution.keys() %}
+                    '{{ range_name }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for count in confidence_distribution.values() %}
+                        {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#28a745', '#007bff', '#17a2b8', '#ffc107', '#dc3545'
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.raw} devices (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    duration: 1500
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Animate confidence segments
+    setTimeout(() => {
+        const segments = document.querySelectorAll('.confidence-segment');
+        segments.forEach((segment, index) => {
+            setTimeout(() => {
+                segment.style.opacity = '1';
+            }, index * 200);
+        });
+    }, 500);
+
+    // Review device function
+    window.reviewDevice = function(ipAddress) {
+        if (confirm(`Flag device ${ipAddress} for manual review?`)) {
+            // Qui implementeresti la logica per contrassegnare il dispositivo per revisione
+            console.log(`Device ${ipAddress} flagged for review`);
+
+            // Feedback visivo
+            const button = event.target.closest('button');
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-check"></i>';
+            button.classList.remove('btn-outline-warning');
+            button.classList.add('btn-outline-success');
+
+            setTimeout(() => {
+                button.innerHTML = originalIcon;
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-outline-warning');
+            }, 2000);
+        }
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '1') window.location.href = "{{ url_for('devices.confidence', confidence='high') }}";
+        if (e.key === '2') window.location.href = "{{ url_for('devices.confidence', confidence='medium') }}";
+        if (e.key === '3') window.location.href = "{{ url_for('devices.confidence', confidence='low') }}";
+        if (e.key === '4') window.location.href = "{{ url_for('devices.confidence', confidence='very_low') }}";
+        if (e.key === 'Escape') window.location.href = "{{ url_for('devices.confidence') }}";
+    });
+
+    // Enhanced hover effects
+    const deviceRows = document.querySelectorAll('.device-row');
+    deviceRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            const progressBar = this.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.boxShadow = '0 0 10px currentColor';
+            }
+        });
+
+        row.addEventListener('mouseleave', function() {
+            const progressBar = this.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.boxShadow = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

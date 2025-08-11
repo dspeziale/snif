@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vendor_info.vendor_name }} - Vendor Details{% endblock %}
+{% block page_title %}Vendor Analysis - {{ vendor_info.vendor_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification_overview') }}">Devices</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.vendors') }}">Vendors</a></li>
+<li class="breadcrumb-item active">{{ vendor_info.vendor_name }}</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .vendor-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  .vendor-logo-large {
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    backdrop-filter: blur(10px);
+  }
+  .stat-card {
+    transition: all 0.3s ease;
+  }
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+  .device-card {
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+  }
+  .device-card:hover {
+    border-left-color: #007bff;
+    background-color: rgba(0,123,255,0.05);
+  }
+  .confidence-progress {
+    height: 6px;
+    border-radius: 3px;
+  }
+  .device-type-distribution {
+    min-height: 300px;
+  }
+  .type-bar {
+    height: 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    position: relative;
+    background: #e9ecef;
+    overflow: hidden;
+  }
+  .type-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease;
+    position: relative;
+  }
+  .type-bar-label {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: white;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  }
+  .network-status {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Vendor Hero Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card vendor-hero">
+        <div class="card-body py-5">
+          <div class="row align-items-center">
+            <div class="col-md-2 text-center mb-3 mb-md-0">
+              <div class="vendor-logo-large mx-auto">
+                {{ vendor_info.vendor_name[:3].upper() }}
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <h1 class="display-5 fw-bold mb-3">{{ vendor_info.vendor_name }}</h1>
+              <p class="lead mb-2">
+                <i class="bi bi-diagram-2"></i> {{ vendor_info.total_devices }} Devices
+                <span class="mx-3">|</span>
+                <i class="bi bi-cpu"></i> {{ vendor_info.device_types|length }} Types
+              </p>
+              <p class="mb-0 opacity-75">
+                <i class="bi bi-graph-up"></i>
+                Average Confidence: {{ "%.1f"|format(vendor_info.avg_confidence * 100) }}%
+                <span class="mx-3">|</span>
+                <i class="bi bi-check-circle"></i>
+                {{ vendor_info.active_devices }} Active
+              </p>
+            </div>
+
+            <div class="col-md-4 text-end">
+              <div class="btn-group">
+                <a href="{{ url_for('devices.classification', vendor=vendor_info.vendor_name) }}"
+                   class="btn btn-light btn-lg">
+                  <i class="bi bi-list"></i> View All Devices
+                </a>
+                <a href="{{ url_for('devices.vendors') }}"
+                   class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-arrow-left"></i> Back to Vendors
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-sm-6">
+      <div class="card stat-card text-center">
+        <div class="card-body">
+          <i class="bi bi-diagram-2 display-4 text-primary"></i>
+          <h3 class="mt-3 mb-1">{{ vendor_info.total_devices }}</h3>
+          <p class="text-muted mb-0">Total Devices</p>
+          <div class="mt-2">
+            <small class="text-success">
+              <i class="bi bi-arrow-up"></i> All discovered
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card stat-card text-center">
+        <div class="card-body">
+          <i class="bi bi-check-circle display-4 text-success"></i>
+          <h3 class="mt-3 mb-1">{{ vendor_info.active_devices }}</h3>
+          <p class="text-muted mb-0">Active Devices</p>
+          <div class="mt-2">
+            <small class="text-info">
+              {% set active_rate = (vendor_info.active_devices / vendor_info.total_devices * 100) if vendor_info.total_devices > 0 else 0 %}
+              {{ "%.0f"|format(active_rate) }}% online
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card stat-card text-center">
+        <div class="card-body">
+          <i class="bi bi-cpu display-4 text-warning"></i>
+          <h3 class="mt-3 mb-1">{{ vendor_info.device_types|length }}</h3>
+          <p class="text-muted mb-0">Device Types</p>
+          <div class="mt-2">
+            <small class="text-warning">
+              <i class="bi bi-collection"></i> Categories
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card stat-card text-center">
+        <div class="card-body">
+          <i class="bi bi-star display-4 text-info"></i>
+          <h3 class="mt-3 mb-1">{{ "%.0f"|format(vendor_info.avg_confidence * 100) }}%</h3>
+          <p class="text-muted mb-0">Avg Confidence</p>
+          <div class="mt-2">
+            <div class="progress confidence-progress">
+              <div class="progress-bar
+                {% if vendor_info.avg_confidence >= 0.8 %}bg-success
+                {% elif vendor_info.avg_confidence >= 0.6 %}bg-primary
+                {% elif vendor_info.avg_confidence >= 0.4 %}bg-warning
+                {% else %}bg-danger
+                {% endif %}"
+                   style="width: {{ (vendor_info.avg_confidence * 100) }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Device Type Distribution -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Device Type Distribution
+          </h3>
+        </div>
+        <div class="card-body device-type-distribution">
+          {% if type_distribution %}
+            {% set max_count = type_distribution.values() | max %}
+            {% for device_type, count in type_distribution.items() %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-medium">
+                  {% if device_type == 'Server' %}
+                    <i class="bi bi-server text-danger"></i>
+                  {% elif device_type == 'Workstation' %}
+                    <i class="bi bi-pc-display text-primary"></i>
+                  {% elif device_type == 'Network Device' %}
+                    <i class="bi bi-router text-warning"></i>
+                  {% elif device_type == 'Printer' %}
+                    <i class="bi bi-printer text-info"></i>
+                  {% elif device_type == 'IoT Device' %}
+                    <i class="bi bi-cpu text-success"></i>
+                  {% else %}
+                    <i class="bi bi-question-circle text-secondary"></i>
+                  {% endif %}
+                  {{ device_type }}
+                </span>
+                <span class="badge bg-secondary">{{ count }}</span>
+              </div>
+              <div class="type-bar">
+                <div class="type-bar-fill
+                  {% if device_type == 'Server' %}bg-danger
+                  {% elif device_type == 'Workstation' %}bg-primary
+                  {% elif device_type == 'Network Device' %}bg-warning
+                  {% elif device_type == 'Printer' %}bg-info
+                  {% elif device_type == 'IoT Device' %}bg-success
+                  {% else %}bg-secondary
+                  {% endif %}"
+                     style="width: {{ (count / max_count * 100) if max_count > 0 else 0 }}%">
+                  <span class="type-bar-label">
+                    {{ "%.0f"|format((count / vendor_info.total_devices * 100) if vendor_info.total_devices > 0 else 0) }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Chart canvas -->
+            <div class="text-center mt-4">
+              <canvas id="typeDistributionChart" width="400" height="200"></canvas>
+            </div>
+          {% else %}
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-info-circle display-4"></i>
+              <h5 class="mt-3">No device type data</h5>
+              <p>Device classification information is not available.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence Score Distribution -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-graph-up"></i> Confidence Score Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if confidence_ranges %}
+            <canvas id="confidenceChart" width="400" height="200"></canvas>
+
+            <div class="mt-4">
+              {% for range_name, count in confidence_ranges.items() %}
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>{{ range_name }}</span>
+                <div>
+                  <span class="badge
+                    {% if 'High' in range_name %}bg-success
+                    {% elif 'Medium' in range_name %}bg-primary
+                    {% else %}bg-warning
+                    {% endif %}">
+                    {{ count }}
+                  </span>
+                  <small class="text-muted ms-2">
+                    ({{ "%.0f"|format((count / vendor_info.total_devices * 100) if vendor_info.total_devices > 0 else 0) }}%)
+                  </small>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-info-circle display-4"></i>
+              <h5 class="mt-3">No confidence data</h5>
+              <p>Confidence score information is not available.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Device List -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> All Devices from {{ vendor_info.vendor_name }}
+            <span class="badge bg-primary ms-2">{{ vendor_devices|length }}</span>
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('devices.classification', vendor=vendor_info.vendor_name) }}"
+               class="btn btn-primary btn-sm">
+              <i class="bi bi-funnel"></i> Filter View
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body p-0">
+          {% if vendor_devices %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Device</th>
+                    <th>Type</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Classification</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for device in vendor_devices %}
+                  <tr class="device-card">
+                    <td>
+                      <div>
+                        <strong>
+                          <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                             class="text-decoration-none">
+                            {{ device.ip_address }}
+                          </a>
+                        </strong>
+                        {% if device.hostname %}
+                          <div class="small text-muted">{{ device.hostname }}</div>
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <td>
+                      {% if device.device_type %}
+                        <span class="badge
+                          {% if device.device_type == 'Server' %}bg-danger
+                          {% elif device.device_type == 'Workstation' %}bg-primary
+                          {% elif device.device_type == 'Network Device' %}bg-warning text-dark
+                          {% elif device.device_type == 'Printer' %}bg-info
+                          {% elif device.device_type == 'IoT Device' %}bg-success
+                          {% else %}bg-secondary
+                          {% endif %}">
+                          {{ device.device_type }}
+                        </span>
+                        {% if device.device_subtype %}
+                          <div class="small text-muted mt-1">{{ device.device_subtype }}</div>
+                        {% endif %}
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      {% set confidence = (device.confidence_score or 0) * 100 %}
+                      <div class="d-flex align-items-center">
+                        <span class="badge
+                          {% if confidence >= 80 %}bg-success
+                          {% elif confidence >= 60 %}bg-primary
+                          {% elif confidence >= 40 %}bg-warning text-dark
+                          {% else %}bg-danger
+                          {% endif %} me-2">
+                          {{ "%.0f"|format(confidence) }}%
+                        </span>
+                        <div class="progress flex-grow-1" style="height: 4px; width: 60px;">
+                          <div class="progress-bar
+                            {% if confidence >= 80 %}bg-success
+                            {% elif confidence >= 60 %}bg-primary
+                            {% elif confidence >= 40 %}bg-warning
+                            {% else %}bg-danger
+                            {% endif %}"
+                               style="width: {{ confidence }}%"></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      {% if device.status %}
+                        <span class="network-status
+                          {% if device.status == 'up' %}bg-success
+                          {% else %}bg-danger
+                          {% endif %}"></span>
+                        {{ device.status.title() }}
+                      {% else %}
+                        <span class="network-status bg-secondary"></span>
+                        Unknown
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      {% if device.classification_reasons %}
+                        <small class="text-muted">{{ device.classification_reasons[:50] }}{% if device.classification_reasons|length > 50 %}...{% endif %}</small>
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                           class="btn btn-outline-primary"
+                           title="View Details">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <button type="button"
+                                class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown">
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li>
+                            <a class="dropdown-item"
+                               href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}">
+                              <i class="bi bi-eye"></i> View Details
+                            </a>
+                          </li>
+                          {% if device.device_type %}
+                          <li>
+                            <a class="dropdown-item"
+                               href="{{ url_for('devices.classification', type=device.device_type) }}">
+                              <i class="bi bi-funnel"></i> Similar Devices
+                            </a>
+                          </li>
+                          {% endif %}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-5">
+              <i class="bi bi-inbox display-4 text-muted"></i>
+              <h4 class="text-muted mt-3">No devices found</h4>
+              <p class="text-muted">No devices are associated with this vendor.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Type Distribution Chart
+    {% if type_distribution %}
+    const typeCtx = document.getElementById('typeDistributionChart');
+    if (typeCtx) {
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    {% for device_type in type_distribution.keys() %}
+                    '{{ device_type }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for count in type_distribution.values() %}
+                        {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#dc3545', '#007bff', '#ffc107', '#17a2b8',
+                        '#28a745', '#6c757d', '#e83e8c'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Confidence Distribution Chart
+    {% if confidence_ranges %}
+    const confidenceCtx = document.getElementById('confidenceChart');
+    if (confidenceCtx) {
+        new Chart(confidenceCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for range_name in confidence_ranges.keys() %}
+                    '{{ range_name }}'{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Devices',
+                    data: [
+                        {% for count in confidence_ranges.values() %}
+                        {{ count }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: ['#28a745', '#007bff', '#ffc107'],
+                    borderColor: ['#1e7e34', '#0056b3', '#d39e00'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Animazioni per le type bars
+    const typeBars = document.querySelectorAll('.type-bar-fill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const currentWidth = entry.target.style.width;
+                entry.target.style.width = '0%';
+
+                setTimeout(() => {
+                    entry.target.style.width = currentWidth;
+                }, 100);
+
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    typeBars.forEach(bar => {
+        observer.observe(bar);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.location.href = "{{ url_for('devices.vendors') }}";
+        }
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            window.location.href = "{{ url_for('devices.classification', vendor=vendor_info.vendor_name) }}";
+        }
+    });
+});
+</script>
+{% endblock %}

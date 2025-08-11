@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Analysis{% endblock %}
+{% block page_title %}Vendor Analysis{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification_overview') }}">Devices</a></li>
+<li class="breadcrumb-item active">Vendor Analysis</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .vendor-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e3e6f0;
+  }
+  .vendor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border-color: #007bff;
+  }
+  .vendor-logo {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  .confidence-ring {
+    position: relative;
+    width: 60px;
+    height: 60px;
+  }
+  .confidence-ring svg {
+    transform: rotate(-90deg);
+  }
+  .confidence-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  .search-highlight {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+  }
+  .device-type-tag {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    margin: 1px;
+    border-radius: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header con ricerca -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card search-highlight">
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('devices.vendors') }}" class="row align-items-end">
+            <div class="col-md-8">
+              <label for="search" class="form-label">
+                <i class="bi bi-search"></i> Search Vendors
+              </label>
+              <input type="text"
+                     class="form-control form-control-lg"
+                     id="search"
+                     name="search"
+                     value="{{ current_search or '' }}"
+                     placeholder="Search by vendor name, OUI, or manufacturer..."
+                     autofocus>
+            </div>
+            <div class="col-md-4">
+              <div class="btn-group w-100">
+                <button type="submit" class="btn btn-light btn-lg">
+                  <i class="bi bi-search"></i> Search
+                </button>
+                <a href="{{ url_for('devices.vendors') }}" class="btn btn-outline-light btn-lg">
+                  <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiche vendor -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-sm-6">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-building display-4 text-primary"></i>
+          <h3 class="mt-2">{{ vendor_stats.total_vendors or 0 }}</h3>
+          <p class="text-muted mb-0">Total Vendors</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-diagram-2 display-4 text-success"></i>
+          <h3 class="mt-2">{{ vendor_stats.total_devices or 0 }}</h3>
+          <p class="text-muted mb-0">Total Devices</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-star display-4 text-warning"></i>
+          <h3 class="mt-2">{{ "%.1f"|format((vendor_stats.avg_confidence or 0) * 100) }}%</h3>
+          <p class="text-muted mb-0">Avg Confidence</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-sm-6">
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="bi bi-cpu display-4 text-info"></i>
+          <h3 class="mt-2">{{ vendor_stats.unique_types or 0 }}</h3>
+          <p class="text-muted mb-0">Device Types</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista vendor -->
+  {% if vendors_data %}
+  <div class="row">
+    {% for vendor in vendors_data %}
+    <div class="col-lg-4 col-md-6 mb-4">
+      <div class="card vendor-card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-start mb-3">
+            <div class="vendor-logo me-3">
+              {{ vendor.vendor_oui[:2].upper() }}
+            </div>
+            <div class="flex-grow-1">
+              <h5 class="card-title mb-1">
+                <a href="{{ url_for('devices.vendor_detail', vendor_name=vendor.vendor_oui) }}"
+                   class="text-decoration-none">
+                  {{ vendor.vendor_oui }}
+                </a>
+              </h5>
+              <p class="text-muted mb-0">
+                {{ vendor.device_count }} device{{ 's' if vendor.device_count != 1 else '' }}
+              </p>
+            </div>
+            <div class="confidence-ring">
+              {% set confidence = (vendor.avg_confidence or 0) * 100 %}
+              <svg width="60" height="60">
+                <circle cx="30" cy="30" r="25" fill="none" stroke="#e9ecef" stroke-width="4"/>
+                <circle cx="30" cy="30" r="25" fill="none"
+                        stroke="{% if confidence >= 80 %}#28a745{% elif confidence >= 60 %}#007bff{% elif confidence >= 40 %}#ffc107{% else %}#dc3545{% endif %}"
+                        stroke-width="4"
+                        stroke-dasharray="{{ (confidence/100*157)|round(2) }} 157"
+                        stroke-linecap="round"/>
+              </svg>
+              <div class="confidence-text">{{ "%.0f"|format(confidence) }}%</div>
+            </div>
+          </div>
+
+          <!-- Device types -->
+          <div class="mb-3">
+            <small class="text-muted d-block mb-1">Device Types ({{ vendor.unique_types }}):</small>
+            {% if vendor.device_types %}
+              {% set types = vendor.device_types.split(',') %}
+              {% for type in types[:4] %}
+                <span class="badge device-type-tag
+                  {% if type.strip() == 'Server' %}bg-danger
+                  {% elif type.strip() == 'Workstation' %}bg-primary
+                  {% elif type.strip() == 'Network Device' %}bg-warning text-dark
+                  {% elif type.strip() == 'Printer' %}bg-info
+                  {% elif type.strip() == 'IoT Device' %}bg-success
+                  {% else %}bg-secondary
+                  {% endif %}">
+                  {{ type.strip() }}
+                </span>
+              {% endfor %}
+              {% if types|length > 4 %}
+                <span class="badge bg-light text-dark device-type-tag">+{{ types|length - 4 }}</span>
+              {% endif %}
+            {% endif %}
+          </div>
+
+          <!-- Statistiche -->
+          <div class="row text-center">
+            <div class="col-6">
+              <div class="border-end">
+                <h6 class="mb-1">{{ vendor.device_count }}</h6>
+                <small class="text-muted">Devices</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <h6 class="mb-1">{{ vendor.unique_types }}</h6>
+              <small class="text-muted">Types</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer bg-transparent">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              Confidence: {{ "%.1f"|format((vendor.avg_confidence or 0) * 100) }}%
+            </small>
+            <div class="btn-group btn-group-sm">
+              <a href="{{ url_for('devices.vendor_detail', vendor_name=vendor.vendor_oui) }}"
+                 class="btn btn-outline-primary">
+                <i class="bi bi-eye"></i> Details
+              </a>
+              <a href="{{ url_for('devices.classification', vendor=vendor.vendor_oui) }}"
+                 class="btn btn-outline-secondary">
+                <i class="bi bi-list"></i> Devices
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Paginazione -->
+  {% if pagination and pagination.total_pages > 1 %}
+  <div class="row">
+    <div class="col-12">
+      <nav aria-label="Vendor pagination">
+        <ul class="pagination justify-content-center">
+          <!-- Previous -->
+          {% if pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('devices.vendors', page=pagination.page-1, search=current_search) }}">
+                <i class="bi bi-chevron-left"></i> Previous
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+            </li>
+          {% endif %}
+
+          <!-- Page numbers -->
+          {% set start_page = [1, pagination.page - 2] | max %}
+          {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+
+          {% if start_page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('devices.vendors', page=1, search=current_search) }}">1</a>
+            </li>
+            {% if start_page > 2 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endif %}
+
+          {% for page_num in range(start_page, end_page + 1) %}
+            <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+              <a class="page-link"
+                 href="{{ url_for('devices.vendors', page=page_num, search=current_search) }}">
+                {{ page_num }}
+              </a>
+            </li>
+          {% endfor %}
+
+          {% if end_page < pagination.total_pages %}
+            {% if end_page < pagination.total_pages - 1 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('devices.vendors', page=pagination.total_pages, search=current_search) }}">
+                {{ pagination.total_pages }}
+              </a>
+            </li>
+          {% endif %}
+
+          <!-- Next -->
+          {% if pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="{{ url_for('devices.vendors', page=pagination.page+1, search=current_search) }}">
+                Next <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+      <div class="text-center text-muted small">
+        Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to
+        {{ [pagination.page * pagination.per_page, pagination.total] | min }} of
+        {{ pagination.total }} vendors
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- Nessun risultato -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-search display-1 text-muted"></i>
+          <h3 class="mt-4 text-muted">No vendors found</h3>
+          {% if current_search %}
+            <p class="text-muted">
+              No vendors match your search criteria: <strong>"{{ current_search }}"</strong>
+            </p>
+            <a href="{{ url_for('devices.vendors') }}" class="btn btn-outline-primary">
+              <i class="bi bi-arrow-counterclockwise"></i> View All Vendors
+            </a>
+          {% else %}
+            <p class="text-muted">No vendor information available in the database.</p>
+            <div class="mt-4">
+              <a href="{{ url_for('devices.classification_overview') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to Device Overview
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Top vendors insight -->
+  {% if not current_search and vendors_data %}
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-trophy"></i> Top Vendors Insights
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Most Devices</h6>
+              {% set top_by_devices = vendors_data | sort(attribute='device_count', reverse=true) %}
+              {% for vendor in top_by_devices[:5] %}
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <a href="{{ url_for('devices.vendor_detail', vendor_name=vendor.vendor_oui) }}"
+                   class="text-decoration-none">
+                  {{ vendor.vendor_oui }}
+                </a>
+                <span class="badge bg-primary">{{ vendor.device_count }}</span>
+              </div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-6">
+              <h6>Highest Confidence</h6>
+              {% set top_by_confidence = vendors_data | sort(attribute='avg_confidence', reverse=true) %}
+              {% for vendor in top_by_confidence[:5] %}
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <a href="{{ url_for('devices.vendor_detail', vendor_name=vendor.vendor_oui) }}"
+                   class="text-decoration-none">
+                  {{ vendor.vendor_oui }}
+                </a>
+                <span class="badge bg-success">{{ "%.1f"|format((vendor.avg_confidence or 0) * 100) }}%</span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit search con debounce
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (searchInput.value.length >= 3 || searchInput.value.length === 0) {
+                searchInput.form.submit();
+            }
+        }, 500);
+    });
+
+    // Animazioni per le vendor cards
+    const vendorCards = document.querySelectorAll('.vendor-card');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(30px)';
+                    entry.target.style.transition = 'all 0.6s ease';
+
+                    requestAnimationFrame(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    });
+                }, index * 100); // Stagger animation
+
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    vendorCards.forEach(card => {
+        observer.observe(card);
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.blur();
+        }
+    });
+
+    // Enhanced hover effects per confidence rings
+    const confidenceRings = document.querySelectorAll('.confidence-ring');
+    confidenceRings.forEach(ring => {
+        ring.addEventListener('mouseenter', function() {
+            const circle = this.querySelector('circle:last-child');
+            if (circle) {
+                circle.style.filter = 'drop-shadow(0 0 8px currentColor)';
+            }
+        });
+
+        ring.addEventListener('mouseleave', function() {
+            const circle = this.querySelector('circle:last-child');
+            if (circle) {
+                circle.style.filter = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -136,7 +136,6 @@ def classification_overview():
 # ===========================
 # DEVICE CLASSIFICATION LIST
 # ===========================
-
 @devices_bp.route('/classification')
 def classification():
     """Lista dispositivi classificati con filtri"""
@@ -152,6 +151,16 @@ def classification():
         search = request.args.get('search', '').strip()
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 50))
+
+        # ✅ DEFINIRE current_filters SUBITO (prima di qualsiasi possibile errore)
+        current_filters = {
+            'type': device_type,
+            'subtype': device_subtype,
+            'vendor': vendor,
+            'confidence_min': confidence_min,
+            'confidence_max': confidence_max,
+            'search': search
+        }
 
         # Query base
         query = '''
@@ -257,15 +266,6 @@ def classification():
             ORDER BY vendor_oui
         ''').fetchall()
 
-        current_filters = {
-            'type': device_type,
-            'subtype': device_subtype,
-            'vendor': vendor,
-            'confidence_min': confidence_min,
-            'confidence_max': confidence_max,
-            'search': search
-        }
-
         return render_template('devices/classification.html',
                                devices=devices_data,
                                pagination=pagination,
@@ -276,9 +276,26 @@ def classification():
 
     except Exception as e:
         current_app.logger.error(f"Errore in classification: {e}")
-        return render_template('devices/classification.html',
-                               devices=[], pagination={}, error=str(e))
 
+        # ✅ ASSICURATI CHE current_filters SIA SEMPRE DEFINITO ANCHE IN CASO DI ERRORE
+        current_filters = {
+            'type': request.args.get('type'),
+            'subtype': request.args.get('subtype'),
+            'vendor': request.args.get('vendor'),
+            'confidence_min': request.args.get('confidence_min', type=float),
+            'confidence_max': request.args.get('confidence_max', type=float),
+            'search': request.args.get('search', '').strip()
+        }
+
+        return render_template('devices/classification.html',
+                               devices=[],
+                               pagination={'page': 1, 'per_page': 50, 'total': 0, 'total_pages': 0, 'has_prev': False,
+                                           'has_next': False},
+                               current_filters=current_filters,
+                               available_types=[],
+                               available_subtypes=[],
+                               available_vendors=[],
+                               error=str(e))
 
 @devices_bp.route('/device/<ip_address>')
 def device_detail(ip_address):
@@ -405,7 +422,6 @@ def device_detail(ip_address):
 # ===========================
 # VENDOR ANALYSIS
 # ===========================
-
 @devices_bp.route('/vendors')
 def vendors():
     """Analisi vendor e OUI"""
@@ -463,45 +479,25 @@ def vendors():
         # Statistiche vendor
         vendor_stats = {
             'total_vendors': total_count,
-            'total_devices_with_oui':
-                db.execute('SELECT COUNT(*) FROM device_classification WHERE vendor_oui IS NOT NULL').fetchone()[0],
-            'devices_without_oui':
-                db.execute('SELECT COUNT(*) FROM device_classification WHERE vendor_oui IS NULL').fetchone()[0]
+            'total_devices': db.execute('SELECT COUNT(*) FROM device_classification WHERE vendor_oui IS NOT NULL').fetchone()[0],
+            'avg_confidence': db.execute('SELECT AVG(confidence_score) FROM device_classification WHERE vendor_oui IS NOT NULL').fetchone()[0] or 0,
+            'unique_types': db.execute('SELECT COUNT(DISTINCT device_type) FROM device_classification WHERE vendor_oui IS NOT NULL AND device_type IS NOT NULL').fetchone()[0]
         }
-
-        # Top vendor per numero di dispositivi
-        top_vendors = db.execute('''
-            SELECT vendor_oui, COUNT(*) as device_count
-            FROM device_classification 
-            WHERE vendor_oui IS NOT NULL 
-            GROUP BY vendor_oui 
-            ORDER BY device_count DESC 
-            LIMIT 10
-        ''').fetchall()
-
-        # Distribuzione per tipo di dispositivo dei vendor principali
-        vendor_type_distribution = db.execute('''
-            SELECT vendor_oui, device_type, COUNT(*) as count
-            FROM device_classification 
-            WHERE vendor_oui IS NOT NULL AND device_type IS NOT NULL
-            GROUP BY vendor_oui, device_type
-            HAVING COUNT(*) > 1
-            ORDER BY vendor_oui, count DESC
-        ''').fetchall()
 
         return render_template('devices/vendors.html',
                                vendors_data=vendors_data,
                                pagination=pagination,
                                current_search=search_vendor,
-                               vendor_stats=vendor_stats,
-                               top_vendors=top_vendors,
-                               vendor_type_distribution=vendor_type_distribution)
+                               vendor_stats=vendor_stats)
 
     except Exception as e:
         current_app.logger.error(f"Errore in vendors: {e}")
         return render_template('devices/vendors.html',
-                               vendors_data=[], pagination={}, error=str(e))
-
+                               vendors_data=[],
+                               pagination={'page': 1, 'per_page': 30, 'total': 0, 'total_pages': 0, 'has_prev': False, 'has_next': False},
+                               current_search=request.args.get('search', ''),
+                               vendor_stats={'total_vendors': 0, 'total_devices': 0, 'avg_confidence': 0, 'unique_types': 0},
+                               error=str(e))
 
 @devices_bp.route('/vendor/<vendor_name>')
 def vendor_detail(vendor_name):
@@ -557,7 +553,6 @@ def vendor_detail(vendor_name):
 # ===========================
 # CONFIDENCE ANALYSIS
 # ===========================
-
 @devices_bp.route('/confidence')
 def confidence():
     """Analisi confidence scores"""
@@ -585,7 +580,9 @@ def confidence():
             elif confidence_filter == 'medium':
                 conditions.append('dc.confidence_score >= 0.6 AND dc.confidence_score < 0.8')
             elif confidence_filter == 'low':
-                conditions.append('dc.confidence_score < 0.6')
+                conditions.append('dc.confidence_score >= 0.4 AND dc.confidence_score < 0.6')
+            elif confidence_filter == 'very_low':
+                conditions.append('dc.confidence_score < 0.4')
 
         if conditions:
             query += ' WHERE ' + ' AND '.join(conditions)
@@ -599,7 +596,7 @@ def confidence():
         # Paginazione
         offset = (page - 1) * per_page
         paginated_query = query + f' LIMIT {per_page} OFFSET {offset}'
-        devices_data = db.execute(paginated_query, params).fetchall()
+        devices = db.execute(paginated_query, params).fetchall()
 
         pagination = {
             'page': page,
@@ -613,61 +610,63 @@ def confidence():
         # Statistiche confidence
         confidence_stats = db.execute('''
             SELECT 
-                ROUND(confidence_score, 1) as confidence_rounded,
-                COUNT(*) as count
+                COUNT(*) as total_devices,
+                AVG(confidence_score) as avg_confidence,
+                SUM(CASE WHEN confidence_score >= 0.8 THEN 1 ELSE 0 END) as high_confidence,
+                SUM(CASE WHEN confidence_score >= 0.6 AND confidence_score < 0.8 THEN 1 ELSE 0 END) as medium_confidence,
+                SUM(CASE WHEN confidence_score >= 0.4 AND confidence_score < 0.6 THEN 1 ELSE 0 END) as low_confidence,
+                SUM(CASE WHEN confidence_score < 0.4 THEN 1 ELSE 0 END) as very_low_confidence
             FROM device_classification
             WHERE confidence_score IS NOT NULL
-            GROUP BY ROUND(confidence_score, 1)
-            ORDER BY confidence_rounded DESC
-        ''').fetchall()
+        ''').fetchone()
 
         # Distribuzione per ranges
-        confidence_ranges = db.execute('''
+        confidence_distribution = db.execute('''
             SELECT 
                 CASE 
-                    WHEN confidence_score >= 0.9 THEN 'Excellent (≥0.9)'
-                    WHEN confidence_score >= 0.8 THEN 'High (0.8-0.9)'
-                    WHEN confidence_score >= 0.7 THEN 'Good (0.7-0.8)'
-                    WHEN confidence_score >= 0.6 THEN 'Fair (0.6-0.7)'
-                    WHEN confidence_score >= 0.5 THEN 'Low (0.5-0.6)'
-                    ELSE 'Very Low (<0.5)'
+                    WHEN confidence_score >= 0.9 THEN 'Excellent (≥90%)'
+                    WHEN confidence_score >= 0.8 THEN 'High (80-90%)'
+                    WHEN confidence_score >= 0.6 THEN 'Medium (60-80%)'
+                    WHEN confidence_score >= 0.4 THEN 'Low (40-60%)'
+                    ELSE 'Very Low (<40%)'
                 END as confidence_range,
                 COUNT(*) as count,
-                AVG(confidence_score) as avg_score,
-                MIN(confidence_score) as min_score,
-                MAX(confidence_score) as max_score
+                AVG(confidence_score) as avg_score
             FROM device_classification
             WHERE confidence_score IS NOT NULL
             GROUP BY confidence_range
             ORDER BY avg_score DESC
         ''').fetchall()
 
-        # Correlazione confidence vs device type
-        type_confidence = db.execute('''
-            SELECT device_type, 
-                   COUNT(*) as count,
-                   AVG(confidence_score) as avg_confidence,
-                   MIN(confidence_score) as min_confidence,
-                   MAX(confidence_score) as max_confidence
-            FROM device_classification
-            WHERE device_type IS NOT NULL AND confidence_score IS NOT NULL
-            GROUP BY device_type
-            ORDER BY avg_confidence DESC
+        # Top performing vendors
+        top_vendors = db.execute('''
+            SELECT vendor_oui, COUNT(*) as device_count, AVG(confidence_score) as avg_confidence
+            FROM device_classification 
+            WHERE vendor_oui IS NOT NULL AND confidence_score IS NOT NULL
+            GROUP BY vendor_oui 
+            HAVING COUNT(*) >= 3
+            ORDER BY avg_confidence DESC 
+            LIMIT 10
         ''').fetchall()
 
         return render_template('devices/confidence.html',
-                               devices_data=devices_data,
+                               devices=devices,
                                pagination=pagination,
                                current_filter=confidence_filter,
                                confidence_stats=confidence_stats,
-                               confidence_ranges=confidence_ranges,
-                               type_confidence=type_confidence)
+                               confidence_distribution=confidence_distribution,
+                               top_vendors=top_vendors)
 
     except Exception as e:
         current_app.logger.error(f"Errore in confidence: {e}")
         return render_template('devices/confidence.html',
-                               devices_data=[], pagination={}, error=str(e))
-
+                               devices=[],
+                               pagination={'page': 1, 'per_page': 50, 'total': 0, 'total_pages': 0, 'has_prev': False, 'has_next': False},
+                               current_filter=request.args.get('confidence'),
+                               confidence_stats={'total_devices': 0, 'avg_confidence': 0, 'high_confidence': 0, 'medium_confidence': 0, 'low_confidence': 0, 'very_low_confidence': 0},
+                               confidence_distribution=[],
+                               top_vendors=[],
+                               error=str(e))
 
 # ===========================
 # API ENDPOINTS

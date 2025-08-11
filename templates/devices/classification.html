@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block title %}Device Classification{% endblock %}
+{% block page_title %}Device Classification{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('devices.classification_overview') }}">Devices</a></li>
+<li class="breadcrumb-item active">Classification</li>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .filter-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  .filter-card .form-label {
+    color: white;
+    opacity: 0.9;
+  }
+  .confidence-bar {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  .device-row:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+  }
+  .quick-filter {
+    transition: all 0.2s ease;
+  }
+  .quick-filter:hover {
+    transform: translateY(-1px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Filtri e ricerca -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card filter-card">
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('devices.classification') }}" id="filterForm">
+            <div class="row g-3">
+              <!-- Ricerca -->
+              <div class="col-lg-3 col-md-6">
+                <label for="search" class="form-label">
+                  <i class="bi bi-search"></i> Search
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="search"
+                       name="search"
+                       value="{{ current_filters.search or '' }}"
+                       placeholder="IP, hostname, vendor...">
+              </div>
+
+              <!-- Tipo dispositivo -->
+              <div class="col-lg-2 col-md-6">
+                <label for="type" class="form-label">
+                  <i class="bi bi-diagram-2"></i> Type
+                </label>
+                <select class="form-select" id="type" name="type">
+                  <option value="">All Types</option>
+                  {% for type_item in available_types %}
+                  <option value="{{ type_item.device_type }}"
+                          {% if current_filters.type == type_item.device_type %}selected{% endif %}>
+                    {{ type_item.device_type }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Sottotipo -->
+              <div class="col-lg-2 col-md-6">
+                <label for="subtype" class="form-label">
+                  <i class="bi bi-cpu"></i> Subtype
+                </label>
+                <select class="form-select" id="subtype" name="subtype">
+                  <option value="">All Subtypes</option>
+                  {% for subtype_item in available_subtypes %}
+                  <option value="{{ subtype_item.device_subtype }}"
+                          {% if current_filters.subtype == subtype_item.device_subtype %}selected{% endif %}>
+                    {{ subtype_item.device_subtype }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Vendor -->
+              <div class="col-lg-2 col-md-6">
+                <label for="vendor" class="form-label">
+                  <i class="bi bi-building"></i> Vendor
+                </label>
+                <select class="form-select" id="vendor" name="vendor">
+                  <option value="">All Vendors</option>
+                  {% for vendor_item in available_vendors %}
+                  <option value="{{ vendor_item.vendor_oui }}"
+                          {% if current_filters.vendor == vendor_item.vendor_oui %}selected{% endif %}>
+                    {{ vendor_item.vendor_oui }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <!-- Confidence Range -->
+              <div class="col-lg-2 col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-graph-up"></i> Confidence
+                </label>
+                <div class="input-group input-group-sm">
+                  <input type="number"
+                         class="form-control"
+                         name="confidence_min"
+                         value="{{ current_filters.confidence_min or '' }}"
+                         placeholder="Min"
+                         min="0"
+                         max="1"
+                         step="0.1">
+                  <input type="number"
+                         class="form-control"
+                         name="confidence_max"
+                         value="{{ current_filters.confidence_max or '' }}"
+                         placeholder="Max"
+                         min="0"
+                         max="1"
+                         step="0.1">
+                </div>
+              </div>
+
+              <!-- Bottoni -->
+              <div class="col-lg-1 col-md-12 d-flex align-items-end">
+                <div class="btn-group w-100" role="group">
+                  <button type="submit" class="btn btn-light">
+                    <i class="bi bi-search"></i>
+                  </button>
+                  <a href="{{ url_for('devices.classification') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtri rapidi -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('devices.classification') }}"
+           class="btn btn-outline-primary btn-sm quick-filter {{ 'active' if not current_filters.type }}">
+          <i class="bi bi-grid"></i> All Devices
+        </a>
+        <a href="{{ url_for('devices.classification', type='Server') }}"
+           class="btn btn-outline-danger btn-sm quick-filter {{ 'active' if current_filters.type == 'Server' }}">
+          <i class="bi bi-server"></i> Servers
+        </a>
+        <a href="{{ url_for('devices.classification', type='Workstation') }}"
+           class="btn btn-outline-primary btn-sm quick-filter {{ 'active' if current_filters.type == 'Workstation' }}">
+          <i class="bi bi-pc-display"></i> Workstations
+        </a>
+        <a href="{{ url_for('devices.classification', type='Network Device') }}"
+           class="btn btn-outline-warning btn-sm quick-filter {{ 'active' if current_filters.type == 'Network Device' }}">
+          <i class="bi bi-router"></i> Network
+        </a>
+        <a href="{{ url_for('devices.classification', type='Printer') }}"
+           class="btn btn-outline-info btn-sm quick-filter {{ 'active' if current_filters.type == 'Printer' }}">
+          <i class="bi bi-printer"></i> Printers
+        </a>
+        <a href="{{ url_for('devices.classification', type='IoT Device') }}"
+           class="btn btn-outline-success btn-sm quick-filter {{ 'active' if current_filters.type == 'IoT Device' }}">
+          <i class="bi bi-cpu"></i> IoT
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risultati -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Devices
+            {% if pagination and pagination.total %}
+              <small class="text-muted">({{ pagination.total }} found)</small>
+            {% endif %}
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-tool dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-gear"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url_for('devices.classification', per_page=25, **current_filters) }}">25 per page</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('devices.classification', per_page=50, **current_filters) }}">50 per page</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('devices.classification', per_page=100, **current_filters) }}">100 per page</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body p-0">
+          {% if devices %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Device</th>
+                    <th>Type/Subtype</th>
+                    <th>Vendor</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for device in devices %}
+                  <tr class="device-row">
+                    <!-- Device Info -->
+                    <td>
+                      <div>
+                        <strong>
+                          <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                             class="text-decoration-none">
+                            {{ device.ip_address }}
+                          </a>
+                        </strong>
+                        {% if device.hostname %}
+                          <div class="small text-muted">{{ device.hostname }}</div>
+                        {% endif %}
+                        {% if device.mac_address %}
+                          <div class="small text-muted">
+                            <i class="bi bi-hdd-network"></i> {{ device.mac_address }}
+                          </div>
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <!-- Type/Subtype -->
+                    <td>
+                      <div>
+                        {% if device.device_type %}
+                          <span class="badge
+                            {% if device.device_type == 'Server' %}bg-danger
+                            {% elif device.device_type == 'Workstation' %}bg-primary
+                            {% elif device.device_type == 'Network Device' %}bg-warning
+                            {% elif device.device_type == 'Printer' %}bg-info
+                            {% elif device.device_type == 'IoT Device' %}bg-success
+                            {% else %}bg-secondary
+                            {% endif %}">
+                            {% if device.device_type == 'Server' %}<i class="bi bi-server"></i>
+                            {% elif device.device_type == 'Workstation' %}<i class="bi bi-pc-display"></i>
+                            {% elif device.device_type == 'Network Device' %}<i class="bi bi-router"></i>
+                            {% elif device.device_type == 'Printer' %}<i class="bi bi-printer"></i>
+                            {% elif device.device_type == 'IoT Device' %}<i class="bi bi-cpu"></i>
+                            {% else %}<i class="bi bi-question-circle"></i>
+                            {% endif %}
+                            {{ device.device_type }}
+                          </span>
+                        {% else %}
+                          <span class="text-muted">Unknown</span>
+                        {% endif %}
+
+                        {% if device.device_subtype %}
+                          <div class="small text-muted mt-1">{{ device.device_subtype }}</div>
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <!-- Vendor -->
+                    <td>
+                      {% if device.vendor_oui %}
+                        <a href="{{ url_for('devices.vendor_detail', vendor_name=device.vendor_oui) }}"
+                           class="text-decoration-none">
+                          {{ device.vendor_oui }}
+                        </a>
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Confidence -->
+                    <td>
+                      {% set confidence = (device.confidence_score or 0) * 100 %}
+                      <div class="d-flex align-items-center">
+                        <span class="badge
+                          {% if confidence >= 80 %}bg-success
+                          {% elif confidence >= 60 %}bg-primary
+                          {% elif confidence >= 40 %}bg-warning
+                          {% else %}bg-danger
+                          {% endif %} me-2">
+                          {{ "%.0f"|format(confidence) }}%
+                        </span>
+                        <div class="confidence-bar flex-grow-1" style="width: 60px;">
+                          <div class="confidence-fill
+                            {% if confidence >= 80 %}bg-success
+                            {% elif confidence >= 60 %}bg-primary
+                            {% elif confidence >= 40 %}bg-warning
+                            {% else %}bg-danger
+                            {% endif %}"
+                               style="width: {{ confidence }}%"></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                      {% if device.status %}
+                        <span class="badge
+                          {% if device.status == 'up' %}bg-success
+                          {% elif device.status == 'down' %}bg-danger
+                          {% else %}bg-warning
+                          {% endif %}">
+                          {% if device.status == 'up' %}<i class="bi bi-check-circle"></i>
+                          {% elif device.status == 'down' %}<i class="bi bi-x-circle"></i>
+                          {% else %}<i class="bi bi-question-circle"></i>
+                          {% endif %}
+                          {{ device.status.title() }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">Unknown</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Details -->
+                    <td>
+                      <div class="d-flex gap-1">
+                        {% if device.open_ports and device.open_ports > 0 %}
+                          <span class="badge bg-info" title="Open Ports">
+                            <i class="bi bi-door-open"></i> {{ device.open_ports }}
+                          </span>
+                        {% endif %}
+                        {% if device.vulnerabilities_count and device.vulnerabilities_count > 0 %}
+                          <span class="badge bg-danger" title="Vulnerabilities">
+                            <i class="bi bi-shield-exclamation"></i> {{ device.vulnerabilities_count }}
+                          </span>
+                        {% endif %}
+                      </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
+                           class="btn btn-outline-primary btn-sm"
+                           title="View Details">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown">
+                          <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li><a class="dropdown-item" href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}">
+                            <i class="bi bi-eye"></i> View Details
+                          </a></li>
+                          {% if device.vendor_oui %}
+                          <li><a class="dropdown-item" href="{{ url_for('devices.vendor_detail', vendor_name=device.vendor_oui) }}">
+                            <i class="bi bi-building"></i> Vendor Analysis
+                          </a></li>
+                          {% endif %}
+                          {% if device.device_type %}
+                          <li><a class="dropdown-item" href="{{ url_for('devices.classification', type=device.device_type) }}">
+                            <i class="bi bi-funnel"></i> Similar Devices
+                          </a></li>
+                          {% endif %}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginazione -->
+            {% if pagination and pagination.total_pages > 1 %}
+            <div class="card-footer">
+              <nav aria-label="Device pagination">
+                <ul class="pagination pagination-sm mb-0 justify-content-center">
+                  <!-- Previous -->
+                  {% if pagination.has_prev %}
+                    <li class="page-item">
+                      <a class="page-link"
+                         href="{{ url_for('devices.classification', page=pagination.page-1, **current_filters) }}">
+                        <i class="bi bi-chevron-left"></i>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                    </li>
+                  {% endif %}
+
+                  <!-- Page Numbers -->
+                  {% set start_page = [1, pagination.page - 2] | max %}
+                  {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+
+                  {% if start_page > 1 %}
+                    <li class="page-item">
+                      <a class="page-link" href="{{ url_for('devices.classification', page=1, **current_filters) }}">1</a>
+                    </li>
+                    {% if start_page > 2 %}
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                  {% endif %}
+
+                  {% for page_num in range(start_page, end_page + 1) %}
+                    <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
+                      <a class="page-link"
+                         href="{{ url_for('devices.classification', page=page_num, **current_filters) }}">
+                        {{ page_num }}
+                      </a>
+                    </li>
+                  {% endfor %}
+
+                  {% if end_page < pagination.total_pages %}
+                    {% if end_page < pagination.total_pages - 1 %}
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                    <li class="page-item">
+                      <a class="page-link"
+                         href="{{ url_for('devices.classification', page=pagination.total_pages, **current_filters) }}">
+                        {{ pagination.total_pages }}
+                      </a>
+                    </li>
+                  {% endif %}
+
+                  <!-- Next -->
+                  {% if pagination.has_next %}
+                    <li class="page-item">
+                      <a class="page-link"
+                         href="{{ url_for('devices.classification', page=pagination.page+1, **current_filters) }}">
+                        <i class="bi bi-chevron-right"></i>
+                      </a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+
+              <div class="text-center text-muted small mt-2">
+                Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to
+                {{ [pagination.page * pagination.per_page, pagination.total] | min }} of
+                {{ pagination.total }} devices
+              </div>
+            </div>
+            {% endif %}
+
+          {% else %}
+            <div class="text-center py-5">
+              <i class="bi bi-search display-4 text-muted"></i>
+              <h4 class="text-muted mt-3">No devices found</h4>
+              <p class="text-muted">
+                {% if current_filters.search or current_filters.type or current_filters.vendor %}
+                  Try adjusting your filters or search criteria.
+                {% else %}
+                  No classified devices available in the database.
+                {% endif %}
+              </p>
+              {% if current_filters.search or current_filters.type or current_filters.vendor %}
+                <a href="{{ url_for('devices.classification') }}" class="btn btn-outline-primary">
+                  <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit del form quando cambia un filtro
+    const filterForm = document.getElementById('filterForm');
+    const selects = filterForm.querySelectorAll('select');
+
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+
+    // Ricerca in tempo reale (con debounce)
+    const searchInput = document.getElementById('search');
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (searchInput.value.length >= 3 || searchInput.value.length === 0) {
+                filterForm.submit();
+            }
+        }, 500);
+    });
+
+    // Shortcut per pulire i filtri
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.blur();
+        }
+    });
+});
+</script>
+{% endblock %}
