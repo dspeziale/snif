@@ -1,174 +1,77 @@
 {% extends "base.html" %}
+{% set active_page = 'reports' %}
 
-{% block title %}Reports Overview - AdminLTE{% endblock %}
-{% block page_title %}Reports & Analytics{% endblock %}
-
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-<li class="breadcrumb-item active">Reports</li>
-{% endblock %}
+{% block title %}Reports Overview{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-  <!-- Report Types -->
-  <div class="row">
-    {% if report_types %}
-    {% for key, report in report_types.items() %}
-    <div class="col-lg-6 col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="{{ report.icon }}"></i> {{ report.title }}
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>{{ report.description }}</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ url_for(report.url) }}" class="btn btn-primary">
-              <i class="bi bi-eye"></i> View Report
-            </a>
-            <button type="button" class="btn btn-outline-secondary" onclick="exportReport('{{ key }}')">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <!-- Default report types if none passed from route -->
-    <div class="col-lg-6 col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-file-earmark-richtext"></i> Executive Summary
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>High-level security overview for management. Includes risk assessment, key findings, and recommendations.</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ url_for('reports.executive_summary') }}" class="btn btn-primary">
-              <i class="bi bi-eye"></i> View Report
-            </a>
-            <button type="button" class="btn btn-outline-secondary" onclick="exportReport('executive')">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Detailed Technical Report
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>Complete technical analysis with all findings, network topology, and detailed vulnerability information.</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ url_for('reports.detailed') }}" class="btn btn-primary">
-              <i class="bi bi-eye"></i> View Report
-            </a>
-            <button type="button" class="btn btn-outline-secondary" onclick="exportReport('detailed')">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-shield-exclamation"></i> Vulnerability Report
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>Focused security vulnerability analysis with risk assessment and remediation recommendations.</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ url_for('reports.vulnerabilities') }}" class="btn btn-primary">
-              <i class="bi bi-eye"></i> View Report
-            </a>
-            <button type="button" class="btn btn-outline-secondary" onclick="exportReport('vulnerability')">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-lg-6 col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-check2-square"></i> Compliance Report
-          </h3>
-        </div>
-        <div class="card-body">
-          <p>Security compliance assessment against industry standards and regulatory requirements.</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <a href="{{ url_for('reports.compliance') }}" class="btn btn-primary">
-              <i class="bi bi-eye"></i> View Report
-            </a>
-            <button type="button" class="btn btn-outline-secondary" onclick="exportReport('compliance')">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Quick Statistics -->
-  <div class="row mt-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
     <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-graph-up"></i> Report Generation Statistics
-          </h3>
-        </div>
+      <h1 class="h3 mb-0">
+        <i class="bi bi-file-earmark-text text-primary"></i> Reports & Analytics
+      </h1>
+      <p class="text-muted">Generate comprehensive reports and export data from your network assessments</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-primary">
         <div class="card-body">
-          <div class="row">
-            <div class="col-lg-3 col-6">
-              <div class="description-block border-right">
-                <span class="description-percentage text-success">
-                  <i class="fas fa-caret-up"></i> 12%
-                </span>
-                <h5 class="description-header">247</h5>
-                <span class="description-text">TOTAL REPORTS GENERATED</span>
-              </div>
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-file-earmark-richtext fs-2"></i>
             </div>
-            <div class="col-lg-3 col-6">
-              <div class="description-block border-right">
-                <span class="description-percentage text-info">
-                  <i class="fas fa-caret-left"></i> 0%
-                </span>
-                <h5 class="description-header">15</h5>
-                <span class="description-text">THIS MONTH</span>
-              </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-4 fw-bold">15</div>
+              <div class="fs-6">Executive Reports</div>
             </div>
-            <div class="col-lg-3 col-6">
-              <div class="description-block border-right">
-                <span class="description-percentage text-warning">
-                  <i class="fas fa-caret-up"></i> 20%
-                </span>
-                <h5 class="description-header">89</h5>
-                <span class="description-text">EXECUTIVE SUMMARIES</span>
-              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-danger">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-shield-exclamation fs-2"></i>
             </div>
-            <div class="col-lg-3 col-6">
-              <div class="description-block">
-                <span class="description-percentage text-danger">
-                  <i class="fas fa-caret-up"></i> 18%
-                </span>
-                <h5 class="description-header">42</h5>
-                <span class="description-text">VULNERABILITY REPORTS</span>
-              </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-4 fw-bold">42</div>
+              <div class="fs-6">Vulnerability Reports</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-download fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-4 fw-bold">128</div>
+              <div class="fs-6">Data Exports</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-calendar-check fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-4 fw-bold">8</div>
+              <div class="fs-6">Scheduled Reports</div>
             </div>
           </div>
         </div>
@@ -176,102 +79,211 @@
     </div>
   </div>
 
-  <!-- Report Tools -->
-  <div class="row mt-4">
+  <!-- Available Reports -->
+  <div class="row">
     <div class="col-md-8">
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">
-            <i class="bi bi-tools"></i> Report Generation Tools
+            <i class="bi bi-file-earmark-bar-graph"></i> Available Reports
           </h3>
         </div>
         <div class="card-body">
           <div class="row">
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-primary btn-block" onclick="generateCustomReport()">
-                <i class="bi bi-gear"></i>
-                <br>Custom Report Builder
-              </button>
+            <!-- Executive Summary -->
+            <div class="col-lg-6 col-md-12 mb-4">
+              <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="card-title mb-0">
+                    <i class="bi bi-file-earmark-richtext"></i> Executive Summary
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <p class="card-text">High-level security overview designed for management. Includes risk assessment, key findings, and strategic recommendations.</p>
+                  <ul class="list-unstyled small">
+                    <li><i class="bi bi-check text-success"></i> Risk assessment overview</li>
+                    <li><i class="bi bi-check text-success"></i> Key security metrics</li>
+                    <li><i class="bi bi-check text-success"></i> Executive recommendations</li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('reports.executive_summary') }}" class="btn btn-primary btn-sm">
+                      <i class="bi bi-eye"></i> View Report
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportReport('executive')">
+                      <i class="bi bi-download"></i> Export
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-info btn-block" onclick="scheduleReport()">
-                <i class="bi bi-calendar-check"></i>
-                <br>Schedule Reports
-              </button>
+
+            <!-- Vulnerability Report -->
+            <div class="col-lg-6 col-md-12 mb-4">
+              <div class="card h-100 border-danger">
+                <div class="card-header bg-danger text-white">
+                  <h5 class="card-title mb-0">
+                    <i class="bi bi-shield-exclamation"></i> Vulnerability Assessment
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <p class="card-text">Comprehensive vulnerability analysis with detailed findings, risk ratings, and remediation guidance.</p>
+                  <ul class="list-unstyled small">
+                    <li><i class="bi bi-check text-success"></i> CVE details and CVSS scores</li>
+                    <li><i class="bi bi-check text-success"></i> Risk prioritization</li>
+                    <li><i class="bi bi-check text-success"></i> Remediation recommendations</li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('security.vulnerabilities') }}" class="btn btn-danger btn-sm">
+                      <i class="bi bi-eye"></i> View Report
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportReport('vulnerability')">
+                      <i class="bi bi-download"></i> Export
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-success btn-block" onclick="bulkExport()">
-                <i class="bi bi-download"></i>
-                <br>Bulk Export
-              </button>
+
+            <!-- Technical Analysis -->
+            <div class="col-lg-6 col-md-12 mb-4">
+              <div class="card h-100 border-info">
+                <div class="card-header bg-info text-white">
+                  <h5 class="card-title mb-0">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> Technical Analysis
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <p class="card-text">Detailed technical report with complete network topology, service enumeration, and technical findings.</p>
+                  <ul class="list-unstyled small">
+                    <li><i class="bi bi-check text-success"></i> Network topology mapping</li>
+                    <li><i class="bi bi-check text-success"></i> Service enumeration</li>
+                    <li><i class="bi bi-check text-success"></i> Port scan results</li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('network.topology') }}" class="btn btn-info btn-sm">
+                      <i class="bi bi-eye"></i> View Report
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="exportReport('technical')">
+                      <i class="bi bi-download"></i> Export
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-warning btn-block" onclick="reportHistory()">
-                <i class="bi bi-clock-history"></i>
-                <br>Report History
-              </button>
-            </div>
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-secondary btn-block" onclick="reportTemplates()">
-                <i class="bi bi-file-template"></i>
-                <br>Report Templates
-              </button>
-            </div>
-            <div class="col-md-4 mb-3">
-              <button type="button" class="btn btn-outline-dark btn-block" onclick="reportSettings()">
-                <i class="bi bi-sliders"></i>
-                <br>Report Settings
-              </button>
+
+            <!-- Data Export -->
+            <div class="col-lg-6 col-md-12 mb-4">
+              <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                  <h5 class="card-title mb-0">
+                    <i class="bi bi-download"></i> Data Export
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <p class="card-text">Export raw data in various formats for analysis, integration with other tools, or backup purposes.</p>
+                  <ul class="list-unstyled small">
+                    <li><i class="bi bi-check text-success"></i> Multiple export formats</li>
+                    <li><i class="bi bi-check text-success"></i> Customizable data selection</li>
+                    <li><i class="bi bi-check text-success"></i> Automated exports</li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('reports.export') }}" class="btn btn-success btn-sm">
+                      <i class="bi bi-gear"></i> Configure Export
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="quickExport()">
+                      <i class="bi bi-lightning"></i> Quick Export
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Report Tools -->
     <div class="col-md-4">
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">
-            <i class="bi bi-info-circle"></i> Report Information
+            <i class="bi bi-tools"></i> Report Tools
           </h3>
         </div>
         <div class="card-body">
-          <h6>Available Export Formats:</h6>
-          <ul class="list-unstyled">
-            <li class="mb-2">
-              <i class="bi bi-file-pdf text-danger"></i> PDF - Executive presentations
-            </li>
-            <li class="mb-2">
-              <i class="bi bi-file-excel text-success"></i> CSV - Data analysis
-            </li>
-            <li class="mb-2">
-              <i class="bi bi-filetype-json text-info"></i> JSON - API integration
-            </li>
-            <li class="mb-2">
-              <i class="bi bi-file-word text-primary"></i> DOCX - Documentation
-            </li>
-          </ul>
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-outline-primary" onclick="generateCustomReport()">
+              <i class="bi bi-gear"></i> Custom Report Builder
+            </button>
+            <button type="button" class="btn btn-outline-info" onclick="scheduleReport()">
+              <i class="bi bi-calendar-check"></i> Schedule Reports
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="bulkExport()">
+              <i class="bi bi-download"></i> Bulk Export
+            </button>
+            <a href="{{ url_for('reports.history') if url_for('reports.history') else '#' }}" class="btn btn-outline-warning" onclick="if(this.href === window.location.href + '#') { reportHistory(); return false; }">
+              <i class="bi bi-clock-history"></i> Report History
+            </a>
+            <button type="button" class="btn btn-outline-secondary" onclick="reportTemplates()">
+              <i class="bi bi-file-template"></i> Report Templates
+            </button>
+            <button type="button" class="btn btn-outline-dark" onclick="reportSettings()">
+              <i class="bi bi-sliders"></i> Report Settings
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <hr>
-
-          <h6>Report Features:</h6>
-          <ul class="list-unstyled small">
-            <li class="mb-1">
-              <i class="bi bi-check text-success"></i> Automated generation
-            </li>
-            <li class="mb-1">
-              <i class="bi bi-check text-success"></i> Customizable templates
-            </li>
-            <li class="mb-1">
-              <i class="bi bi-check text-success"></i> Scheduled delivery
-            </li>
-            <li class="mb-1">
-              <i class="bi bi-check text-success"></i> Real-time data
-            </li>
-            <li class="mb-1">
-              <i class="bi bi-check text-success"></i> Multiple formats
-            </li>
-          </ul>
+      <!-- Report Information -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-info-circle"></i> Export Formats
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+              <div>
+                <i class="bi bi-file-pdf text-danger me-2"></i>
+                <strong>PDF</strong>
+                <br><small class="text-muted">Executive presentations</small>
+              </div>
+              <span class="badge bg-danger">Formatted</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+              <div>
+                <i class="bi bi-file-excel text-success me-2"></i>
+                <strong>CSV/Excel</strong>
+                <br><small class="text-muted">Data analysis</small>
+              </div>
+              <span class="badge bg-success">Raw Data</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+              <div>
+                <i class="bi bi-filetype-json text-info me-2"></i>
+                <strong>JSON</strong>
+                <br><small class="text-muted">API integration</small>
+              </div>
+              <span class="badge bg-info">Structured</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+              <div>
+                <i class="bi bi-file-word text-primary me-2"></i>
+                <strong>DOCX</strong>
+                <br><small class="text-muted">Documentation</small>
+              </div>
+              <span class="badge bg-primary">Editable</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -287,28 +299,30 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <strong>Executive Summary</strong>
-                <br>
-                <small class="text-muted">Generated 2 hours ago</small>
+                <br><small class="text-muted">Generated 2 hours ago</small>
               </div>
               <span class="badge bg-success">PDF</span>
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <strong>Vulnerability Report</strong>
-                <br>
-                <small class="text-muted">Generated 1 day ago</small>
+                <br><small class="text-muted">Generated 1 day ago</small>
               </div>
               <span class="badge bg-warning">CSV</span>
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <div>
                 <strong>Technical Analysis</strong>
-                <br>
-                <small class="text-muted">Generated 3 days ago</small>
+                <br><small class="text-muted">Generated 3 days ago</small>
               </div>
               <span class="badge bg-info">JSON</span>
             </li>
           </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" onclick="showAllReports(); return false;" class="btn btn-sm btn-outline-primary w-100">
+            <i class="bi bi-list"></i> View All Reports
+          </a>
         </div>
       </div>
     </div>
@@ -330,9 +344,30 @@ function exportReport(reportType) {
         btn.innerHTML = originalText;
         btn.disabled = false;
 
-        // Trigger download
-        window.open('/reports/export/' + reportType + '?format=pdf', '_blank');
+        // Trigger download based on report type
+        let url;
+        switch(reportType) {
+            case 'executive':
+                url = '/reports/export/executive?format=pdf';
+                break;
+            case 'vulnerability':
+                url = '/security/export/vulnerabilities?format=pdf';
+                break;
+            case 'technical':
+                url = '/network/export/technical?format=pdf';
+                break;
+            default:
+                url = '/reports/export/' + reportType + '?format=pdf';
+        }
+
+        window.open(url, '_blank');
+        showToast('Export Started', 'Your report is being generated and will download shortly.');
     }, 2000);
+}
+
+function quickExport() {
+    // Redirect to export page with predefined settings
+    window.location.href = '{{ url_for("reports.export") }}?preset=quick';
 }
 
 function generateCustomReport() {
@@ -350,7 +385,12 @@ function bulkExport() {
 }
 
 function reportHistory() {
-    window.open('/reports/history', '_blank');
+    // Try to navigate to report history, fallback to alert
+    try {
+        window.location.href = '/reports/history';
+    } catch(e) {
+        alert('Report History would show previously generated reports with options to re-download or regenerate.');
+    }
 }
 
 function reportTemplates() {
@@ -361,9 +401,35 @@ function reportSettings() {
     alert('Report Settings panel would open here. Users can configure default options, branding, and preferences.');
 }
 
-// Auto-refresh statistics every 5 minutes
-setTimeout(function() {
-    location.reload();
-}, 300000);
+function showAllReports() {
+    reportHistory();
+}
+
+function showToast(title, message) {
+    // Simple toast notification - replace with your preferred toast library
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #198754;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        max-width: 300px;
+    `;
+    toast.innerHTML = `<strong>${title}</strong><br>${message}`;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+        }
+    }, 4000);
+}
 </script>
 {% endblock %}

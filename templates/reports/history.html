@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+{% set active_page = 'reports' %}
+
+{% block title %}Report History{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-0">
+            <i class="bi bi-clock-history text-info"></i> Report History
+          </h1>
+          <p class="text-muted">View and manage previously generated reports</p>
+        </div>
+        <div class="btn-group">
+          <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Reports
+          </a>
+          <button type="button" class="btn btn-outline-primary" onclick="refreshHistory()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="row align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Report Type</label>
+              <select class="form-select" id="reportTypeFilter">
+                <option value="">All Types</option>
+                <option value="executive">Executive Summary</option>
+                <option value="vulnerability">Vulnerability Report</option>
+                <option value="technical">Technical Analysis</option>
+                <option value="export">Data Export</option>
+                <option value="custom">Custom Report</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Date Range</label>
+              <select class="form-select" id="dateRangeFilter">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">Last Week</option>
+                <option value="month">Last Month</option>
+                <option value="quarter">Last Quarter</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Search</label>
+              <input type="text" class="form-control" id="searchFilter" placeholder="Search by filename or description...">
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100" onclick="applyFilters()">
+                <i class="bi bi-search"></i> Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Storage Usage</h5>
+          <div class="d-flex justify-content-center align-items-center">
+            <div class="me-3">
+              <div class="fs-4 fw-bold text-primary">2.3 GB</div>
+              <small class="text-muted">Used</small>
+            </div>
+            <div class="progress" style="width: 100px; height: 8px;">
+              <div class="progress-bar" role="progressbar" style="width: 46%"></div>
+            </div>
+            <div class="ms-3">
+              <div class="fs-4 fw-bold text-muted">5.0 GB</div>
+              <small class="text-muted">Total</small>
+            </div>
+          </div>
+          <button class="btn btn-outline-danger btn-sm mt-2" onclick="cleanupOldReports()">
+            <i class="bi bi-trash"></i> Cleanup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-list"></i> Report History
+            </h5>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-primary" onclick="selectAll()">
+                <i class="bi bi-check-all"></i> Select All
+              </button>
+              <button type="button" class="btn btn-outline-secondary" onclick="deselectAll()">
+                <i class="bi bi-x-square"></i> Deselect
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="deleteSelected()">
+                <i class="bi bi-trash"></i> Delete Selected
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th width="30">
+                    <input type="checkbox" class="form-check-input" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                  </th>
+                  <th>Report Name</th>
+                  <th>Type</th>
+                  <th>Generated</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Executive Summary Reports -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="1">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-pdf text-danger me-2"></i>
+                      <div>
+                        <strong>Executive Summary - Q4 2024</strong>
+                        <br><small class="text-muted">Network security overview for management</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-primary">Executive</span></td>
+                  <td>
+                    <div>Dec 15, 2024</div>
+                    <small class="text-muted">2 hours ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">2.1 MB</span></td>
+                  <td><span class="badge bg-success">Ready</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" onclick="downloadReport(1)" title="Download">
+                        <i class="bi bi-download"></i>
+                      </button>
+                      <button class="btn btn-outline-info" onclick="previewReport(1)" title="Preview">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn btn-outline-warning" onclick="shareReport(1)" title="Share">
+                        <i class="bi bi-share"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteReport(1)" title="Delete">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Vulnerability Reports -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="2">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-excel text-success me-2"></i>
+                      <div>
+                        <strong>Vulnerability Assessment Report</strong>
+                        <br><small class="text-muted">Critical and high-risk vulnerabilities detailed analysis</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-danger">Vulnerability</span></td>
+                  <td>
+                    <div>Dec 14, 2024</div>
+                    <small class="text-muted">1 day ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">5.7 MB</span></td>
+                  <td><span class="badge bg-success">Ready</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" onclick="downloadReport(2)">
+                        <i class="bi bi-download"></i>
+                      </button>
+                      <button class="btn btn-outline-info" onclick="previewReport(2)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn btn-outline-warning" onclick="shareReport(2)">
+                        <i class="bi bi-share"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteReport(2)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Technical Analysis -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="3">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-filetype-json text-info me-2"></i>
+                      <div>
+                        <strong>Technical Network Analysis</strong>
+                        <br><small class="text-muted">Complete port scan and service detection results</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-info">Technical</span></td>
+                  <td>
+                    <div>Dec 13, 2024</div>
+                    <small class="text-muted">2 days ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">12.4 MB</span></td>
+                  <td><span class="badge bg-warning">Processing</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" disabled>
+                        <i class="bi bi-hourglass"></i>
+                      </button>
+                      <button class="btn btn-outline-secondary" onclick="cancelGeneration(3)">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Data Export -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="4">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-zip text-warning me-2"></i>
+                      <div>
+                        <strong>Complete Network Data Export</strong>
+                        <br><small class="text-muted">All hosts, ports, services data in CSV format</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-success">Export</span></td>
+                  <td>
+                    <div>Dec 12, 2024</div>
+                    <small class="text-muted">3 days ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">45.2 MB</span></td>
+                  <td><span class="badge bg-success">Ready</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" onclick="downloadReport(4)">
+                        <i class="bi bi-download"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteReport(4)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Compliance Report -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="5">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-word text-primary me-2"></i>
+                      <div>
+                        <strong>Compliance Assessment Report</strong>
+                        <br><small class="text-muted">Security compliance status and recommendations</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-warning">Compliance</span></td>
+                  <td>
+                    <div>Dec 10, 2024</div>
+                    <small class="text-muted">5 days ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">8.9 MB</span></td>
+                  <td><span class="badge bg-danger">Expired</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                      <button class="btn btn-outline-primary" onclick="regenerateReport(5)">
+                        <i class="bi bi-arrow-clockwise"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteReport(5)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Scheduled Report -->
+                <tr>
+                  <td>
+                    <input type="checkbox" class="form-check-input report-checkbox" value="6">
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-pdf text-danger me-2"></i>
+                      <div>
+                        <strong>Monthly Security Summary</strong>
+                        <br><small class="text-muted">Automated monthly report (scheduled)</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-secondary">Scheduled</span></td>
+                  <td>
+                    <div>Dec 08, 2024</div>
+                    <small class="text-muted">1 week ago</small>
+                  </td>
+                  <td><span class="badge bg-secondary">3.2 MB</span></td>
+                  <td><span class="badge bg-success">Ready</span></td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" onclick="downloadReport(6)">
+                        <i class="bi bi-download"></i>
+                      </button>
+                      <button class="btn btn-outline-info" onclick="previewReport(6)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn btn-outline-warning" onclick="editSchedule(6)">
+                        <i class="bi bi-calendar"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" onclick="deleteReport(6)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+              Showing 6 of 15 reports
+            </div>
+            <nav>
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item disabled">
+                  <span class="page-link">Previous</span>
+                </li>
+                <li class="page-item active">
+                  <span class="page-link">1</span>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="#">2</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="#">3</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="#">Next</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function refreshHistory() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Refreshing...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        location.reload();
+    }, 1500);
+}
+
+function applyFilters() {
+    const reportType = document.getElementById('reportTypeFilter').value;
+    const dateRange = document.getElementById('dateRangeFilter').value;
+    const search = document.getElementById('searchFilter').value;
+
+    // Here you would implement the actual filtering logic
+    console.log('Applying filters:', { reportType, dateRange, search });
+
+    // For demo purposes, just show a message
+    alert('Filters applied: Type=' + (reportType || 'All') + ', Range=' + dateRange + ', Search=' + (search || 'None'));
+}
+
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const reportCheckboxes = document.querySelectorAll('.report-checkbox');
+
+    reportCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.report-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    document.getElementById('selectAllCheckbox').checked = true;
+}
+
+function deselectAll() {
+    const checkboxes = document.querySelectorAll('.report-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('selectAllCheckbox').checked = false;
+}
+
+function deleteSelected() {
+    const selectedReports = [];
+    document.querySelectorAll('.report-checkbox:checked').forEach(checkbox => {
+        selectedReports.push(checkbox.value);
+    });
+
+    if (selectedReports.length === 0) {
+        alert('Please select at least one report to delete.');
+        return;
+    }
+
+    if (confirm(`Are you sure you want to delete ${selectedReports.length} selected report(s)?`)) {
+        // Here you would make an AJAX call to delete the reports
+        console.log('Deleting reports:', selectedReports);
+        alert(`${selectedReports.length} report(s) deleted successfully.`);
+        location.reload();
+    }
+}
+
+function downloadReport(reportId) {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+    btn.disabled = true;
+
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        // Simulate download
+        window.open(`/reports/download/${reportId}`, '_blank');
+        showToast('Download Started', 'Your report is being downloaded.');
+    }, 1000);
+}
+
+function previewReport(reportId) {
+    // Open report preview in a modal or new window
+    window.open(`/reports/preview/${reportId}`, 'preview', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+}
+
+function shareReport(reportId) {
+    const shareUrl = `${window.location.origin}/reports/share/${reportId}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: 'Security Report',
+            text: 'Check out this security report',
+            url: shareUrl
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            alert('Share link copied to clipboard!');
+        }).catch(() => {
+            prompt('Copy this link to share:', shareUrl);
+        });
+    }
+}
+
+function deleteReport(reportId) {
+    if (confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+        // Here you would make an AJAX call to delete the report
+        console.log('Deleting report:', reportId);
+        alert('Report deleted successfully.');
+        location.reload();
+    }
+}
+
+function cancelGeneration(reportId) {
+    if (confirm('Are you sure you want to cancel report generation?')) {
+        // Here you would make an AJAX call to cancel the generation
+        console.log('Canceling report generation:', reportId);
+        alert('Report generation canceled.');
+        location.reload();
+    }
+}
+
+function regenerateReport(reportId) {
+    if (confirm('Regenerate this expired report? This will create a new version with current data.')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            alert('Report regeneration started. You will be notified when it\'s ready.');
+            location.reload();
+        }, 2000);
+    }
+}
+
+function editSchedule(reportId) {
+    // Open schedule editor modal or redirect to schedule page
+    alert('Schedule editor would open here for report ID: ' + reportId);
+}
+
+function cleanupOldReports() {
+    if (confirm('This will delete all expired and old reports to free up space. Continue?')) {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Cleaning...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            alert('Cleanup completed. 3 old reports were deleted, freeing up 156 MB of space.');
+            location.reload();
+        }, 3000);
+    }
+}
+
+function showToast(title, message) {
+    // Simple toast notification - replace with your preferred toast library
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #198754;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 1000;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    toast.innerHTML = `<strong>${title}</strong><br>${message}`;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}
+
+// Auto-refresh processing reports
+setInterval(() => {
+    const processingReports = document.querySelectorAll('.badge.bg-warning');
+    if (processingReports.length > 0) {
+        console.log('Checking status of processing reports...');
+        // Here you would check the status of processing reports
+    }
+}, 30000); // Check every 30 seconds
+</script>
+{% endblock %}

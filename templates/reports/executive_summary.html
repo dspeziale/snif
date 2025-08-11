@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% set active_page = 'reports' %}
+
+{% block title %}Executive Summary Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-0">
+            <i class="bi bi-file-earmark-bar-graph text-primary"></i> Executive Summary Report
+          </h1>
+          <p class="text-muted">Network Security Assessment Overview</p>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-download"></i> Export
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="exportReport('executive', 'pdf')">
+              <i class="bi bi-file-pdf text-danger"></i> Export as PDF</a></li>
+            <li><a class="dropdown-item" href="#" onclick="exportReport('executive', 'docx')">
+              <i class="bi bi-file-word text-primary"></i> Export as DOCX</a></li>
+            <li><a class="dropdown-item" href="#" onclick="exportReport('executive', 'csv')">
+              <i class="bi bi-file-excel text-success"></i> Export as CSV</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Error:</strong> {{ error }}
+  </div>
+  {% endif %}
+
+  {% if data %}
+  <!-- Key Metrics -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-servers fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fs-4 fw-bold">{{ data.active_hosts }}</div>
+              <div class="fs-6">Active Hosts</div>
+              <small class="opacity-75">of {{ data.total_hosts }} total</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-danger">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-shield-exclamation fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fs-4 fw-bold">{{ data.critical_vulns }}</div>
+              <div class="fs-6">Critical</div>
+              <small class="opacity-75">vulnerabilities</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-exclamation-triangle fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fs-4 fw-bold">{{ data.high_vulns }}</div>
+              <div class="fs-6">High Risk</div>
+              <small class="opacity-75">vulnerabilities</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-graph-up fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fs-4 fw-bold">{{ "%.1f"|format(data.risk_score_per_host) }}</div>
+              <div class="fs-6">Risk Score</div>
+              <small class="opacity-75">per host</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h4 class="card-title">Network Security Assessment</h4>
+              <table class="table table-sm">
+                <tr>
+                  <td><strong>Report Date:</strong></td>
+                  <td>{{ data.report_date.strftime('%B %d, %Y at %I:%M %p') }}</td>
+                </tr>
+                <tr>
+                  <td><strong>Assessment Period:</strong></td>
+                  <td>Last 30 days</td>
+                </tr>
+                <tr>
+                  <td><strong>Scope:</strong></td>
+                  <td>{{ data.total_hosts }} network hosts</td>
+                </tr>
+                <tr>
+                  <td><strong>Report Type:</strong></td>
+                  <td>Executive Summary</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h5>Overall Security Status</h5>
+              {% set risk_level = 'Low' if data.risk_score_per_host < 3 else 'Medium' if data.risk_score_per_host < 6 else 'High' if data.risk_score_per_host < 9 else 'Critical' %}
+              {% set risk_class = 'success' if risk_level == 'Low' else 'warning' if risk_level == 'Medium' else 'danger' %}
+              <div class="alert alert-{{ risk_class }}">
+                <h6 class="alert-heading">
+                  <i class="bi bi-shield-{{ 'check' if risk_level == 'Low' else 'exclamation' }}"></i>
+                  Risk Level: {{ risk_level }}
+                </h6>
+                <p class="mb-0">
+                  {% if risk_level == 'Low' %}
+                    Your network shows a good security posture with minimal critical vulnerabilities.
+                  {% elif risk_level == 'Medium' %}
+                    Some security issues require attention to maintain a strong security posture.
+                  {% elif risk_level == 'High' %}
+                    Multiple security vulnerabilities need immediate attention to reduce risk.
+                  {% else %}
+                    Critical security issues detected that require urgent remediation.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vulnerability Breakdown -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-pie-chart"></i> Vulnerability Distribution
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <canvas id="vulnerabilityChart" width="300" height="300"></canvas>
+            </div>
+            <div class="col-md-6">
+              <div class="list-group">
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge bg-danger me-2"></span>
+                    <strong>Critical</strong>
+                  </div>
+                  <span class="badge bg-danger rounded-pill">{{ data.critical_vulns }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge bg-warning me-2"></span>
+                    <strong>High</strong>
+                  </div>
+                  <span class="badge bg-warning rounded-pill">{{ data.high_vulns }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge bg-info me-2"></span>
+                    <strong>Medium</strong>
+                  </div>
+                  <span class="badge bg-info rounded-pill">{{ data.medium_vulns }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge bg-secondary me-2"></span>
+                    <strong>Low</strong>
+                  </div>
+                  <span class="badge bg-secondary rounded-pill">{{ data.low_vulns }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-list-check"></i> Key Recommendations
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group list-group-flush">
+            {% if data.critical_vulns > 0 %}
+            <div class="list-group-item border-0 px-0">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-exclamation-triangle text-danger me-2 mt-1"></i>
+                <div>
+                  <strong>Immediate Action Required</strong>
+                  <p class="mb-0 small text-muted">{{ data.critical_vulns }} critical vulnerabilities need urgent patching</p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if data.high_vulns > 0 %}
+            <div class="list-group-item border-0 px-0">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-shield-exclamation text-warning me-2 mt-1"></i>
+                <div>
+                  <strong>Security Updates</strong>
+                  <p class="mb-0 small text-muted">Schedule patching for {{ data.high_vulns }} high-risk issues</p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="list-group-item border-0 px-0">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-arrow-repeat text-info me-2 mt-1"></i>
+                <div>
+                  <strong>Regular Scanning</strong>
+                  <p class="mb-0 small text-muted">Continue monthly vulnerability assessments</p>
+                </div>
+              </div>
+            </div>
+            <div class="list-group-item border-0 px-0">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-people text-success me-2 mt-1"></i>
+                <div>
+                  <strong>Training</strong>
+                  <p class="mb-0 small text-muted">Implement security awareness programs</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-table"></i> Security Summary by Priority
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Priority Level</th>
+                  <th>Count</th>
+                  <th>Percentage</th>
+                  <th>Recommended Timeframe</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="table-danger">
+                  <td><i class="bi bi-exclamation-triangle-fill text-danger"></i> Critical</td>
+                  <td><strong>{{ data.critical_vulns }}</strong></td>
+                  <td>{{ "%.1f"|format((data.critical_vulns / data.total_vulnerabilities * 100) if data.total_vulnerabilities > 0 else 0) }}%</td>
+                  <td><span class="badge bg-danger">Immediate (0-24h)</span></td>
+                  <td>
+                    {% if data.critical_vulns == 0 %}
+                      <i class="bi bi-check-circle text-success"></i> Clear
+                    {% else %}
+                      <i class="bi bi-exclamation-triangle text-danger"></i> Action Required
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr class="table-warning">
+                  <td><i class="bi bi-exclamation-triangle text-warning"></i> High</td>
+                  <td><strong>{{ data.high_vulns }}</strong></td>
+                  <td>{{ "%.1f"|format((data.high_vulns / data.total_vulnerabilities * 100) if data.total_vulnerabilities > 0 else 0) }}%</td>
+                  <td><span class="badge bg-warning">1-7 days</span></td>
+                  <td>
+                    {% if data.high_vulns == 0 %}
+                      <i class="bi bi-check-circle text-success"></i> Clear
+                    {% else %}
+                      <i class="bi bi-clock text-warning"></i> Scheduled
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr class="table-info">
+                  <td><i class="bi bi-info-circle text-info"></i> Medium</td>
+                  <td><strong>{{ data.medium_vulns }}</strong></td>
+                  <td>{{ "%.1f"|format((data.medium_vulns / data.total_vulnerabilities * 100) if data.total_vulnerabilities > 0 else 0) }}%</td>
+                  <td><span class="badge bg-info">1-30 days</span></td>
+                  <td><i class="bi bi-arrow-clockwise text-info"></i> In Progress</td>
+                </tr>
+                <tr class="table-secondary">
+                  <td><i class="bi bi-info-circle text-secondary"></i> Low</td>
+                  <td><strong>{{ data.low_vulns }}</strong></td>
+                  <td>{{ "%.1f"|format((data.low_vulns / data.total_vulnerabilities * 100) if data.total_vulnerabilities > 0 else 0) }}%</td>
+                  <td><span class="badge bg-secondary">Next maintenance window</span></td>
+                  <td><i class="bi bi-calendar text-secondary"></i> Planned</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="table-dark">
+                  <th>Total Vulnerabilities</th>
+                  <th><strong>{{ data.total_vulnerabilities }}</strong></th>
+                  <th>100%</th>
+                  <th colspan="2">
+                    <span class="badge bg-primary">Assessment Complete</span>
+                  </th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if data %}
+// Vulnerability Distribution Chart
+const ctx = document.getElementById('vulnerabilityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            data: [{{ data.critical_vulns }}, {{ data.high_vulns }}, {{ data.medium_vulns }}, {{ data.low_vulns }}],
+            backgroundColor: [
+                '#dc3545',  // Critical - Red
+                '#ffc107',  // High - Yellow
+                '#17a2b8',  // Medium - Cyan
+                '#6c757d'   // Low - Gray
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const total = {{ data.total_vulnerabilities }};
+                        const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                        return context.label + ': ' + context.raw + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    }
+});
+{% endif %}
+
+function exportReport(reportType, format) {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Exporting...';
+    btn.disabled = true;
+
+    // Simulate export process
+    setTimeout(function() {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        // Trigger download
+        window.open('/reports/export/' + reportType + '?format=' + format, '_blank');
+
+        // Show success message
+        showToast('Export started', 'Your ' + format.toUpperCase() + ' report is being generated and will download shortly.');
+    }, 2000);
+}
+
+function showToast(title, message) {
+    // Simple toast notification (you can replace with your preferred toast library)
+    alert(title + ': ' + message);
+}
+
+// Auto-refresh data every 5 minutes
+setInterval(function() {
+    if (confirm('New data available. Refresh report?')) {
+        location.reload();
+    }
+}, 300000);
+</script>
+{% endblock %}
