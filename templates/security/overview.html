@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}Security Overview - AdminLTE{% endblock %}
+{% block page_title %}Security Overview{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active">Security Overview</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Errore: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Security Metrics -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ vuln_stats.critical }}</h3>
+          <p>Critical Vulnerabilities</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <a href="{{ url_for('security.vulnerabilities') }}?severity=CRITICAL" class="small-box-footer">
+          View Critical <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ vuln_stats.high }}</h3>
+          <p>High Vulnerabilities</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <a href="{{ url_for('security.vulnerabilities') }}?severity=HIGH" class="small-box-footer">
+          View High <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ vuln_stats.medium }}</h3>
+          <p>Medium Vulnerabilities</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-info-circle"></i>
+        </div>
+        <a href="{{ url_for('security.vulnerabilities') }}?severity=MEDIUM" class="small-box-footer">
+          View Medium <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ vuln_stats.low }}</h3>
+          <p>Low Vulnerabilities</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <a href="{{ url_for('security.vulnerabilities') }}?severity=LOW" class="small-box-footer">
+          View Low <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Top Vulnerabilities -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-shield-exclamation"></i> Top Vulnerabilities by Impact
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('security.vulnerabilities') }}" class="btn btn-sm btn-primary">View All</a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_vulns %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>CVE ID</th>
+                  <th>Title</th>
+                  <th>Severity</th>
+                  <th>Affected Hosts</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for vuln in top_vulns %}
+                <tr>
+                  <td>
+                    {% if vuln.cve_id %}
+                    <a href="{{ url_for('security.cve_detail', cve_id=vuln.cve_id) }}"
+                       class="text-decoration-none">
+                      <code>{{ vuln.cve_id }}</code>
+                    </a>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="text-truncate" style="max-width: 300px;" title="{{ vuln.title }}">
+                      {{ vuln.title }}
+                    </div>
+                  </td>
+                  <td>
+                    {% if vuln.severity == 'CRITICAL' %}
+                    <span class="badge bg-danger">{{ vuln.severity }}</span>
+                    {% elif vuln.severity == 'HIGH' %}
+                    <span class="badge bg-warning">{{ vuln.severity }}</span>
+                    {% elif vuln.severity == 'MEDIUM' %}
+                    <span class="badge bg-info">{{ vuln.severity }}</span>
+                    {% else %}
+                    <span class="badge bg-success">{{ vuln.severity }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-secondary">{{ vuln.count }}</span>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      {% if vuln.cve_id %}
+                      <a href="{{ url_for('security.cve_detail', cve_id=vuln.cve_id) }}"
+                         class="btn btn-outline-primary" title="View Details">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      {% endif %}
+                      <a href="{{ url_for('security.vulnerabilities') }}?search={{ vuln.title }}"
+                         class="btn btn-outline-info" title="Find Similar">
+                        <i class="bi bi-search"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i> No vulnerabilities detected!
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Vulnerability Types -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Vulnerability Types
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if vuln_types %}
+          {% for vtype in vuln_types %}
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <strong>{{ vtype.vuln_type or 'Other' }}</strong>
+              <br>
+              <small class="text-muted">{{ vtype.count }} issues</small>
+            </div>
+            <div>
+              <span class="badge bg-secondary">{{ vtype.count }}</span>
+            </div>
+          </div>
+          <div class="progress mb-3" style="height: 8px;">
+            <div class="progress-bar bg-primary"
+                 style="width: {{ (vtype.count / vuln_stats.total * 100) if vuln_stats.total > 0 else 0 }}%"></div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <p class="text-muted">No vulnerability type data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Most Vulnerable Hosts -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pc-display-horizontal"></i> Most Vulnerable Hosts
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('network.hosts') }}" class="btn btn-sm btn-primary">View All Hosts</a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if vulnerable_hosts %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th>Hostname</th>
+                  <th>Total</th>
+                  <th>Critical</th>
+                  <th>High</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for host in vulnerable_hosts %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                       class="text-decoration-none">
+                      {{ host.ip_address }}
+                    </a>
+                  </td>
+                  <td>{{ host.hostname or '-' }}</td>
+                  <td>
+                    <span class="badge bg-danger">{{ host.vuln_count }}</span>
+                  </td>
+                  <td>
+                    {% if host.critical_count > 0 %}
+                    <span class="badge bg-danger">{{ host.critical_count }}</span>
+                    {% else %}
+                    <span class="text-muted">0</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if host.high_count > 0 %}
+                    <span class="badge bg-warning">{{ host.high_count }}</span>
+                    {% else %}
+                    <span class="text-muted">0</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="alert alert-success">
+            <i class="bi bi-check-circle"></i> No vulnerable hosts detected!
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Actions -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-lightning"></i> Security Actions
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('security.vulnerabilities') }}?severity=CRITICAL"
+               class="btn btn-danger">
+              <i class="bi bi-exclamation-triangle-fill"></i> Review Critical Issues
+            </a>
+            <a href="{{ url_for('security.ssl_analysis') }}"
+               class="btn btn-warning">
+              <i class="bi bi-shield-lock"></i> SSL/TLS Analysis
+            </a>
+            <a href="{{ url_for('security.security_summary') }}"
+               class="btn btn-info">
+              <i class="bi bi-clipboard-data"></i> Security Summary Report
+            </a>
+            <a href="{{ url_for('reports.vulnerabilities') }}"
+               class="btn btn-primary">
+              <i class="bi bi-file-earmark-text"></i> Generate Vulnerability Report
+            </a>
+          </div>
+
+          <hr>
+
+          <h6>Security Tips</h6>
+          <ul class="list-unstyled small">
+            <li class="mb-2">
+              <i class="bi bi-check text-success"></i>
+              Prioritize Critical and High severity vulnerabilities
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-check text-success"></i>
+              Regularly update and patch systems
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-check text-success"></i>
+              Monitor for new vulnerabilities
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-check text-success"></i>
+              Implement network segmentation
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Severity Distribution Chart -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Vulnerability Severity Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="severityChart" width="400" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Severity Distribution Chart
+const severityCtx = document.getElementById('severityChart').getContext('2d');
+const severityChart = new Chart(severityCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            label: 'Vulnerabilities',
+            data: [
+                {{ vuln_stats.critical or 0 }},
+                {{ vuln_stats.high or 0 }},
+                {{ vuln_stats.medium or 0 }},
+                {{ vuln_stats.low or 0 }}
+            ],
+            backgroundColor: [
+                '#dc3545', // red
+                '#ffc107', // yellow
+                '#17a2b8', // cyan
+                '#28a745'  // green
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Auto-refresh every 60 seconds for security data
+setTimeout(function() {
+    location.reload();
+}, 60000);
+</script>
+{% endblock %}

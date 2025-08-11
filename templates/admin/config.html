@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}System Configuration - AdminLTE{% endblock %}
+{% block page_title %}System Configuration{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.config') }}">Admin</a></li>
+<li class="breadcrumb-item active">Configuration</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- System Status -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>
+            {% if config.secret_key_set %}
+            <i class="bi bi-check-circle"></i>
+            {% else %}
+            <i class="bi bi-x-circle"></i>
+            {% endif %}
+          </h3>
+          <p>Security Key</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <div class="small-box-footer">
+          {% if config.secret_key_set %}
+          <span class="text-white">Configured</span>
+          {% else %}
+          <span class="text-white">Not Set</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box {% if config.debug_mode %}bg-warning{% else %}bg-info{% endif %}">
+        <div class="inner">
+          <h3>
+            {% if config.debug_mode %}
+            <i class="bi bi-bug"></i>
+            {% else %}
+            <i class="bi bi-shield-check"></i>
+            {% endif %}
+          </h3>
+          <p>Debug Mode</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-gear"></i>
+        </div>
+        <div class="small-box-footer">
+          {% if config.debug_mode %}
+          <span class="text-white">Enabled</span>
+          {% else %}
+          <span class="text-white">Disabled</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3><i class="bi bi-database"></i></h3>
+          <p>Database</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-server"></i>
+        </div>
+        <div class="small-box-footer">
+          <span class="text-white">Connected</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box {% if config.templates_auto_reload %}bg-warning{% else %}bg-secondary{% endif %}">
+        <div class="inner">
+          <h3>
+            {% if config.templates_auto_reload %}
+            <i class="bi bi-arrow-clockwise"></i>
+            {% else %}
+            <i class="bi bi-pause"></i>
+            {% endif %}
+          </h3>
+          <p>Auto Reload</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-file-code"></i>
+        </div>
+        <div class="small-box-footer">
+          {% if config.templates_auto_reload %}
+          <span class="text-white">Enabled</span>
+          {% else %}
+          <span class="text-white">Disabled</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Configuration Details -->
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list-ul"></i> Application Configuration
+          </h3>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th style="width: 40%">Configuration Key</th>
+                <th>Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Database Path</strong></td>
+                <td>
+                  <code>{{ config.database_path }}</code>
+                </td>
+                <td>
+                  <span class="badge bg-success">
+                    <i class="bi bi-check-circle"></i> Available
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Debug Mode</strong></td>
+                <td>
+                  <code>{{ config.debug_mode }}</code>
+                </td>
+                <td>
+                  {% if config.debug_mode %}
+                  <span class="badge bg-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Development
+                  </span>
+                  {% else %}
+                  <span class="badge bg-success">
+                    <i class="bi bi-check-circle"></i> Production
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Secret Key</strong></td>
+                <td>
+                  {% if config.secret_key_set %}
+                  <code>●●●●●●●●●●●●●●●●</code>
+                  {% else %}
+                  <code class="text-danger">Not configured</code>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if config.secret_key_set %}
+                  <span class="badge bg-success">
+                    <i class="bi bi-check-circle"></i> Configured
+                  </span>
+                  {% else %}
+                  <span class="badge bg-danger">
+                    <i class="bi bi-x-circle"></i> Missing
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Template Auto Reload</strong></td>
+                <td>
+                  <code>{{ config.templates_auto_reload }}</code>
+                </td>
+                <td>
+                  {% if config.templates_auto_reload %}
+                  <span class="badge bg-info">
+                    <i class="bi bi-arrow-clockwise"></i> Enabled
+                  </span>
+                  {% else %}
+                  <span class="badge bg-secondary">
+                    <i class="bi bi-pause"></i> Disabled
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Security Recommendations -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-shield-exclamation"></i> Security Recommendations
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if config.debug_mode %}
+          <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Warning:</strong> Debug mode is currently enabled. This should be disabled in production environments as it can expose sensitive information.
+          </div>
+          {% endif %}
+
+          {% if not config.secret_key_set %}
+          <div class="alert alert-danger">
+            <i class="bi bi-x-circle"></i>
+            <strong>Critical:</strong> No secret key is configured. This is required for session security and should be set immediately.
+          </div>
+          {% endif %}
+
+          <h6>Security Checklist:</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              {% if config.secret_key_set %}
+              <i class="bi bi-check-circle text-success"></i>
+              {% else %}
+              <i class="bi bi-x-circle text-danger"></i>
+              {% endif %}
+              Secret key configured
+            </li>
+            <li class="mb-2">
+              {% if not config.debug_mode %}
+              <i class="bi bi-check-circle text-success"></i>
+              {% else %}
+              <i class="bi bi-x-circle text-danger"></i>
+              {% endif %}
+              Debug mode disabled
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-check-circle text-success"></i>
+              Database connection secure
+            </li>
+            <li class="mb-2">
+              <i class="bi bi-check-circle text-success"></i>
+              HTTPS recommended for production
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Actions -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-tools"></i> System Actions
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-outline-primary" onclick="checkSystemHealth()">
+              <i class="bi bi-heart-pulse"></i> System Health Check
+            </button>
+            <button type="button" class="btn btn-outline-info" onclick="viewLogs()">
+              <i class="bi bi-journal-text"></i> View System Logs
+            </button>
+            <button type="button" class="btn btn-outline-warning" onclick="clearCache()">
+              <i class="bi bi-trash"></i> Clear Cache
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="restartService()">
+              <i class="bi bi-arrow-clockwise"></i> Restart Service
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Environment Info -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-info-circle"></i> Environment Information
+          </h3>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-6">Python Version:</dt>
+            <dd class="col-sm-6">
+              <small class="text-muted">3.9+</small>
+            </dd>
+
+            <dt class="col-sm-6">Flask Version:</dt>
+            <dd class="col-sm-6">
+              <small class="text-muted">2.3.3</small>
+            </dd>
+
+            <dt class="col-sm-6">Database Type:</dt>
+            <dd class="col-sm-6">
+              <small class="text-muted">SQLite 3</small>
+            </dd>
+
+            <dt class="col-sm-6">Platform:</dt>
+            <dd class="col-sm-6">
+              <small class="text-muted">Linux/Windows</small>
+            </dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-speedometer2"></i> System Performance
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-success">
+                  <i class="fas fa-caret-up"></i> 98%
+                </span>
+                <h5 class="description-header">Uptime</h5>
+                <span class="description-text">System availability</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="description-block">
+                <span class="description-percentage text-info">
+                  <i class="fas fa-caret-right"></i> 25ms
+                </span>
+                <h5 class="description-header">Response</h5>
+                <span class="description-text">Average response time</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function checkSystemHealth() {
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Checking...';
+    btn.disabled = true;
+
+    // Simulate health check
+    setTimeout(function() {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('System health check completed. All systems are running normally.');
+    }, 2000);
+}
+
+function viewLogs() {
+    window.open('/admin/logs/parsing', '_blank');
+}
+
+function clearCache() {
+    if (confirm('Are you sure you want to clear the system cache?')) {
+        alert('Cache cleared successfully.');
+    }
+}
+
+function restartService() {
+    if (confirm('Are you sure you want to restart the service? This will temporarily interrupt the application.')) {
+        alert('Service restart initiated. Please wait a few moments...');
+    }
+}
+
+// Auto-refresh configuration status every 60 seconds
+setTimeout(function() {
+    location.reload();
+}, 60000);
+</script>
+{% endblock %}

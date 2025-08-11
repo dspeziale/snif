@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Network Overview - AdminLTE{% endblock %}
+{% block page_title %}Network Overview{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active">Network Overview</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Errore: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Statistiche Principali -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ stats.total_hosts if stats else 0 }}</h3>
+          <p>Total Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-pc-display"></i>
+        </div>
+        <a href="{{ url_for('network.hosts') }}" class="small-box-footer">
+          More info <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ stats.active_hosts if stats else 0 }}</h3>
+          <p>Active Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <a href="{{ url_for('network.hosts') }}?status=up" class="small-box-footer">
+          More info <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ stats.total_services if stats else 0 }}</h3>
+          <p>Services Detected</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-gear"></i>
+        </div>
+        <a href="{{ url_for('network.services') }}" class="small-box-footer">
+          More info <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ stats.open_ports if stats else 0 }}</h3>
+          <p>Open Ports</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-diagram-3"></i>
+        </div>
+        <a href="{{ url_for('network.ports') }}?state=open" class="small-box-footer">
+          More info <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Top Services -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Top Services
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('network.services') }}" class="btn btn-sm btn-primary">View All</a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_services %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Hosts</th>
+                  <th>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for service in top_services %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('network.services') }}?service={{ service.service_name }}"
+                       class="text-decoration-none">
+                      {{ service.service_name }}
+                    </a>
+                  </td>
+                  <td>{{ service.count }}</td>
+                  <td>
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-primary" style="width: {{ (service.count / stats.active_hosts * 100) if stats and stats.active_hosts > 0 else 0 }}%"></div>
+                    </div>
+                    <span class="badge bg-secondary">{{ "%.1f"|format((service.count / stats.active_hosts * 100) if stats and stats.active_hosts > 0 else 0) }}%</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No services data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Ports -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-diagram-3"></i> Most Common Open Ports
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('network.ports') }}" class="btn btn-sm btn-primary">View All</a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_ports %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Port</th>
+                  <th>Protocol</th>
+                  <th>Hosts</th>
+                  <th>Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for port in top_ports %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('network.ports') }}?port={{ port.port_number }}"
+                       class="text-decoration-none">
+                      <strong>{{ port.port_number }}</strong>
+                    </a>
+                  </td>
+                  <td>{{ port.protocol|upper }}</td>
+                  <td>{{ port.count }}</td>
+                  <td>
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-info" style="width: {{ (port.count / stats.active_hosts * 100) if stats and stats.active_hosts > 0 else 0 }}%"></div>
+                    </div>
+                    <span class="badge bg-secondary">{{ "%.1f"|format((port.count / stats.active_hosts * 100) if stats and stats.active_hosts > 0 else 0) }}%</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No ports data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Network Status Distribution -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Host Status Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if host_status_distribution %}
+          <canvas id="statusChart" width="300" height="300"></canvas>
+          {% else %}
+          <p class="text-muted">No status data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor Distribution -->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-building"></i> Top Vendors
+          </h3>
+          <div class="card-tools">
+            <a href="{{ url_for('devices.vendors') }}" class="btn btn-sm btn-primary">View All</a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_vendors %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Vendor</th>
+                  <th>Devices</th>
+                  <th>Active</th>
+                  <th>Distribution</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for vendor in top_vendors %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('network.hosts') }}?vendor={{ vendor.vendor }}"
+                       class="text-decoration-none">
+                      {{ vendor.vendor }}
+                    </a>
+                  </td>
+                  <td>{{ vendor.count }}</td>
+                  <td>{{ vendor.active_count or 0 }}</td>
+                  <td>
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-success" style="width: {{ (vendor.count / stats.total_hosts * 100) if stats and stats.total_hosts > 0 else 0 }}%"></div>
+                    </div>
+                    <span class="badge bg-secondary">{{ "%.1f"|format((vendor.count / stats.total_hosts * 100) if stats and stats.total_hosts > 0 else 0) }}%</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No vendor data available</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-lightning"></i> Quick Actions
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <a href="{{ url_for('network.topology') }}" class="btn btn-outline-primary btn-block mb-2">
+                <i class="bi bi-diagram-2"></i> Network Topology
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="{{ url_for('network.hosts') }}?status=up" class="btn btn-outline-success btn-block mb-2">
+                <i class="bi bi-check-circle"></i> Active Hosts Only
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="{{ url_for('security.vulnerabilities') }}" class="btn btn-outline-danger btn-block mb-2">
+                <i class="bi bi-shield-exclamation"></i> Security Issues
+              </a>
+            </div>
+            <div class="col-md-3">
+              <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-info btn-block mb-2">
+                <i class="bi bi-file-earmark-text"></i> Generate Report
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Host Status Chart
+{% if host_status_distribution %}
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+const statusChart = new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for status in host_status_distribution %}'{{ status.status|title }}'{{ ', ' if not loop.last }}{% endfor %}],
+        datasets: [{
+            data: [{% for status in host_status_distribution %}{{ status.count }}{{ ', ' if not loop.last }}{% endfor %}],
+            backgroundColor: [
+                '#28a745', // green for up
+                '#dc3545', // red for down
+                '#ffc107', // yellow for filtered
+                '#6c757d'  // gray for others
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Auto-refresh every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

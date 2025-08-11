@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Overview - AdminLTE{% endblock %}
+{% block page_title %}Analytics & Metrics{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active">Analytics</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Analytics Categories -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3><i class="bi bi-diagram-3"></i></h3>
+          <p>Network Analytics</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-speedometer2"></i>
+        </div>
+        <a href="{{ url_for('analytics.network') }}" class="small-box-footer">
+          View Network Metrics <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3><i class="bi bi-shield-check"></i></h3>
+          <p>Security Analytics</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <a href="{{ url_for('analytics.security') }}" class="small-box-footer">
+          View Security Metrics <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3><i class="bi bi-graph-down"></i></h3>
+          <p>Performance Trends</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-activity"></i>
+        </div>
+        <a href="{{ url_for('analytics.trends') }}" class="small-box-footer">
+          View Trends <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3><i class="bi bi-bar-chart-steps"></i></h3>
+          <p>Comparative Analysis</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-clipboard-data"></i>
+        </div>
+        <a href="{{ url_for('analytics.comparative') }}" class="small-box-footer">
+          Compare Data <i class="fas fa-arrow-circle-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics Dashboard -->
+  <div class="row">
+    <!-- Network Health Score -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-heart-pulse"></i> Network Health Score
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-center">
+            <canvas id="healthScoreChart" width="200" height="200"></canvas>
+          </div>
+          <div class="text-center mt-3">
+            <h4 class="text-success">92%</h4>
+            <p class="text-muted">Overall network health is good</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Distribution -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-exclamation-triangle"></i> Risk Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="riskChart" width="300" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Device Categories -->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Device Categories
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="deviceChart" width="300" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Tools -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-tools"></i> Analytics Tools
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="text-center">
+                <button type="button" class="btn btn-outline-primary btn-block" onclick="generateReport()">
+                  <i class="bi bi-file-earmark-bar-graph"></i>
+                  <br>Generate Analytics Report
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="text-center">
+                <button type="button" class="btn btn-outline-info btn-block" onclick="exportData()">
+                  <i class="bi bi-download"></i>
+                  <br>Export Analytics Data
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="text-center">
+                <button type="button" class="btn btn-outline-success btn-block" onclick="scheduleReport()">
+                  <i class="bi bi-calendar-check"></i>
+                  <br>Schedule Reports
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="text-center">
+                <button type="button" class="btn btn-outline-warning btn-block" onclick="customAnalysis()">
+                  <i class="bi bi-gear"></i>
+                  <br>Custom Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-lightning"></i> Quick Statistics
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-success">
+                  <i class="fas fa-caret-up"></i> 15%
+                </span>
+                <h5 class="description-header">152</h5>
+                <span class="description-text">New Devices</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="description-block">
+                <span class="description-percentage text-warning">
+                  <i class="fas fa-caret-down"></i> 8%
+                </span>
+                <h5 class="description-header">24</h5>
+                <span class="description-text">Vulnerabilities</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-6">
+              <div class="description-block border-right">
+                <span class="description-percentage text-info">
+                  <i class="fas fa-caret-up"></i> 2%
+                </span>
+                <h5 class="description-header">1,205</h5>
+                <span class="description-text">Total Services</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="description-block">
+                <span class="description-percentage text-danger">
+                  <i class="fas fa-caret-down"></i> 3%
+                </span>
+                <h5 class="description-header">12</h5>
+                <span class="description-text">Critical Issues</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trending Analysis -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-graph-up"></i> Network Activity Trends (Last 30 Days)
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="changePeriod(7)">7 Days</button>
+              <button type="button" class="btn btn-sm btn-primary" onclick="changePeriod(30)">30 Days</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="changePeriod(90)">90 Days</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas id="trendChart" width="400" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Insights -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-lightbulb"></i> Key Insights & Recommendations
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="callout callout-info">
+                <h5>Network Growth</h5>
+                <p>Your network has grown by 15% this month. Consider reviewing capacity planning and security policies for new devices.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="callout callout-warning">
+                <h5>Security Alert</h5>
+                <p>24 new vulnerabilities detected. Prioritize patching critical and high-severity issues.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="callout callout-success">
+                <h5>Performance</h5>
+                <p>Network performance metrics are stable. No immediate action required.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Health Score Doughnut Chart
+const healthCtx = document.getElementById('healthScoreChart').getContext('2d');
+const healthChart = new Chart(healthCtx, {
+    type: 'doughnut',
+    data: {
+        datasets: [{
+            data: [92, 8],
+            backgroundColor: ['#28a745', '#e9ecef'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+
+// Risk Distribution Chart
+const riskCtx = document.getElementById('riskChart').getContext('2d');
+const riskChart = new Chart(riskCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Critical', 'High', 'Medium', 'Low'],
+        datasets: [{
+            data: [3, 12, 45, 89],
+            backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// Device Categories Chart
+const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+const deviceChart = new Chart(deviceCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Servers', 'Workstations', 'Network Devices', 'IoT', 'Others'],
+        datasets: [{
+            data: [25, 35, 15, 18, 7],
+            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#6c757d']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// Trend Chart
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+const trendChart = new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [
+            {
+                label: 'New Devices',
+                data: [12, 19, 15, 25],
+                borderColor: '#007bff',
+                tension: 0.1
+            },
+            {
+                label: 'Vulnerabilities',
+                data: [8, 12, 7, 14],
+                borderColor: '#dc3545',
+                tension: 0.1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// Functions
+function generateReport() {
+    window.open('/reports/analytics', '_blank');
+}
+
+function exportData() {
+    window.open('/analytics/export', '_blank');
+}
+
+function scheduleReport() {
+    alert('Schedule Report functionality would be implemented here.');
+}
+
+function customAnalysis() {
+    alert('Custom Analysis tool would be available here.');
+}
+
+function changePeriod(days) {
+    // Update charts based on selected period
+    console.log('Changing period to ' + days + ' days');
+}
+</script>
+{% endblock %}

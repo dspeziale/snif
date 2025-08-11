@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Network Services - AdminLTE{% endblock %}
+{% block page_title %}Network Services{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">Services</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Filtri -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-funnel"></i> Filtri
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="GET" class="row g-3">
+            <div class="col-md-3">
+              <label for="service" class="form-label">Service Name</label>
+              <select class="form-select" id="service" name="service">
+                <option value="">All Services</option>
+                {% if available_filters and available_filters.services %}
+                {% for service in available_filters.services %}
+                <option value="{{ service.service_name }}" {% if request.args.get('service') == service.service_name %}selected{% endif %}>
+                  {{ service.service_name }} ({{ service.count }})
+                </option>
+                {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label for="port" class="form-label">Port Number</label>
+              <input type="number" class="form-control" id="port" name="port"
+                     value="{{ request.args.get('port', '') }}" placeholder="80, 443, 22...">
+            </div>
+            <div class="col-md-3">
+              <label for="host_ip" class="form-label">Host IP</label>
+              <input type="text" class="form-control" id="host_ip" name="host_ip"
+                     value="{{ request.args.get('host_ip', '') }}" placeholder="192.168.1.1">
+            </div>
+            <div class="col-md-3">
+              <label for="search" class="form-label">Search</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ request.args.get('search', '') }}" placeholder="Product, version...">
+            </div>
+            <div class="col-md-3">
+              <label for="per_page" class="form-label">Per Page</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="50" {% if request.args.get('per_page', '50') == '50' %}selected{% endif %}>50</option>
+                <option value="100" {% if request.args.get('per_page') == '100' %}selected{% endif %}>100</option>
+                <option value="200" {% if request.args.get('per_page') == '200' %}selected{% endif %}>200</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Filter
+              </button>
+              <a href="{{ url_for('network.services') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i> Reset
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="row mb-3">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ total_count if total_count is defined else 0 }}</h3>
+          <p>Total Services</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-gear"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ stats.unique_services if stats else 0 }}</h3>
+          <p>Unique Services</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-collection"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ stats.unique_ports if stats else 0 }}</h3>
+          <p>Different Ports</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-diagram-3"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ stats.hosts_with_services if stats else 0 }}</h3>
+          <p>Hosts with Services</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-pc-display"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services List -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Services List
+            <span class="badge bg-secondary ms-2">{{ total_count if total_count is defined else 0 }} services</span>
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i> Export
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportServices('csv')">CSV</a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportServices('json')">JSON</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+          {% if error %}
+          <div class="alert alert-danger m-3">
+            <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+          </div>
+          {% elif not services %}
+          <div class="alert alert-info m-3">
+            <i class="bi bi-info-circle"></i> No services found with the specified filters.
+          </div>
+          {% else %}
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>Host</th>
+                <th>Port</th>
+                <th>Service</th>
+                <th>Product</th>
+                <th>Version</th>
+                <th>Additional Info</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for service in services %}
+              <tr>
+                <td>
+                  <div>
+                    <a href="{{ url_for('network.host_detail', ip_address=service.ip_address) }}"
+                       class="text-decoration-none">
+                      <strong>{{ service.ip_address }}</strong>
+                    </a>
+                    {% if service.hostname %}
+                    <br>
+                    <small class="text-muted">{{ service.hostname }}</small>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <a href="{{ url_for('network.ports') }}?port={{ service.port_number }}"
+                     class="text-decoration-none">
+                    <span class="badge bg-primary">{{ service.port_number }}/{{ service.protocol or 'tcp' }}</span>
+                  </a>
+                </td>
+                <td>
+                  {% if service.service_name %}
+                  <a href="{{ url_for('network.services') }}?service={{ service.service_name }}"
+                     class="text-decoration-none">
+                    <strong>{{ service.service_name }}</strong>
+                  </a>
+                  {% else %}
+                  <span class="text-muted">Unknown</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if service.service_product %}
+                  <span class="text-info">{{ service.service_product }}</span>
+                  {% else %}
+                  <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if service.service_version %}
+                  <code class="text-success">{{ service.service_version }}</code>
+                  {% else %}
+                  <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if service.service_info %}
+                  <div class="text-truncate" style="max-width: 200px;" title="{{ service.service_info }}">
+                    <small class="text-muted">{{ service.service_info }}</small>
+                  </div>
+                  {% else %}
+                  <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('network.host_detail', ip_address=service.ip_address) }}"
+                       class="btn btn-primary" title="View Host">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('network.ports') }}?host_ip={{ service.ip_address }}"
+                       class="btn btn-info" title="Host Ports">
+                      <i class="bi bi-diagram-3"></i>
+                    </a>
+                    <a href="{{ url_for('security.vulnerabilities') }}?host_ip={{ service.ip_address }}"
+                       class="btn btn-warning" title="Vulnerabilities">
+                      <i class="bi bi-shield-exclamation"></i>
+                    </a>
+                    <button type="button" class="btn btn-secondary"
+                            onclick="viewServiceDetails('{{ service.ip_address }}', '{{ service.port_number }}')"
+                            title="Service Details">
+                      <i class="bi bi-info-circle"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages and total_pages > 1 %}
+        <div class="card-footer">
+          <nav aria-label="Services pagination">
+            <ul class="pagination pagination-sm m-0 float-end">
+              {% set current_filters = request.args.to_dict() %}
+              {% if page > 1 %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.services', page=page-1, **current_filters) }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+
+              {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('network.services', page=p, **current_filters) }}">{{ p }}</a>
+              </li>
+              {% endfor %}
+
+              {% if page < total_pages %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.services', page=page+1, **current_filters) }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          <div class="float-start">
+            {% set current_page = page or 1 %}
+            {% set current_per_page = request.args.get('per_page', 50)|int %}
+            Showing {{ (current_page-1)*current_per_page + 1 }} to {{ min(current_page*current_per_page, total_count) if total_count else 0 }} of {{ total_count or 0 }} services
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Analytics -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Top Services
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="topServicesChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Port Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="portDistributionChart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Analysis -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-shield-check"></i> Service Security Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-danger">
+                  <i class="bi bi-exclamation-triangle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">High Risk Services</span>
+                  <span class="info-box-number">{{ security_stats.high_risk if security_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-warning">
+                  <i class="bi bi-shield-exclamation"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Outdated Versions</span>
+                  <span class="info-box-number">{{ security_stats.outdated if security_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-info">
+                  <i class="bi bi-eye-slash"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Unknown Services</span>
+                  <span class="info-box-number">{{ security_stats.unknown if security_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="info-box">
+                <span class="info-box-icon bg-success">
+                  <i class="bi bi-check-circle"></i>
+                </span>
+                <div class="info-box-content">
+                  <span class="info-box-text">Secure Services</span>
+                  <span class="info-box-number">{{ security_stats.secure if security_stats else 0 }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Service Details Modal -->
+<div class="modal fade" id="serviceDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Service Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="serviceDetailsContent">
+          <div class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Top Services Chart
+const topServicesCtx = document.getElementById('topServicesChart').getContext('2d');
+const topServicesChart = new Chart(topServicesCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['HTTP', 'SSH', 'HTTPS', 'FTP', 'SMB', 'Others'],
+        datasets: [{
+            data: [25, 20, 18, 12, 10, 15],
+            backgroundColor: [
+                '#007bff', '#28a745', '#ffc107',
+                '#dc3545', '#17a2b8', '#6c757d'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Port Distribution Chart
+const portDistCtx = document.getElementById('portDistributionChart').getContext('2d');
+const portDistChart = new Chart(portDistCtx, {
+    type: 'bar',
+    data: {
+        labels: ['80', '443', '22', '21', '25', '53', '135', '139', '445', '3389'],
+        datasets: [{
+            label: 'Services Count',
+            data: [45, 38, 32, 15, 12, 28, 8, 6, 18, 5],
+            backgroundColor: '#007bff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+function exportServices(format) {
+    // Get current filters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Add format parameter
+    urlParams.set('format', format);
+
+    // Create export URL - you can adjust this based on your actual export endpoint
+    const exportUrl = '/tools/database/export?table=services&' + urlParams.toString();
+
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Exporting...';
+    btn.disabled = true;
+
+    // Simulate export process
+    setTimeout(function() {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        // Open export URL
+        window.open(exportUrl, '_blank');
+    }, 1000);
+}
+    $('#serviceDetailsModal').modal('show');
+    $('#serviceDetailsContent').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `);
+
+    // Simulate API call
+    setTimeout(function() {
+        $('#serviceDetailsContent').html(`
+            <h6>Service Details for ${ip}:${port}</h6>
+            <dl class="row">
+                <dt class="col-sm-3">Host:</dt>
+                <dd class="col-sm-9">${ip}</dd>
+                <dt class="col-sm-3">Port:</dt>
+                <dd class="col-sm-9">${port}</dd>
+                <dt class="col-sm-3">Status:</dt>
+                <dd class="col-sm-9"><span class="badge bg-success">Active</span></dd>
+                <dt class="col-sm-3">Last Seen:</dt>
+                <dd class="col-sm-9">2024-01-15 10:30:00</dd>
+            </dl>
+            <p><em>Detailed service analysis would be displayed here.</em></p>
+        `);
+    }, 1000);
+}
+
+// Auto-refresh every 60 seconds
+setTimeout(function() {
+    location.reload();
+}, 60000);
+</script>
+{% endblock %}

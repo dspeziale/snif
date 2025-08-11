@@ -1,593 +1,279 @@
 {% extends "base.html" %}
 
-{% block title %}Network Hosts{% endblock %}
+{% block title %}Network Hosts - AdminLTE{% endblock %}
 {% block page_title %}Network Hosts{% endblock %}
 
 {% block breadcrumbs %}
 <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
 <li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
-<li class="breadcrumb-item active" aria-current="page">Hosts</li>
+<li class="breadcrumb-item active">Hosts</li>
 {% endblock %}
 
 {% block content %}
-<!-- Filtri e statistiche -->
-<div class="row mb-4">
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="card-title mb-0">
-          <i class="bi bi-funnel"></i> Filters & Search
-        </h5>
-      </div>
-      <div class="card-body">
-        <form method="GET" id="filterForm">
-          <div class="row g-3">
-            <!-- Status Filter -->
+<div class="container-fluid">
+  <!-- Filtri -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-funnel"></i> Filtri
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <form method="GET" class="row g-3">
             <div class="col-md-3">
               <label for="status" class="form-label">Status</label>
-              <select name="status" id="status" class="form-select">
-                <option value="">All Status</option>
-                <option value="up" {{ 'selected' if current_filters.status == 'up' }}>Up</option>
-                <option value="down" {{ 'selected' if current_filters.status == 'down' }}>Down</option>
+              <select class="form-select" id="status" name="status">
+                <option value="">Tutti</option>
+                <option value="up" {% if filters.status == 'up' %}selected{% endif %}>Up</option>
+                <option value="down" {% if filters.status == 'down' %}selected{% endif %}>Down</option>
+                <option value="filtered" {% if filters.status == 'filtered' %}selected{% endif %}>Filtered</option>
               </select>
             </div>
-
-            <!-- Hostname Filter -->
-            <div class="col-md-3">
-              <label for="has_hostname" class="form-label">Hostname</label>
-              <select name="has_hostname" id="has_hostname" class="form-select">
-                <option value="">All</option>
-                <option value="true" {{ 'selected' if current_filters.has_hostname == 'true' }}>With Hostname</option>
-                <option value="false" {{ 'selected' if current_filters.has_hostname == 'false' }}>Without Hostname</option>
-              </select>
-            </div>
-
-            <!-- Vendor Filter -->
             <div class="col-md-3">
               <label for="vendor" class="form-label">Vendor</label>
-              <select name="vendor" id="vendor" class="form-select">
-                <option value="">All Vendors</option>
-                {% for vendor in vendors %}
-                <option value="{{ vendor.vendor }}" {{ 'selected' if current_filters.vendor == vendor.vendor }}>
-                  {{ vendor.vendor }}
+              <select class="form-select" id="vendor" name="vendor">
+                <option value="">Tutti</option>
+                {% for vendor in available_filters.vendors %}
+                <option value="{{ vendor.vendor }}" {% if filters.vendor == vendor.vendor %}selected{% endif %}>
+                  {{ vendor.vendor }} ({{ vendor.count }})
                 </option>
                 {% endfor %}
               </select>
             </div>
-
-            <!-- Search -->
             <div class="col-md-3">
-              <label for="search" class="form-label">Search</label>
-              <div class="input-group">
-                <input type="text" name="search" id="search" class="form-control"
-                       placeholder="IP, hostname, MAC..." value="{{ current_filters.search or '' }}">
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
+              <label for="search" class="form-label">Cerca IP/Hostname</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ filters.search or '' }}" placeholder="192.168.1.1 o hostname">
             </div>
-          </div>
-
-          <div class="row mt-3">
+            <div class="col-md-3">
+              <label for="per_page" class="form-label">Per pagina</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                <option value="200" {% if per_page == 200 %}selected{% endif %}>200</option>
+              </select>
+            </div>
             <div class="col-12">
               <button type="submit" class="btn btn-primary">
-                <i class="bi bi-funnel"></i> Apply Filters
+                <i class="bi bi-search"></i> Filtra
               </button>
               <a href="{{ url_for('network.hosts') }}" class="btn btn-secondary">
-                <i class="bi bi-x-circle"></i> Clear Filters
+                <i class="bi bi-arrow-clockwise"></i> Reset
               </a>
-              <div class="btn-group ms-3" role="group">
-                <a href="{{ url_for('network.hosts', status='up') }}" class="btn btn-outline-success btn-sm">
-                  <i class="bi bi-check-circle"></i> Active Only
-                </a>
-                <a href="{{ url_for('network.hosts', has_hostname='true') }}" class="btn btn-outline-info btn-sm">
-                  <i class="bi bi-tag"></i> With Hostname
-                </a>
-              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistiche -->
+  <div class="row mb-3">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ total_count }}</h3>
+          <p>Total Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-pc-display"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ stats.up_count if stats else 0 }}</h3>
+          <p>Active Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ stats.down_count if stats else 0 }}</h3>
+          <p>Inactive Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-x-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ stats.filtered_count if stats else 0 }}</h3>
+          <p>Filtered Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-shield-exclamation"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista Hosts -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> Hosts List
+            <span class="badge bg-secondary ms-2">{{ total_count }} hosts</span>
+          </h3>
+          <div class="card-tools">
+            <div class="btn-group">
+              <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-download"></i> Export
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('network.api_hosts', format='csv') }}">CSV</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('network.api_hosts', format='json') }}">JSON</a></li>
+              </ul>
             </div>
           </div>
-        </form>
-      </div>
-    </div>
-  </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+          {% if error %}
+          <div class="alert alert-danger m-3">
+            <i class="bi bi-exclamation-triangle"></i> Errore: {{ error }}
+          </div>
+          {% elif not hosts %}
+          <div class="alert alert-info m-3">
+            <i class="bi bi-info-circle"></i> Nessun host trovato con i filtri specificati.
+          </div>
+          {% else %}
+          <table class="table table-hover text-nowrap">
+            <thead>
+              <tr>
+                <th>IP Address</th>
+                <th>Hostname</th>
+                <th>Status</th>
+                <th>Vendor</th>
+                <th>MAC Address</th>
+                <th>Open Ports</th>
+                <th>Vulnerabilities</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for host in hosts %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                     class="text-decoration-none">
+                    <strong>{{ host.ip_address }}</strong>
+                  </a>
+                </td>
+                <td>{{ host.hostname or '-' }}</td>
+                <td>
+                  {% if host.status == 'up' %}
+                  <span class="badge bg-success">Up</span>
+                  {% elif host.status == 'down' %}
+                  <span class="badge bg-danger">Down</span>
+                  {% else %}
+                  <span class="badge bg-warning">{{ host.status|title }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ host.vendor or '-' }}</td>
+                <td>
+                  <small class="text-muted">{{ host.mac_address or '-' }}</small>
+                </td>
+                <td>
+                  {% if host.open_ports %}
+                  <span class="badge bg-info">{{ host.open_ports }}</span>
+                  {% else %}
+                  <span class="text-muted">0</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if host.vuln_count %}
+                  <span class="badge bg-danger">{{ host.vuln_count }}</span>
+                  {% else %}
+                  <span class="text-muted">0</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                       class="btn btn-primary" title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('network.ports') }}?host_ip={{ host.ip_address }}"
+                       class="btn btn-info" title="View Ports">
+                      <i class="bi bi-diagram-3"></i>
+                    </a>
+                    <a href="{{ url_for('security.vulnerabilities') }}?host_ip={{ host.ip_address }}"
+                       class="btn btn-warning" title="View Vulnerabilities">
+                      <i class="bi bi-shield-exclamation"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
+        </div>
 
-  <!-- Statistics Card -->
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-header">
-        <h5 class="card-title mb-0">
-          <i class="bi bi-bar-chart"></i> Current Filter Stats
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-4">
-            <h4 class="text-primary">{{ filter_stats.total_filtered }}</h4>
-            <small class="text-muted">Total</small>
-          </div>
-          <div class="col-4">
-            <h4 class="text-success">{{ filter_stats.active_filtered }}</h4>
-            <small class="text-muted">Active</small>
-          </div>
-          <div class="col-4">
-            <h4 class="text-danger">{{ filter_stats.with_vulnerabilities }}</h4>
-            <small class="text-muted">With Vulns</small>
+        <!-- Paginazione -->
+        {% if total_pages > 1 %}
+        <div class="card-footer">
+          <nav aria-label="Host pagination">
+            <ul class="pagination pagination-sm m-0 float-end">
+              {% if page > 1 %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.hosts', page=page-1, **filters) }}">
+                  <i class="bi bi-chevron-left"></i>
+                </a>
+              </li>
+              {% endif %}
+
+              {% for p in range(max(1, page-2), min(total_pages+1, page+3)) %}
+              <li class="page-item {% if p == page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('network.hosts', page=p, **filters) }}">{{ p }}</a>
+              </li>
+              {% endfor %}
+
+              {% if page < total_pages %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('network.hosts', page=page+1, **filters) }}">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          <div class="float-start">
+            Showing {{ (page-1)*per_page + 1 }} to {{ min(page*per_page, total_count) }} of {{ total_count }} hosts
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Results Table -->
-<div class="card">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <div>
-      <h5 class="card-title mb-0">
-        <i class="bi bi-pc-display"></i> Network Hosts
-        {% if current_filters.status %}
-          - {{ current_filters.status|title }}
         {% endif %}
-      </h5>
-      <small class="text-muted">
-        Showing {{ pagination.total }} hosts
-        {% if pagination.total > pagination.per_page %}
-          ({{ ((pagination.page - 1) * pagination.per_page) + 1 }} -
-           {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page < pagination.total else pagination.total }})
-        {% endif %}
-      </small>
-    </div>
-
-    <div class="btn-group">
-      <!-- Per Page -->
-      <div class="dropdown">
-        <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-          {{ pagination.per_page }} per page
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="{{ url_for('network.hosts', **current_filters, per_page=25) }}">25 per page</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('network.hosts', **current_filters, per_page=50) }}">50 per page</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('network.hosts', **current_filters, per_page=100) }}">100 per page</a></li>
-        </ul>
-      </div>
-
-      <!-- Export -->
-      <div class="dropdown">
-        <button class="btn btn-outline-primary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-          <i class="bi bi-download"></i> Export
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#" onclick="exportTableToCSV()">
-            <i class="bi bi-file-spreadsheet"></i> Export as CSV
-          </a></li>
-          <li><a class="dropdown-item" href="#" onclick="window.print()">
-            <i class="bi bi-printer"></i> Print Table
-          </a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <div class="card-body p-0">
-    {% if hosts %}
-    <div class="table-responsive">
-      <table class="table table-striped table-hover mb-0" id="hostsTable">
-        <thead class="table-dark">
-          <tr>
-            <th>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="selectAll">
-              </div>
-            </th>
-            <th>IP Address</th>
-            <th>Hostname</th>
-            <th>Status</th>
-            <th>Device Type</th>
-            <th>MAC Address</th>
-            <th>Vendor</th>
-            <th>Open Ports</th>
-            <th>Vulnerabilities</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for host in hosts %}
-          <tr class="host-row" data-ip="{{ host.ip_address }}">
-            <td>
-              <div class="form-check">
-                <input class="form-check-input host-checkbox" type="checkbox" value="{{ host.ip_address }}">
-              </div>
-            </td>
-            <td>
-              <strong>{{ host.ip_address }}</strong>
-              {% if host.mac_address %}
-              <br><small class="text-muted">{{ host.mac_address }}</small>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.hostname %}
-                <span class="badge bg-info">{{ host.hostname }}</span>
-              {% else %}
-                <span class="text-muted">-</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.status == 'up' %}
-                <span class="badge bg-success">
-                  <i class="bi bi-check-circle"></i> Up
-                </span>
-              {% else %}
-                <span class="badge bg-secondary">
-                  <i class="bi bi-x-circle"></i> {{ host.status|title }}
-                </span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.device_type %}
-                <span class="badge bg-primary">{{ host.device_type }}</span>
-                {% if host.confidence_score %}
-                <br><small class="text-muted">{{ "%.1f"|format(host.confidence_score * 100) }}% confidence</small>
-                {% endif %}
-              {% else %}
-                <span class="text-muted">Unknown</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.mac_address %}
-                <code class="small">{{ host.mac_address }}</code>
-              {% else %}
-                <span class="text-muted">-</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.vendor %}
-                {{ host.vendor[:30] }}{% if host.vendor|length > 30 %}...{% endif %}
-              {% else %}
-                <span class="text-muted">-</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.open_ports_count > 0 %}
-                <span class="badge bg-warning">{{ host.open_ports_count }}</span>
-              {% else %}
-                <span class="text-muted">0</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if host.vulnerabilities_count > 0 %}
-                <span class="badge bg-danger">{{ host.vulnerabilities_count }}</span>
-              {% else %}
-                <span class="badge bg-success">0</span>
-              {% endif %}
-            </td>
-            <td>
-              <div class="btn-group btn-group-sm">
-                <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
-                   class="btn btn-outline-primary" title="View Details">
-                  <i class="bi bi-eye"></i>
-                </a>
-                {% if host.open_ports_count > 0 %}
-                <a href="{{ url_for('network.ports', host=host.ip_address) }}"
-                   class="btn btn-outline-info" title="View Ports">
-                  <i class="bi bi-door-open"></i>
-                </a>
-                {% endif %}
-                {% if host.vulnerabilities_count > 0 %}
-                <a href="{{ url_for('security.vulnerabilities', host=host.ip_address) }}"
-                   class="btn btn-outline-danger" title="View Vulnerabilities">
-                  <i class="bi bi-shield-exclamation"></i>
-                </a>
-                {% endif %}
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="text-center py-5">
-      <i class="bi bi-pc-display" style="font-size: 3rem; color: #6c757d;"></i>
-      <h4 class="mt-3">No hosts found</h4>
-      <p class="text-muted">Try adjusting your filters or check if any scans have been performed.</p>
-      <a href="{{ url_for('network.overview') }}" class="btn btn-primary">
-        <i class="bi bi-arrow-left"></i> Back to Network Overview
-      </a>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Pagination -->
-  {% if pagination.total_pages > 1 %}
-  <div class="card-footer">
-    <div class="d-flex justify-content-between align-items-center">
-      <div>
-        <small class="text-muted">
-          Page {{ pagination.page }} of {{ pagination.total_pages }}
-          ({{ pagination.total }} total hosts)
-        </small>
-      </div>
-
-      <nav aria-label="Hosts pagination">
-        <ul class="pagination pagination-sm mb-0">
-          {% if pagination.has_prev %}
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('network.hosts', **current_filters, page=1) }}">
-              <i class="bi bi-chevron-double-left"></i>
-            </a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('network.hosts', **current_filters, page=pagination.prev_num) }}">
-              <i class="bi bi-chevron-left"></i>
-            </a>
-          </li>
-          {% endif %}
-
-          <!-- Page numbers -->
-          {% for page_num in range(max(1, pagination.page - 2), min(pagination.total_pages + 1, pagination.page + 3)) %}
-            {% if page_num == pagination.page %}
-            <li class="page-item active">
-              <span class="page-link">{{ page_num }}</span>
-            </li>
-            {% else %}
-            <li class="page-item">
-              <a class="page-link" href="{{ url_for('network.hosts', **current_filters, page=page_num) }}">{{ page_num }}</a>
-            </li>
-            {% endif %}
-          {% endfor %}
-
-          {% if pagination.has_next %}
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('network.hosts', **current_filters, page=pagination.next_num) }}">
-              <i class="bi bi-chevron-right"></i>
-            </a>
-          </li>
-          <li class="page-item">
-            <a class="page-link" href="{{ url_for('network.hosts', **current_filters, page=pagination.total_pages) }}">
-              <i class="bi bi-chevron-double-right"></i>
-            </a>
-          </li>
-          {% endif %}
-        </ul>
-      </nav>
-    </div>
-  </div>
-  {% endif %}
-</div>
-
-<!-- Bulk Actions Modal -->
-<div class="modal fade" id="bulkActionsModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Bulk Actions</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Perform actions on <span id="selectedCount">0</span> selected hosts:</p>
-        <div class="d-grid gap-2">
-          <button class="btn btn-outline-primary" onclick="bulkExport()">
-            <i class="bi bi-download"></i> Export Selected
-          </button>
-          <button class="btn btn-outline-info" onclick="bulkAnalyze()">
-            <i class="bi bi-search"></i> Analyze Selected
-          </button>
-          <button class="btn btn-outline-warning" onclick="bulkScan()">
-            <i class="bi bi-radar"></i> Re-scan Selected
-          </button>
-        </div>
       </div>
     </div>
   </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Select All checkbox functionality
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const hostCheckboxes = document.querySelectorAll('.host-checkbox');
-
-    selectAllCheckbox?.addEventListener('change', function() {
-        hostCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-        updateBulkActionsButton();
-    });
-
-    // Individual checkbox functionality
-    hostCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedBoxes = document.querySelectorAll('.host-checkbox:checked').length;
-            selectAllCheckbox.checked = checkedBoxes === hostCheckboxes.length;
-            selectAllCheckbox.indeterminate = checkedBoxes > 0 && checkedBoxes < hostCheckboxes.length;
-            updateBulkActionsButton();
-        });
-    });
-
-    // Update bulk actions button
-    function updateBulkActionsButton() {
-        const checkedBoxes = document.querySelectorAll('.host-checkbox:checked');
-        const count = checkedBoxes.length;
-
-        // Update or create bulk actions button
-        let bulkButton = document.getElementById('bulkActionsButton');
-        if (count > 0) {
-            if (!bulkButton) {
-                bulkButton = document.createElement('button');
-                bulkButton.id = 'bulkActionsButton';
-                bulkButton.className = 'btn btn-warning position-fixed';
-                bulkButton.style.cssText = 'bottom: 20px; right: 20px; z-index: 1050;';
-                bulkButton.setAttribute('data-bs-toggle', 'modal');
-                bulkButton.setAttribute('data-bs-target', '#bulkActionsModal');
-                document.body.appendChild(bulkButton);
-            }
-            bulkButton.innerHTML = `<i class="bi bi-gear"></i> Actions (${count})`;
-            document.getElementById('selectedCount').textContent = count;
-        } else if (bulkButton) {
-            bulkButton.remove();
-        }
-    }
-
-    // Row click functionality (exclude checkbox and button clicks)
-    document.querySelectorAll('.host-row').forEach(row => {
-        row.addEventListener('click', function(e) {
-            if (e.target.type !== 'checkbox' && !e.target.closest('button') && !e.target.closest('a')) {
-                const ip = this.dataset.ip;
-                window.location.href = `/network/hosts/${ip}`;
-            }
-        });
-    });
-
-    // Auto-submit form on filter change
-    document.querySelectorAll('#filterForm select').forEach(select => {
-        select.addEventListener('change', function() {
-            document.getElementById('filterForm').submit();
-        });
-    });
-
-    // Search with debounce
-    let searchTimeout;
-    document.getElementById('search')?.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            if (this.value.length >= 3 || this.value.length === 0) {
-                document.getElementById('filterForm').submit();
-            }
-        }, 500);
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 'f':
-                    e.preventDefault();
-                    document.getElementById('search').focus();
-                    break;
-                case 'a':
-                    e.preventDefault();
-                    selectAllCheckbox.click();
-                    break;
-            }
-        }
-    });
+$(document).ready(function() {
+    // Auto-refresh ogni 30 secondi se non ci sono filtri
+    {% if not filters.get('search') and not filters.get('status') %}
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+    {% endif %}
 });
-
-// Export functions
-function exportTableToCSV() {
-    const table = document.getElementById('hostsTable');
-    const rows = table.querySelectorAll('tr');
-    let csv = [];
-
-    // Headers
-    const headers = Array.from(rows[0].querySelectorAll('th')).slice(1, -1).map(th => th.textContent.trim());
-    csv.push(headers.join(','));
-
-    // Data rows
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const cells = Array.from(row.querySelectorAll('td')).slice(1, -1);
-        const rowData = cells.map(cell => {
-            let text = cell.textContent.trim();
-            text = text.replace(/"/g, '""'); // Escape quotes
-            return `"${text}"`;
-        });
-        csv.push(rowData.join(','));
-    }
-
-    // Download
-    const csvContent = csv.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `hosts_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-}
-
-// Bulk action functions
-function bulkExport() {
-    const selected = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.value);
-    console.log('Exporting:', selected);
-    // Implement bulk export logic
-    bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal')).hide();
-}
-
-function bulkAnalyze() {
-    const selected = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.value);
-    console.log('Analyzing:', selected);
-    // Implement bulk analyze logic
-    bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal')).hide();
-}
-
-function bulkScan() {
-    const selected = Array.from(document.querySelectorAll('.host-checkbox:checked')).map(cb => cb.value);
-    console.log('Scanning:', selected);
-    // Implement bulk scan logic
-    bootstrap.Modal.getInstance(document.getElementById('bulkActionsModal')).hide();
-}
 </script>
-
-<style>
-/* Hover effects */
-.host-row {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.host-row:hover {
-    background-color: rgba(0, 123, 255, 0.1) !important;
-}
-
-/* Sticky header */
-.table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-/* Badge improvements */
-.badge {
-    font-size: 0.8em;
-    font-weight: 500;
-}
-
-/* Bulk actions button animation */
-#bulkActionsButton {
-    animation: slideIn 0.3s ease-out;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Print styles */
-@media print {
-    .card-header, .card-footer, .btn, .form-check, .pagination {
-        display: none !important;
-    }
-
-    .table {
-        font-size: 0.8rem;
-    }
-
-    .badge {
-        border: 1px solid #000;
-        color: #000 !important;
-        background: transparent !important;
-    }
-}
-</style>
 {% endblock %}
