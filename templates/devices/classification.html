@@ -1,14 +1,17 @@
-<!-- TEMPLATE MIGLIORATO CON DEBUG E GESTIONE ERRORI -->
-<!-- File: templates/devices/classification.html -->
-
-{% extends "layout.html" %}
+{% extends "base.html" %}
 
 {% block title %}Device Classification{% endblock %}
+{% block page_title %}Device Classification{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active">Device Classification</li>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-  <!-- Header -->
+  <!-- Header semplificato -->
   <div class="row mb-4">
     <div class="col">
       <h1 class="h3 mb-0">
@@ -18,49 +21,17 @@
       <p class="text-muted">Classified network devices with detailed analysis</p>
     </div>
     <div class="col-auto">
-      <div class="btn-group" role="group">
-        <a href="{{ url_for('devices.classification_overview') }}"
-           class="btn btn-outline-primary">
-          <i class="bi bi-bar-chart"></i> Overview
-        </a>
-        <a href="{{ url_for('devices.classification_debug') }}"
-           class="btn btn-outline-info">
-          <i class="bi bi-bug"></i> Debug
-        </a>
-        <a href="{{ url_for('devices.run_manual_classification') }}"
-           class="btn btn-outline-success" onclick="runClassification(this)">
-          <i class="bi bi-arrow-clockwise"></i> Reclassify
-        </a>
-      </div>
+      <button class="btn btn-outline-secondary" onclick="location.reload()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
     </div>
   </div>
-
-  <!-- DEBUG: Mostra info se in modalità debug -->
-  {% if config.DEBUG %}
-  <div class="alert alert-info">
-    <h6><i class="bi bi-info-circle"></i> Debug Info:</h6>
-    <small>
-      - Total devices in template: {{ devices|length }}<br>
-      - Pagination total: {{ pagination.total }}<br>
-      - Current filters: {{ current_filters }}<br>
-      - Available types: {{ available_types|length }}<br>
-      - Available vendors: {{ available_vendors|length }}
-    </small>
-  </div>
-  {% endif %}
 
   <!-- Error Display -->
   {% if error %}
   <div class="alert alert-danger">
     <h6><i class="bi bi-exclamation-triangle"></i> Error</h6>
     <p class="mb-0">{{ error }}</p>
-    <hr>
-    <small>
-      <strong>Troubleshooting steps:</strong><br>
-      1. Check if device classification has been run<br>
-      2. Verify database contains host data<br>
-      3. Try manual classification via the "Reclassify" button
-    </small>
   </div>
   {% endif %}
 
@@ -106,7 +77,7 @@
     </div>
   </div>
 
-  <!-- Filters -->
+  <!-- Filters semplificati -->
   <div class="card mb-4">
     <div class="card-body">
       <form method="GET" id="filterForm">
@@ -217,7 +188,6 @@
                 <th>Confidence</th>
                 <th>Network Info</th>
                 <th>Status</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -226,12 +196,7 @@
                 <!-- Device Info -->
                 <td>
                   <div>
-                    <strong>
-                      <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
-                         class="text-decoration-none">
-                        {{ device.ip_address }}
-                      </a>
-                    </strong>
+                    <strong>{{ device.ip_address }}</strong>
                     {% if device.hostname %}
                       <div class="small text-muted">{{ device.hostname }}</div>
                     {% endif %}
@@ -255,13 +220,6 @@
                         {% elif device.device_type == 'IoT Device' %}bg-success
                         {% else %}bg-secondary
                         {% endif %}">
-                        {% if device.device_type == 'Server' %}<i class="bi bi-server"></i>
-                        {% elif device.device_type == 'Workstation' %}<i class="bi bi-pc-display"></i>
-                        {% elif device.device_type == 'Network Device' %}<i class="bi bi-router"></i>
-                        {% elif device.device_type == 'Printer' %}<i class="bi bi-printer"></i>
-                        {% elif device.device_type == 'IoT Device' %}<i class="bi bi-cpu"></i>
-                        {% else %}<i class="bi bi-question-circle"></i>
-                        {% endif %}
                         {{ device.device_type }}
                       </span>
                     {% else %}
@@ -331,23 +289,13 @@
                     <span class="badge bg-secondary">{{ device.status or 'Unknown' }}</span>
                   {% endif %}
                 </td>
-
-                <!-- Actions -->
-                <td>
-                  <div class="btn-group btn-group-sm" role="group">
-                    <a href="{{ url_for('devices.device_detail', ip_address=device.ip_address) }}"
-                       class="btn btn-outline-primary btn-sm" title="View Details">
-                      <i class="bi bi-eye"></i>
-                    </a>
-                  </div>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
 
-        <!-- Pagination -->
+        <!-- Pagination semplificata -->
         {% if pagination.total_pages > 1 %}
         <div class="d-flex justify-content-center mt-4">
           <nav aria-label="Device classification pagination">
@@ -357,70 +305,29 @@
                 <li class="page-item">
                   <a class="page-link"
                      href="{{ url_for('devices.classification', page=pagination.page-1, **current_filters) }}">
-                    <i class="bi bi-chevron-left"></i>
-                  </a>
-                </li>
-              {% else %}
-                <li class="page-item disabled">
-                  <span class="page-link"><i class="bi bi-chevron-left"></i></span>
-                </li>
-              {% endif %}
-
-              <!-- Page Numbers -->
-              {% set start_page = [pagination.page - 2, 1] | max %}
-              {% set end_page = [start_page + 4, pagination.total_pages] | min %}
-
-              {% if start_page > 1 %}
-                <li class="page-item">
-                  <a class="page-link" href="{{ url_for('devices.classification', page=1, **current_filters) }}">1</a>
-                </li>
-                {% if start_page > 2 %}
-                  <li class="page-item disabled"><span class="page-link">…</span></li>
-                {% endif %}
-              {% endif %}
-
-              {% for page_num in range(start_page, end_page + 1) %}
-                <li class="page-item {{ 'active' if page_num == pagination.page else '' }}">
-                  <a class="page-link"
-                     href="{{ url_for('devices.classification', page=page_num, **current_filters) }}">
-                    {{ page_num }}
-                  </a>
-                </li>
-              {% endfor %}
-
-              {% if end_page < pagination.total_pages %}
-                {% if end_page < pagination.total_pages - 1 %}
-                  <li class="page-item disabled"><span class="page-link">…</span></li>
-                {% endif %}
-                <li class="page-item">
-                  <a class="page-link"
-                     href="{{ url_for('devices.classification', page=pagination.total_pages, **current_filters) }}">
-                    {{ pagination.total_pages }}
+                    Previous
                   </a>
                 </li>
               {% endif %}
+
+              <!-- Current page info -->
+              <li class="page-item active">
+                <span class="page-link">
+                  Page {{ pagination.page }} of {{ pagination.total_pages }}
+                </span>
+              </li>
 
               <!-- Next -->
               {% if pagination.has_next %}
                 <li class="page-item">
                   <a class="page-link"
                      href="{{ url_for('devices.classification', page=pagination.page+1, **current_filters) }}">
-                    <i class="bi bi-chevron-right"></i>
+                    Next
                   </a>
-                </li>
-              {% else %}
-                <li class="page-item disabled">
-                  <span class="page-link"><i class="bi bi-chevron-right"></i></span>
                 </li>
               {% endif %}
             </ul>
           </nav>
-        </div>
-
-        <div class="text-center text-muted small mt-2">
-          Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to
-          {{ [pagination.page * pagination.per_page, pagination.total] | min }} of
-          {{ pagination.total }} devices
         </div>
         {% endif %}
 
@@ -447,12 +354,9 @@
             </ul>
 
             <div class="mt-3">
-              <button onclick="runClassification(this)" class="btn btn-primary">
-                <i class="bi bi-arrow-clockwise"></i> Run Classification Now
+              <button onclick="location.reload()" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise"></i> Refresh Page
               </button>
-              <a href="{{ url_for('devices.classification_debug') }}" class="btn btn-outline-info ms-2">
-                <i class="bi bi-bug"></i> Debug Info
-              </a>
             </div>
           </div>
           {% endif %}
@@ -462,31 +366,4 @@
   </div>
 
 </div>
-
-<script>
-// Function to run manual classification
-function runClassification(button) {
-    const originalText = button.innerHTML;
-    button.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Running...';
-    button.disabled = true;
-
-    fetch('{{ url_for("devices.run_manual_classification") }}')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert('Classification completed successfully!\n' + data.message);
-                location.reload();
-            } else {
-                alert('Classification failed:\n' + data.message);
-            }
-        })
-        .catch(error => {
-            alert('Error running classification:\n' + error);
-        })
-        .finally(() => {
-            button.innerHTML = originalText;
-            button.disabled = false;
-        });
-}
-</script>
 {% endblock %}

@@ -83,35 +83,78 @@ def overview():
 # ===========================
 # SCAN INFORMATION
 # ===========================
-
 @network_bp.route('/scan-info')
 def scan_info():
-    """Informazioni sulle scansioni"""
+    """Informazioni sulle scansioni - VERSIONE CORRETTA"""
     try:
         db = get_db()
 
-        # Lista delle scansioni
-        scans = db.execute('''
+        # Lista delle scansioni con gestione valori None
+        scans_raw = db.execute('''
             SELECT * FROM scan_info 
             ORDER BY start_time DESC
         ''').fetchall()
 
-        # Statistiche aggregate
+        # Converti a dizionari e gestisci valori None
+        scans = []
+        for scan_row in scans_raw:
+            scan_dict = dict(scan_row)
+
+            # Converti valori None in valori sicuri per JSON
+            scan_clean = {}
+            for key, value in scan_dict.items():
+                if value is None:
+                    # Assegna valori di default appropriati per ogni campo
+                    if key in ['total_hosts', 'up_hosts', 'elapsed_time']:
+                        scan_clean[key] = 0
+                    elif key in ['scanner', 'nmap_version', 'command_line', 'file_source']:
+                        scan_clean[key] = ''
+                    elif key in ['start_time', 'end_time']:
+                        scan_clean[key] = ''
+                    else:
+                        scan_clean[key] = value  # Mantieni None per altri campi se necessario
+                else:
+                    scan_clean[key] = value
+
+            scans.append(scan_clean)
+
+        # Statistiche aggregate con gestione None
         scan_stats = {
             'total_scans': len(scans),
-            'total_hosts_scanned': sum(scan['total_hosts'] or 0 for scan in scans),
-            'total_hosts_up': sum(scan['up_hosts'] or 0 for scan in scans),
+            'total_hosts_scanned': 0,
+            'total_hosts_up': 0,
+            'total_elapsed_hours': 0,
+            'last_scan_date': '',
+            'last_scan_hosts': 0
         }
 
         if scans:
-            # Calcola tempo totale scansioni
-            total_elapsed = sum(scan['elapsed_time'] or 0 for scan in scans)
-            scan_stats['total_elapsed_hours'] = round(total_elapsed / 3600, 2)
+            # Calcola statistiche con protezione da None
+            total_hosts_scanned = 0
+            total_hosts_up = 0
+            total_elapsed = 0
 
-            # Ultima scansione
+            for scan in scans:
+                total_hosts_scanned += scan.get('total_hosts', 0) or 0
+                total_hosts_up += scan.get('up_hosts', 0) or 0
+                total_elapsed += scan.get('elapsed_time', 0) or 0
+
+            scan_stats.update({
+                'total_hosts_scanned': total_hosts_scanned,
+                'total_hosts_up': total_hosts_up,
+                'total_elapsed_hours': round(total_elapsed / 3600, 2) if total_elapsed > 0 else 0
+            })
+
+            # Ultima scansione (primo elemento dopo ordinamento DESC)
             last_scan = scans[0]
-            scan_stats['last_scan_date'] = last_scan['start_time']
-            scan_stats['last_scan_hosts'] = last_scan['total_hosts'] or 0
+            scan_stats.update({
+                'last_scan_date': last_scan.get('start_time', '') or '',
+                'last_scan_hosts': last_scan.get('total_hosts', 0) or 0
+            })
+
+        # Log per debug
+        current_app.logger.info(f"Scan info: {len(scans)} scansioni caricate")
+        current_app.logger.debug(f"Scan stats: {scan_stats}")
 
         return render_template('network/scan_info.html',
                                scans=scans,
@@ -119,9 +162,21 @@ def scan_info():
 
     except Exception as e:
         current_app.logger.error(f"Errore in scan_info: {e}")
-        return render_template('network/scan_info.html',
-                               scans=[], scan_stats={}, error=str(e))
+        import traceback
+        current_app.logger.error(f"Stack trace: {traceback.format_exc()}")
 
+        # Ritorna template con dati vuoti ma sicuri
+        return render_template('network/scan_info.html',
+                               scans=[],
+                               scan_stats={
+                                   'total_scans': 0,
+                                   'total_hosts_scanned': 0,
+                                   'total_hosts_up': 0,
+                                   'total_elapsed_hours': 0,
+                                   'last_scan_date': '',
+                                   'last_scan_hosts': 0
+                               },
+                               error=str(e))
 
 # ===========================
 # HOSTS MANAGEMENT
@@ -238,12 +293,15 @@ def hosts():
             'search': search
         }
 
+        # FIX per routes/network.py - Funzione hosts()
+        # Sostituisci la parte finale della funzione hosts() con questo:
+
         return render_template('network/hosts.html',
                                hosts=hosts_data,
                                pagination=pagination,
-                               filters=current_filters,  # ← Cambiato nome variabile
-                               available_filters={'vendors': vendors},  # ← Aggiunto per coerenza
-                               stats=filter_stats,  # ← Cambiato nome per coerenza
+                               filters=current_filters,  # ← CAMBIATO: era current_filters, ora filters
+                               available_filters={'vendors': vendors},
+                               stats=filter_stats,
                                total_count=total_count,
                                page=page,
                                per_page=per_page,
@@ -251,8 +309,35 @@ def hosts():
 
     except Exception as e:
         current_app.logger.error(f"Errore in hosts: {e}")
+
+        # ✅ IMPORTANTE: Passa sempre filters anche in caso di errore
         return render_template('network/hosts.html',
-                               hosts=[], pagination={}, error=str(e))
+                               hosts=[],
+                               pagination={
+                                   'page': 1,
+                                   'per_page': 50,
+                                   'total': 0,
+                                   'total_pages': 0,
+                                   'has_prev': False,
+                                   'has_next': False
+                               },
+                               filters={  # ← AGGIUNTO: filters vuoto per evitare UndefinedError
+                                   'status': None,
+                                   'has_hostname': None,
+                                   'vendor': None,
+                                   'search': None
+                               },
+                               available_filters={'vendors': []},
+                               stats={
+                                   'total_filtered': 0,
+                                   'active_filtered': 0,
+                                   'with_vulnerabilities': 0
+                               },
+                               total_count=0,
+                               page=1,
+                               per_page=50,
+                               total_pages=0,
+                               error=str(e))
 
 
 @network_bp.route('/hosts/<ip_address>')

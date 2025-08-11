@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, g, flash, redirect, url_for
 import os
 import sqlite3
+import builtins  # ← AGGIUNTO per risolvere problema ricorsione
 from datetime import datetime, timedelta
 import json
 from typing import Dict, List, Any
@@ -106,6 +107,7 @@ def format_datetime_obj_filter(value):
         return None
     if isinstance(value, str):
         try:
+            # Prova diversi formati
             for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d']:
                 try:
                     return datetime.strptime(value.replace('T', ' ').replace('Z', ''), fmt)
@@ -114,55 +116,47 @@ def format_datetime_obj_filter(value):
             return None
         except:
             return None
+    return value
 
-    if hasattr(value, 'strftime'):
-        return value
 
-    return None
+@app.template_filter('truncate_words')
+def truncate_words_filter(text, length=20, end='...'):
+    """Tronca testo a un numero di parole"""
+    if not text:
+        return ''
+
+    words = str(text).split()
+    if len(words) <= length:
+        return text
+
+    return ' '.join(words[:length]) + end
 
 
 @app.template_filter('filesizeformat')
 def filesizeformat_filter(value):
-    """Formatta dimensioni file"""
+    """Formatta dimensioni file in formato leggibile"""
     if value is None:
         return 'N/A'
 
     try:
-        value = float(value)
+        bytes_value = float(value)
+
+        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+            if bytes_value < 1024.0:
+                return f"{bytes_value:.1f} {unit}"
+            bytes_value /= 1024.0
+
+        return f"{bytes_value:.1f} PB"
     except (TypeError, ValueError):
-        return 'N/A'
-
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-        if value < 1024.0:
-            return f"{value:.1f} {unit}"
-        value /= 1024.0
-    return f"{value:.1f} PB"
-
-
-@app.template_filter('format_duration')
-def format_duration_filter(seconds):
-    """Formatta durata in secondi in formato leggibile"""
-    if seconds is None:
-        return 'N/A'
-
-    try:
-        seconds = float(seconds)
-    except (TypeError, ValueError):
-        return 'N/A'
-
-    if seconds < 60:
-        return f"{seconds:.0f}s"
-    elif seconds < 3600:
-        return f"{seconds / 60:.1f}m"
-    else:
-        return f"{seconds / 3600:.1f}h"
+        return str(value)
 
 
 @app.template_filter('format_number')
 def format_number_filter(value, decimals=0):
-    """Formatta numeri con separatori delle migliaia"""
+    """Formatta numero con separatori delle migliaia"""
     if value is None:
         return 'N/A'
+
     try:
         if decimals == 0:
             return f"{int(value):,}"
@@ -258,6 +252,26 @@ def severity_class_filter(severity):
         return 'bg-secondary'
 
 
+@app.template_filter('confidence_class')
+def confidence_class_filter(confidence):
+    """Restituisce la classe CSS per il badge di confidenza"""
+    if confidence is None:
+        return 'bg-secondary'
+
+    try:
+        conf = float(confidence)
+        if conf >= 0.8:
+            return 'bg-success'
+        elif conf >= 0.6:
+            return 'bg-primary'
+        elif conf >= 0.4:
+            return 'bg-warning'
+        else:
+            return 'bg-danger'
+    except (TypeError, ValueError):
+        return 'bg-secondary'
+
+
 @app.template_filter('status_class')
 def status_class_filter(status):
     """Restituisce la classe CSS per il badge di status"""
@@ -266,102 +280,110 @@ def status_class_filter(status):
 
     status = str(status).lower()
 
-    if status in ['completed', 'success', 'up', 'active', 'open']:
+    if status == 'up':
         return 'bg-success'
-    elif status in ['running', 'in_progress', 'pending']:
-        return 'bg-primary'
-    elif status in ['failed', 'error', 'down', 'critical', 'closed']:
+    elif status == 'down':
         return 'bg-danger'
-    elif status in ['cancelled', 'stopped', 'inactive', 'filtered']:
-        return 'bg-secondary'
-    elif status in ['warning', 'partial']:
+    elif status == 'filtered':
         return 'bg-warning'
+    elif status == 'open':
+        return 'bg-success'
+    elif status == 'closed':
+        return 'bg-danger'
+    elif status == 'running':
+        return 'bg-primary'
+    elif status == 'stopped':
+        return 'bg-secondary'
     else:
         return 'bg-info'
 
 
 # ===========================
-# CONTEXT PROCESSORS
+# FUNZIONI GLOBALI PER TEMPLATE (FIX RICORSIONE)
 # ===========================
 
 @app.context_processor
-def inject_current_time():
-    """Inietta il timestamp corrente e utility nei template"""
+def inject_builtin_functions():
+    """Inietta funzioni Python built-in nei template - VERSIONE SICURA"""
+
+    def safe_max(*args):
+        try:
+            if not args:
+                return 0
+            # Filtra valori None e non numerici
+            valid_args = []
+            for arg in args:
+                if arg is not None:
+                    try:
+                        # Prova a convertire in numero se è una stringa
+                        if isinstance(arg, str) and arg.isdigit():
+                            valid_args.append(int(arg))
+                        else:
+                            valid_args.append(arg)
+                    except:
+                        valid_args.append(arg)
+
+            return builtins.max(valid_args) if valid_args else 0
+        except:
+            return 0
+
+    def safe_min(*args):
+        try:
+            if not args:
+                return 0
+            # Filtra valori None e non numerici
+            valid_args = []
+            for arg in args:
+                if arg is not None:
+                    try:
+                        # Prova a convertire in numero se è una stringa
+                        if isinstance(arg, str) and arg.isdigit():
+                            valid_args.append(int(arg))
+                        else:
+                            valid_args.append(arg)
+                    except:
+                        valid_args.append(arg)
+
+            return builtins.min(valid_args) if valid_args else 0
+        except:
+            return 0
+
+    def safe_len(obj):
+        try:
+            return builtins.len(obj) if obj is not None else 0
+        except:
+            return 0
+
+    def safe_sum(iterable):
+        try:
+            return builtins.sum(iterable) if iterable else 0
+        except:
+            return 0
+
+    def safe_round(value, ndigits=0):
+        try:
+            return builtins.round(float(value), ndigits) if value is not None else 0
+        except:
+            return 0
+
     return {
-        'current_time': datetime.now(),
-        'now': datetime.now()
+        'max': safe_max,
+        'min': safe_min,
+        'len': safe_len,
+        'sum': safe_sum,
+        'round': safe_round,
+        'range': builtins.range,
+        'enumerate': builtins.enumerate,
+        'zip': builtins.zip,
+        'abs': lambda x: builtins.abs(x) if x is not None else 0,
+        'int': lambda x: builtins.int(x) if x is not None else 0,
+        'float': lambda x: builtins.float(x) if x is not None else 0.0,
+        'str': lambda x: builtins.str(x) if x is not None else '',
     }
 
 
-@app.context_processor
-def utility_processor():
-    """Aggiunge funzioni di utilità ai template"""
-
-    def get_severity_class(severity):
-        if not severity:
-            return 'bg-secondary'
-
-        severity = str(severity).upper()
-
-        if severity == 'CRITICAL':
-            return 'bg-danger'
-        elif severity == 'HIGH':
-            return 'bg-warning'
-        elif severity == 'MEDIUM':
-            return 'bg-info'
-        elif severity == 'LOW':
-            return 'bg-success'
-        else:
-            return 'bg-secondary'
-
-    def get_cvss_class(score):
-        if not score:
-            return 'bg-secondary'
-
-        try:
-            score = float(score)
-            if score >= 9.0:
-                return 'bg-danger'
-            elif score >= 7.0:
-                return 'bg-warning'
-            elif score >= 4.0:
-                return 'bg-info'
-            else:
-                return 'bg-success'
-        except (TypeError, ValueError):
-            return 'bg-secondary'
-
-    def get_status_class(status):
-        if not status:
-            return 'bg-secondary'
-
-        status = str(status).lower()
-
-        if status in ['completed', 'success', 'up', 'active']:
-            return 'bg-success'
-        elif status in ['running', 'in_progress', 'pending']:
-            return 'bg-primary'
-        elif status in ['failed', 'error', 'down', 'critical']:
-            return 'bg-danger'
-        elif status in ['cancelled', 'stopped', 'inactive']:
-            return 'bg-secondary'
-        elif status in ['warning', 'partial']:
-            return 'bg-warning'
-        else:
-            return 'bg-info'
-
-    return dict(
-        get_severity_class=get_severity_class,
-        get_cvss_class=get_cvss_class,
-        get_status_class=get_status_class,
-        format_datetime=format_datetime_filter,
-        format_filesize=filesizeformat_filter,
-        format_number=format_number_filter
-    )
-
-
 # ===========================
-# ERROR HANDLERS
+# GESTIONE ERRORI
 # ===========================
 
 @app.errorhandler(404)
@@ -376,98 +398,105 @@ def internal_error(error):
     return render_template('errors/500.html'), 500
 
 
-@app.errorhandler(403)
-def forbidden_error(error):
-    """Gestisce errori 403"""
-    return render_template('errors/403.html'), 403
-
-
-# ===========================
-# DATABASE TEARDOWN
-# ===========================
-
 @app.teardown_appcontext
 def close_db_connection(exception):
-    """Chiude la connessione al database al termine della richiesta"""
+    """Chiude la connessione al database alla fine della richiesta"""
     close_db(exception)
 
 
 # ===========================
-# ROUTE PRINCIPALE
+# ROUTE PRINCIPALI
 # ===========================
 
 @app.route('/')
 def index():
-    """Home page principale"""
+    """Pagina principale"""
     try:
         db = get_db()
 
-        # Statistiche base
+        # Statistiche rapide per la dashboard
         stats = {
             'total_hosts': 0,
+            'active_hosts': 0,
+            'total_vulnerabilities': 0,
+            'critical_vulnerabilities': 0,
             'total_ports': 0,
             'open_ports': 0,
-            'total_vulnerabilities': 0,
-            'critical_vulns': 0,
-            'recent_scans': 0
+            'classified_devices': 0,
+            'last_scan_date': None
         }
 
         try:
-            # Conta hosts
-            hosts_count = db.execute('SELECT COUNT(*) FROM hosts').fetchone()
-            if hosts_count:
-                stats['total_hosts'] = hosts_count[0]
+            # Statistiche host
+            stats['total_hosts'] = db.execute('SELECT COUNT(*) FROM hosts').fetchone()[0]
+            stats['active_hosts'] = db.execute('SELECT COUNT(*) FROM hosts WHERE status = "up"').fetchone()[0]
+        except:
+            pass
 
-            # Conta porte
-            ports_count = db.execute('SELECT COUNT(*) FROM ports').fetchone()
-            if ports_count:
-                stats['total_ports'] = ports_count[0]
+        try:
+            # Statistiche vulnerabilità
+            stats['total_vulnerabilities'] = db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0]
+            stats['critical_vulnerabilities'] = \
+            db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE severity = "CRITICAL"').fetchone()[0]
+        except:
+            pass
 
-            # Conta porte aperte
-            open_ports_count = db.execute("SELECT COUNT(*) FROM ports WHERE state = 'open'").fetchone()
-            if open_ports_count:
-                stats['open_ports'] = open_ports_count[0]
+        try:
+            # Statistiche porte
+            stats['total_ports'] = db.execute('SELECT COUNT(*) FROM ports').fetchone()[0]
+            stats['open_ports'] = db.execute('SELECT COUNT(*) FROM ports WHERE state = "open"').fetchone()[0]
+        except:
+            pass
 
-            # Conta vulnerabilità
-            vulns_count = db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()
-            if vulns_count:
-                stats['total_vulnerabilities'] = vulns_count[0]
+        try:
+            # Statistiche dispositivi classificati
+            stats['classified_devices'] = db.execute('SELECT COUNT(*) FROM device_classification').fetchone()[0]
+        except:
+            pass
 
-            # Conta vulnerabilità critiche
-            critical_vulns = db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'CRITICAL'").fetchone()
-            if critical_vulns:
-                stats['critical_vulns'] = critical_vulns[0]
+        try:
+            # Data ultima scansione
+            last_scan = db.execute('SELECT MAX(start_time) FROM scan_info').fetchone()[0]
+            if last_scan:
+                stats['last_scan_date'] = last_scan
+        except:
+            pass
 
-            # Conta scansioni recenti (ultima settimana)
-            week_ago = datetime.now() - timedelta(days=7)
-            recent_scans = db.execute(
-                "SELECT COUNT(*) FROM scan_results WHERE start_time > ?",
-                (week_ago.strftime('%Y-%m-%d %H:%M:%S'),)
-            ).fetchone()
-            if recent_scans:
-                stats['recent_scans'] = recent_scans[0]
+        # Attività recenti (host scoperti di recente)
+        recent_activity = []
+        try:
+            recent_hosts = db.execute('''
+                SELECT ip_address, hostname, status, scan_id
+                FROM hosts 
+                ORDER BY scan_id DESC 
+                LIMIT 10
+            ''').fetchall()
 
-        except Exception as e:
-            app.logger.error(f"Errore nel calcolo delle statistiche: {e}")
-            # Mantieni le statistiche a 0 in caso di errore
+            for host in recent_hosts:
+                recent_activity.append({
+                    'type': 'host_discovered',
+                    'ip_address': host['ip_address'],
+                    'hostname': host['hostname'],
+                    'status': host['status'],
+                    'timestamp': datetime.now()  # In realtà dovresti usare timestamp reale
+                })
+        except:
+            pass
 
-        return render_template('index.html', stats=stats)
+        return render_template('index.html',
+                               stats=stats,
+                               recent_activity=recent_activity)
 
     except Exception as e:
-        app.logger.error(f"Errore nella route index: {e}")
-        flash('Errore nel caricamento della dashboard', 'error')
-        return render_template('index.html', stats={
-            'total_hosts': 0,
-            'total_ports': 0,
-            'open_ports': 0,
-            'total_vulnerabilities': 0,
-            'critical_vulns': 0,
-            'recent_scans': 0
-        })
+        app.logger.error(f"Errore nella pagina principale: {e}")
+        return render_template('index.html',
+                               stats={},
+                               recent_activity=[],
+                               error="Errore nel caricamento dei dati")
 
 
 # ===========================
-# API ENDPOINTS BASE
+# API ENDPOINTS
 # ===========================
 
 @app.route('/api/stats')
@@ -476,37 +505,63 @@ def api_stats():
     try:
         db = get_db()
 
-        stats = {}
-
-        # Statistiche hosts
-        stats['hosts'] = {
-            'total': db.execute('SELECT COUNT(*) FROM hosts').fetchone()[0],
-            'up': db.execute("SELECT COUNT(*) FROM hosts WHERE status = 'up'").fetchone()[0],
-            'down': db.execute("SELECT COUNT(*) FROM hosts WHERE status = 'down'").fetchone()[0]
+        stats = {
+            'hosts': {
+                'total': db.execute('SELECT COUNT(*) FROM hosts').fetchone()[0],
+                'active': db.execute('SELECT COUNT(*) FROM hosts WHERE status = "up"').fetchone()[0],
+                'inactive': db.execute('SELECT COUNT(*) FROM hosts WHERE status = "down"').fetchone()[0]
+            },
+            'ports': {
+                'total': db.execute('SELECT COUNT(*) FROM ports').fetchone()[0],
+                'open': db.execute('SELECT COUNT(*) FROM ports WHERE state = "open"').fetchone()[0],
+                'closed': db.execute('SELECT COUNT(*) FROM ports WHERE state = "closed"').fetchone()[0]
+            },
+            'vulnerabilities': {
+                'total': 0,
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0
+            },
+            'devices': {
+                'classified': 0,
+                'unclassified': 0
+            }
         }
 
-        # Statistiche porte
-        stats['ports'] = {
-            'total': db.execute('SELECT COUNT(*) FROM ports').fetchone()[0],
-            'open': db.execute("SELECT COUNT(*) FROM ports WHERE state = 'open'").fetchone()[0],
-            'closed': db.execute("SELECT COUNT(*) FROM ports WHERE state = 'closed'").fetchone()[0],
-            'filtered': db.execute("SELECT COUNT(*) FROM ports WHERE state = 'filtered'").fetchone()[0]
-        }
+        # Statistiche vulnerabilità (se la tabella esiste)
+        try:
+            stats['vulnerabilities']['total'] = db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0]
+            stats['vulnerabilities']['critical'] = \
+            db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE severity = "CRITICAL"').fetchone()[0]
+            stats['vulnerabilities']['high'] = \
+            db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE severity = "HIGH"').fetchone()[0]
+            stats['vulnerabilities']['medium'] = \
+            db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE severity = "MEDIUM"').fetchone()[0]
+            stats['vulnerabilities']['low'] = \
+            db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE severity = "LOW"').fetchone()[0]
+        except:
+            pass
 
-        # Statistiche vulnerabilità
-        stats['vulnerabilities'] = {
-            'total': db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0],
-            'critical': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'CRITICAL'").fetchone()[0],
-            'high': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'HIGH'").fetchone()[0],
-            'medium': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'MEDIUM'").fetchone()[0],
-            'low': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'LOW'").fetchone()[0]
-        }
+        # Statistiche dispositivi classificati (se la tabella esiste)
+        try:
+            stats['devices']['classified'] = db.execute('SELECT COUNT(*) FROM device_classification').fetchone()[0]
+            stats['devices']['unclassified'] = stats['hosts']['total'] - stats['devices']['classified']
+        except:
+            pass
 
-        return jsonify(stats)
+        return jsonify({
+            'status': 'success',
+            'timestamp': datetime.now().isoformat(),
+            'data': stats
+        })
 
     except Exception as e:
-        app.logger.error(f"Errore in api_stats: {e}")
-        return jsonify({'error': 'Errore nel recupero delle statistiche'}), 500
+        app.logger.error(f"Errore nel recupero delle statistiche: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Errore nel recupero delle statistiche'
+        }), 500
 
 
 @app.route('/api/health')
@@ -535,8 +590,71 @@ def api_health():
 
 
 # ===========================
-# UTILITY ROUTES
+# ROUTE DI UTILITÀ
 # ===========================
+
+@app.route('/search')
+def global_search():
+    """Ricerca globale"""
+    query = request.args.get('q', '').strip()
+
+    if not query:
+        return render_template('search_results.html', query='', results={})
+
+    try:
+        db = get_db()
+        results = {
+            'hosts': [],
+            'vulnerabilities': [],
+            'services': []
+        }
+
+        # Cerca negli host
+        try:
+            hosts = db.execute('''
+                SELECT ip_address, hostname, status, vendor
+                FROM hosts 
+                WHERE ip_address LIKE ? OR hostname LIKE ? OR vendor LIKE ?
+                LIMIT 10
+            ''', (f'%{query}%', f'%{query}%', f'%{query}%')).fetchall()
+            results['hosts'] = [dict(host) for host in hosts]
+        except:
+            pass
+
+        # Cerca nelle vulnerabilità
+        try:
+            vulns = db.execute('''
+                SELECT ip_address, vuln_id, title, severity
+                FROM vulnerabilities 
+                WHERE title LIKE ? OR vuln_id LIKE ?
+                LIMIT 10
+            ''', (f'%{query}%', f'%{query}%')).fetchall()
+            results['vulnerabilities'] = [dict(vuln) for vuln in vulns]
+        except:
+            pass
+
+        # Cerca nei servizi
+        try:
+            services = db.execute('''
+                SELECT ip_address, port_number, service_name, service_product
+                FROM services 
+                WHERE service_name LIKE ? OR service_product LIKE ?
+                LIMIT 10
+            ''', (f'%{query}%', f'%{query}%')).fetchall()
+            results['services'] = [dict(service) for service in services]
+        except:
+            pass
+
+        return render_template('search_results.html', query=query, results=results)
+
+    except Exception as e:
+        app.logger.error(f"Errore nella ricerca globale: {e}")
+        return render_template('search_results.html',
+                               query=query,
+                               results={},
+                               error=str(e))
+
+
 # ===========================
 # CONFIGURAZIONE SVILUPPO
 # ===========================

@@ -1,101 +1,102 @@
+<!-- FIXED VERSION: templates/network/scan_info.html -->
+<!-- Risolve errore "Object of type Undefined is not JSON serializable" -->
+
 {% extends "base.html" %}
 
-{% block title %}Scan Information - AdminLTE{% endblock %}
-{% block page_title %}Scan Information{% endblock %}
-
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
-<li class="breadcrumb-item active">Scan Information</li>
-{% endblock %}
+{% block title %}Network Scan Information{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="h3 mb-0">
+        <i class="bi bi-radar text-primary"></i>
+        Network Scan Information
+      </h1>
+      <p class="text-muted">Overview of network scanning activities and results</p>
+    </div>
+    <div class="col-auto">
+      <div class="btn-group">
+        <button type="button" class="btn btn-success" onclick="exportScanTimeline()">
+          <i class="bi bi-download"></i> Export Timeline
+        </button>
+        <button type="button" class="btn btn-outline-info" onclick="refreshScanData()">
+          <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Display -->
   {% if error %}
   <div class="alert alert-danger">
-    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+    <h6><i class="bi bi-exclamation-triangle"></i> Error Loading Scan Data</h6>
+    <p class="mb-0">{{ error }}</p>
   </div>
-  {% else %}
+  {% endif %}
 
-  <!-- Scan Statistics Overview -->
+  <!-- Scan Statistics -->
+  {% if scan_stats %}
   <div class="row mb-4">
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-info">
-        <div class="inner">
-          <h3>{{ scan_stats.total_scans if scan_stats else 0 }}</h3>
-          <p>Total Scans</p>
-        </div>
-        <div class="icon">
-          <i class="bi bi-search"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-success">
-        <div class="inner">
-          <h3>{{ scan_stats.total_hosts_scanned if scan_stats else 0 }}</h3>
-          <p>Hosts Scanned</p>
-        </div>
-        <div class="icon">
-          <i class="bi bi-hdd-network"></i>
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h3 class="mb-0">{{ scan_stats.total_scans or 0 }}</h3>
+              <p class="mb-0">Total Scans</p>
+            </div>
+            <div class="ms-auto">
+              <i class="bi bi-activity fs-1"></i>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-warning">
-        <div class="inner">
-          <h3>{{ scan_stats.total_hosts_up if scan_stats else 0 }}</h3>
-          <p>Hosts Up</p>
-        </div>
-        <div class="icon">
-          <i class="bi bi-check-circle"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-danger">
-        <div class="inner">
-          <h3>{{ scan_stats.total_elapsed_hours if scan_stats else 0 }}h</h3>
-          <p>Total Scan Time</p>
-        </div>
-        <div class="icon">
-          <i class="bi bi-clock"></i>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Last Scan Information -->
-  {% if scan_stats and scan_stats.last_scan_date %}
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card bg-gradient-primary">
-        <div class="card-header">
-          <h3 class="card-title text-white">
-            <i class="bi bi-info-circle"></i> Last Scan Information
-          </h3>
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h3 class="mb-0">{{ scan_stats.total_hosts_scanned or 0 }}</h3>
+              <p class="mb-0">Hosts Scanned</p>
+            </div>
+            <div class="ms-auto">
+              <i class="bi bi-pc-display fs-1"></i>
+            </div>
+          </div>
         </div>
-        <div class="card-body text-white">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="info-box-content">
-                <span class="info-box-text text-white-50">Last Scan Date</span>
-                <span class="info-box-number">{{ scan_stats.last_scan_date[:19] }}</span>
-              </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-warning text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h3 class="mb-0">{{ scan_stats.total_hosts_up or 0 }}</h3>
+              <p class="mb-0">Hosts Online</p>
             </div>
-            <div class="col-md-4">
-              <div class="info-box-content">
-                <span class="info-box-text text-white-50">Hosts Scanned</span>
-                <span class="info-box-number">{{ scan_stats.last_scan_hosts }}</span>
-              </div>
+            <div class="ms-auto">
+              <i class="bi bi-check-circle fs-1"></i>
             </div>
-            <div class="col-md-4">
-              <div class="info-box-content">
-                <span class="info-box-text text-white-50">Status</span>
-                <span class="info-box-number">
-                  <i class="bi bi-check-circle"></i> Completed
-                </span>
-              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h3 class="mb-0">{{ scan_stats.total_elapsed_hours or 0 }}h</h3>
+              <p class="mb-0">Total Scan Time</p>
+            </div>
+            <div class="ms-auto">
+              <i class="bi bi-clock fs-1"></i>
             </div>
           </div>
         </div>
@@ -104,8 +105,8 @@
   </div>
   {% endif %}
 
-  <!-- Scan Timeline Chart -->
-  {% if scans %}
+  <!-- Charts Section -->
+  {% if scans and scans|length > 0 %}
   <div class="row mb-4">
     <div class="col-md-8">
       <div class="card">
@@ -113,14 +114,9 @@
           <h3 class="card-title">
             <i class="bi bi-graph-up"></i> Scan Timeline
           </h3>
-          <div class="card-tools">
-            <button type="button" class="btn btn-sm btn-primary" onclick="ScanInfoManager.exportScanTimeline()">
-              <i class="bi bi-download"></i> Export
-            </button>
-          </div>
         </div>
         <div class="card-body">
-          <canvas id="scanTimelineChart" height="300"></canvas>
+          <canvas id="scanTimelineChart" height="100"></canvas>
         </div>
       </div>
     </div>
@@ -141,7 +137,7 @@
   {% endif %}
 
   <!-- Detailed Scan List -->
-  {% if scans %}
+  {% if scans and scans|length > 0 %}
   <div class="row">
     <div class="col-12">
       <div class="card">
@@ -158,7 +154,7 @@
                 </button>
               </div>
             </div>
-            <button type="button" class="btn btn-sm btn-success ms-2" onclick="ScanInfoManager.exportAllScans()">
+            <button type="button" class="btn btn-sm btn-success ms-2" onclick="exportAllScans()">
               <i class="bi bi-download"></i> Export All
             </button>
           </div>
@@ -183,45 +179,37 @@
                 <tr>
                   <td>
                     <div>
-                      <strong>{{ scan.start_time[:10] if scan.start_time else 'Unknown' }}</strong>
-                      <br><small class="text-muted">{{ scan.start_time[11:19] if scan.start_time else '' }}</small>
+                      <strong>{{ scan.start_time[:19] if scan.start_time else 'Unknown' }}</strong>
+                      {% if scan.end_time %}
+                      <br><small class="text-muted">Ended: {{ scan.end_time[:19] }}</small>
+                      {% endif %}
                     </div>
                   </td>
                   <td>
-                    <div class="d-flex align-items-center">
-                      <i class="bi bi-terminal me-2"></i>
-                      <div>
-                        <strong>{{ scan.scanner or 'nmap' }}</strong>
-                        {% if scan.scan_type %}
-                        <br><small class="text-info">{{ scan.scan_type }}</small>
-                        {% endif %}
-                      </div>
-                    </div>
+                    <span class="badge bg-primary">{{ scan.scanner or 'nmap' }}</span>
+                    {% if scan.nmap_version %}
+                    <br><small class="text-muted">v{{ scan.nmap_version }}</small>
+                    {% endif %}
                   </td>
                   <td>
                     {% if scan.nmap_version %}
-                    <code class="text-success">{{ scan.nmap_version }}</code>
+                      <code>{{ scan.nmap_version }}</code>
                     {% else %}
-                    <span class="text-muted">Unknown</span>
+                      <span class="text-muted">-</span>
                     {% endif %}
                   </td>
                   <td>
                     {% if scan.command_line %}
-                    <div class="text-truncate" style="max-width: 200px;" title="{{ scan.command_line|e }}">
-                      <small><code>{{ scan.command_line[:50] }}{% if scan.command_line|length > 50 %}...{% endif %}</code></small>
-                    </div>
+                    <code class="small">{{ scan.command_line[:50] }}{% if scan.command_line|length > 50 %}...{% endif %}</code>
                     {% else %}
-                    <span class="text-muted">N/A</span>
+                    <span class="text-muted">-</span>
                     {% endif %}
                   </td>
                   <td>
                     {% if scan.elapsed_time %}
-                    <div>
-                      <strong>{{ "%.1f"|format(scan.elapsed_time / 60) }}m</strong>
-                      <br><small class="text-muted">{{ "%.0f"|format(scan.elapsed_time) }}s</small>
-                    </div>
+                      {{ "%.1f"|format(scan.elapsed_time) }}s
                     {% else %}
-                    <span class="text-muted">Unknown</span>
+                      <span class="text-muted">-</span>
                     {% endif %}
                   </td>
                   <td>
@@ -236,12 +224,12 @@
                   <td class="text-center">
                     <div class="btn-group btn-group-sm">
                       <button type="button" class="btn btn-outline-primary"
-                              onclick="ScanInfoManager.viewScanDetails({{ loop.index0 }})" title="View Details">
+                              onclick="viewScanDetails('{{ scan.id or '' }}')" title="View Details">
                         <i class="bi bi-eye"></i>
                       </button>
                       {% if scan.command_line %}
                       <button type="button" class="btn btn-outline-secondary"
-                              onclick="ScanInfoManager.copyToClipboard({{ scan.command_line|tojson|safe }})" title="Copy Command">
+                              onclick="copyToClipboard('{{ scan.command_line|replace("'", "\\'") }}')" title="Copy Command">
                         <i class="bi bi-clipboard"></i>
                       </button>
                       {% endif %}
@@ -270,400 +258,265 @@
           <i class="bi bi-search display-1 text-muted"></i>
           <h4 class="text-muted mt-3">No Scan Information Available</h4>
           <p class="text-muted">No scan information found. This could mean:</p>
-          <ul class="list-unstyled text-muted">
+          <ul class="text-muted list-unstyled">
             <li>• No scans have been performed yet</li>
-            <li>• Scan information was not recorded</li>
-            <li>• The scan data is stored elsewhere</li>
+            <li>• Scan data hasn't been processed</li>
+            <li>• Database connection issues</li>
           </ul>
-          <a href="{{ url_for('network.overview') }}" class="btn btn-primary">
-            <i class="bi bi-arrow-left"></i> Back to Network Overview
-          </a>
+          <div class="mt-4">
+            <a href="{{ url_for('network.overview') }}" class="btn btn-primary">
+              <i class="bi bi-arrow-left"></i> Back to Network Overview
+            </a>
+            <button onclick="refreshScanData()" class="btn btn-outline-secondary ms-2">
+              <i class="bi bi-arrow-clockwise"></i> Refresh Data
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
   {% endif %}
-
-  {% endif %}
 </div>
 
-<!-- Scan Detail Modal -->
-<div class="modal fade" id="scanDetailModal" tabindex="-1">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Scan Details</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="scanDetailContent">
-        <!-- Content will be loaded via JavaScript -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Include Chart.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
+<!-- JavaScript Section -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// ✅ CORREZIONE PRINCIPALE: Namespace per evitare conflitti
-window.ScanInfoManager = {
-  // Dati scansioni (generati server-side una volta sola)
-  scansData: [
-    {% if scans %}
-    {% for scan in scans %}
-    {
-      index: {{ loop.index0 }},
-      id: '{{ scan.id if scan.id else loop.index0 }}',
-      start_time: {{ scan.start_time|tojson|safe }},
-      scanner: {{ scan.scanner|tojson|safe }},
-      nmap_version: {{ scan.nmap_version|tojson|safe }},
-      scan_type: {{ scan.scan_type|tojson|safe }},
-      protocol: {{ scan.protocol|tojson|safe }},
-      total_hosts: {{ scan.total_hosts or 0 }},
-      up_hosts: {{ scan.up_hosts or 0 }},
-      elapsed_time: {{ scan.elapsed_time or 0 }},
-      command_line: {{ scan.command_line|tojson|safe }},
-      file_source: {{ scan.file_source|tojson|safe }},
-      services_scanned: {{ scan.services_scanned|tojson|safe }}
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-    {% endif %}
-  ],
+// ===== SAFE DATA PREPARATION =====
+// Convert Python data to JavaScript safely, handling None/null values
 
-  // Inizializza grafici
-  initCharts: function() {
-    this.initTimelineChart();
-    this.initTypesChart();
-  },
+function safeValue(value, defaultValue = 0) {
+  return value !== null && value !== undefined ? value : defaultValue;
+}
 
-  // Grafico Timeline
-  initTimelineChart: function() {
-    const timelineCtx = document.getElementById('scanTimelineChart');
-    if (!timelineCtx || this.scansData.length === 0) return;
+function safeString(value, defaultValue = '') {
+  return value !== null && value !== undefined ? String(value) : defaultValue;
+}
 
-    // ✅ FIX: Estrai dati senza conflitti di variabili
-    const chartData = this.scansData.map(scan => ({
-      date: scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown',
-      totalHosts: scan.total_hosts || 0,
-      upHosts: scan.up_hosts || 0
-    })).reverse(); // Ordine cronologico
+// Prepare scan data for charts
+const scanData = [
+  {% if scans %}
+  {% for scan in scans %}
+  {
+    date: "{{ scan.start_time[:10] if scan.start_time else 'Unknown' }}",
+    scanner: "{{ scan.scanner or 'nmap' }}",
+    totalHosts: {{ scan.total_hosts or 0 }},
+    upHosts: {{ scan.up_hosts or 0 }},
+    duration: {{ scan.elapsed_time or 0 }},
+    command: "{{ (scan.command_line or '')[:30] }}",
+    version: "{{ scan.nmap_version or '' }}"
+  }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  {% endif %}
+];
 
+// ===== CHARTS =====
+{% if scans and scans|length > 0 %}
+
+// Timeline Chart
+document.addEventListener('DOMContentLoaded', function() {
+  const timelineCtx = document.getElementById('scanTimelineChart');
+  if (timelineCtx && scanData.length > 0) {
     new Chart(timelineCtx, {
       type: 'line',
       data: {
-        labels: chartData.map(d => d.date),
+        labels: scanData.map(scan => scan.date),
         datasets: [{
           label: 'Total Hosts',
-          data: chartData.map(d => d.totalHosts),
+          data: scanData.map(scan => scan.totalHosts),
           borderColor: 'rgb(54, 162, 235)',
           backgroundColor: 'rgba(54, 162, 235, 0.1)',
-          tension: 0.1
+          tension: 0.4
         }, {
           label: 'Hosts Up',
-          data: chartData.map(d => d.upHosts),
+          data: scanData.map(scan => scan.upHosts),
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.1)',
-          tension: 0.1
+          tension: 0.4
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Scan Results Over Time'
-          }
-        },
+        maintainAspectRatio: false,
         scales: {
           y: {
             beginAtZero: true
           }
+        },
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: 'Scan Results Over Time'
+          }
         }
       }
     });
-  },
+  }
 
-  // Grafico Tipi Scansione
-  initTypesChart: function() {
-    const typesCtx = document.getElementById('scanTypesChart');
-    if (!typesCtx || this.scansData.length === 0) return;
-
-    // ✅ FIX: Conta tipi di scansione senza conflitti
-    const typeCounts = {};
-    this.scansData.forEach(scan => {
-      const type = scan.scan_type || 'Unknown';
-      typeCounts[type] = (typeCounts[type] || 0) + 1;
+  // Scan Types Distribution
+  const typesCtx = document.getElementById('scanTypesChart');
+  if (typesCtx && scanData.length > 0) {
+    // Count scanners
+    const scannerCounts = {};
+    scanData.forEach(scan => {
+      const scanner = scan.scanner || 'Unknown';
+      scannerCounts[scanner] = (scannerCounts[scanner] || 0) + 1;
     });
-
-    const labels = Object.keys(typeCounts);
-    const data = Object.values(typeCounts);
-    const colors = [
-      'rgba(255, 99, 132, 0.8)',
-      'rgba(54, 162, 235, 0.8)',
-      'rgba(255, 205, 86, 0.8)',
-      'rgba(75, 192, 192, 0.8)',
-      'rgba(153, 102, 255, 0.8)',
-      'rgba(255, 159, 64, 0.8)'
-    ];
 
     new Chart(typesCtx, {
       type: 'doughnut',
       data: {
-        labels: labels,
+        labels: Object.keys(scannerCounts),
         datasets: [{
-          data: data,
-          backgroundColor: colors.slice(0, labels.length),
-          borderWidth: 2
+          data: Object.values(scannerCounts),
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 205, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)'
+          ]
         }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          title: {
-            display: true,
-            text: 'Scan Types Distribution'
-          },
           legend: {
             position: 'bottom'
           }
         }
       }
     });
-  },
-
-  // ✅ FIX: Funzione viewScanDetails correttamente definita
-  viewScanDetails: function(scanIndex) {
-    const modal = new bootstrap.Modal(document.getElementById('scanDetailModal'));
-    const content = document.getElementById('scanDetailContent');
-
-    if (scanIndex >= 0 && scanIndex < this.scansData.length) {
-      const scan = this.scansData[scanIndex];
-
-      content.innerHTML = `
-        <div class="row">
-          <div class="col-md-6">
-            <h6>Scan Information</h6>
-            <table class="table table-sm">
-              <tr><td><strong>Date:</strong></td><td>${scan.start_time || 'Unknown'}</td></tr>
-              <tr><td><strong>Scanner:</strong></td><td>${scan.scanner || 'nmap'}</td></tr>
-              <tr><td><strong>Version:</strong></td><td>${scan.nmap_version || 'Unknown'}</td></tr>
-              <tr><td><strong>Scan Type:</strong></td><td>${scan.scan_type || 'Unknown'}</td></tr>
-              <tr><td><strong>Protocol:</strong></td><td>${scan.protocol || 'Unknown'}</td></tr>
-            </table>
-          </div>
-          <div class="col-md-6">
-            <h6>Results</h6>
-            <table class="table table-sm">
-              <tr><td><strong>Total Hosts:</strong></td><td>${scan.total_hosts}</td></tr>
-              <tr><td><strong>Hosts Up:</strong></td><td>${scan.up_hosts}</td></tr>
-              <tr><td><strong>Success Rate:</strong></td><td>${scan.total_hosts > 0 ? (scan.up_hosts / scan.total_hosts * 100).toFixed(1) + '%' : 'N/A'}</td></tr>
-              <tr><td><strong>Duration:</strong></td><td>${scan.elapsed_time ? (scan.elapsed_time / 60).toFixed(1) + ' minutes' : 'Unknown'}</td></tr>
-              <tr><td><strong>Source File:</strong></td><td>${scan.file_source || 'N/A'}</td></tr>
-            </table>
-          </div>
-        </div>
-        ${scan.command_line ? `
-        <div class="mt-3">
-          <h6>Command Line</h6>
-          <div class="bg-dark text-light p-3 rounded">
-            <code>${this.escapeHtml(scan.command_line)}</code>
-          </div>
-          <button class="btn btn-sm btn-outline-primary mt-2" onclick="ScanInfoManager.copyToClipboard('${this.escapeHtml(scan.command_line)}')">
-            <i class="bi bi-clipboard"></i> Copy Command
-          </button>
-        </div>
-        ` : ''}
-        ${scan.services_scanned ? `
-        <div class="mt-3">
-          <h6>Services Scanned</h6>
-          <p class="text-muted">${this.escapeHtml(scan.services_scanned)}</p>
-        </div>
-        ` : ''}
-      `;
-    } else {
-      content.innerHTML = '<div class="alert alert-warning">No detailed information available for this scan.</div>';
-    }
-
-    modal.show();
-  },
-
-  // Utility per escape HTML
-  escapeHtml: function(unsafe) {
-    if (typeof unsafe !== 'string') return '';
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  },
-
-  // Export funzioni
-  exportScanTimeline: function() {
-    let csv = 'Date,Scanner,Total Hosts,Hosts Up,Duration (seconds)\n';
-    this.scansData.forEach(scan => {
-      const date = scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown';
-      csv += `"${date}","${scan.scanner || 'nmap'}",${scan.total_hosts},${scan.up_hosts},${scan.elapsed_time}\n`;
-    });
-    this.downloadCSV(csv, 'scan_timeline.csv');
-  },
-
-  exportAllScans: function() {
-    let csv = 'Date,Time,Scanner,Version,Total Hosts,Hosts Up,Duration,Command\n';
-    this.scansData.forEach(scan => {
-      const date = scan.start_time ? scan.start_time.slice(0, 10) : 'Unknown';
-      const time = scan.start_time ? scan.start_time.slice(11, 19) : '';
-      csv += `"${date}","${time}","${scan.scanner || 'nmap'}","${scan.nmap_version || ''}",${scan.total_hosts},${scan.up_hosts},${scan.elapsed_time},"${scan.command_line || ''}"\n`;
-    });
-    this.downloadCSV(csv, 'all_scans.csv');
-  },
-
-  downloadCSV: function(csv, filename) {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-  },
-
-  // Copy to clipboard
-  copyToClipboard: function(text) {
-    if (!text) return;
-
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => {
-        this.showToast('Copied to clipboard!', 'success');
-      }).catch(() => {
-        this.fallbackCopyTextToClipboard(text);
-      });
-    } else {
-      this.fallbackCopyTextToClipboard(text);
-    }
-  },
-
-  fallbackCopyTextToClipboard: function(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    try {
-      document.execCommand('copy');
-      this.showToast('Copied to clipboard!', 'success');
-    } catch (err) {
-      this.showToast('Failed to copy to clipboard', 'error');
-    }
-
-    document.body.removeChild(textArea);
-  },
-
-  // Toast notifications
-  showToast: function(message, type = 'info') {
-    const toast = document.createElement('div');
-    const iconClass = type === 'success' ? 'bi-check-circle' :
-                      type === 'error' ? 'bi-exclamation-circle' : 'bi-info-circle';
-    const alertClass = type === 'success' ? 'alert-success' :
-                       type === 'error' ? 'alert-danger' : 'alert-info';
-
-    toast.className = `toast-notification alert ${alertClass}`;
-    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px; opacity: 0; transition: opacity 0.3s;';
-    toast.innerHTML = `
-      <div class="d-flex align-items-center">
-        <i class="bi ${iconClass} me-2"></i>
-        ${message}
-      </div>
-    `;
-
-    document.body.appendChild(toast);
-
-    // Fade in
-    setTimeout(() => toast.style.opacity = '1', 10);
-
-    // Fade out and remove
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      setTimeout(() => {
-        if (document.body.contains(toast)) {
-          document.body.removeChild(toast);
-        }
-      }, 300);
-    }, 3000);
-  },
-
-  // Inizializza ricerca
-  initSearch: function() {
-    const searchInput = document.getElementById('scanSearch');
-    const table = document.getElementById('scansTable');
-
-    if (searchInput && table) {
-      searchInput.addEventListener('keyup', () => {
-        const filter = searchInput.value.toLowerCase();
-        const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-
-        for (let i = 0; i < rows.length; i++) {
-          const row = rows[i];
-          const text = row.textContent.toLowerCase();
-          row.style.display = text.includes(filter) ? '' : 'none';
-        }
-      });
-    }
   }
-};
+});
+{% endif %}
 
-// ✅ Inizializzazione al caricamento DOM
+// ===== UTILITY FUNCTIONS =====
+
+// Search functionality
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🔧 ScanInfo: Inizializzazione...');
+  const searchInput = document.getElementById('scanSearch');
+  const table = document.getElementById('scansTable');
 
-  // Inizializza tutti i componenti
-  ScanInfoManager.initCharts();
-  ScanInfoManager.initSearch();
+  if (searchInput && table) {
+    searchInput.addEventListener('keyup', function() {
+      const filter = searchInput.value.toLowerCase();
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-      e.preventDefault();
-      const searchInput = document.getElementById('scanSearch');
-      if (searchInput) {
-        searchInput.focus();
-        searchInput.select();
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+
+        if (text.includes(filter)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       }
-    }
-  });
-
-  console.log('✅ ScanInfo: Inizializzazione completata');
+    });
+  }
 });
 
-// ✅ Esponi funzioni globalmente per compatibilità (deprecato ma funzionante)
-window.viewScanDetails = function(scanIndex) {
-  ScanInfoManager.viewScanDetails(scanIndex);
-};
+// Export functions
+function exportScanTimeline() {
+  let csv = 'Date,Scanner,Total Hosts,Hosts Up,Duration (seconds)\n';
+  scanData.forEach(scan => {
+    csv += `"${scan.date}","${scan.scanner}",${scan.totalHosts},${scan.upHosts},${scan.duration}\n`;
+  });
+  downloadCSV(csv, 'scan_timeline.csv');
+}
 
-window.copyToClipboard = function(text) {
-  ScanInfoManager.copyToClipboard(text);
-};
+function exportAllScans() {
+  let csv = 'Date,Scanner,Version,Total Hosts,Hosts Up,Duration,Command\n';
+  scanData.forEach(scan => {
+    csv += `"${scan.date}","${scan.scanner}","${scan.version}",${scan.totalHosts},${scan.upHosts},${scan.duration},"${scan.command}"\n`;
+  });
+  downloadCSV(csv, 'all_scans.csv');
+}
 
-window.exportScanTimeline = function() {
-  ScanInfoManager.exportScanTimeline();
-};
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
 
-window.exportAllScans = function() {
-  ScanInfoManager.exportAllScans();
-};
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
 
+// Other utility functions
+function viewScanDetails(scanId) {
+  if (scanId) {
+    window.location.href = `/network/scan/${scanId}`;
+  } else {
+    alert('Scan ID not available');
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Command copied to clipboard!', 'success');
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      fallbackCopyTextToClipboard(text);
+    });
+  } else {
+    fallbackCopyTextToClipboard(text);
+  }
+}
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand('copy');
+    showToast('Command copied to clipboard!', 'success');
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+    showToast('Failed to copy command', 'error');
+  }
+
+  document.body.removeChild(textArea);
+}
+
+function refreshScanData() {
+  location.reload();
+}
+
+function showToast(message, type = 'info') {
+  // Simple toast notification (you can enhance this)
+  const alertClass = type === 'success' ? 'alert-success' :
+                    type === 'error' ? 'alert-danger' : 'alert-info';
+
+  const toast = document.createElement('div');
+  toast.className = `alert ${alertClass} position-fixed`;
+  toast.style.top = '20px';
+  toast.style.right = '20px';
+  toast.style.zIndex = '9999';
+  toast.style.opacity = '0.9';
+  toast.innerHTML = message;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
 </script>
 {% endblock %}

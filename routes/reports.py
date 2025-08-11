@@ -154,18 +154,51 @@ def export():
 
     return render_template('reports/export.html', **context_data)
 
-
 @reports_bp.route('/history')
 def history():
-    """Report history page"""
+    """History dei report generati"""
     try:
-        # In a real implementation, you would fetch from a reports table
-        # For now, we'll return the template with mock data
-        return render_template('reports/history.html')
-    except Exception as e:
-        current_app.logger.error(f"Errore in history: {e}")
-        return render_template('reports/history.html', error=str(e))
+        # Query per ottenere i report storici (simulati per ora)
+        reports_history = [
+            {
+                'id': 1,
+                'title': 'Network Security Assessment',
+                'type': 'vulnerability',
+                'created_date': datetime.now() - timedelta(days=1),
+                'size': '2.3 MB',
+                'status': 'completed',
+                'format': 'PDF'
+            },
+            {
+                'id': 2,
+                'title': 'Device Classification Report',
+                'type': 'devices',
+                'created_date': datetime.now() - timedelta(days=3),
+                'size': '1.8 MB',
+                'status': 'completed',
+                'format': 'Excel'
+            },
+            {
+                'id': 3,
+                'title': 'Executive Summary Q1',
+                'type': 'executive',
+                'created_date': datetime.now() - timedelta(days=7),
+                'size': '950 KB',
+                'status': 'completed',
+                'format': 'PDF'
+            }
+        ]
 
+        return render_template('reports/history.html',
+                               reports=reports_history,
+                               total_reports=len(reports_history))
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in reports history: {e}")
+        return render_template('reports/history.html',
+                               reports=[],
+                               total_reports=0,
+                               error=str(e))
 
 @reports_bp.route('/export/csv')
 def export_csv():

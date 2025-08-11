@@ -357,6 +357,13 @@ MENU_STRUCTURE = {
                 'url': '/reports/compliance',
                 'endpoint': 'reports.compliance'
             },
+            # ✅ AGGIUNGI QUESTA SEZIONE:
+            'history': {
+                'icon': 'bi bi-clock-history',
+                'label': 'Report History',
+                'url': '/reports/history',
+                'endpoint': 'reports.history'
+            },
             'export_data': {
                 'icon': 'bi bi-download',
                 'label': 'Export Data',

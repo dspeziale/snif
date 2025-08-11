@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Mon Aug 11 22:01:08 2025 as: nmap -T5 -sU -p 161 -&#45;script snmp* -oX 40.snmp.xml 192.168.40.0/24 -->
+<nmaprun scanner="nmap" args="nmap -T5 -sU -p 161 -&#45;script snmp* -oX 40.snmp.xml 192.168.40.0/24" start="1754942468" startstr="Mon Aug 11 22:01:08 2025" version="7.92" xmloutputversion="1.05">
+<scaninfo type="udp" protocol="udp" numservices="1" services="161"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.9" addrtype="ipv4"/>
+<address addr="00:17:C8:65:5A:C5" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.19" addrtype="ipv4"/>
+<address addr="00:07:4D:D0:FC:E3" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.32" addrtype="ipv4"/>
+<address addr="C4:34:6B:14:EC:B0" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.37" addrtype="ipv4"/>
+<address addr="98:E7:F4:03:4B:0E" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.41" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:D4" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.51" addrtype="ipv4"/>
+<address addr="00:17:C8:CC:48:4A" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.46" addrtype="ipv4"/>
+<address addr="00:30:18:59:F7:CE" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.50" addrtype="ipv4"/>
+<address addr="9C:7B:EF:8F:97:4C" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.87" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:6F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.89" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:23" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.88" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:7F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.102" addrtype="ipv4"/>
+<address addr="DC:4A:3E:B0:29:BF" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.93" addrtype="ipv4"/>
+<address addr="B0:0C:D1:E1:58:76" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.95" addrtype="ipv4"/>
+<address addr="3C:2A:F4:E0:DB:55" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.150" addrtype="ipv4"/>
+<address addr="74:E9:BF:28:F4:1C" addrtype="mac" vendor="Huawei Technologies"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.166" addrtype="ipv4"/>
+<address addr="E4:E7:49:03:0C:F6" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.165" addrtype="ipv4"/>
+<address addr="68:D7:9A:02:7D:12" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.177" addrtype="ipv4"/>
+<address addr="B4:B6:86:78:3A:AE" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.185" addrtype="ipv4"/>
+<address addr="F4:30:B9:29:1E:00" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.184" addrtype="ipv4"/>
+<address addr="D0:BF:9C:32:32:16" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.192" addrtype="ipv4"/>
+<address addr="A0:8C:FD:12:E9:65" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.190" addrtype="ipv4"/>
+<address addr="00:17:C8:C5:88:64" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.183" addrtype="ipv4"/>
+<address addr="B0:0C:D1:DE:82:80" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.175" addrtype="ipv4"/>
+<address addr="F0:9F:C2:A6:B1:EE" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.173" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:3E:8C" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.225" addrtype="ipv4"/>
+<address addr="50:57:9C:5B:EA:6B" addrtype="mac" vendor="Seiko Epson"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.199" addrtype="ipv4"/>
+<address addr="94:DD:F8:31:B3:D0" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.243" addrtype="ipv4"/>
+<address addr="84:18:3A:28:E6:C0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.246" addrtype="ipv4"/>
+<address addr="6C:AA:B3:0C:7B:76" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.249" addrtype="ipv4"/>
+<address addr="84:18:3A:23:74:D0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.189" addrtype="ipv4"/>
+<address addr="B4:22:00:DB:53:54" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.53" addrtype="ipv4"/>
+<address addr="98:E7:F4:A7:0D:54" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.86" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:40" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.90" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:72" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.244" addrtype="ipv4"/>
+<address addr="84:18:3A:29:2D:E0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.245" addrtype="ipv4"/>
+<address addr="84:18:3A:28:FD:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.248" addrtype="ipv4"/>
+<address addr="84:18:3A:23:B0:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.146" addrtype="ipv4"/>
+<address addr="0C:23:69:98:9D:B5" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.116" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:1D:3E" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.198" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:80:DD" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<taskprogress task="NSE" time="1754942493" percent="28.04" remaining="24" etc="1754942516"/>
+<taskprogress task="NSE" time="1754942532" percent="97.79" remaining="2" etc="1754942533"/>
+<host starttime="1754942471" endtime="1754942516"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.9" addrtype="ipv4"/>
+<address addr="00:17:C8:65:5A:C5" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="KYOCERA Corporation SNMPv3 server" method="probed" conf="10"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:445          0.0.0.0:0&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  0.0.0.0:39557        *:*&#xa;  UDP  239.255.255.250:3702 *:*&#xa;"/><script id="snmp-interfaces" output="&#xa;  eth0&#xa;    IP address: 192.168.40.9  Netmask: 255.255.0.0&#xa;    MAC address: 00:17:c8:65:5a:c5 (Kyocera Display)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 45.63 Mb sent, 231.34 Mb received&#xa;"/><script id="snmp-info" output="&#xa;  enterprise: KYOCERA Corporation&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 3046d58e68999a20&#xa;  snmpEngineBoots: 1&#xa;  snmpEngineTime: 12h38m58s"><elem key="enterprise">KYOCERA Corporation</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">3046d58e68999a20</elem>
+<elem key="snmpEngineBoots">1</elem>
+<elem key="snmpEngineTime">12h38m58s</elem>
+</script><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-sysdescr" output="KYOCERA Document Solutions Printing System&#xa;  System uptime: 12h39m15.23s (4555523 timeticks)"/></port>
+</ports>
+<times srtt="631" rttvar="3858" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942520"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.19" addrtype="ipv4"/>
+<address addr="00:07:4D:D0:FC:E3" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="60"/><service name="snmp" method="table" conf="3"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:21           0.0.0.0:0&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  TCP  0.0.0.0:6101         0.0.0.0:0&#xa;  TCP  0.0.0.0:9100         0.0.0.0:0&#xa;  TCP  0.0.0.0:9200         0.0.0.0:0&#xa;  TCP  0.0.0.0:9300         0.0.0.0:0&#xa;  TCP  192.168.40.19:65135  34.173.116.52:443&#xa;  UDP  0.0.0.0:0            *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:4201         *:*&#xa;  UDP  0.0.0.0:6101         *:*&#xa;  UDP  0.0.0.0:65135        *:*&#xa;"/><script id="snmp-interfaces" output="&#xa;  lo0&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  en0&#xa;    IP address: 192.168.40.19  Netmask: 255.255.0.0&#xa;    MAC address: 00:07:4d:d0:fc:e3 (Zebra Technologies)&#xa;    Type: ethernetCsmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 3.86 Mb sent, 1.08 Gb received&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-sysdescr" output="Zebra Technologies ZT230-203dpi / internal wired&#xa;  System uptime: 10d05h33m54.42s (88403442 timeticks)"/></port>
+</ports>
+<times srtt="1858" rttvar="4143" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942542"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.32" addrtype="ipv4"/>
+<address addr="C4:34:6B:14:EC:B0" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.32:80     192.168.30.131:49778&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:37621        *:*&#xa;  UDP  0.0.0.0:56330        *:*&#xa;  UDP  0.0.0.1:62481        *:*&#xa;  UDP  127.0.0.1:1021       *:*&#xa;  UDP  127.0.0.1:33316      *:*&#xa;  UDP  127.0.0.1:41097      *:*&#xa;  UDP  127.0.0.1:49426      *:*&#xa;  UDP  127.0.0.1:53316      *:*&#xa;  UDP  192.168.40.32:427    *:*&#xa;  UDP  192.168.40.32:5353   *:*&#xa;  UDP  192.168.40.32:5355   *:*&#xa;"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 21.10 Mb sent, 21.10 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.32  Netmask: 255.255.0.0&#xa;    MAC address: c4:34:6b:14:ec:b0 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 4.93 Mb sent, 182.46 Mb received&#xa;"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:VNK3D00939,FN:Z443YBA,SVCID:25040,PID:HP LaserJet 400 M401dne&#xa;  System uptime: 14h34m52.27s (5249227 timeticks)"/></port>
+</ports>
+<times srtt="545" rttvar="3796" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942542"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.37" addrtype="ipv4"/>
+<address addr="98:E7:F4:03:4B:0E" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHCPB62052,FN:1L51RXT,SVCID:26308,PID:HP LaserJet M402dn&#xa;  System uptime: 24d12h25m9.06s (211830906 timeticks)"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 786.69 Mb sent, 786.69 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.37  Netmask: 255.255.0.0&#xa;    MAC address: 98:e7:f4:03:4b:0e (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 135.68 Mb sent, 1.65 Gb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.37:443    192.168.30.131:51841&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:34700        *:*&#xa;  UDP  0.0.0.0:40498        *:*&#xa;  UDP  0.0.0.0:61844        *:*&#xa;  UDP  0.0.0.0:63690        *:*&#xa;  UDP  0.0.0.1:44815        *:*&#xa;  UDP  127.0.0.1:1032       *:*&#xa;  UDP  127.0.0.1:50118      *:*&#xa;  UDP  127.0.0.1:57827      *:*&#xa;  UDP  127.0.0.1:61681      *:*&#xa;  UDP  127.0.0.1:63608      *:*&#xa;  UDP  192.168.40.37:427    *:*&#xa;  UDP  192.168.40.37:5353   *:*&#xa;  UDP  192.168.40.37:5355   *:*&#xa;"/></port>
+</ports>
+<times srtt="2315" rttvar="7603" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942521"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.41" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:D4" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="60"/><service name="snmp" method="table" conf="3"/><script id="snmp-interfaces" output="&#xa;  lo0&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 374.87 Kb sent, 374.87 Kb received&#xa;  en0&#xa;    IP address: 192.168.40.41  Netmask: 255.255.0.0&#xa;    MAC address: 00:07:4d:7c:41:d4 (Zebra Technologies)&#xa;    Type: ethernetCsmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 20.17 Mb sent, 2.74 Gb received&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-sysdescr" output="Zebra Wired&#xa;  System uptime: 24d03h59m44.61s (208798461 timeticks)"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:21           0.0.0.0:0&#xa;  TCP  0.0.0.0:23           0.0.0.0:0&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  UDP  0.0.0.0:0            *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:4201         *:*&#xa;  UDP  0.0.0.0:6101         *:*&#xa;  UDP  0.0.0.0:65534        *:*&#xa;"/></port>
+</ports>
+<times srtt="1200" rttvar="4340" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.46" addrtype="ipv4"/>
+<address addr="00:30:18:59:F7:CE" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="128"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="833" rttvar="3886" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942518"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.50" addrtype="ipv4"/>
+<address addr="9C:7B:EF:8F:97:4C" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="net-snmp SNMPv3 server" method="probed" conf="10"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT&#xa;  System uptime: 12h34m4.10s (4524410 timeticks)"/><script id="snmp-info" output="&#xa;  enterprise: net-snmp&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 89cde803905ac352&#xa;  snmpEngineBoots: 241&#xa;  snmpEngineTime: 12h33m22s"><elem key="enterprise">net-snmp</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">89cde803905ac352</elem>
+<elem key="snmpEngineBoots">241</elem>
+<elem key="snmpEngineTime">12h33m22s</elem>
+</script><script id="snmp-interfaces" output="&#xa;  lo&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 24.75 Mb sent, 24.75 Mb received&#xa;  eth0&#xa;    IP address: 192.168.40.50  Netmask: 255.255.0.0&#xa;    MAC address: 9c:7b:ef:8f:97:4c (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 6.10 Mb sent, 150.00 Mb received&#xa;"/></port>
+</ports>
+<times srtt="1015" rttvar="4261" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942522"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.51" addrtype="ipv4"/>
+<address addr="00:17:C8:CC:48:4A" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="KYOCERA Corporation SNMPv3 server" method="probed" conf="10"/><script id="snmp-info" output="&#xa;  enterprise: KYOCERA Corporation&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 3c71ca0cf51b9768&#xa;  snmpEngineBoots: 1&#xa;  snmpEngineTime: 2d10h00m44s"><elem key="enterprise">KYOCERA Corporation</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">3c71ca0cf51b9768</elem>
+<elem key="snmpEngineBoots">1</elem>
+<elem key="snmpEngineTime">2d10h00m44s</elem>
+</script><script id="snmp-sysdescr" output="KYOCERA Document Solutions Printing System&#xa;  System uptime: 2d10h01m15.80s (20887580 timeticks)"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:445          0.0.0.0:0&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  0.0.0.0:35796        *:*&#xa;  UDP  239.255.255.250:3702 *:*&#xa;"/><script id="snmp-interfaces" output="&#xa;  eth0&#xa;    IP address: 192.168.40.51  Netmask: 255.255.0.0&#xa;    MAC address: 00:17:c8:cc:48:4a (Kyocera Display)&#xa;    Type: ethernetCsmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 30.30 Mb sent, 253.52 Mb received&#xa;"/></port>
+</ports>
+<times srtt="17072" rttvar="37124" to="165568"/>
+</host>
+<host starttime="1754942471" endtime="1754942527"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.53" addrtype="ipv4"/>
+<address addr="98:E7:F4:A7:0D:54" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-interfaces" output="&#xa;  Ethernet&#xa;    IP address: 192.168.40.53  Netmask: 255.255.0.0&#xa;"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHC6H06946,FN:6E5268Z,SVCID:27066,PID:HP LaserJet M402dn&#xa;  System uptime: 11h54m10.25s (4285025 timeticks)"/></port>
+</ports>
+<times srtt="460" rttvar="3842" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942521"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.86" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:40" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="555" rttvar="5000" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942525"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.87" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:6F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="405" rttvar="5000" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942528"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.88" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:7F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="441" rttvar="5000" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942524"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.89" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:23" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="382" rttvar="5000" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942520"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.90" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:72" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="553" rttvar="5000" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942521"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.93" addrtype="ipv4"/>
+<address addr="B0:0C:D1:E1:58:76" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="net-snmp SNMPv3 server" method="probed" conf="10"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-info" output="&#xa;  enterprise: net-snmp&#xa;  engineIDFormat: unknown&#xa;  engineIDData: e86c5a368f5ac352&#xa;  snmpEngineBoots: 342&#xa;  snmpEngineTime: 9h06m33s"><elem key="enterprise">net-snmp</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">e86c5a368f5ac352</elem>
+<elem key="snmpEngineBoots">342</elem>
+<elem key="snmpEngineTime">9h06m33s</elem>
+</script><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT&#xa;  System uptime: 9h06m44.78s (3280478 timeticks)"/><script id="snmp-interfaces" output="&#xa;  lo&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 110.51 Mb sent, 110.51 Mb received&#xa;  eth0&#xa;    IP address: 192.168.40.93  Netmask: 255.255.0.0&#xa;    MAC address: b0:0c:d1:e1:58:76 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 4.48 Mb sent, 102.04 Mb received&#xa;"/></port>
+</ports>
+<times srtt="932" rttvar="4341" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942524"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.95" addrtype="ipv4"/>
+<address addr="3C:2A:F4:E0:DB:55" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="0 SNMPv3 server" method="probed" conf="10"/><script id="snmp-interfaces" output="&#xa;  NC-8900h&#xa;    IP address: 192.168.40.95  Netmask: 255.255.0.0&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-info" output="&#xa;  enterprise: 0&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 3c2af4e0db550001&#xa;  snmpEngineBoots: 44&#xa;  snmpEngineTime: 2d21h38m30s"><elem key="enterprise">0</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">3c2af4e0db550001</elem>
+<elem key="snmpEngineBoots">44</elem>
+<elem key="snmpEngineTime">2d21h38m30s</elem>
+</script><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:443          0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  TCP  0.0.0.0:631          0.0.0.0:0&#xa;  TCP  0.0.0.0:9100         0.0.0.0:0&#xa;  TCP  0.0.0.0:54921        0.0.0.0:0&#xa;  TCP  0.0.0.0:54922        0.0.0.0:0&#xa;  TCP  0.0.0.0:54923        0.0.0.0:0&#xa;  UDP  0.0.0.0:69           *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:3702         *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:33642        *:*&#xa;  UDP  127.0.0.1:1011       *:*&#xa;  UDP  127.0.0.1:1012       *:*&#xa;  UDP  127.0.0.1:35110      *:*&#xa;  UDP  127.0.0.1:49109      *:*&#xa;  UDP  127.0.0.1:63508      *:*&#xa;  UDP  127.0.0.1:64522      *:*&#xa;"/><script id="snmp-sysdescr" output="Brother NC-8900h, Firmware Ver.ZD  ,MID 8C5-J52,FID 2&#xa;  System uptime: 2d21h40m15.20s (25081520 timeticks)"/></port>
+</ports>
+<times srtt="36567" rttvar="40303" to="197779"/>
+</host>
+<host starttime="1754942471" endtime="1754942524"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.102" addrtype="ipv4"/>
+<address addr="DC:4A:3E:B0:29:BF" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 20.04 Mb sent, 20.04 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.102  Netmask: 255.255.0.0&#xa;    MAC address: dc:4a:3e:b0:29:bf (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 12.90 Mb sent, 191.29 Mb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.102:80    192.168.30.131:49765&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:47712        *:*&#xa;  UDP  0.0.0.0:63441        *:*&#xa;  UDP  0.0.0.1:36378        *:*&#xa;  UDP  127.0.0.1:1021       *:*&#xa;  UDP  127.0.0.1:47209      *:*&#xa;  UDP  127.0.0.1:49994      *:*&#xa;  UDP  127.0.0.1:57765      *:*&#xa;  UDP  127.0.0.1:61650      *:*&#xa;  UDP  192.168.40.102:427   *:*&#xa;  UDP  192.168.40.102:5353  *:*&#xa;  UDP  192.168.40.102:5355  *:*&#xa;"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:VNC4F27405,FN:WW32YFV,SVCID:26188,PID:HP LaserJet Pro M201n&#xa;  System uptime: 12h49m8.72s (4614872 timeticks)"/></port>
+</ports>
+<times srtt="593" rttvar="3794" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.116" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:1D:3E" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="255"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="962630" rttvar="1099788" to="300000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.146" addrtype="ipv4"/>
+<address addr="0C:23:69:98:9D:B5" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="63"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="121468" rttvar="90719" to="300000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.150" addrtype="ipv4"/>
+<address addr="74:E9:BF:28:F4:1C" addrtype="mac" vendor="Huawei Technologies"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="255"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="603" rttvar="3845" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.165" addrtype="ipv4"/>
+<address addr="68:D7:9A:02:7D:12" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="1707" rttvar="3772" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942538"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.166" addrtype="ipv4"/>
+<address addr="E4:E7:49:03:0C:F6" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHC6Y19830,FN:6E80V6D,SVCID:29306,PID:HP LaserJet M402dne&#xa;  System uptime: 12h46m40.55s (4600055 timeticks)"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 16.74 Mb sent, 16.74 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.166  Netmask: 255.255.0.0&#xa;    MAC address: e4:e7:49:03:0c:f6 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 5.97 Mb sent, 154.28 Mb received&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.166:80    192.168.30.131:49787&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:44278        *:*&#xa;  UDP  0.0.0.0:46040        *:*&#xa;  UDP  0.0.0.0:53088        *:*&#xa;  UDP  0.0.0.0:59312        *:*&#xa;  UDP  0.0.0.1:34092        *:*&#xa;  UDP  127.0.0.1:1032       *:*&#xa;  UDP  127.0.0.1:38523      *:*&#xa;  UDP  127.0.0.1:42398      *:*&#xa;  UDP  127.0.0.1:52029      *:*&#xa;  UDP  127.0.0.1:53967      *:*&#xa;  UDP  192.168.40.166:427   *:*&#xa;  UDP  192.168.40.166:5353  *:*&#xa;  UDP  192.168.40.166:5355  *:*&#xa;"/></port>
+</ports>
+<times srtt="443" rttvar="3765" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.173" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:3E:8C" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="255"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="630" rttvar="3826" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.175" addrtype="ipv4"/>
+<address addr="F0:9F:C2:A6:B1:EE" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="630" rttvar="3877" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942534"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.177" addrtype="ipv4"/>
+<address addr="B4:B6:86:78:3A:AE" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 519.60 Mb sent, 519.60 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.177  Netmask: 255.255.0.0&#xa;    MAC address: b4:b6:86:78:3a:ae (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 2.63 Gb sent, 1.92 Gb received&#xa;  wifi0&#xa;    MAC address: fc:01:7c:3b:37:95 (Hon Hai Precision Ind.)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  wifiUAP&#xa;    MAC address: fc:01:7c:3b:37:95 (Hon Hai Precision Ind.)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.177:80    192.168.30.131:61692&#xa;  TCP  192.168.40.177:631   192.168.30.117:62768&#xa;  TCP  192.168.40.177:631   192.168.30.156:50691&#xa;  TCP  192.168.40.177:631   192.168.30.156:55126&#xa;  TCP  192.168.40.177:631   192.168.30.156:62744&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:33711        *:*&#xa;  UDP  0.0.0.0:36536        *:*&#xa;  UDP  0.0.0.0:43586        *:*&#xa;  UDP  0.0.0.0:45186        *:*&#xa;  UDP  0.0.0.0:54560        *:*&#xa;  UDP  0.0.0.0:57584        *:*&#xa;  UDP  0.0.0.1:55338        *:*&#xa;  UDP  127.0.0.1:1032       *:*&#xa;  UDP  127.0.0.1:39688      *:*&#xa;  UDP  127.0.0.1:46612      *:*&#xa;  UDP  127.0.0.1:55366      *:*&#xa;  UDP  127.0.0.1:60460      *:*&#xa;  UDP  192.168.40.177:427   *:*&#xa;  UDP  192.168.40.177:5353  *:*&#xa;  UDP  192.168.40.177:5355  *:*&#xa;"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:VNFVC16804,FN:4Q34H5R,SVCID:00000,PID:HP LaserJet MFP M130nw&#xa;  System uptime: 45d23h14m54.18s (397169418 timeticks)"/></port>
+</ports>
+<times srtt="529" rttvar="3770" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942528"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.183" addrtype="ipv4"/>
+<address addr="B0:0C:D1:DE:82:80" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:VNF3R20610,FN:4S41ZXF,SVCID:29293,PID:HP LaserJet MFP M227sdn&#xa;  System uptime: 24d11h08m2.14s (211368214 timeticks)"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;  Ethernet&#xa;    IP address: 192.168.40.183  Netmask: 255.255.0.0&#xa;    MAC address: b0:0c:d1:de:82:80 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;"/></port>
+</ports>
+<times srtt="554" rttvar="3837" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942518"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.184" addrtype="ipv4"/>
+<address addr="D0:BF:9C:32:32:16" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHKFG31018,FN:Z455M8E,SVCID:26140,PID:HP LaserJet 400 M401dne&#xa;  System uptime: 12h33m45.69s (4522569 timeticks)"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 23.99 Mb sent, 23.99 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.184  Netmask: 255.255.0.0&#xa;    MAC address: d0:bf:9c:32:32:16 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 4.32 Mb sent, 161.25 Mb received&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script></port>
+</ports>
+<times srtt="503" rttvar="3816" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942520"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.185" addrtype="ipv4"/>
+<address addr="F4:30:B9:29:1E:00" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHC6B53555,FN:6E65CMJ,SVCID:27293,PID:HP LaserJet M402dn&#xa;  System uptime: 14h21m42.75s (5170275 timeticks)"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 19.01 Mb sent, 19.01 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.185  Netmask: 255.255.0.0&#xa;    MAC address: f4:30:b9:29:1e:00 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 8.72 Mb sent, 176.90 Mb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.185:80    192.168.30.131:49763&#xa;  TCP  192.168.40.185:443   192.168.30.131:49624&#xa;  TCP  192.168.40.185:443   192.168.30.131:54405&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:36309        *:*&#xa;  UDP  0.0.0.0:39133        *:*&#xa;  UDP  0.0.0.0:39851        *:*&#xa;  UDP  0.0.0.0:58935        *:*&#xa;  UDP  0.0.0.1:46810        *:*&#xa;  UDP  127.0.0.1:1032       *:*&#xa;  UDP  127.0.0.1:44230      *:*&#xa;  UDP  127.0.0.1:45851      *:*&#xa;  UDP  127.0.0.1:54883      *:*&#xa;  UDP  127.0.0.1:55693      *:*&#xa;  UDP  192.168.40.185:427   *:*&#xa;  UDP  192.168.40.185:5353  *:*&#xa;  UDP  192.168.40.185:5355  *:*&#xa;"/></port>
+</ports>
+<times srtt="529" rttvar="3879" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942522"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.189" addrtype="ipv4"/>
+<address addr="B4:22:00:DB:53:54" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="0 SNMPv3 server" method="probed" conf="10"/><script id="snmp-info" output="&#xa;  enterprise: 0&#xa;  engineIDFormat: unknown&#xa;  engineIDData: b42200db53540001&#xa;  snmpEngineBoots: 19&#xa;  snmpEngineTime: 9h22m12s"><elem key="enterprise">0</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">b42200db53540001</elem>
+<elem key="snmpEngineBoots">19</elem>
+<elem key="snmpEngineTime">9h22m12s</elem>
+</script><script id="snmp-sysdescr" output="Brother NC-9800h, Firmware Ver.1.05  ,MID 8C5-MTJFID 2&#xa;  System uptime: 9h24m7.80s (3384780 timeticks)"/><script id="snmp-interfaces" output="&#xa;  NC-9800h&#xa;    IP address: 192.168.40.189  Netmask: 255.255.0.0&#xa;    MAC address: b4:22:00:db:53:54 (Brother Industries)&#xa;    Type: iso88023Csmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 3.39 Mb sent, 79.85 Mb received&#xa;  NC-9300w&#xa;    MAC address: 00:41:0e:0d:29:49 (Unknown)&#xa;    Type: iso88023Csmacd  Speed: 72 Mbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  NC-9300w&#xa;    MAC address: 02:41:0e:0d:a9:49 (Unknown)&#xa;    Type: iso88023Csmacd  Speed: 72 Mbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  SoftwareLoopBack&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 2.51 Kb sent, 2.51 Kb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:443          0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  TCP  0.0.0.0:631          0.0.0.0:0&#xa;  TCP  0.0.0.0:9100         0.0.0.0:0&#xa;  TCP  0.0.0.0:54921        0.0.0.0:0&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:37870        *:*&#xa;  UDP  127.0.0.1:1011       *:*&#xa;  UDP  127.0.0.1:1012       *:*&#xa;  UDP  127.0.0.1:47418      *:*&#xa;  UDP  127.0.0.1:53177      *:*&#xa;  UDP  127.0.0.1:57301      *:*&#xa;  UDP  127.0.0.1:62069      *:*&#xa;"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script></port>
+</ports>
+<times srtt="34750" rttvar="26530" to="140870"/>
+</host>
+<host starttime="1754942471" endtime="1754942534"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.190" addrtype="ipv4"/>
+<address addr="00:17:C8:C5:88:64" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="KYOCERA Corporation SNMPv3 server" method="probed" conf="10"/><script id="snmp-interfaces" output="&#xa;  eth0&#xa;    IP address: 192.168.40.190  Netmask: 255.255.0.0&#xa;    MAC address: 00:17:c8:c5:88:64 (Kyocera Display)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 13.73 Mb sent, 128.92 Mb received&#xa;"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:445          0.0.0.0:0&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  0.0.0.0:37660        *:*&#xa;  UDP  239.255.255.250:3702 *:*&#xa;"/><script id="snmp-sysdescr" output="KYOCERA Document Solutions Printing System&#xa;  System uptime: 12h21m45.57s (4450557 timeticks)"/><script id="snmp-info" output="&#xa;  enterprise: KYOCERA Corporation&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 9c549a1cacbf9968&#xa;  snmpEngineBoots: 1&#xa;  snmpEngineTime: 12h21m22s"><elem key="enterprise">KYOCERA Corporation</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">9c549a1cacbf9968</elem>
+<elem key="snmpEngineBoots">1</elem>
+<elem key="snmpEngineTime">12h21m22s</elem>
+</script><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script></port>
+</ports>
+<times srtt="568" rttvar="3937" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942527"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.192" addrtype="ipv4"/>
+<address addr="A0:8C:FD:12:E9:65" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-netstat" output="&#xa;  TCP  192.168.40.192:80    192.168.30.131:49807&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:138          *:*&#xa;  UDP  0.0.0.0:1022         *:*&#xa;  UDP  0.0.0.0:1023         *:*&#xa;  UDP  0.0.0.0:41989        *:*&#xa;  UDP  0.0.0.0:46920        *:*&#xa;  UDP  0.0.0.0:53762        *:*&#xa;  UDP  0.0.0.0:56608        *:*&#xa;  UDP  0.0.0.1:33207        *:*&#xa;  UDP  127.0.0.1:1032       *:*&#xa;  UDP  127.0.0.1:39796      *:*&#xa;  UDP  127.0.0.1:46825      *:*&#xa;  UDP  127.0.0.1:56228      *:*&#xa;  UDP  127.0.0.1:60882      *:*&#xa;  UDP  192.168.40.192:427   *:*&#xa;  UDP  192.168.40.192:5353  *:*&#xa;  UDP  192.168.40.192:5355  *:*&#xa;"/><script id="snmp-sysdescr" output="HP ETHERNET MULTI-ENVIRONMENT,SN:PHCPH30726,FN:1L41G8Q,SVCID:27336,PID:HP LaserJet M402dn-SUAREZ&#xa;  System uptime: 3d03h27m29.05s (27164905 timeticks)"/><script id="snmp-interfaces" output="&#xa;  LOOPBACK&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 86.16 Mb sent, 86.16 Mb received&#xa;  Ethernet&#xa;    IP address: 192.168.40.192  Netmask: 255.255.0.0&#xa;    MAC address: a0:8c:fd:12:e9:65 (Hewlett Packard)&#xa;    Type: ethernetCsmacd  Speed: 10 Mbps&#xa;    Status: up&#xa;    Traffic stats: 13.17 Mb sent, 771.34 Mb received&#xa;"/></port>
+</ports>
+<times srtt="514" rttvar="3853" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942511"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.198" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:80:DD" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="50124" rttvar="51961" to="257968"/>
+</host>
+<host starttime="1754942471" endtime="1754942515"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.199" addrtype="ipv4"/>
+<address addr="94:DD:F8:31:B3:D0" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" product="0 SNMPv3 server" method="probed" conf="10"/><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:443          0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  TCP  0.0.0.0:631          0.0.0.0:0&#xa;  TCP  0.0.0.0:9100         0.0.0.0:0&#xa;  UDP  0.0.0.0:137          *:*&#xa;  UDP  0.0.0.0:3702         *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:62045        *:*&#xa;  UDP  127.0.0.1:1011       *:*&#xa;  UDP  127.0.0.1:1012       *:*&#xa;  UDP  127.0.0.1:37971      *:*&#xa;  UDP  127.0.0.1:51572      *:*&#xa;  UDP  127.0.0.1:51753      *:*&#xa;"/><script id="snmp-info" output="&#xa;  enterprise: 0&#xa;  engineIDFormat: unknown&#xa;  engineIDData: 94ddf831b3d00001&#xa;  snmpEngineBoots: 9&#xa;  snmpEngineTime: 12h59m14s"><elem key="enterprise">0</elem>
+<elem key="engineIDFormat">unknown</elem>
+<elem key="engineIDData">94ddf831b3d00001</elem>
+<elem key="snmpEngineBoots">9</elem>
+<elem key="snmpEngineTime">12h59m14s</elem>
+</script><script id="snmp-sysdescr" output="Brother NC-9800h, Firmware Ver.1.14  ,MID 84U-M6J&#xa;  System uptime: 13h01m31.90s (4689190 timeticks)"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-interfaces" output="&#xa;  NC-9800h&#xa;    IP address: 192.168.40.199  Netmask: 255.255.0.0&#xa;    MAC address: 94:dd:f8:31:b3:d0 (Unknown)&#xa;    Type: iso88023Csmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 4.23 Mb sent, 156.29 Mb received&#xa;  NC-9300w&#xa;    MAC address: 2c:98:11:0c:fc:8e (Unknown)&#xa;    Type: iso88023Csmacd  Speed: 72 Mbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  NC-9300w&#xa;    MAC address: 2e:98:11:0c:7c:8e (Unknown)&#xa;    Type: iso88023Csmacd  Speed: 72 Mbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  SoftwareLoopBack&#xa;    Type: softwareLoopback  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 1.90 Kb sent, 1.90 Kb received&#xa;"/></port>
+</ports>
+<times srtt="8056" rttvar="6062" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942521"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.225" addrtype="ipv4"/>
+<address addr="50:57:9C:5B:EA:6B" addrtype="mac" vendor="Seiko Epson"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="64"/><service name="snmp" method="table" conf="3"/><script id="snmp-interfaces" output="&#xa;  EEPS2 Hard Ver.1.00 Firm Ver.0.60&#xa;    IP address: 192.168.40.225  Netmask: 255.255.0.0&#xa;    MAC address: 50:57:9c:5b:ea:6b (Seiko Epson)&#xa;    Type: ethernetCsmacd  Speed: 100 Mbps&#xa;    Status: up&#xa;    Traffic stats: 70.63 Mb sent, -450005.39 Kb received&#xa;"/><script id="snmp-sysdescr" output="EPSON Built-in 10Base-T/100Base-TX/1000Base-T Print Server&#xa;  System uptime: 14d05h12m31.00s (122835100 timeticks)"/><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="state">Valid credentials</elem>
+<elem key="password">public</elem>
+</table>
+</script><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:443          0.0.0.0:0&#xa;  TCP  0.0.0.0:515          0.0.0.0:0&#xa;  TCP  0.0.0.0:631          0.0.0.0:0&#xa;  TCP  0.0.0.0:9100         0.0.0.0:0&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:427          *:*&#xa;  UDP  0.0.0.0:3289         *:*&#xa;  UDP  0.0.0.0:3702         *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  0.0.0.0:57440        *:*&#xa;"/></port>
+</ports>
+<times srtt="684" rttvar="4270" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.243" addrtype="ipv4"/>
+<address addr="84:18:3A:28:E6:C0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="9463" rttvar="9373" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.244" addrtype="ipv4"/>
+<address addr="84:18:3A:29:2D:E0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="930" rttvar="3941" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.245" addrtype="ipv4"/>
+<address addr="84:18:3A:28:FD:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="1016" rttvar="3934" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.246" addrtype="ipv4"/>
+<address addr="6C:AA:B3:0C:7B:76" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="345" rttvar="3927" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.248" addrtype="ipv4"/>
+<address addr="84:18:3A:23:B0:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="1974" rttvar="3788" to="50000"/>
+</host>
+<host starttime="1754942471" endtime="1754942471"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.249" addrtype="ipv4"/>
+<address addr="84:18:3A:23:74:D0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="619" rttvar="4083" to="50000"/>
+</host>
+<runstats><finished time="1754942542" timestr="Mon Aug 11 22:02:22 2025" summary="Nmap done at Mon Aug 11 22:02:22 2025; 256 IP addresses (40 hosts up) scanned in 73.63 seconds" elapsed="73.63" exit="success"/><hosts up="40" down="216" total="256"/>
+</runstats>
+</nmaprun>
