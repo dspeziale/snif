@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="it">
+<!--begin::Head-->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>{% block title %}AdminLTE v4 | Dashboard{% endblock %}</title>
+  <!--begin::Accessibility Meta Tags-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+  <!--end::Accessibility Meta Tags-->
+
+  <!--begin::Primary Meta Tags-->
+  <meta name="title" content="{% block meta_title %}AdminLTE v4 | Dashboard{% endblock %}" />
+  <meta name="author" content="ColorlibHQ" />
+  <meta name="description" content="{% block meta_description %}AdminLTE Dashboard Flask Application{% endblock %}" />
+  <!--end::Primary Meta Tags-->
+
+  <!--begin::Fonts-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+    integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q=" crossorigin="anonymous" media="print"
+    onload="this.media='all'" />
+  <!--end::Fonts-->
+
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(OverlayScrollbars)-->
+
+  <!--begin::Third Party Plugin(Bootstrap Icons)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    crossorigin="anonymous" />
+  <!--end::Third Party Plugin(Bootstrap Icons)-->
+
+  <!--begin::Required Plugin(AdminLTE)-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/css/adminlte.min.css" />
+  <!--end::Required Plugin(AdminLTE)-->
+
+  {% block extra_css %}
+  <!-- Personalizzazioni CSS per tema light -->
+  <style>
+    /* Sidebar con tema light e testi più scuri */
+    .app-sidebar[data-bs-theme="light"] {
+      background-color: #f8f9fa !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link {
+      color: #212529 !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link:hover {
+      background-color: #e9ecef !important;
+      color: #000 !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-link.active {
+      background-color: #007bff !important;
+      color: #fff !important;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .nav-header {
+      color: #6c757d !important;
+      font-weight: 600;
+    }
+
+    .app-sidebar[data-bs-theme="light"] .brand-text {
+      color: #212529 !important;
+    }
+
+    /* Testo più scuro per tutto il contenuto */
+    .app-content {
+      color: #212529;
+    }
+
+    .card-title {
+      color: #212529 !important;
+      font-weight: 600;
+    }
+
+    .card-body {
+      color: #212529;
+    }
+
+    /* Breadcrumb con testi più scuri */
+    .breadcrumb-item a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+      color: #6c757d;
+    }
+
+    /* Header con testi più scuri */
+    h1, h2, h3, h4, h5, h6 {
+      color: #212529 !important;
+    }
+
+    /* Testi paragrafi più scuri */
+    p, div, span {
+      color: #212529;
+    }
+
+    /* Navbar con tema light */
+    .app-header {
+      background-color: #fff !important;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .navbar-nav .nav-link {
+      color: #212529 !important;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #007bff !important;
+    }
+
+    /* Loading spinner per il menu */
+    .menu-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .menu-loading .spinner-border {
+      color: #007bff;
+    }
+  </style>
+  {% endblock %}
+</head>
+
+<!--end::Head-->
+
+<!--begin::Body-->
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+  <!--begin::App Wrapper-->
+  <div class="app-wrapper">
+    <!--begin::Header-->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <!--begin::Container-->
+      <div class="container-fluid">
+        <!--begin::Start Navbar Links-->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+              <i class="bi bi-list"></i>
+            </a>
+          </li>
+          <li class="nav-item d-none d-md-block">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item d-none d-md-block">
+            <a href="{{ url_for('about') }}" class="nav-link">About</a>
+          </li>
+        </ul>
+        <!--end::Start Navbar Links-->
+
+        <!--begin::End Navbar Links-->
+        <ul class="navbar-nav ms-auto">
+         <!--begin::Messages Dropdown Menu-->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+              <i class="bi bi-chat-text"></i>
+              <span class="navbar-badge badge text-bg-danger">3</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <a href="#" class="dropdown-item">
+                <div class="d-flex">
+                  <div class="flex-shrink-0">
+                    <img src="{{ url_for('static', filename='assets/img/avatar.png') if url_for else '#' }}" alt="User Avatar" class="img-size-50 rounded-circle me-3" />
+                  </div>
+                  <div class="flex-grow-1">
+                    <h3 class="dropdown-item-title">
+                      Utente Demo
+                      <span class="float-end fs-7 text-danger"><i class="bi bi-star-fill"></i></span>
+                    </h3>
+                    <p class="fs-7">Messaggio di esempio...</p>
+                    <p class="fs-7 text-secondary">
+                      <i class="bi bi-clock-fill me-1"></i> 4 Ore fa
+                    </p>
+                  </div>
+                </div>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item dropdown-footer">Vedi tutti i messaggi</a>
+            </div>
+          </li>
+          <!--end::Messages Dropdown Menu-->
+
+          <!--begin::Notifications Dropdown Menu-->
+          <li class="nav-item dropdown">
+            <a class="nav-link" data-bs-toggle="dropdown" href="#">
+              <i class="bi bi-bell-fill"></i>
+              <span class="navbar-badge badge text-bg-warning">15</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <span class="dropdown-item dropdown-header">15 Notifiche</span>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">
+                <i class="bi bi-envelope me-2"></i> 4 nuovi messaggi
+                <span class="float-end text-secondary fs-7">3 min</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item dropdown-footer">Vedi tutte le notifiche</a>
+            </div>
+          </li>
+          <!--end::Notifications Dropdown Menu-->
+
+          <!--begin::Fullscreen Toggle-->
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+              <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+              <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+            </a>
+          </li>
+          <!--end::Fullscreen Toggle-->
+
+          <!--begin::User Menu Dropdown-->
+          <li class="nav-item dropdown user-menu">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <img src="{{ url_for('static', filename='assets/img/daniele.png') if url_for else '#' }}" class="user-image rounded-circle shadow" alt="User Image" />
+              <span class="d-none d-md-inline">Admin User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+              <li class="user-header text-bg-primary">
+                <img src="{{ url_for('static', filename='assets/img/daniele.png') if url_for else '#' }}" class="rounded-circle shadow" alt="User Image" />
+                <p>
+                  Admin User - Web Developer
+                  <small>Membro da Nov. 2019</small>
+                </p>
+              </li>
+              <li class="user-body">
+                <div class="row">
+                  <div class="col-4 text-center"><a href="#">Followers</a></div>
+                  <div class="col-4 text-center"><a href="#">Vendite</a></div>
+                  <div class="col-4 text-center"><a href="#">Amici</a></div>
+                </div>
+              </li>
+              <li class="user-footer">
+                <a href="#" class="btn btn-default btn-flat">Profilo</a>
+                <a href="#" class="btn btn-default btn-flat float-end">Logout</a>
+              </li>
+            </ul>
+          </li>
+          <!--end::User Menu Dropdown-->
+        </ul>
+        <!--end::End Navbar Links-->
+      </div>
+      <!--end::Container-->
+    </nav>
+    <!--end::Header-->
+
+    <!--begin::Sidebar-->
+    <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="light">
+      <!--begin::Sidebar Brand-->
+      <div class="sidebar-brand">
+        <a href="{{ url_for('network.dashboard') }}" class="brand-link">
+          <img src="{{ url_for('static', filename='assets/img/AdminLTELogo.png') if url_for else '#' }}" alt="AdminLTE Logo"
+               class="brand-image opacity-75 shadow" />
+          <span class="brand-text fw-light">AdminLTE 4</span>
+        </a>
+      </div>
+      <!--end::Sidebar Brand-->
+
+      <!--begin::Sidebar Wrapper-->
+      <div class="sidebar-wrapper">
+        <nav class="mt-2">
+          <!--begin::Sidebar Menu-->
+          <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation"
+              aria-label="Main navigation" data-accordion="false" id="navigation">
+
+            <!-- Loading placeholder -->
+            <li class="menu-loading">
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Caricamento menu...</span>
+              </div>
+            </li>
+          </ul>
+          <!--end::Sidebar Menu-->
+        </nav>
+      </div>
+      <!--end::Sidebar Wrapper-->
+    </aside>
+    <!--end::Sidebar-->
+
+    <!--begin::App Main-->
+    <main class="app-main">
+      <!--begin::App Content Header-->
+      <div class="app-content-header">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-6">
+              <h3 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h3>
+            </div>
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-end">
+                {% block breadcrumbs %}
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                {% endblock %}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--end::App Content Header-->
+
+      <!--begin::App Content-->
+      <div class="app-content">
+        <div class="container-fluid">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+      <!--end::App Content-->
+    </main>
+    <!--end::App Main-->
+
+    <!--begin::Footer-->
+    <footer class="app-footer">
+      <div class="float-end d-none d-sm-inline">{% block footer_right %}Qualsiasi cosa tu voglia{% endblock %}</div>
+      <strong>
+        Copyright &copy; 2019-25&nbsp;
+        <a href="https://dsc.altervista.org" class="text-decoration-none">DS Consulting</a>.
+      </strong>
+      Tutti i diritti riservati.
+    </footer>
+    <!--end::Footer-->
+  </div>
+  <!--end::App Wrapper-->
+
+  <!--begin::Script-->
+  <!--begin::Third Party Plugin(OverlayScrollbars)-->
+  <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Third Party Plugin(OverlayScrollbars)-->
+
+  <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Required Plugin(popperjs for Bootstrap 5)-->
+
+  <!--begin::Required Plugin(Bootstrap 5)-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
+    crossorigin="anonymous"></script>
+  <!--end::Required Plugin(Bootstrap 5)-->
+
+  <!--begin::Required Plugin(AdminLTE)-->
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0-beta2/dist/js/adminlte.min.js"></script>
+  <!--end::Required Plugin(AdminLTE)-->
+
+  <!--begin::OverlayScrollbars Configure-->
+  <script>
+    const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+    const Default = {
+      scrollbarTheme: 'os-theme-light',
+      scrollbarAutoHide: 'leave',
+      scrollbarClickScroll: true,
+    };
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+      if (sidebarWrapper && typeof OverlayScrollbarsGlobal !== 'undefined') {
+        OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+          scrollbars: {
+            theme: Default.scrollbarTheme,
+            autoHide: Default.scrollbarAutoHide,
+            clickScroll: Default.scrollbarClickScroll,
+          },
+        });
+      }
+    });
+  </script>
+  <!--end::OverlayScrollbars Configure-->
+<!-- Menu AJAX Management - VERSIONE CORRETTA -->
+  <script>
+    // Evita dichiarazioni multiple
+    if (typeof MenuManager === 'undefined') {
+      class MenuManager {
+        constructor() {
+          // ✅ CORREZIONE: Usa g.current_endpoint che viene settato in before_request
+          this.currentEndpoint = '{{ g.current_endpoint or request.endpoint or "index" }}';
+          this.currentUrl = '{{ request.path }}';
+          this.menuContainer = document.getElementById('navigation');
+
+          // Debug dettagliato
+          console.log('🔧 MenuManager inizializzato:');
+          console.log('   Endpoint:', this.currentEndpoint);
+          console.log('   URL:', this.currentUrl);
+          console.log('   Container:', this.menuContainer ? 'trovato' : 'NON TROVATO');
+
+          if (!this.menuContainer) {
+            console.error('❌ Container del menu non trovato! Controlla che esista <nav id="navigation">');
+            return;
+          }
+
+          this.init();
+        }
+
+        init() {
+          this.loadMenu();
+          this.setupEventHandlers();
+        }
+
+        async loadMenu() {
+          try {
+            console.log('📥 Caricamento menu per:');
+            console.log('   Endpoint:', this.currentEndpoint);
+            console.log('   URL:', this.currentUrl);
+
+            // ✅ CORREZIONE: Assicurati che endpoint sia passato correttamente
+            const endpoint = this.currentEndpoint || 'index';
+            const url = encodeURIComponent(this.currentUrl || '/');
+
+            const response = await fetch(`/menu/render?endpoint=${endpoint}&url=${url}`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              const text = await response.text();
+              console.error('❌ Risposta non JSON ricevuta:', text);
+              throw new Error('Risposta del server non è JSON valido');
+            }
+
+            const data = await response.json();
+            console.log('📨 Risposta menu ricevuta:', data);
+
+            if (data.status === 'success' && data.html) {
+              this.menuContainer.innerHTML = data.html;
+              this.activateTreeview();
+              this.setupMenuClickHandlers();
+
+              // ✅ CORREZIONE: Log più dettagliato per debug
+              if (data.active_path && data.active_path.length > 0) {
+                console.log('✅ Percorso attivo trovato:', data.active_path);
+                console.log('🎨 Elementi che dovrebbero essere blu:',
+                  data.active_path.map(path => `"${path}"`).join(' → '));
+              } else {
+                console.log('⚠️ Nessun percorso attivo trovato per:');
+                console.log('   Endpoint cercato:', data.current_endpoint);
+                console.log('   URL cercato:', data.current_url);
+
+                // Mostra suggerimenti
+                this.showDebugSuggestions(data);
+              }
+            } else {
+              throw new Error(data.error || 'Errore sconosciuto nel caricamento del menu');
+            }
+          } catch (error) {
+            console.error('❌ Errore nel caricamento del menu:', error);
+            this.showMenuError(error.message);
+          }
+        }
+
+        // ✅ NUOVO: Mostra suggerimenti di debug
+        showDebugSuggestions(data) {
+          console.log('🔧 SUGGERIMENTI DEBUG:');
+          console.log('1. Controlla che il menu_config.py contenga endpoint:', data.current_endpoint);
+          console.log('2. Verifica che URL corrisponda:', data.current_url);
+          console.log('3. Apri /menu/debug per analisi completa');
+          console.log('4. Confronta con elementi SNMP che funzionano');
+        }
+
+        showMenuError(message = 'Errore nel caricamento del menu') {
+          this.menuContainer.innerHTML = `
+            <li class="nav-item">
+              <a href="#" class="nav-link text-danger">
+                <i class="nav-icon bi bi-exclamation-triangle"></i>
+                <p>${message}</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link text-info" onclick="window.menuManager.loadMenu()">
+                <i class="nav-icon bi bi-arrow-clockwise"></i>
+                <p>Riprova</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}"
+                 class="nav-link text-warning" target="_blank">
+                <i class="nav-icon bi bi-bug"></i>
+                <p>Debug Info</p>
+              </a>
+            </li>
+          `;
+        }
+
+        activateTreeview() {
+          // ✅ Riattiva la funzionalità treeview di AdminLTE
+          const treeviewElements = this.menuContainer.querySelectorAll('[data-lte-toggle="treeview"]');
+          treeviewElements.forEach(element => {
+            // AdminLTE gestirà automaticamente il treeview se ha l'attributo corretto
+          });
+        }
+
+        setupMenuClickHandlers() {
+          // ✅ CORREZIONE: Gestisce i click sui link del menu
+          const menuLinks = this.menuContainer.querySelectorAll('a[href]:not([href="#"])');
+          console.log(`🔗 Configurati ${menuLinks.length} link del menu`);
+
+          menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+              const href = link.getAttribute('href');
+
+              // Solo per link interni (non esterni)
+              if (href && href.startsWith('/')) {
+                console.log('🖱️ Click su link menu:', href);
+
+                // ✅ NON prevenire il default - lascia che la pagina si ricarichi normalmente
+                // Il nuovo sistema server-side gestirà l'highlighting corretto
+
+                // Feedback visivo temporaneo
+                this.updateActiveStates(link);
+              }
+            });
+          });
+        }
+
+        // ✅ SEMPLIFICATO: Solo feedback visivo temporaneo
+        updateActiveStates(activeLink) {
+          // Rimuovi tutte le classi active
+          this.menuContainer.querySelectorAll('.nav-link.active').forEach(link => {
+            link.classList.remove('active');
+          });
+
+          this.menuContainer.querySelectorAll('.nav-item.menu-open').forEach(item => {
+            item.classList.remove('menu-open');
+          });
+
+          // Aggiungi active al link cliccato (temporaneo)
+          activeLink.classList.add('active');
+
+          // Aggiungi menu-open ai parent
+          let parent = activeLink.closest('li').parentElement;
+          while (parent) {
+            if (parent.classList.contains('nav-treeview')) {
+              const parentLi = parent.parentElement;
+              if (parentLi && parentLi.classList.contains('nav-item')) {
+                parentLi.classList.add('menu-open');
+                const parentLink = parentLi.querySelector('.nav-link');
+                if (parentLink) {
+                  parentLink.classList.add('active');
+                }
+              }
+            }
+            parent = parent.parentElement;
+          }
+        }
+
+        setupEventHandlers() {
+          // Listener per aggiornamenti del menu se necessario
+          window.addEventListener('menuUpdate', () => {
+            this.loadMenu();
+          });
+        }
+
+        // Metodo pubblico per aggiornare il menu
+        refreshMenu(newEndpoint = null, newUrl = null) {
+          if (newEndpoint) {
+            this.currentEndpoint = newEndpoint;
+          }
+          if (newUrl) {
+            this.currentUrl = newUrl;
+          }
+          this.loadMenu();
+        }
+
+        // ✅ MIGLIORATO: Metodo per debug con più informazioni
+        async debugMenu() {
+          try {
+            console.log('🔍 Avvio debug completo...');
+
+            const response = await fetch(`/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}`);
+            const data = await response.json();
+
+            console.log('📋 DEBUG COMPLETO:');
+            console.log('='.repeat(50));
+            console.log(data);
+            console.log('='.repeat(50));
+
+            // Apri anche in una nuova finestra per analisi dettagliata
+            window.open(`/menu/debug?endpoint=${this.currentEndpoint}&url=${encodeURIComponent(this.currentUrl)}`, '_blank');
+
+            return data;
+          } catch (error) {
+            console.error('❌ Errore nel debug:', error);
+          }
+        }
+      }
+
+      // Inizializza il menu quando il DOM è pronto
+      document.addEventListener('DOMContentLoaded', function() {
+        // Evita inizializzazioni multiple
+        if (!window.menuManager) {
+          window.menuManager = new MenuManager();
+
+          // ✅ Aggiungi comandi di debug utili alla console
+          window.debugMenu = () => window.menuManager.debugMenu();
+          window.refreshMenu = () => window.menuManager.loadMenu();
+
+          console.log('✅ Menu Manager inizializzato.');
+          console.log('💡 Comandi disponibili: debugMenu(), refreshMenu()');
+        }
+      });
+    }
+  </script>
+{% block extra_js_libs %}
+<!-- jQuery - DEVE essere caricato per PRIMO -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables - Carica DOPO jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net-bs5@1.13.6/js/dataTables.bootstrap5.min.js"></script>
+{% endblock %}
+  <!--end::Script-->
+
+</body>
+<!--end::Body-->
+</html>\
