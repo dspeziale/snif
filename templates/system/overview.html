@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block title %}System Overview - AdminLTE{% endblock %}
+{% block page_title %}System Overview{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active">System Overview</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- System Statistics Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ software_stats.total_software_entries if software_stats else 0 }}</h3>
+          <p>Software Entries</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-app-indicator"></i>
+        </div>
+        <a href="{{ url_for('system.installed_software') }}" class="small-box-footer">
+          More info <i class="bi bi-arrow-right-circle-fill"></i>
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ software_stats.unique_software if software_stats else 0 }}</h3>
+          <p>Unique Software</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-collection"></i>
+        </div>
+        <a href="{{ url_for('system.software_statistics') }}" class="small-box-footer">
+          More info <i class="bi bi-arrow-right-circle-fill"></i>
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ software_stats.total_processes if software_stats else 0 }}</h3>
+          <p>Total Processes</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-cpu"></i>
+        </div>
+        <a href="{{ url_for('system.processes') }}" class="small-box-footer">
+          More info <i class="bi bi-arrow-right-circle-fill"></i>
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ software_stats.hosts_with_software if software_stats else 0 }}</h3>
+          <p>Active Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hdd-network"></i>
+        </div>
+        <a href="{{ url_for('network.overview') }}" class="small-box-footer">
+          More info <i class="bi bi-arrow-right-circle-fill"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Software and Processes -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-award"></i> Top Installed Software
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportSoftwareList()">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_software %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software Name</th>
+                  <th class="text-center">Installations</th>
+                  <th class="text-center">Unique Hosts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for software in top_software %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.software_detail', software_name=software.software_name) }}"
+                       class="text-decoration-none">
+                      <strong>{{ software.software_name }}</strong>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ software.install_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ software.unique_hosts }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No software data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-play-circle"></i> Most Common Processes
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportProcessList()">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_processes %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Process Name</th>
+                  <th class="text-center">Instances</th>
+                  <th class="text-center">Hosts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for process in top_processes %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                       class="text-decoration-none">
+                      <code>{{ process.process_name }}</code>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ process.instance_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ process.unique_hosts }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No process data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hosts with Most Software/Processes -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pc-display"></i> Hosts with Most Software
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if hosts_most_software %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th class="text-center">Software Count</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for host in hosts_most_software %}
+                <tr>
+                  <td>
+                    <div>
+                      <strong>{{ host.ip_address }}</strong>
+                      {% if host.hostname %}
+                      <br><small class="text-muted">{{ host.hostname }}</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary">{{ host.software_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('system.installed_software', host_ip=host.ip_address) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-list"></i> View
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No host data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-cpu"></i> Hosts with Most Processes
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if hosts_most_processes %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th class="text-center">Process Count</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for host in hosts_most_processes %}
+                <tr>
+                  <td>
+                    <div>
+                      <strong>{{ host.ip_address }}</strong>
+                      {% if host.hostname %}
+                      <br><small class="text-muted">{{ host.hostname }}</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary">{{ host.process_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('system.processes', host_ip=host.ip_address) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-list"></i> View
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No host data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Software Version Analysis -->
+  {% if software_versions %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-code-square"></i> Software Version Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software</th>
+                  <th class="text-center">Unique Versions</th>
+                  <th class="text-center">Total Installations</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for version in software_versions %}
+                <tr>
+                  <td><strong>{{ version.software_name }}</strong></td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ version.version_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ version.total_installs }}</span>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('system.software_detail', software_name=version.software_name) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye"></i> Details
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Publishers -->
+  {% if publishers %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-building"></i> Top Software Publishers
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Publisher</th>
+                  <th class="text-center">Software Count</th>
+                  <th class="text-center">Unique Software</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for publisher in publishers %}
+                <tr>
+                  <td><strong>{{ publisher.publisher }}</strong></td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ publisher.software_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ publisher.unique_software }}</span>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('system.installed_software', publisher=publisher.publisher) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-list"></i> View Software
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script>
+function exportSoftwareList() {
+  // Export functionality for software list
+  window.location.href = '{{ url_for("system.api_software") }}?format=csv';
+}
+
+function exportProcessList() {
+  // Export functionality for process list
+  window.location.href = '{{ url_for("system.api_processes") }}?format=csv';
+}
+</script>
+{% endblock %}

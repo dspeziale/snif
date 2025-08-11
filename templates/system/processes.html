@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Running Processes - AdminLTE{% endblock %}
+{% block page_title %}Running Processes{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.software') }}">System</a></li>
+<li class="breadcrumb-item active">Processes</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-funnel"></i> Filters
+      </h3>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{{ url_for('system.processes') }}">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <label for="search" class="form-label">Search</label>
+              <input type="text" class="form-control" id="search" name="search"
+                     value="{{ request.args.get('search', '') }}"
+                     placeholder="Search processes...">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <label for="host_ip" class="form-label">Host IP</label>
+              <input type="text" class="form-control" id="host_ip" name="host_ip"
+                     value="{{ request.args.get('host_ip', '') }}"
+                     placeholder="e.g., 192.168.1.10">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <label for="process_name" class="form-label">Process Name</label>
+              <input type="text" class="form-control" id="process_name" name="process_name"
+                     value="{{ request.args.get('process_name', '') }}"
+                     placeholder="e.g., svchost.exe">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="mb-3">
+              <label for="has_params" class="form-label">Parameters</label>
+              <select class="form-select" id="has_params" name="has_params">
+                <option value="">All Processes</option>
+                <option value="true" {% if request.args.get('has_params') == 'true' %}selected{% endif %}>With Parameters</option>
+                <option value="false" {% if request.args.get('has_params') == 'false' %}selected{% endif %}>Without Parameters</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <div class="mb-3">
+              <label for="per_page" class="form-label">Results per page</label>
+              <select class="form-select" id="per_page" name="per_page">
+                <option value="25" {% if request.args.get('per_page', '50') == '25' %}selected{% endif %}>25</option>
+                <option value="50" {% if request.args.get('per_page', '50') == '50' %}selected{% endif %}>50</option>
+                <option value="100" {% if request.args.get('per_page', '50') == '100' %}selected{% endif %}>100</option>
+                <option value="200" {% if request.args.get('per_page', '50') == '200' %}selected{% endif %}>200</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="mb-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="bi bi-search"></i> Apply Filters
+              </button>
+              <a href="{{ url_for('system.processes') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-x-circle"></i> Clear Filters
+              </a>
+              <button type="button" class="btn btn-success" onclick="exportResults()">
+                <i class="bi bi-download"></i> Export
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-cpu"></i> Running Processes
+        {% if processes %}
+        <span class="badge bg-info">{{ processes|length }} results</span>
+        {% if total_count and total_count > processes|length %}
+        <small class="text-muted">({{ total_count }} total)</small>
+        {% endif %}
+        {% endif %}
+      </h3>
+      <div class="card-tools">
+        <div class="btn-group">
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleView('table')" id="table-view-btn">
+            <i class="bi bi-table"></i> Table
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary" onclick="toggleView('cards')" id="cards-view-btn">
+            <i class="bi bi-grid-3x3-gap"></i> Cards
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      {% if processes %}
+
+      <!-- Table View -->
+      <div id="table-view" class="view-container">
+        <div class="table-responsive">
+          <table class="table table-striped" id="processesTable">
+            <thead>
+              <tr>
+                <th>Process Name</th>
+                <th>PID</th>
+                <th>Path</th>
+                <th>Parameters</th>
+                <th>Host</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for process in processes %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                     class="text-decoration-none">
+                    <code><strong>{{ process.process_name }}</strong></code>
+                  </a>
+                </td>
+                <td>
+                  {% if process.pid %}
+                  <span class="badge bg-secondary">{{ process.pid }}</span>
+                  {% else %}
+                  <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if process.process_path %}
+                  <small><code>{{ process.process_path[:50] }}{% if process.process_path|length > 50 %}...{% endif %}</code></small>
+                  {% else %}
+                  <span class="text-muted">Unknown</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if process.process_params %}
+                  <small class="text-info">{{ process.process_params[:30] }}{% if process.process_params|length > 30 %}...{% endif %}</small>
+                  {% else %}
+                  <span class="text-muted">None</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div>
+                    <a href="{{ url_for('network.host_detail', ip_address=process.ip_address) }}"
+                       class="text-decoration-none">
+                      <strong>{{ process.ip_address }}</strong>
+                    </a>
+                    {% if process.hostname %}
+                    <br><small class="text-muted">{{ process.hostname }}</small>
+                    {% endif %}
+                    {% if process.vendor %}
+                    <br><small class="text-info">{{ process.vendor }}</small>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                       class="btn btn-outline-primary" title="View Process Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('network.host_detail', ip_address=process.ip_address) }}"
+                       class="btn btn-outline-info" title="View Host">
+                      <i class="bi bi-pc-display"></i>
+                    </a>
+                    {% if process.process_path %}
+                    <button type="button" class="btn btn-outline-secondary"
+                            title="Copy Path" onclick="copyToClipboard('{{ process.process_path }}')">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cards View -->
+      <div id="cards-view" class="view-container" style="display: none;">
+        <div class="row">
+          {% for process in processes %}
+          <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                     class="text-decoration-none">
+                    <code>{{ process.process_name }}</code>
+                  </a>
+                </h5>
+                <div class="card-text">
+                  <div class="mb-2">
+                    <strong>PID:</strong>
+                    {% if process.pid %}
+                    <span class="badge bg-secondary">{{ process.pid }}</span>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </div>
+                  {% if process.process_path %}
+                  <div class="mb-2">
+                    <strong>Path:</strong>
+                    <small><code>{{ process.process_path[:40] }}{% if process.process_path|length > 40 %}...{% endif %}</code></small>
+                  </div>
+                  {% endif %}
+                  {% if process.process_params %}
+                  <div class="mb-2">
+                    <strong>Parameters:</strong>
+                    <small class="text-info">{{ process.process_params[:30] }}{% if process.process_params|length > 30 %}...{% endif %}</small>
+                  </div>
+                  {% endif %}
+                  <div class="mb-2">
+                    <strong>Host:</strong>
+                    <a href="{{ url_for('network.host_detail', ip_address=process.ip_address) }}"
+                       class="text-decoration-none">
+                      {{ process.ip_address }}
+                    </a>
+                    {% if process.hostname %}
+                    <br><small class="text-muted">{{ process.hostname }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="btn-group btn-group-sm w-100">
+                  <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                     class="btn btn-outline-primary">
+                    <i class="bi bi-eye"></i> Details
+                  </a>
+                  <a href="{{ url_for('network.host_detail', ip_address=process.ip_address) }}"
+                     class="btn btn-outline-info">
+                    <i class="bi bi-pc-display"></i> Host
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination %}
+      <nav aria-label="Process pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('system.processes', page=pagination.prev_num, **request.args) }}">
+              <i class="bi bi-chevron-left"></i> Previous
+            </a>
+          </li>
+          {% endif %}
+
+          {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+              {% if page_num != pagination.page %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('system.processes', page=page_num, **request.args) }}">
+                  {{ page_num }}
+                </a>
+              </li>
+              {% else %}
+              <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+              </li>
+              {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('system.processes', page=pagination.next_num, **request.args) }}">
+              Next <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-cpu display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No Processes Found</h4>
+        <p class="text-muted">No running processes match your current filters.</p>
+        <a href="{{ url_for('system.processes') }}" class="btn btn-primary">
+          <i class="bi bi-arrow-clockwise"></i> Reset Filters
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+function toggleView(viewType) {
+  const tableView = document.getElementById('table-view');
+  const cardsView = document.getElementById('cards-view');
+  const tableBtn = document.getElementById('table-view-btn');
+  const cardsBtn = document.getElementById('cards-view-btn');
+
+  if (viewType === 'table') {
+    tableView.style.display = 'block';
+    cardsView.style.display = 'none';
+    tableBtn.classList.add('active');
+    cardsBtn.classList.remove('active');
+  } else {
+    tableView.style.display = 'none';
+    cardsView.style.display = 'block';
+    tableBtn.classList.remove('active');
+    cardsBtn.classList.add('active');
+  }
+
+  localStorage.setItem('process-view-preference', viewType);
+}
+
+function exportResults() {
+  const params = new URLSearchParams(window.location.search);
+  params.set('format', 'csv');
+  window.location.href = '{{ url_for("system.api_processes") }}?' + params.toString();
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Show success feedback
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = 'Copied to clipboard!';
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 15px; border-radius: 4px; z-index: 9999;';
+    document.body.appendChild(toast);
+    setTimeout(() => document.body.removeChild(toast), 2000);
+  }).catch(function(err) {
+    console.error('Failed to copy: ', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      toast.textContent = 'Copied to clipboard!';
+      toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 15px; border-radius: 4px; z-index: 9999;';
+      document.body.appendChild(toast);
+      setTimeout(() => document.body.removeChild(toast), 2000);
+    } catch (fallbackErr) {
+      console.error('Fallback copy failed: ', fallbackErr);
+    }
+    document.body.removeChild(textArea);
+  });
+}
+
+// Load saved view preference
+document.addEventListener('DOMContentLoaded', function() {
+  const savedView = localStorage.getItem('process-view-preference') || 'table';
+  toggleView(savedView);
+
+  // Add search functionality to the table
+  const searchInput = document.querySelector('input[name="search"]');
+  if (searchInput) {
+    // Real-time search within visible results
+    searchInput.addEventListener('input', function() {
+      const filter = this.value.toLowerCase();
+      const tableView = document.getElementById('table-view');
+      const cardsView = document.getElementById('cards-view');
+
+      if (tableView.style.display !== 'none') {
+        const rows = tableView.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(filter) ? '' : 'none';
+        });
+      } else {
+        const cards = cardsView.querySelectorAll('.card');
+        cards.forEach(card => {
+          const text = card.textContent.toLowerCase();
+          card.closest('.col-md-6').style.display = text.includes(filter) ? '' : 'none';
+        });
+      }
+    });
+  }
+});
+
+// Add tooltip functionality for long text
+document.addEventListener('DOMContentLoaded', function() {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  // Ctrl+F or Cmd+F to focus search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.select();
+    }
+  }
+
+  // V key to toggle view
+  if (e.key === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const activeElement = document.activeElement;
+    if (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA') {
+      const currentView = localStorage.getItem('process-view-preference') || 'table';
+      toggleView(currentView === 'table' ? 'cards' : 'table');
+    }
+  }
+});
+</script>
+{% endblock %}

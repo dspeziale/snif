@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}Software Statistics - AdminLTE{% endblock %}
+{% block page_title %}Software Statistics{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.software') }}">System</a></li>
+<li class="breadcrumb-item active">Software Statistics</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Most Common Software -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-award"></i> Most Common Software
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('most-common')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if most_common_software %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software Name</th>
+                  <th class="text-center">Installations</th>
+                  <th class="text-center">Hosts</th>
+                  <th class="text-center">Avg/Host</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for software in most_common_software %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.software_detail', software_name=software.software_name) }}"
+                       class="text-decoration-none">
+                      <strong>{{ software.software_name }}</strong>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ software.install_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ software.unique_hosts }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ "%.1f"|format(software.install_count / software.unique_hosts) }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No software data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-building"></i> Top Publishers
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('publishers')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if top_publishers %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Publisher</th>
+                  <th class="text-center">Software Count</th>
+                  <th class="text-center">Unique Software</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for publisher in top_publishers %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.installed_software', publisher=publisher.publisher) }}"
+                       class="text-decoration-none">
+                      <strong>{{ publisher.publisher }}</strong>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ publisher.software_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ publisher.unique_software }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No publisher data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version Analysis -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-code-square"></i> Version Analysis
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('versions')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if version_analysis %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software</th>
+                  <th class="text-center">Versions</th>
+                  <th class="text-center">Total Installs</th>
+                  <th class="text-center">Version Consistency</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in version_analysis %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.software_detail', software_name=item.software_name) }}"
+                       class="text-decoration-none">
+                      {{ item.software_name }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-warning">{{ item.version_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ item.total_installs }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% set consistency = (1 / item.version_count * 100) if item.version_count > 0 else 0 %}
+                    {% if consistency >= 80 %}
+                    <span class="badge bg-success">High</span>
+                    {% elif consistency >= 50 %}
+                    <span class="badge bg-warning">Medium</span>
+                    {% else %}
+                    <span class="badge bg-danger">Low</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No version data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-calendar"></i> Installation Timeline
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('timeline')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if install_timeline %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="text-center">Installations</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_timeline = install_timeline.values() | sum %}
+                {% for year, count in install_timeline.items() %}
+                <tr>
+                  <td><strong>{{ year }}</strong></td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-primary"
+                           style="width: {{ (count / total_timeline * 100) if total_timeline > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((count / total_timeline * 100)) if total_timeline > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Timeline Chart -->
+          <div class="mt-4">
+            <canvas id="timelineChart" height="200"></canvas>
+          </div>
+          {% else %}
+          <p class="text-muted">No installation timeline data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Software without Versions and Distribution -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-question-circle"></i> Software Without Version Info
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if unversioned_software %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software Name</th>
+                  <th class="text-center">Count</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for software in unversioned_software %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.software_detail', software_name=software.software_name) }}"
+                       class="text-decoration-none">
+                      {{ software.software_name }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-warning">{{ software.count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('system.installed_software', software=software.software_name, has_version='false') }}"
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-list"></i> View
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">All software has version information.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Software per Host Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if software_per_host %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Software Count</th>
+                  <th class="text-center">Number of Hosts</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_hosts_dist = software_per_host | map(attribute=1) | sum %}
+                {% for dist in software_per_host %}
+                <tr>
+                  <td>
+                    <strong>{{ dist[0] }} software</strong>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ dist[1] }} hosts</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-success"
+                           style="width: {{ (dist[1] / total_hosts_dist * 100) if total_hosts_dist > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((dist[1] / total_hosts_dist * 100)) if total_hosts_dist > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Distribution Chart -->
+          <div class="mt-4">
+            <canvas id="distributionChart" height="200"></canvas>
+          </div>
+          {% else %}
+          <p class="text-muted">No distribution data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+// Timeline Chart
+{% if install_timeline %}
+document.addEventListener('DOMContentLoaded', function() {
+  const timelineCtx = document.getElementById('timelineChart');
+  if (timelineCtx) {
+    new Chart(timelineCtx, {
+      type: 'line',
+      data: {
+        labels: [{% for year in install_timeline.keys() %}'{{ year }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          label: 'Installations',
+          data: [{% for count in install_timeline.values() %}{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Software Installation Timeline'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+});
+{% endif %}
+
+// Distribution Chart
+{% if software_per_host %}
+document.addEventListener('DOMContentLoaded', function() {
+  const distributionCtx = document.getElementById('distributionChart');
+  if (distributionCtx) {
+    new Chart(distributionCtx, {
+      type: 'bar',
+      data: {
+        labels: [{% for dist in software_per_host %}'{{ dist[0] }} software'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          label: 'Number of Hosts',
+          data: [{% for dist in software_per_host %}{{ dist[1] }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 205, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 205, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Software Distribution per Host'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+});
+{% endif %}
+
+function exportChart(chartType) {
+  // Export functionality for different chart types
+  const params = new URLSearchParams();
+  params.set('format', 'csv');
+  params.set('chart_type', chartType);
+  window.location.href = '{{ url_for("system.api_software") }}?' + params.toString();
+}
+</script>
+{% endblock %}

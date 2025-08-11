@@ -1,0 +1,402 @@
+{% extends "base.html" %}
+
+{% block title %}{{ software_info.software_name if software_info else 'Software Detail' }} - AdminLTE{% endblock %}
+{% block page_title %}Software Detail: {{ software_info.software_name if software_info else 'Unknown' }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.software') }}">System</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.installed_software') }}">Software</a></li>
+<li class="breadcrumb-item active">{{ software_info.software_name if software_info else 'Detail' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Software Information Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ software_info.total_installations if software_info else 0 }}</h3>
+          <p>Total Installations</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-download"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ software_info.unique_hosts if software_info else 0 }}</h3>
+          <p>Unique Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hdd-network"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ software_info.unique_versions if software_info else 0 }}</h3>
+          <p>Different Versions</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-code-square"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ software_info.unique_publishers if software_info else 0 }}</h3>
+          <p>Publishers</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-building"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Software Details -->
+  {% if software_info %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-info-circle"></i> Software Information
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportSoftwareDetail()">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless">
+                <tr>
+                  <th width="30%">Software Name:</th>
+                  <td><strong>{{ software_info.software_name }}</strong></td>
+                </tr>
+                <tr>
+                  <th>Most Common Version:</th>
+                  <td>
+                    {% if software_info.most_common_version %}
+                    <code>{{ software_info.most_common_version }}</code>
+                    {% else %}
+                    <span class="text-muted">Not specified</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Primary Publisher:</th>
+                  <td>
+                    {% if software_info.primary_publisher %}
+                    {{ software_info.primary_publisher }}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>First Seen:</th>
+                  <td>
+                    {% if software_info.first_seen %}
+                    {{ software_info.first_seen[:10] }}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Last Seen:</th>
+                  <td>
+                    {% if software_info.last_seen %}
+                    {{ software_info.last_seen[:10] }}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-4">
+                <h6>Installation Distribution</h6>
+                <div class="progress-group">
+                  <span class="progress-text">Hosts with this software</span>
+                  <span class="float-end">{{ software_info.unique_hosts }} / {{ total_hosts if total_hosts else 'N/A' }}</span>
+                  <div class="progress progress-sm">
+                    <div class="progress-bar bg-primary" style="width: {{ (software_info.unique_hosts / total_hosts * 100) if total_hosts else 0 }}%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Quick Statistics
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-6">
+              <div class="info-box-content">
+                <span class="info-box-text">Avg per Host</span>
+                <span class="info-box-number">{{ "%.1f"|format(software_info.total_installations / software_info.unique_hosts) if software_info.unique_hosts > 0 else 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="info-box-content">
+                <span class="info-box-text">Coverage</span>
+                <span class="info-box-number">{{ "%.1f"|format((software_info.unique_hosts / total_hosts * 100)) if total_hosts else 'N/A' }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Version Distribution -->
+  {% if version_distribution %}
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-code-square"></i> Version Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Version</th>
+                  <th class="text-center">Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for version in version_distribution %}
+                <tr>
+                  <td>
+                    {% if version[0] %}
+                    <code>{{ version[0] }}</code>
+                    {% else %}
+                    <span class="text-muted">Unspecified</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ version[1] }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% if software_info %}
+                    {{ "%.1f"|format((version[1] / software_info.total_installations * 100)) }}%
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-building"></i> Publisher Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if publisher_distribution %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Publisher</th>
+                  <th class="text-center">Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for publisher in publisher_distribution %}
+                <tr>
+                  <td>
+                    {% if publisher[0] %}
+                    {{ publisher[0] }}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ publisher[1] }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% if software_info %}
+                    {{ "%.1f"|format((publisher[1] / software_info.total_installations * 100)) }}%
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No publisher information available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Installation List -->
+  {% if installations %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> All Installations ({{ installations|length }})
+          </h3>
+          <div class="card-tools">
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" class="form-control" id="installationSearch" placeholder="Search installations...">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-default">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped" id="installationsTable">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th>Version</th>
+                  <th>Publisher</th>
+                  <th>Install Date</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for installation in installations %}
+                <tr>
+                  <td>
+                    <div>
+                      <a href="{{ url_for('network.host_detail', ip_address=installation.ip_address) }}"
+                         class="text-decoration-none">
+                        <strong>{{ installation.ip_address }}</strong>
+                      </a>
+                      {% if installation.hostname %}
+                      <br><small class="text-muted">{{ installation.hostname }}</small>
+                      {% endif %}
+                      {% if installation.vendor %}
+                      <br><small class="text-info">{{ installation.vendor }}</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    {% if installation.version %}
+                    <code>{{ installation.version }}</code>
+                    {% else %}
+                    <span class="text-muted">Unspecified</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if installation.publisher %}
+                    {{ installation.publisher }}
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if installation.install_date %}
+                    <small>{{ installation.install_date[:10] }}</small>
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{{ url_for('network.host_detail', ip_address=installation.ip_address) }}"
+                         class="btn btn-outline-primary" title="View Host">
+                        <i class="bi bi-pc-display"></i>
+                      </a>
+                      <a href="{{ url_for('system.installed_software', host_ip=installation.ip_address) }}"
+                         class="btn btn-outline-info" title="All Software on Host">
+                        <i class="bi bi-list"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script>
+function exportSoftwareDetail() {
+  const softwareName = '{{ software_info.software_name if software_info else "" }}';
+  window.location.href = '{{ url_for("system.api_software") }}?software=' + encodeURIComponent(softwareName) + '&format=csv';
+}
+
+// Search functionality for installations table
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('installationSearch');
+  const table = document.getElementById('installationsTable');
+
+  if (searchInput && table) {
+    searchInput.addEventListener('keyup', function() {
+      const filter = searchInput.value.toLowerCase();
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+
+        if (text.includes(filter)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

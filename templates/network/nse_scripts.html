@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+
+{% block title %}NSE Scripts Results - AdminLTE{% endblock %}
+{% block page_title %}NSE Scripts Results{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('network.overview') }}">Network</a></li>
+<li class="breadcrumb-item active">NSE Scripts</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- NSE Scripts Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ scripts_data|length if scripts_data else 0 }}</h3>
+          <p>Script Results</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-code-square"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ scripts_data|map(attribute='script_name')|unique|list|length if scripts_data else 0 }}</h3>
+          <p>Unique Scripts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-list-ul"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ scripts_data|map(attribute='ip_address')|unique|list|length if scripts_data else 0 }}</h3>
+          <p>Affected Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hdd-network"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ pagination.total if pagination and pagination.total else 0 }}</h3>
+          <p>Total Results</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-database"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Scripts -->
+  {% if top_scripts %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-award"></i> Most Common NSE Scripts
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportTopScripts()">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% for script in top_scripts %}
+            <div class="col-md-4 mb-3">
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <a href="{{ url_for('network.nse_scripts') }}?script={{ script.script_name }}"
+                       class="text-decoration-none">
+                      <code>{{ script.script_name }}</code>
+                    </a>
+                  </h5>
+                  <div class="row text-center">
+                    <div class="col-6">
+                      <div class="border-end">
+                        <div class="h4 mb-0">{{ script.count }}</div>
+                        <small class="text-muted">Results</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="h4 mb-0">{{ script.unique_hosts }}</div>
+                      <small class="text-muted">Hosts</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Filter and Search -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-funnel"></i> Filter NSE Scripts
+          </h3>
+        </div>
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('network.nse_scripts') }}">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="script" class="form-label">Script Name</label>
+                  <input type="text" class="form-control" id="script" name="script"
+                         value="{{ current_filter or '' }}"
+                         placeholder="e.g., http-title, ssh-hostkey">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="script_category" class="form-label">Script Category</label>
+                  <select class="form-select" id="script_category" name="category">
+                    <option value="">All Categories</option>
+                    <option value="http" {% if request.args.get('category') == 'http' %}selected{% endif %}>HTTP</option>
+                    <option value="ssh" {% if request.args.get('category') == 'ssh' %}selected{% endif %}>SSH</option>
+                    <option value="ftp" {% if request.args.get('category') == 'ftp' %}selected{% endif %}>FTP</option>
+                    <option value="ssl" {% if request.args.get('category') == 'ssl' %}selected{% endif %}>SSL/TLS</option>
+                    <option value="dns" {% if request.args.get('category') == 'dns' %}selected{% endif %}>DNS</option>
+                    <option value="smb" {% if request.args.get('category') == 'smb' %}selected{% endif %}>SMB</option>
+                    <option value="vulnerability" {% if request.args.get('category') == 'vulnerability' %}selected{% endif %}>Vulnerability</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="search_text" class="form-label">Search in Output</label>
+                  <input type="text" class="form-control" id="search_text" name="search"
+                         value="{{ request.args.get('search', '') }}"
+                         placeholder="Search in script output...">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-search"></i> Apply Filter
+                </button>
+                <a href="{{ url_for('network.nse_scripts') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-x-circle"></i> Clear Filter
+                </a>
+                <button type="button" class="btn btn-success" onclick="exportAllScripts()">
+                  <i class="bi bi-download"></i> Export All
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts Results -->
+  {% if scripts_data %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list-ul"></i> NSE Script Results
+            <span class="badge bg-info">{{ scripts_data|length }} results</span>
+            {% if pagination and pagination.total > scripts_data|length %}
+            <small class="text-muted">({{ pagination.total }} total)</small>
+            {% endif %}
+          </h3>
+          <div class="card-tools">
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" class="form-control" id="scriptSearch" placeholder="Search results...">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-default">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="accordion" id="nseScriptsAccordion">
+            {% for script in scripts_data %}
+            <div class="accordion-item" data-script-name="{{ script.script_name }}" data-host="{{ script.ip_address }}">
+              <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                  <div class="d-flex justify-content-between w-100 me-3">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-code-square text-primary me-2"></i>
+                      <div>
+                        <strong>{{ script.script_name }}</strong>
+                        {% if script.port_number %}
+                        <span class="badge bg-secondary ms-2">Port {{ script.port_number }}/{{ script.protocol or 'tcp' }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <div class="me-3">
+                        <a href="{{ url_for('network.host_detail', ip_address=script.ip_address) }}"
+                           class="text-decoration-none" onclick="event.stopPropagation();">
+                          <strong>{{ script.ip_address }}</strong>
+                        </a>
+                        {% if script.hostname %}
+                        <br><small class="text-muted">{{ script.hostname }}</small>
+                        {% endif %}
+                      </div>
+                      <i class="bi bi-chevron-down"></i>
+                    </div>
+                  </div>
+                </button>
+              </h2>
+              <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                   data-bs-parent="#nseScriptsAccordion">
+                <div class="accordion-body">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <h6>Script Information</h6>
+                      <table class="table table-sm table-borderless">
+                        <tr>
+                          <td><strong>Script:</strong></td>
+                          <td><code>{{ script.script_name }}</code></td>
+                        </tr>
+                        <tr>
+                          <td><strong>Host:</strong></td>
+                          <td>
+                            <a href="{{ url_for('network.host_detail', ip_address=script.ip_address) }}">
+                              {{ script.ip_address }}
+                            </a>
+                          </td>
+                        </tr>
+                        {% if script.hostname %}
+                        <tr>
+                          <td><strong>Hostname:</strong></td>
+                          <td>{{ script.hostname }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if script.port_number %}
+                        <tr>
+                          <td><strong>Port:</strong></td>
+                          <td>
+                            <a href="{{ url_for('network.ports') }}?port={{ script.port_number }}">
+                              {{ script.port_number }}/{{ script.protocol or 'tcp' }}
+                            </a>
+                          </td>
+                        </tr>
+                        {% endif %}
+                        <tr>
+                          <td><strong>Category:</strong></td>
+                          <td>
+                            {% set script_category = script.script_name.split('-')[0] %}
+                            <span class="badge bg-info">{{ script_category }}</span>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                    <div class="col-md-9">
+                      <h6>Script Output</h6>
+                      {% if script.script_output %}
+                      <div class="bg-dark text-light p-3 rounded">
+                        <pre class="mb-0" style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.85em;">{{ script.script_output }}</pre>
+                      </div>
+                      {% else %}
+                      <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> No output available for this script.
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-12">
+                      <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('network.host_detail', ip_address=script.ip_address) }}"
+                           class="btn btn-outline-primary">
+                          <i class="bi bi-pc-display"></i> View Host
+                        </a>
+                        {% if script.port_number %}
+                        <a href="{{ url_for('network.ports') }}?host_ip={{ script.ip_address }}"
+                           class="btn btn-outline-info">
+                          <i class="bi bi-diagram-3"></i> Host Ports
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('network.nse_scripts') }}?script={{ script.script_name }}"
+                           class="btn btn-outline-secondary">
+                          <i class="bi bi-search"></i> Similar Scripts
+                        </a>
+                        <button type="button" class="btn btn-outline-success"
+                                onclick="copyScriptOutput({{ loop.index }})">
+                          <i class="bi bi-clipboard"></i> Copy Output
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.total_pages > 1 %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <nav aria-label="NSE Scripts pagination">
+        <ul class="pagination justify-content-center">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('network.nse_scripts', page=pagination.page-1, script=current_filter) }}">
+              <i class="bi bi-chevron-left"></i> Previous
+            </a>
+          </li>
+          {% endif %}
+
+          {% for page_num in range(1, pagination.total_pages + 1) %}
+            {% if page_num == pagination.page %}
+            <li class="page-item active">
+              <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% elif page_num <= 3 or page_num > pagination.total_pages - 3 or (page_num >= pagination.page - 2 and page_num <= pagination.page + 2) %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('network.nse_scripts', page=page_num, script=current_filter) }}">
+                {{ page_num }}
+              </a>
+            </li>
+            {% elif page_num == 4 or page_num == pagination.total_pages - 3 %}
+            <li class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('network.nse_scripts', page=pagination.page+1, script=current_filter) }}">
+              Next <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-code-square display-1 text-muted"></i>
+          <h4 class="text-muted mt-3">No NSE Script Results</h4>
+          <p class="text-muted">No NSE script results found. This could mean:</p>
+          <ul class="list-unstyled text-muted">
+            <li>• No NSE scripts were executed during the scan</li>
+            <li>• The scripts didn't produce any output</li>
+            <li>• Your current filter criteria are too restrictive</li>
+          </ul>
+          <a href="{{ url_for('network.nse_scripts') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise"></i> Clear Filters
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script>
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('scriptSearch');
+  const accordion = document.getElementById('nseScriptsAccordion');
+
+  if (searchInput && accordion) {
+    searchInput.addEventListener('keyup', function() {
+      const filter = searchInput.value.toLowerCase();
+      const items = accordion.querySelectorAll('.accordion-item');
+
+      items.forEach(item => {
+        const scriptName = item.dataset.scriptName.toLowerCase();
+        const host = item.dataset.host.toLowerCase();
+        const content = item.textContent.toLowerCase();
+
+        if (scriptName.includes(filter) || host.includes(filter) || content.includes(filter)) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  }
+});
+
+// Export functions - Generate CSV client-side
+function exportTopScripts() {
+  let csv = 'Script Name,Results Count,Unique Hosts\n';
+  {% if top_scripts %}
+  {% for script in top_scripts %}
+  csv += '"{{ script.script_name }}",{{ script.count }},{{ script.unique_hosts }}\n';
+  {% endfor %}
+  {% endif %}
+  downloadCSV(csv, 'top_nse_scripts.csv');
+}
+
+function exportAllScripts() {
+  let csv = 'Host,Hostname,Script Name,Port,Protocol,Output Length\n';
+  {% if scripts_data %}
+  {% for script in scripts_data %}
+  csv += '"{{ script.ip_address }}","{{ script.hostname or '' }}","{{ script.script_name }}","{{ script.port_number or '' }}","{{ script.protocol or '' }}","{{ script.script_output|length if script.script_output else 0 }}"\n';
+  {% endfor %}
+  {% endif %}
+  downloadCSV(csv, 'nse_scripts_results.csv');
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
+// Copy script output to clipboard
+function copyScriptOutput(scriptIndex) {
+  const outputElement = document.querySelector(`#collapse${scriptIndex} pre`);
+  if (outputElement) {
+    const text = outputElement.textContent;
+
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('Script output copied to clipboard!', 'success');
+    }).catch(function(err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Script output copied to clipboard!', 'success');
+      } catch (fallbackErr) {
+        showToast('Failed to copy to clipboard', 'error');
+      }
+      document.body.removeChild(textArea);
+    });
+  }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast-notification alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'}`;
+  toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+  toast.innerHTML = `
+    <div class="d-flex align-items-center">
+      <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+      ${message}
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    if (document.body.contains(toast)) {
+      document.body.removeChild(toast);
+    }
+  }, 3000);
+}
+
+// Filter by script category
+document.addEventListener('DOMContentLoaded', function() {
+  const categorySelect = document.getElementById('script_category');
+  if (categorySelect) {
+    categorySelect.addEventListener('change', function() {
+      const scriptInput = document.getElementById('script');
+      if (this.value && scriptInput) {
+        // Auto-fill script name field based on category
+        if (!scriptInput.value) {
+          scriptInput.placeholder = `e.g., ${this.value}-*`;
+        }
+      }
+    });
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  // Ctrl+F or Cmd+F to focus search
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    const searchInput = document.getElementById('scriptSearch');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.select();
+    }
+  }
+
+  // Ctrl+E to focus script filter
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+    e.preventDefault();
+    const scriptInput = document.getElementById('script');
+    if (scriptInput) {
+      scriptInput.focus();
+      scriptInput.select();
+    }
+  }
+});
+
+// Auto-expand first result if only one
+document.addEventListener('DOMContentLoaded', function() {
+  const accordionItems = document.querySelectorAll('.accordion-item');
+  if (accordionItems.length === 1) {
+    const firstButton = accordionItems[0].querySelector('.accordion-button');
+    const firstCollapse = accordionItems[0].querySelector('.accordion-collapse');
+
+    if (firstButton && firstCollapse) {
+      firstButton.classList.remove('collapsed');
+      firstCollapse.classList.add('show');
+    }
+  }
+});
+</script>
+{% endblock %}

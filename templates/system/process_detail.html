@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}{{ process_info.process_name if process_info else 'Process Detail' }} - AdminLTE{% endblock %}
+{% block page_title %}Process Detail: {{ process_info.process_name if process_info else 'Unknown' }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.software') }}">System</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.processes') }}">Processes</a></li>
+<li class="breadcrumb-item active">{{ process_info.process_name if process_info else 'Detail' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Process Information Overview -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ process_info.total_instances if process_info else 0 }}</h3>
+          <p>Total Instances</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-play-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ process_info.unique_hosts if process_info else 0 }}</h3>
+          <p>Unique Hosts</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hdd-network"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ process_info.unique_paths|length if process_info and process_info.unique_paths else 0 }}</h3>
+          <p>Different Paths</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-folder"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ process_info.pid_range.max - process_info.pid_range.min if process_info and process_info.pid_range else 0 }}</h3>
+          <p>PID Range</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-hash"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Process Details -->
+  {% if process_info %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-info-circle"></i> Process Information
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportProcessDetail()">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless">
+                <tr>
+                  <th width="35%">Process Name:</th>
+                  <td><code><strong>{{ process_info.process_name }}</strong></code></td>
+                </tr>
+                <tr>
+                  <th>Total Instances:</th>
+                  <td>
+                    <span class="badge bg-info">{{ process_info.total_instances }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Unique Hosts:</th>
+                  <td>
+                    <span class="badge bg-success">{{ process_info.unique_hosts }}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>PID Range:</th>
+                  <td>
+                    {% if process_info.pid_range.min and process_info.pid_range.max %}
+                    <span class="badge bg-secondary">{{ process_info.pid_range.min }}</span> -
+                    <span class="badge bg-secondary">{{ process_info.pid_range.max }}</span>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                <tr>
+                  <th>Unique Paths:</th>
+                  <td>
+                    <span class="badge bg-warning">{{ process_info.unique_paths|length }}</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-4">
+                <h6>Host Distribution</h6>
+                <div class="progress-group">
+                  <span class="progress-text">Average per host</span>
+                  <span class="float-end">{{ "%.1f"|format(process_info.total_instances / process_info.unique_hosts) if process_info.unique_hosts > 0 else 'N/A' }}</span>
+                  <div class="progress progress-sm">
+                    <div class="progress-bar bg-primary" style="width: 75%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-bar-chart"></i> Quick Statistics
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 mb-3">
+              <div class="info-box-content">
+                <span class="info-box-text">Instances per Host</span>
+                <span class="info-box-number">{{ "%.1f"|format(process_info.total_instances / process_info.unique_hosts) if process_info.unique_hosts > 0 else 'N/A' }}</span>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="info-box-content">
+                <span class="info-box-text">Host Coverage</span>
+                <span class="info-box-number">{{ process_info.unique_hosts }} hosts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Path Distribution -->
+  {% if path_distribution %}
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-folder"></i> Path Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Path</th>
+                  <th class="text-center">Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for path, count in path_distribution.items() %}
+                <tr>
+                  <td>
+                    <small>
+                      <code>{{ path[:50] }}{% if path|length > 50 %}...{% endif %}</code>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ count }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% if process_info %}
+                    {{ "%.1f"|format((count / process_info.total_instances * 100)) }}%
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-gear"></i> Parameter Analysis
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if params_analysis %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Parameters</th>
+                  <th class="text-center">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for params, count in params_analysis.items() %}
+                <tr>
+                  <td>
+                    <small class="text-info">
+                      {{ params[:60] }}{% if params|length > 60 %}...{% endif %}
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ count }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No parameter information available for this process.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Process Instances -->
+  {% if hosts_with_process %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-list"></i> All Process Instances ({{ hosts_with_process|length }})
+          </h3>
+          <div class="card-tools">
+            <div class="input-group input-group-sm" style="width: 250px;">
+              <input type="text" class="form-control" id="processSearch" placeholder="Search instances...">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-default">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped" id="processInstancesTable">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th>PID</th>
+                  <th>Path</th>
+                  <th>Parameters</th>
+                  <th>Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for instance in hosts_with_process %}
+                <tr>
+                  <td>
+                    <div>
+                      <a href="{{ url_for('network.host_detail', ip_address=instance.ip_address) }}"
+                         class="text-decoration-none">
+                        <strong>{{ instance.ip_address }}</strong>
+                      </a>
+                      {% if instance.hostname %}
+                      <br><small class="text-muted">{{ instance.hostname }}</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    {% if instance.pid %}
+                    <span class="badge bg-secondary">{{ instance.pid }}</span>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if instance.process_path %}
+                    <small>
+                      <code title="{{ instance.process_path }}">
+                        {{ instance.process_path[:40] }}{% if instance.process_path|length > 40 %}...{% endif %}
+                      </code>
+                    </small>
+                    {% else %}
+                    <span class="text-muted">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if instance.process_params %}
+                    <small class="text-info" title="{{ instance.process_params }}">
+                      {{ instance.process_params[:30] }}{% if instance.process_params|length > 30 %}...{% endif %}
+                    </small>
+                    {% else %}
+                    <span class="text-muted">None</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if instance.status %}
+                    <span class="badge bg-success">{{ instance.status }}</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Unknown</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{{ url_for('network.host_detail', ip_address=instance.ip_address) }}"
+                         class="btn btn-outline-primary" title="View Host">
+                        <i class="bi bi-pc-display"></i>
+                      </a>
+                      <a href="{{ url_for('system.processes', host_ip=instance.ip_address) }}"
+                         class="btn btn-outline-info" title="All Processes on Host">
+                        <i class="bi bi-list"></i>
+                      </a>
+                      {% if instance.process_path %}
+                      <button type="button" class="btn btn-outline-secondary"
+                              title="Copy Path" onclick="copyToClipboard('{{ instance.process_path }}')">
+                        <i class="bi bi-clipboard"></i>
+                      </button>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script>
+function exportProcessDetail() {
+  const processName = '{{ process_info.process_name if process_info else "" }}';
+  window.location.href = '{{ url_for("system.api_processes") }}?process_name=' + encodeURIComponent(processName) + '&format=csv';
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    // Show success feedback
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = 'Copied to clipboard!';
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 15px; border-radius: 4px; z-index: 9999;';
+    document.body.appendChild(toast);
+    setTimeout(() => document.body.removeChild(toast), 2000);
+  });
+}
+
+// Search functionality for process instances table
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('processSearch');
+  const table = document.getElementById('processInstancesTable');
+
+  if (searchInput && table) {
+    searchInput.addEventListener('keyup', function() {
+      const filter = searchInput.value.toLowerCase();
+      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+
+        if (text.includes(filter)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

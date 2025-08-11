@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Process Statistics - AdminLTE{% endblock %}
+{% block page_title %}Process Statistics{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('system.software') }}">System</a></li>
+<li class="breadcrumb-item active">Process Statistics</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  {% if error %}
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> Error: {{ error }}
+  </div>
+  {% else %}
+
+  <!-- Most Common Processes -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-cpu"></i> Most Common Processes
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('processes')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if most_common_processes %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Process Name</th>
+                  <th class="text-center">Instances</th>
+                  <th class="text-center">Hosts</th>
+                  <th class="text-center">Avg PID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for process in most_common_processes %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                       class="text-decoration-none">
+                      <code><strong>{{ process.process_name }}</strong></code>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ process.instance_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ process.unique_hosts }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% if process.avg_pid %}
+                    <span class="badge bg-secondary">{{ "%.0f"|format(process.avg_pid) }}</span>
+                    {% else %}
+                    <span class="text-muted">N/A</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No process data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-folder"></i> Executable Paths Analysis
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('paths')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if executable_paths %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Executable Path</th>
+                  <th class="text-center">Usage Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_paths = executable_paths | map(attribute=1) | sum %}
+                {% for path_info in executable_paths %}
+                <tr>
+                  <td>
+                    <small>
+                      <code title="{{ path_info[0] }}">
+                        {{ path_info[0][:50] }}{% if path_info[0]|length > 50 %}...{% endif %}
+                      </code>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ path_info[1] }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-primary"
+                           style="width: {{ (path_info[1] / total_paths * 100) if total_paths > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((path_info[1] / total_paths * 100)) if total_paths > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No executable path data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PID Distribution and Process Parameters -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-hash"></i> PID Distribution
+          </h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-sm btn-primary" onclick="exportChart('pids')">
+              <i class="bi bi-download"></i> Export
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if pid_distribution %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>PID Range</th>
+                  <th class="text-center">Process Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_pids = pid_distribution | map(attribute=1) | sum %}
+                {% for pid_range, count in pid_distribution %}
+                <tr>
+                  <td><strong>{{ pid_range }}</strong></td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-success"
+                           style="width: {{ (count / total_pids * 100) if total_pids > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((count / total_pids * 100)) if total_pids > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PID Distribution Chart -->
+          <div class="mt-4">
+            <canvas id="pidChart" height="200"></canvas>
+          </div>
+          {% else %}
+          <p class="text-muted">No PID distribution data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-gear"></i> Processes with Parameters
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if processes_with_params %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Process Name</th>
+                  <th class="text-center">With Params</th>
+                  <th class="text-center">Total</th>
+                  <th class="text-center">Param Usage %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for process in processes_with_params %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('system.process_detail', process_name=process.process_name) }}"
+                       class="text-decoration-none">
+                      <code>{{ process.process_name }}</code>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ process.with_params }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ process.total_instances }}</span>
+                  </td>
+                  <td class="text-center">
+                    {% set param_percentage = (process.with_params / process.total_instances * 100) if process.total_instances > 0 else 0 %}
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-warning" style="width: {{ param_percentage }}%"></div>
+                    </div>
+                    <small>{{ "%.1f"|format(param_percentage) }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No process parameter data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hosts Analysis and Directory Distribution -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-hdd-network"></i> Hosts with Most Processes
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if hosts_most_processes %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th class="text-center">Process Count</th>
+                  <th class="text-center">Unique Processes</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for host in hosts_most_processes %}
+                <tr>
+                  <td>
+                    <div>
+                      <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                         class="text-decoration-none">
+                        <strong>{{ host.ip_address }}</strong>
+                      </a>
+                      {% if host.hostname %}
+                      <br><small class="text-muted">{{ host.hostname }}</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ host.process_count }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-success">{{ host.unique_processes }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                      <a href="{{ url_for('system.processes', host_ip=host.ip_address) }}"
+                         class="btn btn-outline-primary">
+                        <i class="bi bi-list"></i> View
+                      </a>
+                      <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                         class="btn btn-outline-info">
+                        <i class="bi bi-pc-display"></i> Host
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No host process data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-folder-symlink"></i> Top Executable Directories
+          </h3>
+        </div>
+        <div class="card-body">
+          {% if top_executable_dirs %}
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Directory Path</th>
+                  <th class="text-center">Executable Count</th>
+                  <th class="text-center">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% set total_dirs = top_executable_dirs | map(attribute=1) | sum %}
+                {% for dir_info in top_executable_dirs %}
+                <tr>
+                  <td>
+                    <small>
+                      <code title="{{ dir_info[0] }}">
+                        {{ dir_info[0][:45] }}{% if dir_info[0]|length > 45 %}...{% endif %}
+                      </code>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-info">{{ dir_info[1] }}</span>
+                  </td>
+                  <td class="text-center">
+                    <div class="progress progress-sm">
+                      <div class="progress-bar bg-warning"
+                           style="width: {{ (dir_info[1] / total_dirs * 100) if total_dirs > 0 else 0 }}%">
+                      </div>
+                    </div>
+                    <small>{{ "%.1f"|format((dir_info[1] / total_dirs * 100)) if total_dirs > 0 else 0 }}%</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Directory Distribution Chart -->
+          <div class="mt-4">
+            <canvas id="directoryChart" height="200"></canvas>
+          </div>
+          {% else %}
+          <p class="text-muted">No executable directory data available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<script>
+// PID Distribution Chart
+{% if pid_distribution %}
+document.addEventListener('DOMContentLoaded', function() {
+  const pidCtx = document.getElementById('pidChart');
+  if (pidCtx) {
+    new Chart(pidCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [{% for pid_range, count in pid_distribution %}'{{ pid_range }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          data: [{% for pid_range, count in pid_distribution %}{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 205, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)',
+            'rgba(199, 199, 199, 0.8)',
+            'rgba(83, 102, 255, 0.8)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 205, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(199, 199, 199, 1)',
+            'rgba(83, 102, 255, 1)'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'PID Range Distribution'
+          },
+          legend: {
+            position: 'right'
+          }
+        }
+      }
+    });
+  }
+});
+{% endif %}
+
+// Directory Distribution Chart
+{% if top_executable_dirs %}
+document.addEventListener('DOMContentLoaded', function() {
+  const directoryCtx = document.getElementById('directoryChart');
+  if (directoryCtx) {
+    new Chart(directoryCtx, {
+      type: 'horizontalBar',
+      data: {
+        labels: [{% for dir_info in top_executable_dirs[:8] %}'{{ dir_info[0].split("/")[-1] if "/" in dir_info[0] else dir_info[0].split("\\")[-1] }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+          label: 'Executable Count',
+          data: [{% for dir_info in top_executable_dirs[:8] %}{{ dir_info[1] }}{% if not loop.last %}, {% endif %}{% endfor %}],
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Top Executable Directories'
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+});
+{% endif %}
+
+function exportChart(chartType) {
+  // Export functionality for different chart types
+  const params = new URLSearchParams();
+  params.set('format', 'csv');
+  params.set('chart_type', chartType);
+  window.location.href = '{{ url_for("system.api_processes") }}?' + params.toString();
+}
+</script>
+{% endblock %}
