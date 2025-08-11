@@ -317,11 +317,11 @@
             <p class="text-muted mb-0">Download detailed network analysis reports</p>
           </div>
           <div class="btn-group" role="group">
-            <a href="{{ url_for('reports.detailed_network') }}" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-file-pdf"></i> PDF Report
+            <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-pdf"></i> Report Overview
             </a>
-            <a href="{{ url_for('reports.export', type='network') }}" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-file-csv"></i> CSV Data
+            <a href="{{ url_for('reports.export') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-csv"></i> Export Data
             </a>
           </div>
         </div>

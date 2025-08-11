@@ -345,11 +345,11 @@
             <a href="{{ url_for('reports.executive_summary') }}" class="btn btn-outline-danger btn-sm">
               <i class="bi bi-file-pdf"></i> Executive Report
             </a>
-            <a href="{{ url_for('reports.detailed_security') }}" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-file-text"></i> Detailed Report
+            <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-text"></i> Report Overview
             </a>
-            <a href="{{ url_for('reports.export', type='security') }}" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-file-csv"></i> CSV Data
+            <a href="{{ url_for('reports.export') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-csv"></i> Export Data
             </a>
           </div>
         </div>
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Critical',
                     data: [
                         {% for trend in security_data.vulnerability_trends %}
-                        {{ trend.critical || 0 }}{{ ',' if not loop.last }}
+                        {{ trend.critical or 0 }}{{ ',' if not loop.last }}
                         {% endfor %}
                     ],
                     borderColor: '#dc3545',
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'High',
                     data: [
                         {% for trend in security_data.vulnerability_trends %}
-                        {{ trend.high || 0 }}{{ ',' if not loop.last }}
+                        {{ trend.high or 0 }}{{ ',' if not loop.last }}
                         {% endfor %}
                     ],
                     borderColor: '#fd7e14',

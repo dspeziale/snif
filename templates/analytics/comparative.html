@@ -160,10 +160,10 @@
                 </td>
                 <td>
                   <div class="btn-group btn-group-sm" role="group">
-                    <a href="{{ url_for('security.vulnerabilities', ip=host.ip_address) }}" class="btn btn-outline-primary btn-sm" title="View Details">
+                    <a href="{{ url_for('security.vulnerabilities') }}?ip={{ host.ip_address }}" class="btn btn-outline-primary btn-sm" title="View Details">
                       <i class="bi bi-eye"></i>
                     </a>
-                    <a href="{{ url_for('reports.export_report', host=host.ip_address) }}" class="btn btn-outline-secondary btn-sm" title="Generate Report">
+                    <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-secondary btn-sm" title="Generate Report">
                       <i class="bi bi-file-text"></i>
                     </a>
                   </div>
@@ -311,9 +311,6 @@
                      style="width: {{ comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0 }}%"
                      aria-valuenow="{{ comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0 }}"
                      aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-secondary" role="progressbar"
-                     style="width: {{ 85 - (comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0) }}%"
-                     aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <small class="text-muted">Industry Average: 85%</small>
             </div>
@@ -328,9 +325,6 @@
                      style="width: {{ comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0 }}%"
                      aria-valuenow="{{ comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0 }}"
                      aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-secondary" role="progressbar"
-                     style="width: {{ 78 - (comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0) }}%"
-                     aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <small class="text-muted">Industry Average: 78%</small>
             </div>
@@ -345,9 +339,6 @@
                      style="width: {{ comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0 }}%"
                      aria-valuenow="{{ comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0 }}"
                      aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-secondary" role="progressbar"
-                     style="width: {{ 82 - (comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0) }}%"
-                     aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <small class="text-muted">Industry Average: 82%</small>
             </div>
@@ -366,9 +357,6 @@
                      style="width: {{ comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0 }}%"
                      aria-valuenow="{{ comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0 }}"
                      aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-secondary" role="progressbar"
-                     style="width: {{ 75 - (comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0) }}%"
-                     aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <small class="text-muted">Industry Average: 75</small>
             </div>
@@ -383,9 +371,6 @@
                      style="width: {{ comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0 }}%"
                      aria-valuenow="{{ comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0 }}"
                      aria-valuemin="0" aria-valuemax="100"></div>
-                <div class="progress-bar bg-secondary" role="progressbar"
-                     style="width: {{ 68 - (comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0) }}%"
-                     aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
               </div>
               <small class="text-muted">Industry Average: 68%</small>
             </div>
@@ -456,8 +441,8 @@
             <p class="text-muted mb-0">Generate detailed benchmark comparisons and recommendations</p>
           </div>
           <div class="btn-group" role="group">
-            <a href="{{ url_for('reports.export_report') }}" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-file-bar-graph"></i> Benchmark Report
+            <a href="{{ url_for('reports.overview') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-bar-graph"></i> Reports Overview
             </a>
             <button type="button" class="btn btn-outline-info btn-sm" onclick="exportComparison()">
               <i class="bi bi-download"></i> Export Data
@@ -629,4 +614,4 @@ function exportComparison() {
         });
 }
 </script>
-{% endblock %>
+{% endblock %}
