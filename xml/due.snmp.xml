@@ -1,0 +1,2160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///C:/Program Files (x86)/Nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.97 scan initiated Mon Aug 11 11:32:02 2025 as: nmap -sU -p 161 -&#45;script=snmp* -oX due.snmp.xml 192.168.30.225-228 -->
+<nmaprun scanner="nmap" args="nmap -sU -p 161 -&#45;script=snmp* -oX due.snmp.xml 192.168.30.225-228" start="1754904722" startstr="Mon Aug 11 11:32:02 2025" version="7.97" xmloutputversion="1.05">
+<scaninfo type="udp" protocol="udp" numservices="1" services="161"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.228" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:06" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.225" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:07" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.226" addrtype="ipv4"/>
+<address addr="00:08:5D:21:E1:74" addrtype="mac" vendor="Mitel"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<taskprogress task="NSE" time="1754904739" percent="90.00" remaining="1" etc="1754904739"/>
+<host starttime="1754904728" endtime="1754904738"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.225" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:07" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="128"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="Hardware: Intel64 Family 6 Model 85 Stepping 4 AT/AT COMPATIBLE - Software: Windows Version 6.3 (Build 17763 Multiprocessor Free)&#xa;  System uptime: 2d11h35m45.52s (21454552 timeticks)"/><script id="snmp-win32-users" output="&#xa;  Administrator&#xa;  DefaultAccount&#xa;  Guest&#xa;  WDAGUtilityAccount"><elem>Administrator</elem>
+<elem>DefaultAccount</elem>
+<elem>Guest</elem>
+<elem>WDAGUtilityAccount</elem>
+</script><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="password">public</elem>
+<elem key="state">Valid credentials</elem>
+</table>
+</script><script id="snmp-interfaces" output="&#xa;  Software Loopback Interface 1\x00&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter\x00&#xa;    MAC address: 00:15:5d:a2:71:00 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft 6to4 Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft IP-HTTPS Platform Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IKEv2)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Kernel Debug Network Adapter\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (GRE)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (SSTP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IP)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Teredo Tunneling Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter #2\x00&#xa;    IP address: 192.168.30.225  Netmask: 255.255.0.0&#xa;    MAC address: 00:15:5d:8f:60:07 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 20.65 Mb sent, 622.09 Mb received&#xa;  WAN Miniport (PPTP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (PPPOE)\x00&#xa;    Type: ppp  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (L2TP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter #2-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:07 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 20.65 Mb sent, 622.09 Mb received&#xa;  Microsoft Hyper-V Network Adapter #2-Npcap Packet Driver (NPCAP)-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:07 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 20.65 Mb sent, 622.09 Mb received&#xa;  Microsoft Hyper-V Network Adapter #2-QoS Packet Scheduler-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:07 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 20.65 Mb sent, 622.09 Mb received&#xa;  Microsoft Hyper-V Network Adapter #2-WFP 802.3 MAC Layer LightWeight Filter-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:07 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 20.65 Mb sent, 622.09 Mb received&#xa;  WAN Miniport (IP)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IP)-Npcap Packet Driver (NPCAP)-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IP)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)-Npcap Packet Driver (NPCAP)-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)-Npcap Packet Driver (NPCAP)-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;"/><script id="snmp-win32-shares" output="&#xa;  SISTEMI: C:\SISTEMI"><elem key="SISTEMI">C:\SISTEMI</elem>
+</script><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:135          0.0.0.0:0&#xa;  TCP  0.0.0.0:443          0.0.0.0:0&#xa;  TCP  0.0.0.0:445          0.0.0.0:0&#xa;  TCP  0.0.0.0:1801         0.0.0.0:0&#xa;  TCP  0.0.0.0:2001         0.0.0.0:0&#xa;  TCP  0.0.0.0:2103         0.0.0.0:0&#xa;  TCP  0.0.0.0:2105         0.0.0.0:0&#xa;  TCP  0.0.0.0:2107         0.0.0.0:0&#xa;  TCP  0.0.0.0:3389         0.0.0.0:0&#xa;  TCP  0.0.0.0:5985         0.0.0.0:0&#xa;  TCP  0.0.0.0:8082         0.0.0.0:0&#xa;  TCP  0.0.0.0:10000        0.0.0.0:0&#xa;  TCP  0.0.0.0:47001        0.0.0.0:0&#xa;  TCP  0.0.0.0:49664        0.0.0.0:0&#xa;  TCP  0.0.0.0:49665        0.0.0.0:0&#xa;  TCP  0.0.0.0:49667        0.0.0.0:0&#xa;  TCP  0.0.0.0:49668        0.0.0.0:0&#xa;  TCP  0.0.0.0:49671        0.0.0.0:0&#xa;  TCP  0.0.0.0:49690        0.0.0.0:0&#xa;  TCP  0.0.0.0:49705        0.0.0.0:0&#xa;  TCP  0.0.0.0:49710        0.0.0.0:0&#xa;  TCP  0.0.0.0:49719        0.0.0.0:0&#xa;  TCP  0.0.0.0:49731        0.0.0.0:0&#xa;  TCP  0.0.0.0:53244        0.0.0.0:0&#xa;  TCP  192.168.30.225:139   0.0.0.0:0&#xa;  TCP  192.168.30.225:10000 192.168.50.160:51692&#xa;  TCP  192.168.30.225:10000 192.168.50.161:54966&#xa;  TCP  192.168.30.225:10000 192.168.50.162:49722&#xa;  TCP  192.168.30.225:10000 192.168.50.163:37058&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:500          *:*&#xa;  UDP  0.0.0.0:1434         *:*&#xa;  UDP  0.0.0.0:3389         *:*&#xa;  UDP  0.0.0.0:4500         *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  127.0.0.1:52425      *:*&#xa;  UDP  127.0.0.1:58006      *:*&#xa;  UDP  127.0.0.1:58012      *:*&#xa;  UDP  127.0.0.1:58208      *:*&#xa;  UDP  127.0.0.1:59147      *:*&#xa;  UDP  127.0.0.1:59149      *:*&#xa;  UDP  192.168.30.225:137   *:*&#xa;  UDP  192.168.30.225:138   *:*&#xa;"/><script id="snmp-win32-services" output="&#xa;  Accesso rete&#xa;  Accodamento messaggi&#xa;  Adattatore listener Net.Msmq&#xa;  Adattatore listener Net.Pipe&#xa;  Adattatore listener Net.Tcp&#xa;  Agente criteri IPsec&#xa;  Agente mapping endpoint RPC&#xa;  Alimentazione&#xa;  AzureAttestService&#xa;  BFE (Base Filtering Engine)&#xa;  COM+ Event System&#xa;  Chiamata di procedura remota (RPC)&#xa;  Citrix Workspace Advanced Service&#xa;  Client DHCP&#xa;  Client DNS&#xa;  Client di Criteri di gruppo&#xa;  Configurazione Desktop remoto&#xa;  Connection Manager di Accesso remoto&#xa;  Copia shadow del volume&#xa;  CoreMessaging&#xa;  CrypKey License&#xa;  Distributed Transaction Coordinator&#xa;  Esperienze utente connesse e telemetria&#xa;  Gestione account Web&#xa;  Gestione connessioni Windows&#xa;  Gestione remota Windows (WS-Management)&#xa;  Gestione sessioni locali&#xa;  Gestione utenti&#xa;  Gestore connessione rete&#xa;  Gestore eventi di sistema&#xa;  Gestore tempo&#xa;  Helper IP&#xa;  Helper NetBIOS di TCP/IP&#xa;  Informazioni applicazioni&#xa;  Isolamento chiavi CNG&#xa;  Manutenzione collegamenti distribuiti client&#xa;  Moduli di impostazione chiavi IPSec IKE e Auth-IP&#xa;  Ora di Windows&#xa;  Ottimizzazione recapito&#xa;  Plug and Play&#xa;  Propagazione certificati&#xa;  Provider di copie shadow software Microsoft&#xa;  Raccolta eventi Windows&#xa;  Redirector porta UserMode di Servizi Desktop remoto&#xa;  Registro eventi di Windows&#xa;  Richiedente Copia Shadow del volume Hyper-V&#xa;  Riconoscimento presenza in rete&#xa;  Rilevamento hardware shell&#xa;  SQL Server (SISTEMI)&#xa;  SQL Server Browser&#xa;  SQL Server CEIP service (SISTEMI)&#xa;  SQL Server VSS Writer&#xa;  Server&#xa;  Servizi Desktop remoto&#xa;  Servizi di crittografia&#xa;  Servizio AVCTP&#xa;  Servizio Application Host Helper&#xa;  Servizio Arresto guest Hyper-V&#xa;  Servizio Attivazione processo Windows&#xa;  Servizio Controllo rete di Microsoft Defender Antivirus&#xa;  Servizio Criteri di diagnostica&#xa;  Servizio Elenco reti&#xa;  Servizio Gestione licenze Windows&#xa;  Servizio Heartbeat Hyper-V&#xa;  Servizio Interfaccia archivio di rete&#xa;  Servizio Microsoft Defender Antivirus&#xa;  Servizio Pubblicazione sul Web&#xa;  Servizio Risoluzione problemi compatibilit\xC3\xA0 programmi&#xa;  Servizio SNMP&#xa;  Servizio SSTP (Secure Socket Tunneling Protocol)&#xa;  Servizio Scambio di dati Hyper-V&#xa;  Servizio Sicurezza di Windows&#xa;  Servizio Sincronizzazione ora Hyper-V&#xa;  Servizio Virtualizzazione Desktop remoto Hyper-V&#xa;  Servizio cache tipi di carattere Windows&#xa;  Servizio di archiviazione&#xa;  Servizio di base di Microsoft Defender&#xa;  Servizio di condivisione dati&#xa;  Servizio di condivisione porte Net.Tcp&#xa;  Servizio di notifica eventi di sistema&#xa;  Servizio di sistema notifiche Push Windows&#xa;  Servizio infrastruttura attivit\xC3\xA0 in background&#xa;  Servizio piattaforma dispositivi connessi&#xa;  Servizio profili utente&#xa;  Servizio registrazione accessi utente&#xa;  Servizio repository stati&#xa;  Servizio rilevamento automatico proxy WinHTTP&#xa;  Servizio tastiera virtuale e pannello per la grafia&#xa;  Servizio utente notifica Push Windows_e0867&#xa;  Servizio utente piattaforma dispositivi connessi_e0867&#xa;  Sistema di gestione degli account di sicurezza (SAM)&#xa;  Spooler di stampa&#xa;  Strumentazione gestione Windows&#xa;  SysMain&#xa;  System Scheduler Logon&#xa;  System Scheduler Service&#xa;  Temi&#xa;  TrexOnLine CP Service 64&#xa;  Update Orchestrator Service&#xa;  Utilit\xC3\xA0 di avvio processi server DCOM&#xa;  Utilit\xC3\xA0 di pianificazione&#xa;  Windows Defender Firewall&#xa;  Windows Update&#xa;  Workstation"><elem>Accesso rete</elem>
+<elem>Accodamento messaggi</elem>
+<elem>Adattatore listener Net.Msmq</elem>
+<elem>Adattatore listener Net.Pipe</elem>
+<elem>Adattatore listener Net.Tcp</elem>
+<elem>Agente criteri IPsec</elem>
+<elem>Agente mapping endpoint RPC</elem>
+<elem>Alimentazione</elem>
+<elem>AzureAttestService</elem>
+<elem>BFE (Base Filtering Engine)</elem>
+<elem>COM+ Event System</elem>
+<elem>Chiamata di procedura remota (RPC)</elem>
+<elem>Citrix Workspace Advanced Service</elem>
+<elem>Client DHCP</elem>
+<elem>Client DNS</elem>
+<elem>Client di Criteri di gruppo</elem>
+<elem>Configurazione Desktop remoto</elem>
+<elem>Connection Manager di Accesso remoto</elem>
+<elem>Copia shadow del volume</elem>
+<elem>CoreMessaging</elem>
+<elem>CrypKey License</elem>
+<elem>Distributed Transaction Coordinator</elem>
+<elem>Esperienze utente connesse e telemetria</elem>
+<elem>Gestione account Web</elem>
+<elem>Gestione connessioni Windows</elem>
+<elem>Gestione remota Windows (WS-Management)</elem>
+<elem>Gestione sessioni locali</elem>
+<elem>Gestione utenti</elem>
+<elem>Gestore connessione rete</elem>
+<elem>Gestore eventi di sistema</elem>
+<elem>Gestore tempo</elem>
+<elem>Helper IP</elem>
+<elem>Helper NetBIOS di TCP/IP</elem>
+<elem>Informazioni applicazioni</elem>
+<elem>Isolamento chiavi CNG</elem>
+<elem>Manutenzione collegamenti distribuiti client</elem>
+<elem>Moduli di impostazione chiavi IPSec IKE e Auth-IP</elem>
+<elem>Ora di Windows</elem>
+<elem>Ottimizzazione recapito</elem>
+<elem>Plug and Play</elem>
+<elem>Propagazione certificati</elem>
+<elem>Provider di copie shadow software Microsoft</elem>
+<elem>Raccolta eventi Windows</elem>
+<elem>Redirector porta UserMode di Servizi Desktop remoto</elem>
+<elem>Registro eventi di Windows</elem>
+<elem>Richiedente Copia Shadow del volume Hyper-V</elem>
+<elem>Riconoscimento presenza in rete</elem>
+<elem>Rilevamento hardware shell</elem>
+<elem>SQL Server (SISTEMI)</elem>
+<elem>SQL Server Browser</elem>
+<elem>SQL Server CEIP service (SISTEMI)</elem>
+<elem>SQL Server VSS Writer</elem>
+<elem>Server</elem>
+<elem>Servizi Desktop remoto</elem>
+<elem>Servizi di crittografia</elem>
+<elem>Servizio AVCTP</elem>
+<elem>Servizio Application Host Helper</elem>
+<elem>Servizio Arresto guest Hyper-V</elem>
+<elem>Servizio Attivazione processo Windows</elem>
+<elem>Servizio Controllo rete di Microsoft Defender Antivirus</elem>
+<elem>Servizio Criteri di diagnostica</elem>
+<elem>Servizio Elenco reti</elem>
+<elem>Servizio Gestione licenze Windows</elem>
+<elem>Servizio Heartbeat Hyper-V</elem>
+<elem>Servizio Interfaccia archivio di rete</elem>
+<elem>Servizio Microsoft Defender Antivirus</elem>
+<elem>Servizio Pubblicazione sul Web</elem>
+<elem>Servizio Risoluzione problemi compatibilit\xC3\xA0 programmi</elem>
+<elem>Servizio SNMP</elem>
+<elem>Servizio SSTP (Secure Socket Tunneling Protocol)</elem>
+<elem>Servizio Scambio di dati Hyper-V</elem>
+<elem>Servizio Sicurezza di Windows</elem>
+<elem>Servizio Sincronizzazione ora Hyper-V</elem>
+<elem>Servizio Virtualizzazione Desktop remoto Hyper-V</elem>
+<elem>Servizio cache tipi di carattere Windows</elem>
+<elem>Servizio di archiviazione</elem>
+<elem>Servizio di base di Microsoft Defender</elem>
+<elem>Servizio di condivisione dati</elem>
+<elem>Servizio di condivisione porte Net.Tcp</elem>
+<elem>Servizio di notifica eventi di sistema</elem>
+<elem>Servizio di sistema notifiche Push Windows</elem>
+<elem>Servizio infrastruttura attivit\xC3\xA0 in background</elem>
+<elem>Servizio piattaforma dispositivi connessi</elem>
+<elem>Servizio profili utente</elem>
+<elem>Servizio registrazione accessi utente</elem>
+<elem>Servizio repository stati</elem>
+<elem>Servizio rilevamento automatico proxy WinHTTP</elem>
+<elem>Servizio tastiera virtuale e pannello per la grafia</elem>
+<elem>Servizio utente notifica Push Windows_e0867</elem>
+<elem>Servizio utente piattaforma dispositivi connessi_e0867</elem>
+<elem>Sistema di gestione degli account di sicurezza (SAM)</elem>
+<elem>Spooler di stampa</elem>
+<elem>Strumentazione gestione Windows</elem>
+<elem>SysMain</elem>
+<elem>System Scheduler Logon</elem>
+<elem>System Scheduler Service</elem>
+<elem>Temi</elem>
+<elem>TrexOnLine CP Service 64</elem>
+<elem>Update Orchestrator Service</elem>
+<elem>Utilit\xC3\xA0 di avvio processi server DCOM</elem>
+<elem>Utilit\xC3\xA0 di pianificazione</elem>
+<elem>Windows Defender Firewall</elem>
+<elem>Windows Update</elem>
+<elem>Workstation</elem>
+</script><script id="snmp-win32-software" output="&#xa;  7-Zip 23.01 (x64); 2024-02-22T10:17:32&#xa;  Active Directory Authentication Library for SQL Server; 2024-02-22T10:29:40&#xa;  BCR Plug-in; 2025-05-23T13:35:10&#xa;  Bitvise SSH Client - FlowSshNet (x64); 2024-04-09T11:10:22&#xa;  Bitvise SSH Client - FlowSshNet (x86); 2024-04-09T11:10:08&#xa;  Bitvise SSH Client 9.33 (remove only); 2024-04-09T11:10:22&#xa;  Browser per SQL Server 2019; 2024-02-22T10:26:58&#xa;  Citrix Authentication Manager; 2025-05-23T13:35:20&#xa;  Citrix Desktop Lock; 2025-05-23T13:35:56&#xa;  Citrix Web Helper; 2025-05-23T13:35:32&#xa;  Citrix Workspace 2503; 2025-05-23T13:35:56&#xa;  Citrix Workspace Inside; 2025-05-23T13:34:34&#xa;  Citrix Workspace(DV); 2025-05-23T13:35:16&#xa;  Citrix Workspace(SSON); 2025-05-23T13:35:20&#xa;  Citrix Workspace(USB); 2025-05-23T13:35:12&#xa;  Google Chrome; 2025-08-08T02:21:32&#xa;  Installazione di Microsoft SQL Server 2019 (Italiano); 2024-02-22T10:24:48&#xa;  Integration Services; 2024-02-22T10:31:44&#xa;  Java 8 Update 401 (64-bit); 2024-04-09T11:07:36&#xa;  Java Auto Updater; 2024-04-09T11:08:42&#xa;  JobTime SQL; 2024-05-07T10:59:24&#xa;  MTOP Client; 2025-05-23T13:35:52&#xa;  Microsoft .NET Host - 6.0.25 (x86); 2024-06-19T14:49:38&#xa;  Microsoft .NET Host - 8.0.11 (x86); 2025-01-17T13:52:22&#xa;  Microsoft .NET Host FX Resolver - 6.0.25 (x86); 2024-06-19T14:49:38&#xa;  Microsoft .NET Host FX Resolver - 8.0.11 (x86); 2025-01-17T13:52:20&#xa;  Microsoft .NET Runtime - 6.0.25 (x86); 2024-06-19T14:49:36&#xa;  Microsoft .NET Runtime - 8.0.11 (x86); 2025-01-17T13:52:20&#xa;  Microsoft Edge WebView2 Runtime; 2025-08-02T07:32:04&#xa;  Microsoft Help Viewer 2.3; 2024-02-22T10:29:36&#xa;  Microsoft Help Viewer 2.3; 2024-02-22T10:29:36&#xa;  Microsoft Help Viewer 2.3 Language Pack - ITA; 2024-02-22T10:29:36&#xa;  Microsoft Help Viewer 2.3 Language Pack - ITA; 2024-02-22T10:29:36&#xa;  Microsoft ODBC Driver 17 for SQL Server; 2024-02-22T10:29:38&#xa;  Microsoft OLE DB Driver for SQL Server; 2024-02-22T10:24:16&#xa;  Microsoft SQL Server 2012 Native Client; 2024-02-22T10:25:42&#xa;  Microsoft SQL Server 2019 (64 bit); 2024-02-22T10:27:14&#xa;  Microsoft SQL Server 2019 (64 bit); 2024-02-22T10:27:14&#xa;  Microsoft SQL Server 2019 RsFx Driver; 2024-02-22T10:27:00&#xa;  Microsoft SQL Server Management Studio - 18.4; 2024-02-22T10:31:44&#xa;  Microsoft VSS Writer per SQL Server 2019; 2024-02-22T10:26:56&#xa;  Microsoft Visual C++ 2008 Redistributable - x64 9.0.30729.6161; 2024-04-02T11:44:54&#xa;  Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161; 2024-04-02T11:45:00&#xa;  Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501; 2024-02-22T10:29:34&#xa;  Microsoft Visual C++ 2013 x86 Additional Runtime - 12.0.21005; 2024-02-22T10:29:34&#xa;  Microsoft Visual C++ 2013 x86 Minimum Runtime - 12.0.21005; 2024-02-22T10:29:32&#xa;  Microsoft Visual C++ 2015-2022 Redistributable (x64) - 14.42.344; 2025-05-23T13:34:00&#xa;  Microsoft Visual C++ 2015-2022 Redistributable (x86) - 14.42.344; 2025-05-23T13:33:44&#xa;  Microsoft Visual C++ 2022 X64 Additional Runtime - 14.42.34433; 2025-05-23T13:33:58&#xa;  Microsoft Visual C++ 2022 X64 Minimum Runtime - 14.42.34433; 2025-05-23T13:33:58&#xa;  Microsoft Visual C++ 2022 X86 Additional Runtime - 14.42.34433; 2025-05-23T13:33:44&#xa;  Microsoft Visual C++ 2022 X86 Minimum Runtime - 14.42.34433; 2025-05-23T13:33:36&#xa;  Microsoft Visual Studio Tools for Applications 2017; 2024-02-22T10:30:52&#xa;  Microsoft Visual Studio Tools for Applications 2017 x64 Hosting ; 2024-02-22T10:30:50&#xa;  Microsoft Visual Studio Tools for Applications 2017 x86 Hosting ; 2024-02-22T10:30:36&#xa;  Microsoft Windows Desktop Runtime - 6.0.25 (x86); 2024-06-19T14:49:42&#xa;  Microsoft Windows Desktop Runtime - 6.0.25 (x86); 2024-06-19T14:49:42&#xa;  Microsoft Windows Desktop Runtime - 8.0.11 (x86); 2025-01-17T13:52:48&#xa;  Microsoft Windows Desktop Runtime - 8.0.11 (x86); 2025-01-17T13:52:26&#xa;  Nmap 7.95; 2024-06-20T12:44:04&#xa;  Npcap; 2024-06-20T12:44:34&#xa;  Online Plug-in; 2025-05-23T13:35:00&#xa;  Provider OLE DB Microsoft Analysis Services; 2024-02-22T10:30:02&#xa;  Provider OLE DB Microsoft Analysis Services; 2024-02-22T10:29:56&#xa;  SQL Server 2019 Batch Parser; 2024-02-22T10:24:32&#xa;  SQL Server 2019 Common Files; 2024-02-22T10:25:36&#xa;  SQL Server 2019 Common Files; 2024-02-22T10:25:26&#xa;  SQL Server 2019 Connection Info; 2024-02-22T10:24:26&#xa;  SQL Server 2019 Connection Info; 2024-02-22T10:24:28&#xa;  SQL Server 2019 DMF; 2024-02-22T10:24:44&#xa;  SQL Server 2019 DMF; 2024-02-22T10:24:40&#xa;  SQL Server 2019 Database Engine Services; 2024-02-22T10:27:08&#xa;  SQL Server 2019 Database Engine Services; 2024-02-22T10:27:14&#xa;  SQL Server 2019 Database Engine Shared; 2024-02-22T10:26:36&#xa;  SQL Server 2019 Database Engine Shared; 2024-02-22T10:25:56&#xa;  SQL Server 2019 SQL Diagnostics; 2024-02-22T10:24:36&#xa;  SQL Server 2019 Shared Management Objects; 2024-02-22T10:25:06&#xa;  SQL Server 2019 Shared Management Objects; 2024-02-22T10:25:20&#xa;  SQL Server 2019 Shared Management Objects Extensions; 2024-02-22T10:25:14&#xa;  SQL Server 2019 Shared Management Objects Extensions; 2024-02-22T10:24:58&#xa;  SQL Server 2019 XEvent; 2024-02-22T10:24:54&#xa;  SQL Server 2019 XEvent; 2024-02-22T10:25:10&#xa;  SQL Server Management Studio; 2024-02-22T10:31:18&#xa;  SQL Server Management Studio; 2024-02-22T10:31:24&#xa;  SQL Server Management Studio for Analysis Services; 2024-02-22T10:31:32&#xa;  SQL Server Management Studio for Analysis Services Localization; 2024-02-22T10:31:34&#xa;  SQL Server Management Studio for Reporting Services; 2024-02-22T10:31:26&#xa;  SQL Server Management Studio for Reporting Services Localization; 2024-02-22T10:31:34&#xa;  SSMS Post Install Tasks; 2024-02-22T10:31:44&#xa;  Self-service Plug-in; 2025-05-23T13:35:32&#xa;  Servizio del linguaggio T-SQL di Microsoft SQL Server 2019 ; 2024-02-22T10:26:30&#xa;  System Scheduler Professional 4.23; 2024-05-07T12:27:50&#xa;  Visual Studio 2017 Isolated Shell for SSMS; 2024-02-22T10:30:26&#xa;  Visual Studio 2017 Isolated Shell per SSMS LangPack - Italiano; 2024-02-22T10:30:28&#xa;  deviceTRUST ICA Client Extension v25.3 x64; 2025-07-23T09:38:04&#xa;  deviceTRUST ICA Client Extension v25.3 x86; 2025-07-23T09:38:04"><table>
+<elem key="name">7-Zip 23.01 (x64)</elem>
+<elem key="install_date">2024-02-22T10:17:32</elem>
+</table>
+<table>
+<elem key="name">Active Directory Authentication Library for SQL Server</elem>
+<elem key="install_date">2024-02-22T10:29:40</elem>
+</table>
+<table>
+<elem key="name">BCR Plug-in</elem>
+<elem key="install_date">2025-05-23T13:35:10</elem>
+</table>
+<table>
+<elem key="name">Bitvise SSH Client - FlowSshNet (x64)</elem>
+<elem key="install_date">2024-04-09T11:10:22</elem>
+</table>
+<table>
+<elem key="name">Bitvise SSH Client - FlowSshNet (x86)</elem>
+<elem key="install_date">2024-04-09T11:10:08</elem>
+</table>
+<table>
+<elem key="name">Bitvise SSH Client 9.33 (remove only)</elem>
+<elem key="install_date">2024-04-09T11:10:22</elem>
+</table>
+<table>
+<elem key="name">Browser per SQL Server 2019</elem>
+<elem key="install_date">2024-02-22T10:26:58</elem>
+</table>
+<table>
+<elem key="name">Citrix Authentication Manager</elem>
+<elem key="install_date">2025-05-23T13:35:20</elem>
+</table>
+<table>
+<elem key="name">Citrix Desktop Lock</elem>
+<elem key="install_date">2025-05-23T13:35:56</elem>
+</table>
+<table>
+<elem key="name">Citrix Web Helper</elem>
+<elem key="install_date">2025-05-23T13:35:32</elem>
+</table>
+<table>
+<elem key="name">Citrix Workspace 2503</elem>
+<elem key="install_date">2025-05-23T13:35:56</elem>
+</table>
+<table>
+<elem key="name">Citrix Workspace Inside</elem>
+<elem key="install_date">2025-05-23T13:34:34</elem>
+</table>
+<table>
+<elem key="name">Citrix Workspace(DV)</elem>
+<elem key="install_date">2025-05-23T13:35:16</elem>
+</table>
+<table>
+<elem key="name">Citrix Workspace(SSON)</elem>
+<elem key="install_date">2025-05-23T13:35:20</elem>
+</table>
+<table>
+<elem key="name">Citrix Workspace(USB)</elem>
+<elem key="install_date">2025-05-23T13:35:12</elem>
+</table>
+<table>
+<elem key="name">Google Chrome</elem>
+<elem key="install_date">2025-08-08T02:21:32</elem>
+</table>
+<table>
+<elem key="name">Installazione di Microsoft SQL Server 2019 (Italiano)</elem>
+<elem key="install_date">2024-02-22T10:24:48</elem>
+</table>
+<table>
+<elem key="name">Integration Services</elem>
+<elem key="install_date">2024-02-22T10:31:44</elem>
+</table>
+<table>
+<elem key="name">Java 8 Update 401 (64-bit)</elem>
+<elem key="install_date">2024-04-09T11:07:36</elem>
+</table>
+<table>
+<elem key="name">Java Auto Updater</elem>
+<elem key="install_date">2024-04-09T11:08:42</elem>
+</table>
+<table>
+<elem key="name">JobTime SQL</elem>
+<elem key="install_date">2024-05-07T10:59:24</elem>
+</table>
+<table>
+<elem key="name">MTOP Client</elem>
+<elem key="install_date">2025-05-23T13:35:52</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Host - 6.0.25 (x86)</elem>
+<elem key="install_date">2024-06-19T14:49:38</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Host - 8.0.11 (x86)</elem>
+<elem key="install_date">2025-01-17T13:52:22</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Host FX Resolver - 6.0.25 (x86)</elem>
+<elem key="install_date">2024-06-19T14:49:38</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Host FX Resolver - 8.0.11 (x86)</elem>
+<elem key="install_date">2025-01-17T13:52:20</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Runtime - 6.0.25 (x86)</elem>
+<elem key="install_date">2024-06-19T14:49:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft .NET Runtime - 8.0.11 (x86)</elem>
+<elem key="install_date">2025-01-17T13:52:20</elem>
+</table>
+<table>
+<elem key="name">Microsoft Edge WebView2 Runtime</elem>
+<elem key="install_date">2025-08-02T07:32:04</elem>
+</table>
+<table>
+<elem key="name">Microsoft Help Viewer 2.3</elem>
+<elem key="install_date">2024-02-22T10:29:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft Help Viewer 2.3</elem>
+<elem key="install_date">2024-02-22T10:29:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft Help Viewer 2.3 Language Pack - ITA</elem>
+<elem key="install_date">2024-02-22T10:29:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft Help Viewer 2.3 Language Pack - ITA</elem>
+<elem key="install_date">2024-02-22T10:29:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft ODBC Driver 17 for SQL Server</elem>
+<elem key="install_date">2024-02-22T10:29:38</elem>
+</table>
+<table>
+<elem key="name">Microsoft OLE DB Driver for SQL Server</elem>
+<elem key="install_date">2024-02-22T10:24:16</elem>
+</table>
+<table>
+<elem key="name">Microsoft SQL Server 2012 Native Client</elem>
+<elem key="install_date">2024-02-22T10:25:42</elem>
+</table>
+<table>
+<elem key="name">Microsoft SQL Server 2019 (64 bit)</elem>
+<elem key="install_date">2024-02-22T10:27:14</elem>
+</table>
+<table>
+<elem key="name">Microsoft SQL Server 2019 (64 bit)</elem>
+<elem key="install_date">2024-02-22T10:27:14</elem>
+</table>
+<table>
+<elem key="name">Microsoft SQL Server 2019 RsFx Driver</elem>
+<elem key="install_date">2024-02-22T10:27:00</elem>
+</table>
+<table>
+<elem key="name">Microsoft SQL Server Management Studio - 18.4</elem>
+<elem key="install_date">2024-02-22T10:31:44</elem>
+</table>
+<table>
+<elem key="name">Microsoft VSS Writer per SQL Server 2019</elem>
+<elem key="install_date">2024-02-22T10:26:56</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2008 Redistributable - x64 9.0.30729.6161</elem>
+<elem key="install_date">2024-04-02T11:44:54</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161</elem>
+<elem key="install_date">2024-04-02T11:45:00</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2013 Redistributable (x86) - 12.0.30501</elem>
+<elem key="install_date">2024-02-22T10:29:34</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2013 x86 Additional Runtime - 12.0.21005</elem>
+<elem key="install_date">2024-02-22T10:29:34</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2013 x86 Minimum Runtime - 12.0.21005</elem>
+<elem key="install_date">2024-02-22T10:29:32</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2015-2022 Redistributable (x64) - 14.42.344</elem>
+<elem key="install_date">2025-05-23T13:34:00</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2015-2022 Redistributable (x86) - 14.42.344</elem>
+<elem key="install_date">2025-05-23T13:33:44</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2022 X64 Additional Runtime - 14.42.34433</elem>
+<elem key="install_date">2025-05-23T13:33:58</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2022 X64 Minimum Runtime - 14.42.34433</elem>
+<elem key="install_date">2025-05-23T13:33:58</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2022 X86 Additional Runtime - 14.42.34433</elem>
+<elem key="install_date">2025-05-23T13:33:44</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual C++ 2022 X86 Minimum Runtime - 14.42.34433</elem>
+<elem key="install_date">2025-05-23T13:33:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual Studio Tools for Applications 2017</elem>
+<elem key="install_date">2024-02-22T10:30:52</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual Studio Tools for Applications 2017 x64 Hosting </elem>
+<elem key="install_date">2024-02-22T10:30:50</elem>
+</table>
+<table>
+<elem key="name">Microsoft Visual Studio Tools for Applications 2017 x86 Hosting </elem>
+<elem key="install_date">2024-02-22T10:30:36</elem>
+</table>
+<table>
+<elem key="name">Microsoft Windows Desktop Runtime - 6.0.25 (x86)</elem>
+<elem key="install_date">2024-06-19T14:49:42</elem>
+</table>
+<table>
+<elem key="name">Microsoft Windows Desktop Runtime - 6.0.25 (x86)</elem>
+<elem key="install_date">2024-06-19T14:49:42</elem>
+</table>
+<table>
+<elem key="name">Microsoft Windows Desktop Runtime - 8.0.11 (x86)</elem>
+<elem key="install_date">2025-01-17T13:52:48</elem>
+</table>
+<table>
+<elem key="name">Microsoft Windows Desktop Runtime - 8.0.11 (x86)</elem>
+<elem key="install_date">2025-01-17T13:52:26</elem>
+</table>
+<table>
+<elem key="name">Nmap 7.95</elem>
+<elem key="install_date">2024-06-20T12:44:04</elem>
+</table>
+<table>
+<elem key="name">Npcap</elem>
+<elem key="install_date">2024-06-20T12:44:34</elem>
+</table>
+<table>
+<elem key="name">Online Plug-in</elem>
+<elem key="install_date">2025-05-23T13:35:00</elem>
+</table>
+<table>
+<elem key="name">Provider OLE DB Microsoft Analysis Services</elem>
+<elem key="install_date">2024-02-22T10:30:02</elem>
+</table>
+<table>
+<elem key="name">Provider OLE DB Microsoft Analysis Services</elem>
+<elem key="install_date">2024-02-22T10:29:56</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Batch Parser</elem>
+<elem key="install_date">2024-02-22T10:24:32</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Common Files</elem>
+<elem key="install_date">2024-02-22T10:25:36</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Common Files</elem>
+<elem key="install_date">2024-02-22T10:25:26</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Connection Info</elem>
+<elem key="install_date">2024-02-22T10:24:26</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Connection Info</elem>
+<elem key="install_date">2024-02-22T10:24:28</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 DMF</elem>
+<elem key="install_date">2024-02-22T10:24:44</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 DMF</elem>
+<elem key="install_date">2024-02-22T10:24:40</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Database Engine Services</elem>
+<elem key="install_date">2024-02-22T10:27:08</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Database Engine Services</elem>
+<elem key="install_date">2024-02-22T10:27:14</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Database Engine Shared</elem>
+<elem key="install_date">2024-02-22T10:26:36</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Database Engine Shared</elem>
+<elem key="install_date">2024-02-22T10:25:56</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 SQL Diagnostics</elem>
+<elem key="install_date">2024-02-22T10:24:36</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Shared Management Objects</elem>
+<elem key="install_date">2024-02-22T10:25:06</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Shared Management Objects</elem>
+<elem key="install_date">2024-02-22T10:25:20</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Shared Management Objects Extensions</elem>
+<elem key="install_date">2024-02-22T10:25:14</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 Shared Management Objects Extensions</elem>
+<elem key="install_date">2024-02-22T10:24:58</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 XEvent</elem>
+<elem key="install_date">2024-02-22T10:24:54</elem>
+</table>
+<table>
+<elem key="name">SQL Server 2019 XEvent</elem>
+<elem key="install_date">2024-02-22T10:25:10</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio</elem>
+<elem key="install_date">2024-02-22T10:31:18</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio</elem>
+<elem key="install_date">2024-02-22T10:31:24</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio for Analysis Services</elem>
+<elem key="install_date">2024-02-22T10:31:32</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio for Analysis Services Localization</elem>
+<elem key="install_date">2024-02-22T10:31:34</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio for Reporting Services</elem>
+<elem key="install_date">2024-02-22T10:31:26</elem>
+</table>
+<table>
+<elem key="name">SQL Server Management Studio for Reporting Services Localization</elem>
+<elem key="install_date">2024-02-22T10:31:34</elem>
+</table>
+<table>
+<elem key="name">SSMS Post Install Tasks</elem>
+<elem key="install_date">2024-02-22T10:31:44</elem>
+</table>
+<table>
+<elem key="name">Self-service Plug-in</elem>
+<elem key="install_date">2025-05-23T13:35:32</elem>
+</table>
+<table>
+<elem key="name">Servizio del linguaggio T-SQL di Microsoft SQL Server 2019 </elem>
+<elem key="install_date">2024-02-22T10:26:30</elem>
+</table>
+<table>
+<elem key="name">System Scheduler Professional 4.23</elem>
+<elem key="install_date">2024-05-07T12:27:50</elem>
+</table>
+<table>
+<elem key="name">Visual Studio 2017 Isolated Shell for SSMS</elem>
+<elem key="install_date">2024-02-22T10:30:26</elem>
+</table>
+<table>
+<elem key="name">Visual Studio 2017 Isolated Shell per SSMS LangPack - Italiano</elem>
+<elem key="install_date">2024-02-22T10:30:28</elem>
+</table>
+<table>
+<elem key="name">deviceTRUST ICA Client Extension v25.3 x64</elem>
+<elem key="install_date">2025-07-23T09:38:04</elem>
+</table>
+<table>
+<elem key="name">deviceTRUST ICA Client Extension v25.3 x86</elem>
+<elem key="install_date">2025-07-23T09:38:04</elem>
+</table>
+</script><script id="snmp-processes" output="&#xa;  1: &#xa;    Name: System Idle Process&#xa;  4: &#xa;    Name: System&#xa;  112: &#xa;    Name: Registry&#xa;  476: &#xa;    Name: smss.exe&#xa;  580: &#xa;    Name: csrss.exe&#xa;  584: &#xa;    Name: sihost.exe&#xa;  604: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k RPCSS -p&#xa;  660: &#xa;    Name: wininit.exe&#xa;  668: &#xa;    Name: csrss.exe&#xa;  736: &#xa;    Name: winlogon.exe&#xa;  808: &#xa;    Name: services.exe&#xa;  828: &#xa;    Name: lsass.exe&#xa;    Path: C:\Windows\system32\&#xa;  840: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p -s LSM&#xa;  900: &#xa;    Name: dwm.exe&#xa;  932: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  952: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p -s PlugPlay&#xa;  976: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p&#xa;  1004: &#xa;    Name: fontdrvhost.exe&#xa;  1012: &#xa;    Name: fontdrvhost.exe&#xa;  1092: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k termsvcs -s TermService&#xa;  1156: &#xa;    Name: taskhostw.exe&#xa;    Params: {222A245B-E637-4AE9-A93F-A59CA119A75E}&#xa;  1180: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s NcbService&#xa;  1248: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s nsi&#xa;  1256: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s lmhosts&#xa;  1264: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s TimeBrokerSvc&#xa;  1272: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -s W32Time&#xa;  1280: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s EventLog&#xa;  1412: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s Dhcp&#xa;  1424: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k ICService -p -s vmicheartbeat&#xa;  1436: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmickvpexchange&#xa;  1456: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmicshutdown&#xa;  1464: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k ICService -p -s vmicrdv&#xa;  1504: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmicvss&#xa;  1532: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s vmictimesync&#xa;  1556: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s Dnscache&#xa;  1796: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  1800: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s NlaSvc&#xa;  1836: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s gpsvc&#xa;  1872: &#xa;    Name: VSSVC.exe&#xa;    Path: C:\Windows\system32\&#xa;  1916: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s ProfSvc&#xa;  1928: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s EventSystem&#xa;  1940: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s Themes&#xa;  2016: &#xa;    Name: SearchUI.exe&#xa;    Path: C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\&#xa;    Params:  -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca&#xa;  2028: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNoNetworkFirewall -p&#xa;  2184: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalService -p -s netprofm&#xa;  2196: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Schedule&#xa;  2220: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s SENS&#xa;  2236: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s UmRdpService&#xa;  2260: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  2296: &#xa;    Name: Receiver.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\receiver\&#xa;    Params:  -autoupdate -startplugins -disableshowcontrolpanel&#xa;  2496: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -s CertPropSvc&#xa;  2520: &#xa;    Name: dllhost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: /Processid:{3EB3C877-1F16-487C-9050-104DBCD66683}&#xa;  2528: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p&#xa;  2604: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNoNetwork -p&#xa;  2612: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s ShellHWDetection&#xa;  2636: &#xa;    Name: shutdown.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -unexpected&#xa;  2668: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s TabletInputService&#xa;  2704: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s FontCache&#xa;  2752: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s LanmanWorkstation&#xa;  2820: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s WinHttpAutoProxySvc&#xa;  2884: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s SessionEnv&#xa;  2892: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s UserManager&#xa;  3140: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Winmgmt&#xa;  3184: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s IKEEXT&#xa;  3200: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkServiceNetworkRestricted -p -s PolicyAgent&#xa;  3264: &#xa;    Name: ctfmon.exe&#xa;  3268: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetSvcs -p -s iphlpsvc&#xa;  3304: &#xa;    Name: AnalyticsSrv.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\Receiver\&#xa;    Params:  /Startup&#xa;  3424: &#xa;    Name: spoolsv.exe&#xa;    Path: C:\Windows\System32\&#xa;  3508: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s WpnUserService&#xa;  3564: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s Wecsvc&#xa;  3572: &#xa;    Name: concentr.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\&#xa;    Params:  /startup&#xa;  3588: &#xa;    Name: MpDefenderCoreService.exe&#xa;  3600: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  3652: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalService -p -s LicenseManager&#xa;  3684: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s UsoSvc&#xa;  3692: &#xa;    Name: ShellExperienceHost.exe&#xa;    Path: C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\&#xa;    Params:  -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca&#xa;  3744: &#xa;    Name: snmp.exe&#xa;    Path: C:\Windows\System32\&#xa;  3756: &#xa;    Name: Crypserv.exe&#xa;    Path: C:\Windows\system32\&#xa;  3768: &#xa;    Name: MsMpEng.exe&#xa;  3776: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k AzureAttestService -s AzureAttestService&#xa;  3788: &#xa;    Name: sqlwriter.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\90\Shared\&#xa;  3800: &#xa;    Name: SMSvcHost.exe&#xa;    Path: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\&#xa;  3812: &#xa;    Name: TolCPService64.exe&#xa;    Path: c:\TrexOnlineCP1211\&#xa;  3820: &#xa;    Name: WService.exe&#xa;    Path: C:\PROGRA~2\SYSTEM~1\&#xa;  3828: &#xa;    Name: WSLogon.exe&#xa;    Path: C:\PROGRA~2\SYSTEM~1\&#xa;  3840: &#xa;    Name: UpdaterService.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\Receiver\&#xa;  3848: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k iissvcs&#xa;  3868: &#xa;    Name: sqlbrowser.exe&#xa;    Path: C:\Program Files (x86)\Microsoft SQL Server\90\Shared\&#xa;  3876: &#xa;    Name: mqsvc.exe&#xa;    Path: C:\Windows\system32\&#xa;  3896: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s CryptSvc&#xa;  3912: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s SysMain&#xa;  3964: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s SstpSvc&#xa;  3984: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k apphost -s AppHostSvc&#xa;  3992: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k utcsvc -p&#xa;  4000: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s WinRM&#xa;  4008: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s TrkWks&#xa;  4016: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k smbsvcs -s LanmanServer&#xa;  4048: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s WpnService&#xa;  4112: &#xa;    Name: ServerManager.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params:  &#xa;  4144: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s UALSVC&#xa;  4200: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Appinfo&#xa;  4372: &#xa;    Name: WScheduler.exe&#xa;    Path: C:\PROGRA~2\SYSTEM~1\&#xa;    Params: /service&#xa;  4620: &#xa;    Name: jusched.exe&#xa;    Path: C:\Program Files (x86)\Common Files\Java\Java Update\&#xa;    Params:  &#xa;  4724: &#xa;    Name: dtclientuser.exe&#xa;    Path: C:\Program Files (x86)\Citrix\deviceTRUST\Bin64\&#xa;    Params:  &#xa;  4836: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs&#xa;  4888: &#xa;    Name: WScheduler.exe&#xa;    Path: C:\Program Files (x86)\SystemScheduler\&#xa;    Params:  /LOGON&#xa;  4912: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  5348: &#xa;    Name: LogonUI.exe&#xa;    Params:  /flags:0x0 /state0:0xa3d2a855 /state1:0x41c64e6d&#xa;  5352: &#xa;    Name: sqlceip.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.SISTEMI\MSSQL\Binn\&#xa;    Params:  -Service SISTEMI&#xa;  5360: &#xa;    Name: sqlservr.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.SISTEMI\MSSQL\Binn\&#xa;    Params:  -sSISTEMI&#xa;  5480: &#xa;    Name: dllhost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: /Processid:{973D20D7-562D-44B9-B70B-5A0F49CCDF3F}&#xa;  5580: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s PcaSvc&#xa;  5656: &#xa;    Name: SecurityHealthService.exe&#xa;  5764: &#xa;    Name: SMSvcHost.exe&#xa;    Path: C:\Windows\Microsoft.NET\Framework64\v4.0.30319\&#xa;    Params:  -NetMsmqActivator&#xa;  5812: &#xa;    Name: msdtc.exe&#xa;    Path: C:\Windows\System32\&#xa;  5996: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNoNetwork -p -s DPS&#xa;  6052: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s wuauserv&#xa;  6068: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p&#xa;  6224: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k appmodel -p -s StateRepository&#xa;  6264: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s CDPUserSvc&#xa;  6316: &#xa;    Name: LockApp.exe&#xa;    Path: C:\Windows\SystemApps\Microsoft.LockApp_cw5n1h2txyewy\&#xa;    Params:  -ServerName:WindowsDefaultLockScreen.AppX7y4nbzq37zn4ks9k7amqjywdat7d3j2z.mca&#xa;  6368: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s TokenBroker&#xa;  6384: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s DsSvc&#xa;  6668: &#xa;    Name: smartscreen.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  6716: &#xa;    Name: WmiPrvSE.exe&#xa;    Path: C:\Windows\sysWOW64\wbem\&#xa;    Params: -Embedding&#xa;  6896: &#xa;    Name: NisSrv.exe&#xa;  6928: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  6968: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  7036: &#xa;    Name: explorer.exe&#xa;    Path: C:\Windows\&#xa;  7108: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s CDPSvc&#xa;  7152: &#xa;    Name: svchost.exe&#xa;  7248: &#xa;    Name: redirector.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\&#xa;    Params:  /startup&#xa;  7288: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s BthAvctpSvc&#xa;  7488: &#xa;    Name: wfcrun32.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\&#xa;    Params:  -Embedding&#xa;  7504: &#xa;    Name: SelfServicePlugin.exe&#xa;    Path: C:\Program Files (x86)\Citrix\ICA Client\SelfServicePlugin\&#xa;    Params:  &#xa;  8020: &#xa;    Name: jucheck.exe&#xa;    Path: C:\Program Files (x86)\Common Files\Java\Java Update\&#xa;    Params:  -auto -critical&#xa;  8148: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k swprv&#xa;  8184: &#xa;    Name: WmiPrvSE.exe&#xa;    Path: C:\Windows\sysWOW64\wbem\&#xa;    Params: -secured -Embedding"><table key="1">
+<elem key="Name">System Idle Process</elem>
+</table>
+<table key="4">
+<elem key="Name">System</elem>
+</table>
+<table key="112">
+<elem key="Name">Registry</elem>
+</table>
+<table key="476">
+<elem key="Name">smss.exe</elem>
+</table>
+<table key="580">
+<elem key="Name">csrss.exe</elem>
+</table>
+<table key="584">
+<elem key="Name">sihost.exe</elem>
+</table>
+<table key="604">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k RPCSS -p</elem>
+</table>
+<table key="660">
+<elem key="Name">wininit.exe</elem>
+</table>
+<table key="668">
+<elem key="Name">csrss.exe</elem>
+</table>
+<table key="736">
+<elem key="Name">winlogon.exe</elem>
+</table>
+<table key="808">
+<elem key="Name">services.exe</elem>
+</table>
+<table key="828">
+<elem key="Name">lsass.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+</table>
+<table key="840">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p -s LSM</elem>
+</table>
+<table key="900">
+<elem key="Name">dwm.exe</elem>
+</table>
+<table key="932">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="952">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p -s PlugPlay</elem>
+</table>
+<table key="976">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p</elem>
+</table>
+<table key="1004">
+<elem key="Name">fontdrvhost.exe</elem>
+</table>
+<table key="1012">
+<elem key="Name">fontdrvhost.exe</elem>
+</table>
+<table key="1092">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k termsvcs -s TermService</elem>
+</table>
+<table key="1156">
+<elem key="Name">taskhostw.exe</elem>
+<elem key="Params">{222A245B-E637-4AE9-A93F-A59CA119A75E}</elem>
+</table>
+<table key="1180">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s NcbService</elem>
+</table>
+<table key="1248">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s nsi</elem>
+</table>
+<table key="1256">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s lmhosts</elem>
+</table>
+<table key="1264">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s TimeBrokerSvc</elem>
+</table>
+<table key="1272">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -s W32Time</elem>
+</table>
+<table key="1280">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s EventLog</elem>
+</table>
+<table key="1412">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s Dhcp</elem>
+</table>
+<table key="1424">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k ICService -p -s vmicheartbeat</elem>
+</table>
+<table key="1436">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmickvpexchange</elem>
+</table>
+<table key="1456">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmicshutdown</elem>
+</table>
+<table key="1464">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k ICService -p -s vmicrdv</elem>
+</table>
+<table key="1504">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmicvss</elem>
+</table>
+<table key="1532">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s vmictimesync</elem>
+</table>
+<table key="1556">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s Dnscache</elem>
+</table>
+<table key="1796">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="1800">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s NlaSvc</elem>
+</table>
+<table key="1836">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s gpsvc</elem>
+</table>
+<table key="1872">
+<elem key="Name">VSSVC.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+</table>
+<table key="1916">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s ProfSvc</elem>
+</table>
+<table key="1928">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s EventSystem</elem>
+</table>
+<table key="1940">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s Themes</elem>
+</table>
+<table key="2016">
+<elem key="Name">SearchUI.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca</elem>
+</table>
+<table key="2028">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNoNetworkFirewall -p</elem>
+</table>
+<table key="2184">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalService -p -s netprofm</elem>
+</table>
+<table key="2196">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Schedule</elem>
+</table>
+<table key="2220">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s SENS</elem>
+</table>
+<table key="2236">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s UmRdpService</elem>
+</table>
+<table key="2260">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="2296">
+<elem key="Name">Receiver.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\receiver\</elem>
+<elem key="Params"> -autoupdate -startplugins -disableshowcontrolpanel</elem>
+</table>
+<table key="2496">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -s CertPropSvc</elem>
+</table>
+<table key="2520">
+<elem key="Name">dllhost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">/Processid:{3EB3C877-1F16-487C-9050-104DBCD66683}</elem>
+</table>
+<table key="2528">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p</elem>
+</table>
+<table key="2604">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNoNetwork -p</elem>
+</table>
+<table key="2612">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s ShellHWDetection</elem>
+</table>
+<table key="2636">
+<elem key="Name">shutdown.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-unexpected</elem>
+</table>
+<table key="2668">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s TabletInputService</elem>
+</table>
+<table key="2704">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s FontCache</elem>
+</table>
+<table key="2752">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s LanmanWorkstation</elem>
+</table>
+<table key="2820">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s WinHttpAutoProxySvc</elem>
+</table>
+<table key="2884">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s SessionEnv</elem>
+</table>
+<table key="2892">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s UserManager</elem>
+</table>
+<table key="3140">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Winmgmt</elem>
+</table>
+<table key="3184">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s IKEEXT</elem>
+</table>
+<table key="3200">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkServiceNetworkRestricted -p -s PolicyAgent</elem>
+</table>
+<table key="3264">
+<elem key="Name">ctfmon.exe</elem>
+</table>
+<table key="3268">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetSvcs -p -s iphlpsvc</elem>
+</table>
+<table key="3304">
+<elem key="Name">AnalyticsSrv.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\Receiver\</elem>
+<elem key="Params"> /Startup</elem>
+</table>
+<table key="3424">
+<elem key="Name">spoolsv.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="3508">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s WpnUserService</elem>
+</table>
+<table key="3564">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s Wecsvc</elem>
+</table>
+<table key="3572">
+<elem key="Name">concentr.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\</elem>
+<elem key="Params"> /startup</elem>
+</table>
+<table key="3588">
+<elem key="Name">MpDefenderCoreService.exe</elem>
+</table>
+<table key="3600">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="3652">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalService -p -s LicenseManager</elem>
+</table>
+<table key="3684">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s UsoSvc</elem>
+</table>
+<table key="3692">
+<elem key="Name">ShellExperienceHost.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca</elem>
+</table>
+<table key="3744">
+<elem key="Name">snmp.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="3756">
+<elem key="Name">Crypserv.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+</table>
+<table key="3768">
+<elem key="Name">MsMpEng.exe</elem>
+</table>
+<table key="3776">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k AzureAttestService -s AzureAttestService</elem>
+</table>
+<table key="3788">
+<elem key="Name">sqlwriter.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\90\Shared\</elem>
+</table>
+<table key="3800">
+<elem key="Name">SMSvcHost.exe</elem>
+<elem key="Path">C:\Windows\Microsoft.NET\Framework64\v4.0.30319\</elem>
+</table>
+<table key="3812">
+<elem key="Name">TolCPService64.exe</elem>
+<elem key="Path">c:\TrexOnlineCP1211\</elem>
+</table>
+<table key="3820">
+<elem key="Name">WService.exe</elem>
+<elem key="Path">C:\PROGRA~2\SYSTEM~1\</elem>
+</table>
+<table key="3828">
+<elem key="Name">WSLogon.exe</elem>
+<elem key="Path">C:\PROGRA~2\SYSTEM~1\</elem>
+</table>
+<table key="3840">
+<elem key="Name">UpdaterService.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\Receiver\</elem>
+</table>
+<table key="3848">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k iissvcs</elem>
+</table>
+<table key="3868">
+<elem key="Name">sqlbrowser.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Microsoft SQL Server\90\Shared\</elem>
+</table>
+<table key="3876">
+<elem key="Name">mqsvc.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+</table>
+<table key="3896">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s CryptSvc</elem>
+</table>
+<table key="3912">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s SysMain</elem>
+</table>
+<table key="3964">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s SstpSvc</elem>
+</table>
+<table key="3984">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k apphost -s AppHostSvc</elem>
+</table>
+<table key="3992">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k utcsvc -p</elem>
+</table>
+<table key="4000">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s WinRM</elem>
+</table>
+<table key="4008">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s TrkWks</elem>
+</table>
+<table key="4016">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k smbsvcs -s LanmanServer</elem>
+</table>
+<table key="4048">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s WpnService</elem>
+</table>
+<table key="4112">
+<elem key="Name">ServerManager.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="4144">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s UALSVC</elem>
+</table>
+<table key="4200">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Appinfo</elem>
+</table>
+<table key="4372">
+<elem key="Name">WScheduler.exe</elem>
+<elem key="Path">C:\PROGRA~2\SYSTEM~1\</elem>
+<elem key="Params">/service</elem>
+</table>
+<table key="4620">
+<elem key="Name">jusched.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Common Files\Java\Java Update\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="4724">
+<elem key="Name">dtclientuser.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\deviceTRUST\Bin64\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="4836">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs</elem>
+</table>
+<table key="4888">
+<elem key="Name">WScheduler.exe</elem>
+<elem key="Path">C:\Program Files (x86)\SystemScheduler\</elem>
+<elem key="Params"> /LOGON</elem>
+</table>
+<table key="4912">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="5348">
+<elem key="Name">LogonUI.exe</elem>
+<elem key="Params"> /flags:0x0 /state0:0xa3d2a855 /state1:0x41c64e6d</elem>
+</table>
+<table key="5352">
+<elem key="Name">sqlceip.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.SISTEMI\MSSQL\Binn\</elem>
+<elem key="Params"> -Service SISTEMI</elem>
+</table>
+<table key="5360">
+<elem key="Name">sqlservr.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.SISTEMI\MSSQL\Binn\</elem>
+<elem key="Params"> -sSISTEMI</elem>
+</table>
+<table key="5480">
+<elem key="Name">dllhost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">/Processid:{973D20D7-562D-44B9-B70B-5A0F49CCDF3F}</elem>
+</table>
+<table key="5580">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s PcaSvc</elem>
+</table>
+<table key="5656">
+<elem key="Name">SecurityHealthService.exe</elem>
+</table>
+<table key="5764">
+<elem key="Name">SMSvcHost.exe</elem>
+<elem key="Path">C:\Windows\Microsoft.NET\Framework64\v4.0.30319\</elem>
+<elem key="Params"> -NetMsmqActivator</elem>
+</table>
+<table key="5812">
+<elem key="Name">msdtc.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="5996">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNoNetwork -p -s DPS</elem>
+</table>
+<table key="6052">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s wuauserv</elem>
+</table>
+<table key="6068">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p</elem>
+</table>
+<table key="6224">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k appmodel -p -s StateRepository</elem>
+</table>
+<table key="6264">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s CDPUserSvc</elem>
+</table>
+<table key="6316">
+<elem key="Name">LockApp.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\Microsoft.LockApp_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:WindowsDefaultLockScreen.AppX7y4nbzq37zn4ks9k7amqjywdat7d3j2z.mca</elem>
+</table>
+<table key="6368">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s TokenBroker</elem>
+</table>
+<table key="6384">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s DsSvc</elem>
+</table>
+<table key="6668">
+<elem key="Name">smartscreen.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="6716">
+<elem key="Name">WmiPrvSE.exe</elem>
+<elem key="Path">C:\Windows\sysWOW64\wbem\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="6896">
+<elem key="Name">NisSrv.exe</elem>
+</table>
+<table key="6928">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="6968">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="7036">
+<elem key="Name">explorer.exe</elem>
+<elem key="Path">C:\Windows\</elem>
+</table>
+<table key="7108">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s CDPSvc</elem>
+</table>
+<table key="7152">
+<elem key="Name">svchost.exe</elem>
+</table>
+<table key="7248">
+<elem key="Name">redirector.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\</elem>
+<elem key="Params"> /startup</elem>
+</table>
+<table key="7288">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s BthAvctpSvc</elem>
+</table>
+<table key="7488">
+<elem key="Name">wfcrun32.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\</elem>
+<elem key="Params"> -Embedding</elem>
+</table>
+<table key="7504">
+<elem key="Name">SelfServicePlugin.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Citrix\ICA Client\SelfServicePlugin\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="8020">
+<elem key="Name">jucheck.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Common Files\Java\Java Update\</elem>
+<elem key="Params"> -auto -critical</elem>
+</table>
+<table key="8148">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k swprv</elem>
+</table>
+<table key="8184">
+<elem key="Name">WmiPrvSE.exe</elem>
+<elem key="Path">C:\Windows\sysWOW64\wbem\</elem>
+<elem key="Params">-secured -Embedding</elem>
+</table>
+</script></port>
+</ports>
+<times srtt="14125" rttvar="15750" to="100000"/>
+</host>
+<host starttime="1754904728" endtime="1754904728"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.226" addrtype="ipv4"/>
+<address addr="00:08:5D:21:E1:74" addrtype="mac" vendor="Mitel"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="closed" reason="port-unreach" reason_ttl="64"/><service name="snmp" method="table" conf="3"/></port>
+</ports>
+<times srtt="14250" rttvar="15500" to="100000"/>
+</host>
+<host starttime="1754904728" endtime="1754904739"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.228" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:06" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="161"><state state="open" reason="udp-response" reason_ttl="128"/><service name="snmp" method="table" conf="3"/><script id="snmp-sysdescr" output="Hardware: Intel64 Family 6 Model 85 Stepping 4 AT/AT COMPATIBLE - Software: Windows Version 6.3 (Build 17763 Multiprocessor Free)&#xa;  System uptime: 6d00h10m46.59s (51904659 timeticks)"/><script id="snmp-win32-users" output="&#xa;  Administrator&#xa;  DefaultAccount&#xa;  Guest&#xa;  WDAGUtilityAccount&#xa;  dselvaggi&#xa;  dspeziale&#xa;  massimo"><elem>Administrator</elem>
+<elem>DefaultAccount</elem>
+<elem>Guest</elem>
+<elem>WDAGUtilityAccount</elem>
+<elem>dselvaggi</elem>
+<elem>dspeziale</elem>
+<elem>massimo</elem>
+</script><script id="snmp-processes" output="&#xa;  1: &#xa;    Name: System Idle Process&#xa;  4: &#xa;    Name: System&#xa;  84: &#xa;    Name: agentsvc.exe&#xa;    Path: C:\Program Files\AVG\Business Agent\&#xa;  112: &#xa;    Name: Registry&#xa;  372: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s BthAvctpSvc&#xa;  504: &#xa;    Name: smss.exe&#xa;  540: &#xa;    Name: AVGSvc.exe&#xa;  556: &#xa;    Name: fontdrvhost.exe&#xa;  568: &#xa;    Name: fontdrvhost.exe&#xa;  616: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k appmodel -p -s StateRepository&#xa;  620: &#xa;    Name: csrss.exe&#xa;  700: &#xa;    Name: wininit.exe&#xa;  708: &#xa;    Name: csrss.exe&#xa;  772: &#xa;    Name: winlogon.exe&#xa;  840: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k RPCSS -p&#xa;  844: &#xa;    Name: services.exe&#xa;  852: &#xa;    Name: lsass.exe&#xa;  988: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p -s PlugPlay&#xa;  1008: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p&#xa;  1056: &#xa;    Name: AVGUI.exe&#xa;  1060: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k DcomLaunch -p -s LSM&#xa;  1160: &#xa;    Name: TrustedInstaller.exe&#xa;    Path: C:\Windows\servicing\&#xa;  1164: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k termsvcs -s TermService&#xa;  1212: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -s W32Time&#xa;  1220: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s lmhosts&#xa;  1228: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s nsi&#xa;  1252: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s Wecsvc&#xa;  1296: &#xa;    Name: sihost.exe&#xa;  1344: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s NcbService&#xa;  1352: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s TimeBrokerSvc&#xa;  1388: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s Dhcp&#xa;  1432: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s EventLog&#xa;  1488: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s Dnscache&#xa;  1516: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  1612: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k ICService -p -s vmicheartbeat&#xa;  1632: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmickvpexchange&#xa;  1640: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k ICService -p -s vmicrdv&#xa;  1668: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmicshutdown&#xa;  1688: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s NlaSvc&#xa;  1720: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s vmicvss&#xa;  1736: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s vmictimesync&#xa;  1764: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  1860: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s IKEEXT&#xa;  1904: &#xa;    Name: python.exe&#xa;    Path: C:\Users\cRapisardi\AppData\Local\Programs\Python\Python313\&#xa;    Params: C:\Users\cRapisardi\PycharmProjects\CapeApp-1\app.py&#xa;  1908: &#xa;    Name: dwm.exe&#xa;  1928: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s gpsvc&#xa;  1988: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNoNetworkFirewall -p&#xa;  2096: &#xa;    Name: SQLAGENT.EXE&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\&#xa;  2100: &#xa;    Name: VSSVC.exe&#xa;    Path: C:\Windows\system32\&#xa;  2128: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s ProfSvc&#xa;  2136: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s EventSystem&#xa;  2144: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalService -p -s netprofm&#xa;  2156: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s Themes&#xa;  2216: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Schedule&#xa;  2232: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkServiceNetworkRestricted -p -s PolicyAgent&#xa;  2364: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s SENS&#xa;  2432: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s UmRdpService&#xa;  2480: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNoNetwork -p&#xa;  2496: &#xa;    Name: rdpclip.exe&#xa;  2636: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p -s WinHttpAutoProxySvc&#xa;  2708: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalServiceNetworkRestricted -p&#xa;  2756: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -s CertPropSvc&#xa;  2792: &#xa;    Name: fdlauncher.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\&#xa;    Params:  -s MSSQL15.MSSQLSERVER&#xa;  2836: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s ShellHWDetection&#xa;  2856: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k NetworkService -p -s CryptSvc&#xa;  2916: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalServiceNoNetwork -p -s DPS&#xa;  2952: &#xa;    Name: inetinfo.exe&#xa;    Path: C:\Windows\system32\inetsrv\&#xa;  2976: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s FontCache&#xa;  2992: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s UserManager&#xa;  3028: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s LanmanWorkstation&#xa;  3068: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Winmgmt&#xa;  3188: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetSvcs -p -s iphlpsvc&#xa;  3240: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs -p -s SessionEnv&#xa;  3260: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k utcsvc -p&#xa;  3316: &#xa;    Name: AVGUI.exe&#xa;  3572: &#xa;    Name: crashpad_handler.exe&#xa;  3668: &#xa;    Name: avgToolsSvc.exe&#xa;    Path: C:\Program Files\AVG\Antivirus\&#xa;    Params:  /runassvc&#xa;  3680: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s UALSVC&#xa;  3904: &#xa;    Name: csrss.exe&#xa;  3984: &#xa;    Name: spoolsv.exe&#xa;    Path: C:\Windows\System32\&#xa;  4040: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  4072: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k apphost -s AppHostSvc&#xa;  4080: &#xa;    Name: bcc.exe&#xa;    Path: C:\Program Files\AVG\Antivirus\&#xa;  4088: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k AzureAttestService -s AzureAttestService&#xa;  4140: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s SstpSvc&#xa;  4200: &#xa;    Name: timeout.exe&#xa;    Params:  /t 300 &#xa;  4236: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k smbsvcs -s LanmanServer&#xa;  4244: &#xa;    Name: snmp.exe&#xa;    Path: C:\Windows\System32\&#xa;  4252: &#xa;    Name: sqlbrowser.exe&#xa;    Path: C:\Program Files (x86)\Microsoft SQL Server\90\Shared\&#xa;  4300: &#xa;    Name: sqlwriter.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\90\Shared\&#xa;  4320: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s SysMain&#xa;  4328: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k iissvcs&#xa;  4344: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s TrkWks&#xa;  4360: &#xa;    Name: wazuh-agent.exe&#xa;    Path: C:\Program Files (x86)\ossec-agent\&#xa;  4488: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  4552: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k NetworkService -p -s WinRM&#xa;  4628: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s WpnService&#xa;  4784: &#xa;    Name: GoogleDriveFS.exe&#xa;  4852: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k netsvcs&#xa;  4868: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  5056: &#xa;    Name: sqlceip.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\&#xa;    Params:  -Service &#xa;  5072: &#xa;    Name: RSHostingService.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\RSHostingService\&#xa;  5344: &#xa;    Name: sqlservr.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\&#xa;    Params:  -sMSSQLSERVER&#xa;  5456: &#xa;    Name: bccavsvc.exe&#xa;    Path: C:\Program Files\AVG\Antivirus\&#xa;    Params:  /service&#xa;  5504: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  5592: &#xa;    Name: MpDefenderCoreService.exe&#xa;  5608: &#xa;    Name: dwm.exe&#xa;  5688: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  5912: &#xa;    Name: AVGUI.exe&#xa;    Params: /nogui&#xa;  6028: &#xa;    Name: fontdrvhost.exe&#xa;  6212: &#xa;    Name: aswEngSrv.exe&#xa;    Path: C:\Program Files\AVG\Antivirus\&#xa;    Params:  /pipename=&quot;34AE9D39-F0D0-9920-6565-F88BB52D62B8&quot; /binpath=&quot;C:\Program Files\AVG\Antivirus&quot; /logpath=&quot;C:\ProgramData\AVG\Antivir&#xa;  6236: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s Appinfo&#xa;  6380: &#xa;    Name: pycharm64.exe&#xa;    Path: C:\Program Files\JetBrains\PyCharm Community Edition 2024.3.1.1\bin\&#xa;    Params:  &#xa;  6428: &#xa;    Name: fdhost.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\&#xa;    Params:  &quot;MSSQL15.MSSQLSERVERB1519c495f2dcaf4ac8f88fcf457b6fe29edf7lj5l6&quot; &quot;MSSQL15.MSSQLSERVER&quot; &quot;MSSQL15.MSSQLSERVER&quot; &quot;14&quot; &quot;&quot; &quot;16384&quot; &quot;M&#xa;  6660: &#xa;    Name: RSManagement.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\Management\&#xa;  6672: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  7112: &#xa;    Name: NisSrv.exe&#xa;  7116: &#xa;    Name: GoogleDriveFS.exe&#xa;  7268: &#xa;    Name: dllhost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: /Processid:{3EB3C877-1F16-487C-9050-104DBCD66683}&#xa;  7336: &#xa;    Name: explorer.exe&#xa;    Path: C:\Windows\&#xa;  7420: &#xa;    Name: SearchIndexer.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: /Embedding&#xa;  7492: &#xa;    Name: sihost.exe&#xa;  7504: &#xa;    Name: ctfmon.exe&#xa;  7524: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  7580: &#xa;    Name: GoogleDriveFS.exe&#xa;  7860: &#xa;    Name: TiWorker.exe&#xa;    Path: C:\Windows\winsxs\amd64_microsoft-windows-servicingstack_31bf3856ad364e35_10.0.17763.7557_none_56db325b9926b2f1\&#xa;    Params: -Embedding&#xa;  8232: &#xa;    Name: python.exe&#xa;    Path: C:\Users\cRapisardi\AppData\Local\Programs\Python\Python313\&#xa;    Params: C:\Users\cRapisardi\PycharmProjects\CapeApp-1\app.py&#xa;  8320: &#xa;    Name: taskhostw.exe&#xa;    Params: {222A245B-E637-4AE9-A93F-A59CA119A75E}&#xa;  8436: &#xa;    Name: winlogon.exe&#xa;  8592: &#xa;    Name: MsMpEng.exe&#xa;  8660: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  8760: &#xa;    Name: ReportingServicesService.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer\bin\&#xa;    Params:  /app&#xa;  8764: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  8800: &#xa;    Name: AVGUI.exe&#xa;  8804: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s DsSvc&#xa;  8836: &#xa;    Name: RSPortal.exe&#xa;    Path: C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\Portal\&#xa;    Params:  /app&#xa;  9228: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s CDPUserSvc&#xa;  9264: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s WpnUserService&#xa;  9412: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s TokenBroker&#xa;  9460: &#xa;    Name: LockApp.exe&#xa;    Path: C:\Windows\SystemApps\Microsoft.LockApp_cw5n1h2txyewy\&#xa;    Params:  -ServerName:WindowsDefaultLockScreen.AppX7y4nbzq37zn4ks9k7amqjywdat7d3j2z.mca&#xa;  9472: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s TabletInputService&#xa;  9644: &#xa;    Name: ctfmon.exe&#xa;  9724: &#xa;    Name: taskhostw.exe&#xa;    Params: {222A245B-E637-4AE9-A93F-A59CA119A75E}&#xa;  9764: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalService -p -s CDPSvc&#xa;  9888: &#xa;    Name: ShellExperienceHost.exe&#xa;    Path: C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\&#xa;    Params:  -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca&#xa;  9916: &#xa;    Name: fsnotifier.exe&#xa;    Path: C:\Program Files\JetBrains\PyCharm Community Edition 2024.3.1.1\bin\&#xa;  10036: &#xa;    Name: explorer.exe&#xa;    Path: C:\Windows\&#xa;  10044: &#xa;    Name: AVGUI.exe&#xa;    Params: /nogui&#xa;  10172: &#xa;    Name: GoogleDriveFS.exe&#xa;  10336: &#xa;    Name: cmd.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: /c &quot;&quot;C:\Users\cRapisardi\Desktop\ripeti.bat&quot; &quot;&#xa;  10364: &#xa;    Name: SearchUI.exe&#xa;    Path: C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\&#xa;    Params:  -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca&#xa;  10412: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  10556: &#xa;    Name: AVGUI.exe&#xa;  10600: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  10616: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  10620: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  10676: &#xa;    Name: GoogleDriveFS.exe&#xa;    Path: C:\Program Files\Google\Drive File Stream\111.0.2.0\&#xa;    Params:  -&#45;startup_mode&#xa;  10688: &#xa;    Name: conhost.exe&#xa;    Path: \??\C:\Windows\system32\&#xa;    Params: 0x4&#xa;  10764: &#xa;    Name: crashpad_handler.exe&#xa;  10984: &#xa;    Name: AVGUI.exe&#xa;  11116: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  11144: &#xa;    Name: AVGUI.exe&#xa;  11172: &#xa;    Name: smartscreen.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  11188: &#xa;    Name: smartscreen.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  11256: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k LocalSystemNetworkRestricted -p -s PcaSvc&#xa;  11296: &#xa;    Name: AVGUI.exe&#xa;  11320: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s CDPUserSvc&#xa;  11360: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  11440: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalService -p -s LicenseManager&#xa;  11500: &#xa;    Name: ShellExperienceHost.exe&#xa;    Path: C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\&#xa;    Params:  -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca&#xa;  11552: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  11692: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\Users\cRapisardi\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\&#xa;    Params:  &#xa;  11800: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k UnistackSvcGroup -s WpnUserService&#xa;  11916: &#xa;    Name: GoogleDriveFS.exe&#xa;    Path: C:\Program Files\Google\Drive File Stream\112.0.3.0\&#xa;    Params:  -&#45;crash_handler_token=\\.\pipe\crashpad_10676_SDGTKQOUQKUOXSKR -&#45;parent_version=111.0.2.0 -&#45;startup_mode&#xa;  11992: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\Users\cRapisardi\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\&#xa;    Params:  &#xa;  12012: &#xa;    Name: Launchpad.exe&#xa;  12052: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  12088: &#xa;    Name: informazioniDispositivo_PROD.exe&#xa;    Path: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\&#xa;    Params:  &#xa;  12324: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params: -k netsvcs -p -s UsoSvc&#xa;  12352: &#xa;    Name: RuntimeBroker.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -Embedding&#xa;  12372: &#xa;    Name: snmptrap.exe&#xa;    Path: C:\Windows\System32\&#xa;  12576: &#xa;    Name: GoogleDriveFS.exe&#xa;  12812: &#xa;    Name: msdtc.exe&#xa;    Path: C:\Windows\System32\&#xa;  12980: &#xa;    Name: LogonUI.exe&#xa;    Params:  /flags:0x0 /state0:0xa248c055 /state1:0x41c64e6d&#xa;  13072: &#xa;    Name: ServerManager.exe&#xa;    Path: C:\Windows\system32\&#xa;    Params:  &#xa;  13176: &#xa;    Name: svchost.exe&#xa;    Path: C:\Windows\System32\&#xa;    Params: -k LocalSystemNetworkRestricted -p&#xa;  13228: &#xa;    Name: SearchUI.exe&#xa;    Path: C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\&#xa;    Params:  -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca&#xa;  13324: &#xa;    Name: LogonUI.exe&#xa;    Params:  /flags:0x0 /state0:0xa0ba7055 /state1:0x41c64e6d&#xa;  14324: &#xa;    Name: SecurityHealthService.exe"><table key="1">
+<elem key="Name">System Idle Process</elem>
+</table>
+<table key="4">
+<elem key="Name">System</elem>
+</table>
+<table key="84">
+<elem key="Name">agentsvc.exe</elem>
+<elem key="Path">C:\Program Files\AVG\Business Agent\</elem>
+</table>
+<table key="112">
+<elem key="Name">Registry</elem>
+</table>
+<table key="372">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s BthAvctpSvc</elem>
+</table>
+<table key="504">
+<elem key="Name">smss.exe</elem>
+</table>
+<table key="540">
+<elem key="Name">AVGSvc.exe</elem>
+</table>
+<table key="556">
+<elem key="Name">fontdrvhost.exe</elem>
+</table>
+<table key="568">
+<elem key="Name">fontdrvhost.exe</elem>
+</table>
+<table key="616">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k appmodel -p -s StateRepository</elem>
+</table>
+<table key="620">
+<elem key="Name">csrss.exe</elem>
+</table>
+<table key="700">
+<elem key="Name">wininit.exe</elem>
+</table>
+<table key="708">
+<elem key="Name">csrss.exe</elem>
+</table>
+<table key="772">
+<elem key="Name">winlogon.exe</elem>
+</table>
+<table key="840">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k RPCSS -p</elem>
+</table>
+<table key="844">
+<elem key="Name">services.exe</elem>
+</table>
+<table key="852">
+<elem key="Name">lsass.exe</elem>
+</table>
+<table key="988">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p -s PlugPlay</elem>
+</table>
+<table key="1008">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p</elem>
+</table>
+<table key="1056">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="1060">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k DcomLaunch -p -s LSM</elem>
+</table>
+<table key="1160">
+<elem key="Name">TrustedInstaller.exe</elem>
+<elem key="Path">C:\Windows\servicing\</elem>
+</table>
+<table key="1164">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k termsvcs -s TermService</elem>
+</table>
+<table key="1212">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -s W32Time</elem>
+</table>
+<table key="1220">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s lmhosts</elem>
+</table>
+<table key="1228">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s nsi</elem>
+</table>
+<table key="1252">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s Wecsvc</elem>
+</table>
+<table key="1296">
+<elem key="Name">sihost.exe</elem>
+</table>
+<table key="1344">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s NcbService</elem>
+</table>
+<table key="1352">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s TimeBrokerSvc</elem>
+</table>
+<table key="1388">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s Dhcp</elem>
+</table>
+<table key="1432">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s EventLog</elem>
+</table>
+<table key="1488">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s Dnscache</elem>
+</table>
+<table key="1516">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="1612">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k ICService -p -s vmicheartbeat</elem>
+</table>
+<table key="1632">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmickvpexchange</elem>
+</table>
+<table key="1640">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k ICService -p -s vmicrdv</elem>
+</table>
+<table key="1668">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmicshutdown</elem>
+</table>
+<table key="1688">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s NlaSvc</elem>
+</table>
+<table key="1720">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s vmicvss</elem>
+</table>
+<table key="1736">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s vmictimesync</elem>
+</table>
+<table key="1764">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="1860">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s IKEEXT</elem>
+</table>
+<table key="1904">
+<elem key="Name">python.exe</elem>
+<elem key="Path">C:\Users\cRapisardi\AppData\Local\Programs\Python\Python313\</elem>
+<elem key="Params">C:\Users\cRapisardi\PycharmProjects\CapeApp-1\app.py</elem>
+</table>
+<table key="1908">
+<elem key="Name">dwm.exe</elem>
+</table>
+<table key="1928">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s gpsvc</elem>
+</table>
+<table key="1988">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNoNetworkFirewall -p</elem>
+</table>
+<table key="2096">
+<elem key="Name">SQLAGENT.EXE</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\</elem>
+</table>
+<table key="2100">
+<elem key="Name">VSSVC.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+</table>
+<table key="2128">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s ProfSvc</elem>
+</table>
+<table key="2136">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s EventSystem</elem>
+</table>
+<table key="2144">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalService -p -s netprofm</elem>
+</table>
+<table key="2156">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s Themes</elem>
+</table>
+<table key="2216">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Schedule</elem>
+</table>
+<table key="2232">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkServiceNetworkRestricted -p -s PolicyAgent</elem>
+</table>
+<table key="2364">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s SENS</elem>
+</table>
+<table key="2432">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s UmRdpService</elem>
+</table>
+<table key="2480">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNoNetwork -p</elem>
+</table>
+<table key="2496">
+<elem key="Name">rdpclip.exe</elem>
+</table>
+<table key="2636">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p -s WinHttpAutoProxySvc</elem>
+</table>
+<table key="2708">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalServiceNetworkRestricted -p</elem>
+</table>
+<table key="2756">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -s CertPropSvc</elem>
+</table>
+<table key="2792">
+<elem key="Name">fdlauncher.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\</elem>
+<elem key="Params"> -s MSSQL15.MSSQLSERVER</elem>
+</table>
+<table key="2836">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s ShellHWDetection</elem>
+</table>
+<table key="2856">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k NetworkService -p -s CryptSvc</elem>
+</table>
+<table key="2916">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalServiceNoNetwork -p -s DPS</elem>
+</table>
+<table key="2952">
+<elem key="Name">inetinfo.exe</elem>
+<elem key="Path">C:\Windows\system32\inetsrv\</elem>
+</table>
+<table key="2976">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s FontCache</elem>
+</table>
+<table key="2992">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s UserManager</elem>
+</table>
+<table key="3028">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s LanmanWorkstation</elem>
+</table>
+<table key="3068">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Winmgmt</elem>
+</table>
+<table key="3188">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetSvcs -p -s iphlpsvc</elem>
+</table>
+<table key="3240">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs -p -s SessionEnv</elem>
+</table>
+<table key="3260">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k utcsvc -p</elem>
+</table>
+<table key="3316">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="3572">
+<elem key="Name">crashpad_handler.exe</elem>
+</table>
+<table key="3668">
+<elem key="Name">avgToolsSvc.exe</elem>
+<elem key="Path">C:\Program Files\AVG\Antivirus\</elem>
+<elem key="Params"> /runassvc</elem>
+</table>
+<table key="3680">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s UALSVC</elem>
+</table>
+<table key="3904">
+<elem key="Name">csrss.exe</elem>
+</table>
+<table key="3984">
+<elem key="Name">spoolsv.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="4040">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="4072">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k apphost -s AppHostSvc</elem>
+</table>
+<table key="4080">
+<elem key="Name">bcc.exe</elem>
+<elem key="Path">C:\Program Files\AVG\Antivirus\</elem>
+</table>
+<table key="4088">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k AzureAttestService -s AzureAttestService</elem>
+</table>
+<table key="4140">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s SstpSvc</elem>
+</table>
+<table key="4200">
+<elem key="Name">timeout.exe</elem>
+<elem key="Params"> /t 300 </elem>
+</table>
+<table key="4236">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k smbsvcs -s LanmanServer</elem>
+</table>
+<table key="4244">
+<elem key="Name">snmp.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="4252">
+<elem key="Name">sqlbrowser.exe</elem>
+<elem key="Path">C:\Program Files (x86)\Microsoft SQL Server\90\Shared\</elem>
+</table>
+<table key="4300">
+<elem key="Name">sqlwriter.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\90\Shared\</elem>
+</table>
+<table key="4320">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s SysMain</elem>
+</table>
+<table key="4328">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k iissvcs</elem>
+</table>
+<table key="4344">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s TrkWks</elem>
+</table>
+<table key="4360">
+<elem key="Name">wazuh-agent.exe</elem>
+<elem key="Path">C:\Program Files (x86)\ossec-agent\</elem>
+</table>
+<table key="4488">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="4552">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k NetworkService -p -s WinRM</elem>
+</table>
+<table key="4628">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s WpnService</elem>
+</table>
+<table key="4784">
+<elem key="Name">GoogleDriveFS.exe</elem>
+</table>
+<table key="4852">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k netsvcs</elem>
+</table>
+<table key="4868">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="5056">
+<elem key="Name">sqlceip.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\</elem>
+<elem key="Params"> -Service </elem>
+</table>
+<table key="5072">
+<elem key="Name">RSHostingService.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\RSHostingService\</elem>
+</table>
+<table key="5344">
+<elem key="Name">sqlservr.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\</elem>
+<elem key="Params"> -sMSSQLSERVER</elem>
+</table>
+<table key="5456">
+<elem key="Name">bccavsvc.exe</elem>
+<elem key="Path">C:\Program Files\AVG\Antivirus\</elem>
+<elem key="Params"> /service</elem>
+</table>
+<table key="5504">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="5592">
+<elem key="Name">MpDefenderCoreService.exe</elem>
+</table>
+<table key="5608">
+<elem key="Name">dwm.exe</elem>
+</table>
+<table key="5688">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="5912">
+<elem key="Name">AVGUI.exe</elem>
+<elem key="Params">/nogui</elem>
+</table>
+<table key="6028">
+<elem key="Name">fontdrvhost.exe</elem>
+</table>
+<table key="6212">
+<elem key="Name">aswEngSrv.exe</elem>
+<elem key="Path">C:\Program Files\AVG\Antivirus\</elem>
+<elem key="Params"> /pipename=&quot;34AE9D39-F0D0-9920-6565-F88BB52D62B8&quot; /binpath=&quot;C:\Program Files\AVG\Antivirus&quot; /logpath=&quot;C:\ProgramData\AVG\Antivir</elem>
+</table>
+<table key="6236">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s Appinfo</elem>
+</table>
+<table key="6380">
+<elem key="Name">pycharm64.exe</elem>
+<elem key="Path">C:\Program Files\JetBrains\PyCharm Community Edition 2024.3.1.1\bin\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="6428">
+<elem key="Name">fdhost.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Binn\</elem>
+<elem key="Params"> &quot;MSSQL15.MSSQLSERVERB1519c495f2dcaf4ac8f88fcf457b6fe29edf7lj5l6&quot; &quot;MSSQL15.MSSQLSERVER&quot; &quot;MSSQL15.MSSQLSERVER&quot; &quot;14&quot; &quot;&quot; &quot;16384&quot; &quot;M</elem>
+</table>
+<table key="6660">
+<elem key="Name">RSManagement.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\Management\</elem>
+</table>
+<table key="6672">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="7112">
+<elem key="Name">NisSrv.exe</elem>
+</table>
+<table key="7116">
+<elem key="Name">GoogleDriveFS.exe</elem>
+</table>
+<table key="7268">
+<elem key="Name">dllhost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">/Processid:{3EB3C877-1F16-487C-9050-104DBCD66683}</elem>
+</table>
+<table key="7336">
+<elem key="Name">explorer.exe</elem>
+<elem key="Path">C:\Windows\</elem>
+</table>
+<table key="7420">
+<elem key="Name">SearchIndexer.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">/Embedding</elem>
+</table>
+<table key="7492">
+<elem key="Name">sihost.exe</elem>
+</table>
+<table key="7504">
+<elem key="Name">ctfmon.exe</elem>
+</table>
+<table key="7524">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="7580">
+<elem key="Name">GoogleDriveFS.exe</elem>
+</table>
+<table key="7860">
+<elem key="Name">TiWorker.exe</elem>
+<elem key="Path">C:\Windows\winsxs\amd64_microsoft-windows-servicingstack_31bf3856ad364e35_10.0.17763.7557_none_56db325b9926b2f1\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="8232">
+<elem key="Name">python.exe</elem>
+<elem key="Path">C:\Users\cRapisardi\AppData\Local\Programs\Python\Python313\</elem>
+<elem key="Params">C:\Users\cRapisardi\PycharmProjects\CapeApp-1\app.py</elem>
+</table>
+<table key="8320">
+<elem key="Name">taskhostw.exe</elem>
+<elem key="Params">{222A245B-E637-4AE9-A93F-A59CA119A75E}</elem>
+</table>
+<table key="8436">
+<elem key="Name">winlogon.exe</elem>
+</table>
+<table key="8592">
+<elem key="Name">MsMpEng.exe</elem>
+</table>
+<table key="8660">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="8760">
+<elem key="Name">ReportingServicesService.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer\bin\</elem>
+<elem key="Params"> /app</elem>
+</table>
+<table key="8764">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="8800">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="8804">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s DsSvc</elem>
+</table>
+<table key="8836">
+<elem key="Name">RSPortal.exe</elem>
+<elem key="Path">C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\Portal\</elem>
+<elem key="Params"> /app</elem>
+</table>
+<table key="9228">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s CDPUserSvc</elem>
+</table>
+<table key="9264">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s WpnUserService</elem>
+</table>
+<table key="9412">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s TokenBroker</elem>
+</table>
+<table key="9460">
+<elem key="Name">LockApp.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\Microsoft.LockApp_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:WindowsDefaultLockScreen.AppX7y4nbzq37zn4ks9k7amqjywdat7d3j2z.mca</elem>
+</table>
+<table key="9472">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s TabletInputService</elem>
+</table>
+<table key="9644">
+<elem key="Name">ctfmon.exe</elem>
+</table>
+<table key="9724">
+<elem key="Name">taskhostw.exe</elem>
+<elem key="Params">{222A245B-E637-4AE9-A93F-A59CA119A75E}</elem>
+</table>
+<table key="9764">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalService -p -s CDPSvc</elem>
+</table>
+<table key="9888">
+<elem key="Name">ShellExperienceHost.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca</elem>
+</table>
+<table key="9916">
+<elem key="Name">fsnotifier.exe</elem>
+<elem key="Path">C:\Program Files\JetBrains\PyCharm Community Edition 2024.3.1.1\bin\</elem>
+</table>
+<table key="10036">
+<elem key="Name">explorer.exe</elem>
+<elem key="Path">C:\Windows\</elem>
+</table>
+<table key="10044">
+<elem key="Name">AVGUI.exe</elem>
+<elem key="Params">/nogui</elem>
+</table>
+<table key="10172">
+<elem key="Name">GoogleDriveFS.exe</elem>
+</table>
+<table key="10336">
+<elem key="Name">cmd.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">/c &quot;&quot;C:\Users\cRapisardi\Desktop\ripeti.bat&quot; &quot;</elem>
+</table>
+<table key="10364">
+<elem key="Name">SearchUI.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca</elem>
+</table>
+<table key="10412">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="10556">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="10600">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="10616">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="10620">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="10676">
+<elem key="Name">GoogleDriveFS.exe</elem>
+<elem key="Path">C:\Program Files\Google\Drive File Stream\111.0.2.0\</elem>
+<elem key="Params"> -&#45;startup_mode</elem>
+</table>
+<table key="10688">
+<elem key="Name">conhost.exe</elem>
+<elem key="Path">\??\C:\Windows\system32\</elem>
+<elem key="Params">0x4</elem>
+</table>
+<table key="10764">
+<elem key="Name">crashpad_handler.exe</elem>
+</table>
+<table key="10984">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="11116">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="11144">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="11172">
+<elem key="Name">smartscreen.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="11188">
+<elem key="Name">smartscreen.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="11256">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p -s PcaSvc</elem>
+</table>
+<table key="11296">
+<elem key="Name">AVGUI.exe</elem>
+</table>
+<table key="11320">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s CDPUserSvc</elem>
+</table>
+<table key="11360">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="11440">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalService -p -s LicenseManager</elem>
+</table>
+<table key="11500">
+<elem key="Name">ShellExperienceHost.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:App.AppXtk181tbxbce2qsex02s8tw7hfxa9xb3t.mca</elem>
+</table>
+<table key="11552">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="11692">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\Users\cRapisardi\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="11800">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k UnistackSvcGroup -s WpnUserService</elem>
+</table>
+<table key="11916">
+<elem key="Name">GoogleDriveFS.exe</elem>
+<elem key="Path">C:\Program Files\Google\Drive File Stream\112.0.3.0\</elem>
+<elem key="Params"> -&#45;crash_handler_token=\\.\pipe\crashpad_10676_SDGTKQOUQKUOXSKR -&#45;parent_version=111.0.2.0 -&#45;startup_mode</elem>
+</table>
+<table key="11992">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\Users\cRapisardi\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="12012">
+<elem key="Name">Launchpad.exe</elem>
+</table>
+<table key="12052">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="12088">
+<elem key="Name">informazioniDispositivo_PROD.exe</elem>
+<elem key="Path">C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="12324">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params">-k netsvcs -p -s UsoSvc</elem>
+</table>
+<table key="12352">
+<elem key="Name">RuntimeBroker.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-Embedding</elem>
+</table>
+<table key="12372">
+<elem key="Name">snmptrap.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="12576">
+<elem key="Name">GoogleDriveFS.exe</elem>
+</table>
+<table key="12812">
+<elem key="Name">msdtc.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+</table>
+<table key="12980">
+<elem key="Name">LogonUI.exe</elem>
+<elem key="Params"> /flags:0x0 /state0:0xa248c055 /state1:0x41c64e6d</elem>
+</table>
+<table key="13072">
+<elem key="Name">ServerManager.exe</elem>
+<elem key="Path">C:\Windows\system32\</elem>
+<elem key="Params"> </elem>
+</table>
+<table key="13176">
+<elem key="Name">svchost.exe</elem>
+<elem key="Path">C:\Windows\System32\</elem>
+<elem key="Params">-k LocalSystemNetworkRestricted -p</elem>
+</table>
+<table key="13228">
+<elem key="Name">SearchUI.exe</elem>
+<elem key="Path">C:\Windows\SystemApps\Microsoft.Windows.Cortana_cw5n1h2txyewy\</elem>
+<elem key="Params"> -ServerName:CortanaUI.AppXa50dqqa5gqv4a428c9y1jjw7m3btvepj.mca</elem>
+</table>
+<table key="13324">
+<elem key="Name">LogonUI.exe</elem>
+<elem key="Params"> /flags:0x0 /state0:0xa0ba7055 /state1:0x41c64e6d</elem>
+</table>
+<table key="14324">
+<elem key="Name">SecurityHealthService.exe</elem>
+</table>
+</script><script id="snmp-brute" output="&#xa;  public - Valid credentials"><table>
+<elem key="password">public</elem>
+<elem key="state">Valid credentials</elem>
+</table>
+</script><script id="snmp-win32-services" output="&#xa;  AVG Antivirus&#xa;  AVG Business Agent&#xa;  AVG Business Console Client&#xa;  AVG Business Console Client Antivirus Service&#xa;  AVG Tools&#xa;  Accesso rete&#xa;  Agente criteri IPsec&#xa;  Agente mapping endpoint RPC&#xa;  Alimentazione&#xa;  AzureAttestService&#xa;  BFE (Base Filtering Engine)&#xa;  COM+ Event System&#xa;  Chiamata di procedura remota (RPC)&#xa;  Client DHCP&#xa;  Client DNS&#xa;  Client di Criteri di gruppo&#xa;  Configurazione Desktop remoto&#xa;  Connection Manager di Accesso remoto&#xa;  Copia shadow del volume&#xa;  CoreMessaging&#xa;  Distributed Transaction Coordinator&#xa;  Esperienze utente connesse e telemetria&#xa;  Gestione account Web&#xa;  Gestione connessioni Windows&#xa;  Gestione remota Windows (WS-Management)&#xa;  Gestione sessioni locali&#xa;  Gestione utenti&#xa;  Gestore connessione rete&#xa;  Gestore eventi di sistema&#xa;  Gestore tempo&#xa;  Helper IP&#xa;  Helper NetBIOS di TCP/IP&#xa;  Informazioni applicazioni&#xa;  Isolamento chiavi CNG&#xa;  Manutenzione collegamenti distribuiti client&#xa;  Moduli di impostazione chiavi IPSec IKE e Auth-IP&#xa;  Ora di Windows&#xa;  Plug and Play&#xa;  Programma di installazione dei moduli di Windows&#xa;  Propagazione certificati&#xa;  Raccolta eventi Windows&#xa;  Redirector porta UserMode di Servizi Desktop remoto&#xa;  Registro eventi di Windows&#xa;  Richiedente Copia Shadow del volume Hyper-V&#xa;  Riconoscimento presenza in rete&#xa;  Rilevamento hardware shell&#xa;  SQL Full-text Filter Daemon Launcher (MSSQLSERVER)&#xa;  SQL Server (MSSQLSERVER)&#xa;  SQL Server Browser&#xa;  SQL Server CEIP service (MSSQLSERVER)&#xa;  SQL Server Launchpad (MSSQLSERVER)&#xa;  SQL Server Reporting Services&#xa;  SQL Server VSS Writer&#xa;  SQLSERVERAGENT&#xa;  Server&#xa;  Servizi Desktop remoto&#xa;  Servizi di crittografia&#xa;  Servizio AVCTP&#xa;  Servizio Application Host Helper&#xa;  Servizio Arresto guest Hyper-V&#xa;  Servizio Attivazione processo Windows&#xa;  Servizio Controllo rete di Microsoft Defender Antivirus&#xa;  Servizio Criteri di diagnostica&#xa;  Servizio Elenco reti&#xa;  Servizio Gestione licenze Windows&#xa;  Servizio Heartbeat Hyper-V&#xa;  Servizio Interfaccia archivio di rete&#xa;  Servizio Microsoft Defender Antivirus&#xa;  Servizio Pubblicazione sul Web&#xa;  Servizio Risoluzione problemi compatibilit\xC3\xA0 programmi&#xa;  Servizio SNMP&#xa;  Servizio SSTP (Secure Socket Tunneling Protocol)&#xa;  Servizio Scambio di dati Hyper-V&#xa;  Servizio Sicurezza di Windows&#xa;  Servizio Sincronizzazione ora Hyper-V&#xa;  Servizio Virtualizzazione Desktop remoto Hyper-V&#xa;  Servizio cache tipi di carattere Windows&#xa;  Servizio di amministrazione di IIS&#xa;  Servizio di archiviazione&#xa;  Servizio di base di Microsoft Defender&#xa;  Servizio di condivisione dati&#xa;  Servizio di notifica eventi di sistema&#xa;  Servizio di sistema notifiche Push Windows&#xa;  Servizio infrastruttura attivit\xC3\xA0 in background&#xa;  Servizio piattaforma dispositivi connessi&#xa;  Servizio profili utente&#xa;  Servizio registrazione accessi utente&#xa;  Servizio repository stati&#xa;  Servizio rilevamento automatico proxy WinHTTP&#xa;  Servizio tastiera virtuale e pannello per la grafia&#xa;  Servizio utente notifica Push Windows_85b11&#xa;  Servizio utente notifica Push Windows_fcb0d0f&#xa;  Servizio utente piattaforma dispositivi connessi_85b11&#xa;  Servizio utente piattaforma dispositivi connessi_fcb0d0f&#xa;  Sistema di gestione degli account di sicurezza (SAM)&#xa;  Spooler di stampa&#xa;  Strumentazione gestione Windows&#xa;  SysMain&#xa;  Temi&#xa;  Trap SNMP&#xa;  Update Orchestrator Service&#xa;  Utilit\xC3\xA0 di avvio processi server DCOM&#xa;  Utilit\xC3\xA0 di pianificazione&#xa;  Wazuh&#xa;  Windows Defender Firewall&#xa;  Windows Search&#xa;  Workstation"><elem>AVG Antivirus</elem>
+<elem>AVG Business Agent</elem>
+<elem>AVG Business Console Client</elem>
+<elem>AVG Business Console Client Antivirus Service</elem>
+<elem>AVG Tools</elem>
+<elem>Accesso rete</elem>
+<elem>Agente criteri IPsec</elem>
+<elem>Agente mapping endpoint RPC</elem>
+<elem>Alimentazione</elem>
+<elem>AzureAttestService</elem>
+<elem>BFE (Base Filtering Engine)</elem>
+<elem>COM+ Event System</elem>
+<elem>Chiamata di procedura remota (RPC)</elem>
+<elem>Client DHCP</elem>
+<elem>Client DNS</elem>
+<elem>Client di Criteri di gruppo</elem>
+<elem>Configurazione Desktop remoto</elem>
+<elem>Connection Manager di Accesso remoto</elem>
+<elem>Copia shadow del volume</elem>
+<elem>CoreMessaging</elem>
+<elem>Distributed Transaction Coordinator</elem>
+<elem>Esperienze utente connesse e telemetria</elem>
+<elem>Gestione account Web</elem>
+<elem>Gestione connessioni Windows</elem>
+<elem>Gestione remota Windows (WS-Management)</elem>
+<elem>Gestione sessioni locali</elem>
+<elem>Gestione utenti</elem>
+<elem>Gestore connessione rete</elem>
+<elem>Gestore eventi di sistema</elem>
+<elem>Gestore tempo</elem>
+<elem>Helper IP</elem>
+<elem>Helper NetBIOS di TCP/IP</elem>
+<elem>Informazioni applicazioni</elem>
+<elem>Isolamento chiavi CNG</elem>
+<elem>Manutenzione collegamenti distribuiti client</elem>
+<elem>Moduli di impostazione chiavi IPSec IKE e Auth-IP</elem>
+<elem>Ora di Windows</elem>
+<elem>Plug and Play</elem>
+<elem>Programma di installazione dei moduli di Windows</elem>
+<elem>Propagazione certificati</elem>
+<elem>Raccolta eventi Windows</elem>
+<elem>Redirector porta UserMode di Servizi Desktop remoto</elem>
+<elem>Registro eventi di Windows</elem>
+<elem>Richiedente Copia Shadow del volume Hyper-V</elem>
+<elem>Riconoscimento presenza in rete</elem>
+<elem>Rilevamento hardware shell</elem>
+<elem>SQL Full-text Filter Daemon Launcher (MSSQLSERVER)</elem>
+<elem>SQL Server (MSSQLSERVER)</elem>
+<elem>SQL Server Browser</elem>
+<elem>SQL Server CEIP service (MSSQLSERVER)</elem>
+<elem>SQL Server Launchpad (MSSQLSERVER)</elem>
+<elem>SQL Server Reporting Services</elem>
+<elem>SQL Server VSS Writer</elem>
+<elem>SQLSERVERAGENT</elem>
+<elem>Server</elem>
+<elem>Servizi Desktop remoto</elem>
+<elem>Servizi di crittografia</elem>
+<elem>Servizio AVCTP</elem>
+<elem>Servizio Application Host Helper</elem>
+<elem>Servizio Arresto guest Hyper-V</elem>
+<elem>Servizio Attivazione processo Windows</elem>
+<elem>Servizio Controllo rete di Microsoft Defender Antivirus</elem>
+<elem>Servizio Criteri di diagnostica</elem>
+<elem>Servizio Elenco reti</elem>
+<elem>Servizio Gestione licenze Windows</elem>
+<elem>Servizio Heartbeat Hyper-V</elem>
+<elem>Servizio Interfaccia archivio di rete</elem>
+<elem>Servizio Microsoft Defender Antivirus</elem>
+<elem>Servizio Pubblicazione sul Web</elem>
+<elem>Servizio Risoluzione problemi compatibilit\xC3\xA0 programmi</elem>
+<elem>Servizio SNMP</elem>
+<elem>Servizio SSTP (Secure Socket Tunneling Protocol)</elem>
+<elem>Servizio Scambio di dati Hyper-V</elem>
+<elem>Servizio Sicurezza di Windows</elem>
+<elem>Servizio Sincronizzazione ora Hyper-V</elem>
+<elem>Servizio Virtualizzazione Desktop remoto Hyper-V</elem>
+<elem>Servizio cache tipi di carattere Windows</elem>
+<elem>Servizio di amministrazione di IIS</elem>
+<elem>Servizio di archiviazione</elem>
+<elem>Servizio di base di Microsoft Defender</elem>
+<elem>Servizio di condivisione dati</elem>
+<elem>Servizio di notifica eventi di sistema</elem>
+<elem>Servizio di sistema notifiche Push Windows</elem>
+<elem>Servizio infrastruttura attivit\xC3\xA0 in background</elem>
+<elem>Servizio piattaforma dispositivi connessi</elem>
+<elem>Servizio profili utente</elem>
+<elem>Servizio registrazione accessi utente</elem>
+<elem>Servizio repository stati</elem>
+<elem>Servizio rilevamento automatico proxy WinHTTP</elem>
+<elem>Servizio tastiera virtuale e pannello per la grafia</elem>
+<elem>Servizio utente notifica Push Windows_85b11</elem>
+<elem>Servizio utente notifica Push Windows_fcb0d0f</elem>
+<elem>Servizio utente piattaforma dispositivi connessi_85b11</elem>
+<elem>Servizio utente piattaforma dispositivi connessi_fcb0d0f</elem>
+<elem>Sistema di gestione degli account di sicurezza (SAM)</elem>
+<elem>Spooler di stampa</elem>
+<elem>Strumentazione gestione Windows</elem>
+<elem>SysMain</elem>
+<elem>Temi</elem>
+<elem>Trap SNMP</elem>
+<elem>Update Orchestrator Service</elem>
+<elem>Utilit\xC3\xA0 di avvio processi server DCOM</elem>
+<elem>Utilit\xC3\xA0 di pianificazione</elem>
+<elem>Wazuh</elem>
+<elem>Windows Defender Firewall</elem>
+<elem>Windows Search</elem>
+<elem>Workstation</elem>
+</script><script id="snmp-netstat" output="&#xa;  TCP  0.0.0.0:80           0.0.0.0:0&#xa;  TCP  0.0.0.0:135          0.0.0.0:0&#xa;  TCP  0.0.0.0:445          0.0.0.0:0&#xa;  TCP  0.0.0.0:800          0.0.0.0:0&#xa;  TCP  0.0.0.0:1433         0.0.0.0:0&#xa;  TCP  0.0.0.0:3389         0.0.0.0:0&#xa;  TCP  0.0.0.0:5985         0.0.0.0:0&#xa;  TCP  0.0.0.0:8082         0.0.0.0:0&#xa;  TCP  0.0.0.0:47001        0.0.0.0:0&#xa;  TCP  0.0.0.0:49664        0.0.0.0:0&#xa;  TCP  0.0.0.0:49665        0.0.0.0:0&#xa;  TCP  0.0.0.0:49666        0.0.0.0:0&#xa;  TCP  0.0.0.0:49667        0.0.0.0:0&#xa;  TCP  0.0.0.0:49669        0.0.0.0:0&#xa;  TCP  0.0.0.0:49670        0.0.0.0:0&#xa;  TCP  0.0.0.0:49694        0.0.0.0:0&#xa;  TCP  0.0.0.0:49780        0.0.0.0:0&#xa;  TCP  0.0.0.0:49783        0.0.0.0:0&#xa;  TCP  0.0.0.0:52292        0.0.0.0:0&#xa;  TCP  127.0.0.1:1434       0.0.0.0:0&#xa;  TCP  127.0.0.1:10107      0.0.0.0:0&#xa;  TCP  127.0.0.1:14108      0.0.0.0:0&#xa;  TCP  127.0.0.1:14108      127.0.0.1:60222&#xa;  TCP  127.0.0.1:27275      0.0.0.0:0&#xa;  TCP  127.0.0.1:59149      0.0.0.0:0&#xa;  TCP  127.0.0.1:60222      127.0.0.1:14108&#xa;  TCP  127.0.0.1:63342      0.0.0.0:0&#xa;  TCP  192.168.30.228:80    192.168.30.99:52329&#xa;  TCP  192.168.30.228:80    192.168.30.99:52332&#xa;  TCP  192.168.30.228:80    192.168.30.131:49345&#xa;  TCP  192.168.30.228:80    192.168.30.159:7697&#xa;  TCP  192.168.30.228:80    192.168.30.159:7718&#xa;  TCP  192.168.30.228:80    192.168.30.167:57072&#xa;  TCP  192.168.30.228:80    192.168.30.167:57082&#xa;  TCP  192.168.30.228:80    192.168.30.167:57088&#xa;  TCP  192.168.30.228:80    192.168.30.167:57098&#xa;  TCP  192.168.30.228:80    192.168.30.167:57172&#xa;  TCP  192.168.30.228:80    192.168.30.167:57219&#xa;  TCP  192.168.30.228:139   0.0.0.0:0&#xa;  TCP  192.168.30.228:445   192.168.30.159:60241&#xa;  TCP  192.168.30.228:1433  192.168.30.159:2427&#xa;  TCP  192.168.30.228:1433  192.168.30.159:2569&#xa;  TCP  192.168.30.228:1433  192.168.30.159:2596&#xa;  TCP  192.168.30.228:1433  192.168.30.159:7675&#xa;  TCP  192.168.30.228:1433  192.168.30.159:60551&#xa;  TCP  192.168.30.228:1433  192.168.30.159:60568&#xa;  TCP  192.168.30.228:1433  192.168.30.159:61778&#xa;  TCP  192.168.30.228:1433  192.168.30.159:62897&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63306&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63307&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63308&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63309&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63311&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63312&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63313&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63314&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63316&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63317&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63318&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63319&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63320&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63321&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63322&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63323&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63325&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63326&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63327&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63328&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63329&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63788&#xa;  TCP  192.168.30.228:1433  192.168.30.159:63804&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57491&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57492&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57493&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57494&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57496&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57497&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57498&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57499&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57501&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57502&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57503&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57504&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57505&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57506&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57507&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57508&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57510&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57511&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57512&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57513&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57515&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57517&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57519&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57520&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57521&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57522&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57524&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57525&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57526&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57527&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57528&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57529&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57530&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57531&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57532&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57533&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57534&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57535&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57537&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57538&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57539&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57540&#xa;  TCP  192.168.30.228:1433  192.168.30.228:57541&#xa;  TCP  192.168.30.228:1433  192.168.30.228:59678&#xa;  TCP  192.168.30.228:1433  192.168.30.228:59851&#xa;  TCP  192.168.30.228:1433  192.168.30.228:59922&#xa;  TCP  192.168.30.228:1433  192.168.30.228:59974&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60050&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60103&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60112&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60158&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60170&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60171&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60190&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60196&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60211&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60231&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60235&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60236&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60241&#xa;  TCP  192.168.30.228:1433  192.168.30.228:60242&#xa;  TCP  192.168.30.228:8085  0.0.0.0:0&#xa;  TCP  192.168.30.228:49739 35.230.86.105:7500&#xa;  TCP  192.168.30.228:49744 34.160.208.98:443&#xa;  TCP  192.168.30.228:49754 35.230.86.105:7500&#xa;  TCP  192.168.30.228:50201 34.98.110.65:443&#xa;  TCP  192.168.30.228:57491 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57492 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57493 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57494 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57496 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57497 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57498 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57499 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57501 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57502 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57503 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57504 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57505 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57506 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57507 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57508 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57509 192.168.30.254:1433&#xa;  TCP  192.168.30.228:57510 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57511 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57512 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57513 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57515 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57517 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57519 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57520 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57521 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57522 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57524 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57525 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57526 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57527 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57528 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57529 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57530 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57531 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57532 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57533 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57534 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57535 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57536 192.168.30.254:1433&#xa;  TCP  192.168.30.228:57537 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57538 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57539 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57540 192.168.30.228:1433&#xa;  TCP  192.168.30.228:57541 192.168.30.228:1433&#xa;  TCP  192.168.30.228:58986 216.58.205.42:443&#xa;  TCP  192.168.30.228:59278 192.168.30.254:445&#xa;  TCP  192.168.30.228:59595 192.168.30.228:1433&#xa;  TCP  192.168.30.228:59678 192.168.30.228:1433&#xa;  TCP  192.168.30.228:59851 192.168.30.228:1433&#xa;  TCP  192.168.30.228:59922 192.168.30.228:1433&#xa;  TCP  192.168.30.228:59940 34.89.198.16:443&#xa;  TCP  192.168.30.228:59974 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60033 34.98.110.65:443&#xa;  TCP  192.168.30.228:60047 142.250.180.138:443&#xa;  TCP  192.168.30.228:60048 142.250.180.138:443&#xa;  TCP  192.168.30.228:60050 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60060 142.250.180.170:443&#xa;  TCP  192.168.30.228:60070 34.160.208.98:443&#xa;  TCP  192.168.30.228:60100 192.168.30.254:1433&#xa;  TCP  192.168.30.228:60103 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60112 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60130 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60138 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60147 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60151 216.239.38.223:443&#xa;  TCP  192.168.30.228:60158 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60161 142.250.180.138:443&#xa;  TCP  192.168.30.228:60170 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60171 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60185 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60190 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60196 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60205 34.160.208.98:443&#xa;  TCP  192.168.30.228:60208 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60209 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60211 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60221 95.100.146.42:443&#xa;  TCP  192.168.30.228:60226 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60231 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60235 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60236 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60239 192.168.40.161:1514&#xa;  TCP  192.168.30.228:60241 192.168.30.228:1433&#xa;  TCP  192.168.30.228:60242 192.168.30.228:1433&#xa;  TCP  192.168.30.228:62398 34.98.110.65:443&#xa;  TCP  192.168.30.228:64876 192.168.30.251:445&#xa;  TCP  192.168.30.228:64879 192.168.30.251:445&#xa;  TCP  192.168.30.228:64880 192.168.30.251:445&#xa;  TCP  192.168.30.228:64881 192.168.30.251:445&#xa;  UDP  0.0.0.0:123          *:*&#xa;  UDP  0.0.0.0:161          *:*&#xa;  UDP  0.0.0.0:162          *:*&#xa;  UDP  0.0.0.0:500          *:*&#xa;  UDP  0.0.0.0:1434         *:*&#xa;  UDP  0.0.0.0:3389         *:*&#xa;  UDP  0.0.0.0:4500         *:*&#xa;  UDP  0.0.0.0:5353         *:*&#xa;  UDP  0.0.0.0:5355         *:*&#xa;  UDP  0.0.0.0:51603        *:*&#xa;  UDP  127.0.0.1:51907      *:*&#xa;  UDP  127.0.0.1:55822      *:*&#xa;  UDP  127.0.0.1:57323      *:*&#xa;  UDP  127.0.0.1:57449      *:*&#xa;  UDP  127.0.0.1:60761      *:*&#xa;  UDP  127.0.0.1:61860      *:*&#xa;  UDP  192.168.30.228:137   *:*&#xa;  UDP  192.168.30.228:138   *:*&#xa;"/><script id="snmp-interfaces" output="&#xa;  Software Loopback Interface 1\x00&#xa;    IP address: 127.0.0.1  Netmask: 255.0.0.0&#xa;    Type: softwareLoopback  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter\x00&#xa;    MAC address: 00:15:5d:a2:71:00 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft 6to4 Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter #2\x00&#xa;    IP address: 192.168.30.228  Netmask: 255.255.0.0&#xa;    MAC address: 00:15:5d:8f:60:06 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 244.78 Mb sent, 3.29 Gb received&#xa;  Microsoft IP-HTTPS Platform Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (GRE)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IP)\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Kernel Debug Network Adapter\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (PPTP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Teredo Tunneling Adapter\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (PPPOE)\x00&#xa;    Type: ppp  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (SSTP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IKEv2)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (L2TP)\x00&#xa;    Type: tunnel  Speed: 0 Kbps&#xa;    Status: down&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  Microsoft Hyper-V Network Adapter #2-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:06 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 244.78 Mb sent, 3.29 Gb received&#xa;  Microsoft Hyper-V Network Adapter #2-QoS Packet Scheduler-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:06 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 244.78 Mb sent, 3.29 Gb received&#xa;  Microsoft Hyper-V Network Adapter #2-WFP 802.3 MAC Layer LightWeight Filter-0000\x00&#xa;    MAC address: 00:15:5d:8f:60:06 (Microsoft)&#xa;    Type: ethernetCsmacd  Speed: 1 Gbps&#xa;    Status: up&#xa;    Traffic stats: 244.78 Mb sent, 3.29 Gb received&#xa;  WAN Miniport (IP)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IP)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (IPv6)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)-WFP Native MAC Layer LightWeight Filter-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;  WAN Miniport (Network Monitor)-QoS Packet Scheduler-0000\x00&#xa;    Type: ethernetCsmacd  Speed: 0 Kbps&#xa;    Status: up&#xa;    Traffic stats: 0.00 Kb sent, 0.00 Kb received&#xa;"/><script id="snmp-win32-software" output="ERROR: Script execution failed (use -d to debug)"/><script id="snmp-win32-shares" output="&#xa;  USR: C:\USR&#xa;  temp: C:\temp&#xa;  frodi: C:\storage\frodi&#xa;  pratiche: C:\storage\pratiche&#xa;  container: C:\storage\container&#xa;  etichette: C:\storage\etichette&#xa;  marketing: C:\storage\marketing&#xa;  sicurezza: C:\storage\sicurezza&#xa;  Repository: C:\Repository&#xa;  schedetecniche: C:\storage\schedetecniche&#xa;  containerGenerale: C:\storage\containerGenerale&#xa;  schedetecnicheTEST: C:\storage\schedetecnicheTEST"><elem key="USR">C:\USR</elem>
+<elem key="temp">C:\temp</elem>
+<elem key="frodi">C:\storage\frodi</elem>
+<elem key="pratiche">C:\storage\pratiche</elem>
+<elem key="container">C:\storage\container</elem>
+<elem key="etichette">C:\storage\etichette</elem>
+<elem key="marketing">C:\storage\marketing</elem>
+<elem key="sicurezza">C:\storage\sicurezza</elem>
+<elem key="Repository">C:\Repository</elem>
+<elem key="schedetecniche">C:\storage\schedetecniche</elem>
+<elem key="containerGenerale">C:\storage\containerGenerale</elem>
+<elem key="schedetecnicheTEST">C:\storage\schedetecnicheTEST</elem>
+</script></port>
+</ports>
+<times srtt="1125" rttvar="4000" to="100000"/>
+</host>
+<runstats><finished time="1754904739" timestr="Mon Aug 11 11:32:19 2025" summary="Nmap done at Mon Aug 11 11:32:19 2025; 4 IP addresses (3 hosts up) scanned in 16.99 seconds" elapsed="16.99" exit="success"/><hosts up="3" down="1" total="4"/>
+</runstats>
+</nmaprun>
