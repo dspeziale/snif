@@ -48,7 +48,7 @@ app.jinja_env.filters['timestamp'] = format_timestamp
 @app.route('/')
 def index():
     """Homepage con dashboard principale"""
-    return redirect(url_for('network.dashboard'))
+    return redirect("index.html")
 
 
 

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Errore del Server{% endblock %}
+{% block page_title %}Errore 500{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item active" aria-current="page">Errore 500</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="error-page">
+            <h2 class="headline text-danger">500</h2>
+            <div class="error-content">
+                <h3><i class="bi bi-exclamation-triangle text-danger"></i> Oops! Qualcosa è andato storto.</h3>
+                <p>
+                    Si è verificato un errore interno del server.
+                    Stiamo lavorando per risolvere il problema.
+                    Puoi <a href="{{ url_for('index') }}">tornare alla dashboard</a>
+                    e riprovare più tardi.
+                </p>
+                <p>
+                    Se il problema persiste, contatta l'amministratore del sistema.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="bi bi-house"></i> Torna alla Home
+                    </a>
+                    <button type="button" onclick="history.back()" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Indietro
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
