@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Nmap XML Parser con Database SQLite
+Nmap XML Parser con Database SQLite - Versione con Debug NBT-STAT e Fix Software/Processi
 Analizza i file XML di nmap e crea un database SQLite normalizzato
 La tupla ip/address è la chiave primaria per il sistema
 """
@@ -47,9 +47,9 @@ class NmapXMLParser:
         self.cursor = None
 
     def connect_db(self):
-        """Connette al database SQLite"""
+        """Connette al database SQLite con gestione datetime"""
         try:
-            self.conn = sqlite3.connect(self.db_path)
+            self.conn = sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_DECLTYPES)
             self.cursor = self.conn.cursor()
             logger.info(f"Connesso al database: {self.db_path}")
         except Exception as e:
@@ -155,7 +155,7 @@ class NmapXMLParser:
             )
         ''')
 
-        # Tabella delle vulnerabilità
+        # Tabella delle vulnerabilità (rinominato references in vuln_references)
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS vulnerabilities (
                 vuln_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -296,9 +296,9 @@ class NmapXMLParser:
         start_timestamp = root.get('start')
         if start_timestamp:
             try:
-                scan_info['start_time'] = datetime.fromtimestamp(int(start_timestamp))
+                scan_info['start_time'] = datetime.fromtimestamp(int(start_timestamp)).isoformat()
             except:
-                pass
+                scan_info['start_time'] = None
 
         # Estrai info scansione
         scaninfo = root.find('scaninfo')
@@ -331,7 +331,7 @@ class NmapXMLParser:
         return self.cursor.lastrowid
 
     def _parse_hosthint(self, hint, scan_id: int):
-        """Parse degli hosthint (discovery)"""
+        """Parse degli hosthint (discovery) - solo se il device esiste"""
         # Estrai indirizzi
         ip_addr = None
         mac_addr = None
@@ -351,10 +351,15 @@ class NmapXMLParser:
             status = status_elem.get('state') if status_elem is not None else 'unknown'
             reason = status_elem.get('reason') if status_elem is not None else ''
 
-            self._insert_or_update_host(ip_addr, mac_addr, vendor, status, reason, None, scan_id)
+            # FILTRO: Inserisci solo se il dispositivo è effettivamente up/attivo
+            if status.lower() in ['up', 'open', 'filtered']:
+                logger.debug(f"Aggiunto host hint {ip_addr} con status {status}")
+                self._insert_or_update_host(ip_addr, mac_addr, vendor, status, reason, None, scan_id)
+            else:
+                logger.debug(f"Ignorato host hint {ip_addr} con status {status} (dispositivo non esistente)")
 
     def _parse_host(self, host, scan_id: int):
-        """Parse completo di un host"""
+        """Parse completo di un host - solo se effettivamente esistente"""
         ip_addr = None
         mac_addr = None
         vendor = None
@@ -380,6 +385,33 @@ class NmapXMLParser:
             status = status_elem.get('state', 'unknown')
             reason = status_elem.get('reason', '')
 
+        # FILTRO PRINCIPALE: Inserisci solo host che esistono realmente
+        if status.lower() not in ['up', 'open']:
+            logger.debug(f"Ignorato host {ip_addr} con status '{status}' - dispositivo non esistente")
+            return
+
+        # Verifica aggiuntiva: se non ha porte aperte e non risponde, probabilmente non esiste
+        ports_elem = host.find('ports')
+        has_open_ports = False
+        if ports_elem is not None:
+            for port in ports_elem.findall('port'):
+                state_elem = port.find('state')
+                if state_elem is not None and state_elem.get('state') in ['open', 'filtered']:
+                    has_open_ports = True
+                    break
+
+        # Se status è "up" ma non ha porte aperte né MAC address, potrebbe essere falso positivo
+        if status.lower() == 'up' and not has_open_ports and not mac_addr:
+            # Verifica se ha almeno un hostname o altre info che confermano l'esistenza
+            hostnames_elem = host.find('hostnames')
+            has_hostname = hostnames_elem is not None and len(hostnames_elem.findall('hostname')) > 0
+
+            if not has_hostname:
+                logger.debug(f"Ignorato host {ip_addr} - probabile falso positivo (no porte, no MAC, no hostname)")
+                return
+
+        logger.info(f"Processando host esistente: {ip_addr} (status: {status})")
+
         # Hostname
         hostnames_elem = host.find('hostnames')
         if hostnames_elem is not None:
@@ -390,8 +422,7 @@ class NmapXMLParser:
         # Inserisci/aggiorna host
         self._insert_or_update_host(ip_addr, mac_addr, vendor, status, reason, hostname, scan_id)
 
-        # Parse porte
-        ports_elem = host.find('ports')
+        # Parse porte (solo quelle aperte/filtrate)
         if ports_elem is not None:
             for port in ports_elem.findall('port'):
                 self._parse_port(ip_addr, port)
@@ -416,29 +447,43 @@ class NmapXMLParser:
                                status: str, reason: str, hostname: str, scan_id: int):
         """Inserisce o aggiorna un host"""
         # Verifica se esiste
-        self.cursor.execute('SELECT ip_address FROM hosts WHERE ip_address = ?', (ip_addr,))
-        exists = self.cursor.fetchone()
+        self.cursor.execute('SELECT ip_address, hostname FROM hosts WHERE ip_address = ?', (ip_addr,))
+        result = self.cursor.fetchone()
 
-        if exists:
-            # Aggiorna
+        if result:
+            # Aggiorna - gestisce hostname concatenato
+            existing_hostname = result[1] if result[1] else ""
+            combined_hostname = existing_hostname
+
+            if hostname and hostname.strip():
+                if existing_hostname:
+                    # Verifica se hostname già presente
+                    hostname_list = existing_hostname.split('|')
+                    hostname_list = [h.strip() for h in hostname_list if h.strip()]
+                    if hostname not in hostname_list:
+                        hostname_list.append(hostname)
+                        combined_hostname = '|'.join(hostname_list)
+                else:
+                    combined_hostname = hostname
+
             self.cursor.execute('''
                 UPDATE hosts SET 
                     mac_address = COALESCE(?, mac_address),
                     vendor = COALESCE(?, vendor),
                     status = ?,
                     status_reason = ?,
-                    hostname = COALESCE(?, hostname),
-                    last_updated = CURRENT_TIMESTAMP
+                    hostname = ?,
+                    last_updated = ?
                 WHERE ip_address = ?
-            ''', (mac_addr, vendor, status, reason, hostname, ip_addr))
+            ''', (mac_addr, vendor, status, reason, combined_hostname, datetime.now().isoformat(), ip_addr))
         else:
             # Inserisci nuovo
             self.cursor.execute('''
                 INSERT INTO hosts (
                     ip_address, mac_address, vendor, status, 
                     status_reason, hostname, scan_time
-                ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            ''', (ip_addr, mac_addr, vendor, status, reason, hostname))
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (ip_addr, mac_addr, vendor, status, reason, hostname, datetime.now().isoformat()))
 
         # Inserisci relazione host-scan
         self.cursor.execute('''
@@ -447,7 +492,7 @@ class NmapXMLParser:
         ''', (ip_addr, scan_id))
 
     def _parse_port(self, ip_addr: str, port_elem):
-        """Parse di una porta"""
+        """Parse di una porta - solo se aperta o filtrata"""
         port_num = int(port_elem.get('portid'))
         protocol = port_elem.get('protocol', 'tcp')
 
@@ -456,6 +501,11 @@ class NmapXMLParser:
         state = state_elem.get('state') if state_elem is not None else 'unknown'
         reason = state_elem.get('reason') if state_elem is not None else ''
         reason_ttl = state_elem.get('reason_ttl') if state_elem is not None else None
+
+        # FILTRO: Inserisci solo porte aperte, filtrate o con servizi identificati
+        if state.lower() not in ['open', 'filtered', 'open|filtered']:
+            logger.debug(f"Ignorata porta {port_num}/{protocol} su {ip_addr} - stato: {state}")
+            return
 
         if reason_ttl:
             try:
@@ -477,6 +527,8 @@ class NmapXMLParser:
                 service_conf = int(service_conf)
             except:
                 service_conf = None
+
+        logger.debug(f"Aggiunta porta {port_num}/{protocol} su {ip_addr} - stato: {state}")
 
         # Inserisci porta
         self.cursor.execute('''
@@ -523,7 +575,7 @@ class NmapXMLParser:
 
     def _parse_nse_script(self, ip_addr: str, port_num: Optional[int],
                           protocol: Optional[str], script_elem):
-        """Parse script NSE"""
+        """Parse script NSE e estrae hostname quando possibile"""
         script_name = script_elem.get('id', '')
         script_output = script_elem.get('output', '')
 
@@ -537,10 +589,368 @@ class NmapXMLParser:
             ) VALUES (?, ?, ?, ?, ?)
         ''', (ip_addr, port_num, protocol, script_name, script_output))
 
+        # Estrai hostname da varie fonti (solo se abbiamo output valido)
+        if script_output and len(script_output.strip()) > 5:
+            hostname = self._extract_hostname_from_script(script_name, script_output)
+            if hostname:
+                self._update_host_hostname(ip_addr, hostname, f"nse_{script_name}")
+
+            # DEBUG: Se è nbt-stat, stampa il primo campo trovato
+            if script_name == 'nbstat' and script_output:
+                self._debug_nbt_stat_first_field(ip_addr, script_output)
+
         # Analizza se è una vulnerabilità
         if any(vuln_keyword in script_name.lower() for vuln_keyword in
                ['vuln', 'cve', 'exploit', 'security']):
             self._parse_vulnerability(ip_addr, port_num, protocol, script_elem)
+
+    def _debug_nbt_stat_first_field(self, ip_addr: str, output: str):
+        """DEBUG: Stampa il campo NetBIOS_Computer_Name trovato in nbt-stat"""
+        try:
+            lines = output.split('\n')
+            for line in lines:
+                line = line.strip()
+                # Cerca specificamente la riga con NetBIOS_Computer_Name
+                if 'NetBIOS_Computer_Name' in line or 'NETBIOS_COMPUTER_NAME' in line:
+                    # Estrai il valore del computer name
+                    # Pattern tipico: "NetBIOS_Computer_Name: HOSTNAME" oppure "HOSTNAME<00>  UNIQUE  NetBIOS_Computer_Name"
+                    if ':' in line:
+                        # Formato: NetBIOS_Computer_Name: HOSTNAME
+                        computer_name = line.split(':', 1)[1].strip()
+                    else:
+                        # Formato: HOSTNAME<00>  UNIQUE  NetBIOS_Computer_Name
+                        computer_name_match = re.match(r'^([^\s<]+)', line)
+                        if computer_name_match:
+                            computer_name = computer_name_match.group(1).strip()
+                        else:
+                            computer_name = "NON_TROVATO"
+
+                    if computer_name and len(computer_name) > 1:
+                        print(f"DEBUG nbt-stat {ip_addr}: NetBIOS_Computer_Name = '{computer_name}'")
+                        return
+
+            # Se non trova NetBIOS_Computer_Name, cerca il primo campo valido come fallback
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('NetBIOS') and '<' in line and '00>' in line:
+                    first_field_match = re.match(r'^([^\s<]+)', line)
+                    if first_field_match:
+                        first_field = first_field_match.group(1).strip()
+                        if first_field and len(first_field) > 1:
+                            print(f"DEBUG nbt-stat {ip_addr}: Primo campo (fallback) = '{first_field}'")
+                            return
+
+        except Exception as e:
+            logger.warning(f"Errore debug nbt-stat per {ip_addr}: {e}")
+
+    def _extract_hostname_from_script(self, script_name: str, output: str) -> Optional[str]:
+        """Estrae hostname da vari script NSE"""
+        hostname = None
+        script_name_lower = script_name.lower()
+
+        try:
+            # NetBIOS hostname discovery
+            if 'nbstat' in script_name_lower or 'netbios' in script_name_lower:
+                hostname = self._extract_netbios_hostname(output)
+
+            # SNMP hostname discovery
+            elif 'snmp' in script_name_lower:
+                hostname = self._extract_snmp_hostname(output)
+
+            # SMB hostname discovery
+            elif 'smb' in script_name_lower:
+                hostname = self._extract_smb_hostname(output)
+
+            # DNS reverse lookup
+            elif 'dns' in script_name_lower or 'reverse' in script_name_lower:
+                hostname = self._extract_dns_hostname(output)
+
+            # HTTP server hostname
+            elif 'http' in script_name_lower:
+                hostname = self._extract_http_hostname(output)
+
+            # SSH hostname
+            elif 'ssh' in script_name_lower:
+                hostname = self._extract_ssh_hostname(output)
+
+            # DHCP hostname
+            elif 'dhcp' in script_name_lower:
+                hostname = self._extract_dhcp_hostname(output)
+
+            # Generic hostname patterns
+            else:
+                hostname = self._extract_generic_hostname(output)
+
+        except Exception as e:
+            logger.warning(f"Errore estrazione hostname da {script_name}: {e}")
+
+        if hostname:
+            # Pulisci e valida hostname
+            hostname = self._clean_hostname(hostname)
+            if self._is_valid_hostname(hostname):
+                logger.info(f"Hostname estratto da {script_name}: {hostname}")
+                return hostname
+
+        return None
+
+    def _extract_netbios_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output NetBIOS - cerca specificamente NetBIOS_Computer_Name"""
+
+        # PRIORITÀ 1: Cerca specificamente NetBIOS_Computer_Name
+        lines = output.split('\n')
+        for line in lines:
+            line = line.strip()
+            if 'NetBIOS_Computer_Name' in line or 'NETBIOS_COMPUTER_NAME' in line:
+                # Estrai il valore del computer name
+                if ':' in line:
+                    # Formato: NetBIOS_Computer_Name: HOSTNAME
+                    computer_name = line.split(':', 1)[1].strip()
+                    if computer_name and len(computer_name) > 1:
+                        return computer_name
+                else:
+                    # Formato: HOSTNAME<00>  UNIQUE  NetBIOS_Computer_Name
+                    computer_name_match = re.match(r'^([^\s<]+)', line)
+                    if computer_name_match:
+                        computer_name = computer_name_match.group(1).strip()
+                        if computer_name and len(computer_name) > 1:
+                            return computer_name
+
+        # PRIORITÀ 2: Pattern alternativi se NetBIOS_Computer_Name non trovato
+        patterns = [
+            r'Computer name:\s*([^\r\n]+)',
+            r'NetBIOS name:\s*([^\r\n]+)',
+            r'Workstation\s+([^\s]+)',
+            r'<00>\s+([^\s]+)\s+<UNIQUE>',
+            r'^\s*([A-Za-z0-9_-]+)\s+<00>\s+UNIQUE',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        return None
+
+    def _extract_snmp_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output SNMP"""
+        patterns = [
+            r'sysName:\s*([^\r\n]+)',
+            r'System name:\s*([^\r\n]+)',
+            r'1\.3\.6\.1\.2\.1\.1\.5\.0\s*=\s*STRING:\s*([^\r\n]+)',
+            r'hostname:\s*([^\r\n]+)',
+            r'Name:\s*([^\r\n]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                hostname = match.group(1).strip()
+                # Rimuovi quotes SNMP se presenti
+                hostname = hostname.strip('"\'')
+                return hostname
+        return None
+
+    def _extract_smb_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output SMB"""
+        patterns = [
+            r'Computer name:\s*([^\r\n]+)',
+            r'NetBIOS computer name:\s*([^\r\n]+)',
+            r'Server:\s*([^\r\n]+)',
+            r'Workgroup:\s*([^\r\n]+)\\([^\r\n]+)',
+            r'Domain name:\s*([^\r\n]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                if len(match.groups()) > 1:
+                    return match.group(2).strip()  # Per pattern con gruppi multipli
+                return match.group(1).strip()
+        return None
+
+    def _extract_dns_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output DNS"""
+        patterns = [
+            r'PTR record:\s*([^\r\n]+)',
+            r'Reverse DNS:\s*([^\r\n]+)',
+            r'hostname:\s*([^\r\n]+)',
+            r'FQDN:\s*([^\r\n]+)',
+            r'([a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9_-]+)+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                hostname = match.group(1).strip()
+                # Rimuovi il punto finale se presente
+                return hostname.rstrip('.')
+        return None
+
+    def _extract_http_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output HTTP"""
+        patterns = [
+            r'Server:\s*([^\r\n]+)',
+            r'Host:\s*([^\r\n]+)',
+            r'Location:\s*https?://([^/\r\n]+)',
+            r'X-Forwarded-Host:\s*([^\r\n]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                hostname = match.group(1).strip()
+                # Rimuovi porta se presente
+                if ':' in hostname:
+                    hostname = hostname.split(':')[0]
+                return hostname
+        return None
+
+    def _extract_ssh_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output SSH"""
+        patterns = [
+            r'Banner:\s*SSH-[^@]*@([^\r\n\s]+)',
+            r'Remote protocol version.*@([^\r\n\s]+)',
+            r'SSH server:\s*([^\r\n]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        return None
+
+    def _extract_dhcp_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname da output DHCP"""
+        patterns = [
+            r'Hostname:\s*([^\r\n]+)',
+            r'Client hostname:\s*([^\r\n]+)',
+            r'Option 12:\s*([^\r\n]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        return None
+
+    def _extract_generic_hostname(self, output: str) -> Optional[str]:
+        """Estrae hostname con pattern generici"""
+        patterns = [
+            r'hostname[:\s]+([^\r\n\s]+)',
+            r'computer[:\s]+([^\r\n\s]+)',
+            r'machine[:\s]+([^\r\n\s]+)',
+            r'device[:\s]+([^\r\n\s]+)',
+            r'name[:\s]+([a-zA-Z0-9._-]+)',
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, output, re.MULTILINE | re.IGNORECASE)
+            if match:
+                hostname = match.group(1).strip()
+                # Valida che sembri un hostname valido
+                if self._is_valid_hostname(hostname):
+                    return hostname
+        return None
+
+    def _is_valid_hostname(self, hostname: str) -> bool:
+        """Valida se la stringa è un hostname plausibile"""
+        if not hostname or len(hostname) < 2 or len(hostname) > 253:
+            return False
+
+        # Escludi IP addresses
+        if re.match(r'^\d+\.\d+\.\d+\.\d+$', hostname):
+            return False
+
+        # Escludi stringhe troppo generiche
+        generic_terms = ['unknown', 'localhost', 'default', 'none', 'null', 'n/a']
+        if hostname.lower() in generic_terms:
+            return False
+
+        # Valida caratteri hostname (carattere - non all'inizio della classe)
+        if re.match(r'^[a-zA-Z0-9._-]+$', hostname):
+            return True
+
+        return False
+
+    def _clean_hostname(self, hostname: str) -> str:
+        """Pulisce e normalizza hostname"""
+        if not hostname:
+            return hostname
+
+        # Rimuovi spazi e caratteri speciali (mantieni solo caratteri validi)
+        hostname = hostname.strip()
+        hostname = re.sub(r'[^a-zA-Z0-9._-|]', '', hostname)
+
+        # Rimuovi punti multipli
+        hostname = re.sub(r'\.+', '.', hostname)
+
+        # Rimuovi punto iniziale e finale
+        hostname = hostname.strip('.')
+
+        # Converti in lowercase per consistenza
+        hostname = hostname.lower()
+
+        return hostname
+
+    def _update_host_hostname(self, ip_addr: str, hostname: str, source: str):
+        """Aggiorna hostname nella tabella hosts concatenando tutti gli hostname trovati"""
+        if not hostname or not self._is_valid_hostname(hostname):
+            return
+
+        # Verifica hostname esistente
+        self.cursor.execute('SELECT hostname FROM hosts WHERE ip_address = ?', (ip_addr,))
+        result = self.cursor.fetchone()
+
+        combined_hostname = hostname
+
+        if result and result[0]:
+            existing_hostnames = result[0]
+            # Verifica se questo hostname è già presente
+            hostname_list = existing_hostnames.split('|')
+            hostname_list = [h.strip() for h in hostname_list if h.strip()]
+
+            if hostname not in hostname_list:
+                # Aggiungi il nuovo hostname alla lista
+                hostname_list.append(hostname)
+                combined_hostname = '|'.join(hostname_list)
+                logger.info(f"Hostname aggiunto per {ip_addr}: '{hostname}' (fonte: {source})")
+            else:
+                logger.debug(f"Hostname '{hostname}' già presente per {ip_addr}")
+                # Inserisci comunque nella tabella hostnames per tracking della fonte
+                self.cursor.execute('''
+                    INSERT INTO hostnames (ip_address, hostname, hostname_type)
+                    VALUES (?, ?, ?)
+                ''', (ip_addr, hostname, source))
+                return
+        else:
+            logger.info(f"Primo hostname per {ip_addr}: '{hostname}' (fonte: {source})")
+
+        # Aggiorna hostname combinato
+        self.cursor.execute('''
+            UPDATE hosts SET 
+                hostname = ?,
+                last_updated = ?
+            WHERE ip_address = ?
+        ''', (combined_hostname, datetime.now().isoformat(), ip_addr))
+
+        # Inserisci anche nella tabella hostnames per tracking
+        self.cursor.execute('''
+            INSERT INTO hostnames (ip_address, hostname, hostname_type)
+            VALUES (?, ?, ?)
+        ''', (ip_addr, hostname, source))
+
+    def _parse_hostname(self, ip_addr: str, hostname_elem):
+        """Parse hostname da elementi XML"""
+        hostname = hostname_elem.get('name', '')
+        hostname_type = hostname_elem.get('type', '')
+
+        if hostname:
+            # Aggiorna anche la tabella hosts se è un hostname migliore
+            self._update_host_hostname(ip_addr, hostname, f"xml_{hostname_type}")
+
+            self.cursor.execute('''
+                INSERT INTO hostnames (ip_address, hostname, hostname_type)
+                VALUES (?, ?, ?)
+            ''', (ip_addr, hostname, hostname_type))
 
     def _parse_vulnerability(self, ip_addr: str, port_num: Optional[int],
                              protocol: Optional[str], script_elem):
@@ -600,22 +1010,8 @@ class NmapXMLParser:
                 ''', (ip_addr, os_name, os_family, os_generation,
                       os_type, os_vendor, accuracy))
 
-    def _parse_hostname(self, ip_addr: str, hostname_elem):
-        """Parse hostname"""
-        hostname = hostname_elem.get('name', '')
-        hostname_type = hostname_elem.get('type', '')
-
-        if hostname:
-            self.cursor.execute('''
-                INSERT INTO hostnames (ip_address, hostname, hostname_type)
-                VALUES (?, ?, ?)
-            ''', (ip_addr, hostname, hostname_type))
-
     def parse_software_and_processes(self, xml_file_path: str):
-        """
-        Parse specifico per software installato e processi
-        (se presenti negli script NSE)
-        """
+        """Parse specifico per software installato e processi - VERSIONE CORRETTA"""
         try:
             tree = ET.parse(xml_file_path)
             root = tree.getroot()
@@ -635,57 +1031,335 @@ class NmapXMLParser:
                     script_name = script.get('id', '')
                     output = script.get('output', '')
 
-                    # Parse software installato
-                    if 'installed' in script_name.lower() or 'software' in script_name.lower():
-                        self._parse_installed_software_from_output(ip_addr, output)
+                    # CORREZIONE 1: Nomi script corretti per software
+                    if any(software_script in script_name.lower() for software_script in
+                           ['smb-enum-software', 'wmi-software', 'snmp-software',
+                            'enum-software', 'installed-software']):
+                        logger.info(f"Trovato script software: {script_name} per {ip_addr}")
+                        self._parse_installed_software_from_script_element(ip_addr, script)
 
-                    # Parse processi
-                    if 'process' in script_name.lower() or 'ps' in script_name.lower():
-                        self._parse_processes_from_output(ip_addr, output)
+                    # CORREZIONE 2: Nomi script corretti per processi
+                    if any(process_script in script_name.lower() for process_script in
+                           ['smb-enum-processes', 'wmi-processes', 'snmp-processes',
+                            'enum-processes', 'ps-enum', 'process-enum']):
+                        logger.info(f"Trovato script processi: {script_name} per {ip_addr}")
+                        self._parse_processes_from_script_element(ip_addr, script)
 
             self.conn.commit()
 
         except Exception as e:
             logger.error(f"Errore nel parsing software/processi da {xml_file_path}: {e}")
 
-    def _parse_installed_software_from_output(self, ip_addr: str, output: str):
-        """Parse del software installato dall'output degli script"""
-        # Pattern per software con data installazione
-        software_pattern = r'([^;]+);\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})'
-        matches = re.findall(software_pattern, output)
+    def _parse_installed_software_from_script_element(self, ip_addr: str, script_element):
+        """Parse del software installato dall'elemento script XML - VERSIONE CORRETTA"""
+        try:
+            # CORREZIONE 3: Parse delle tabelle XML invece del testo
+            tables = script_element.findall('table')
 
-        for software_name, install_date_str in matches:
-            try:
-                install_date = datetime.fromisoformat(install_date_str)
-                self.cursor.execute('''
-                    INSERT OR IGNORE INTO installed_software (
-                        ip_address, software_name, install_date
-                    ) VALUES (?, ?, ?)
-                ''', (ip_addr, software_name.strip(), install_date))
-            except:
-                continue
+            for table in tables:
+                software_name = None
+                install_date = None
+                version = None
+                publisher = None
 
-    def _parse_processes_from_output(self, ip_addr: str, output: str):
-        """Parse dei processi dall'output degli script"""
-        # Pattern per processi (esempio: PID: nome processo)
-        process_pattern = r'(\d+):\s*([^\\]+)\\([^\\]+)\s*(.*)'
-        matches = re.findall(process_pattern, output, re.MULTILINE)
+                # Estrai dati dalla tabella
+                for elem in table.findall('elem'):
+                    key = elem.get('key', '')
+                    value = elem.text if elem.text else ''
 
-        for pid_str, path, name, params in matches:
-            try:
-                pid = int(pid_str)
-                self.cursor.execute('''
-                    INSERT OR IGNORE INTO running_processes (
-                        ip_address, pid, process_name, process_path, process_params
-                    ) VALUES (?, ?, ?, ?, ?)
-                ''', (ip_addr, pid, name.strip(), path.strip(), params.strip()))
-            except:
-                continue
+                    if key == 'name':
+                        software_name = value.strip()
+                    elif key == 'install_date':
+                        install_date = value.strip()
+                    elif key == 'version':
+                        version = value.strip()
+                    elif key == 'publisher':
+                        publisher = value.strip()
 
-    def process_all_xml_files(self, directory_path: str = "../"):
-        """
-        Processa tutti i file XML nella directory root del progetto
-        """
+                # Inserisci solo se abbiamo almeno il nome
+                if software_name:
+                    # Converti data se presente
+                    install_date_formatted = None
+                    if install_date:
+                        try:
+                            # La data è già in formato ISO
+                            install_date_formatted = install_date
+                        except Exception as e:
+                            logger.warning(f"Errore parsing data installazione {install_date}: {e}")
+
+                    logger.info(f"Aggiunto software: {software_name} per {ip_addr}")
+                    self.cursor.execute('''
+                        INSERT OR IGNORE INTO installed_software (
+                            ip_address, software_name, install_date, version, publisher
+                        ) VALUES (?, ?, ?, ?, ?)
+                    ''', (ip_addr, software_name, install_date_formatted, version, publisher))
+
+            # FALLBACK: Se non ci sono tabelle, prova parsing testuale
+            if not tables:
+                self._parse_installed_software_from_output_fallback(ip_addr, script_element.get('output', ''))
+
+        except Exception as e:
+            logger.error(f"Errore parsing software da script element per {ip_addr}: {e}")
+
+    def _parse_installed_software_from_output_fallback(self, ip_addr: str, output: str):
+        """Fallback per parsing testuale del software - pattern migliorati"""
+        if not output:
+            return
+
+        try:
+            # Pattern più flessibili per software
+            patterns = [
+                # Formato: nome; data
+                r'([^;\n]+);\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})',
+                # Formato: nome | versione | data
+                r'([^|\n]+)\|\s*([^|\n]*)\|\s*(\d{4}-\d{2}-\d{2})',
+                # Formato linea semplice con data
+                r'^([^0-9\n]+)\s+(\d{4}-\d{2}-\d{2})',
+            ]
+
+            for pattern in patterns:
+                matches = re.findall(pattern, output, re.MULTILINE)
+                for match in matches:
+                    if len(match) >= 2:
+                        software_name = match[0].strip()
+                        install_date_str = match[-1].strip()  # Ultimo elemento è sempre la data
+                        version = match[1].strip() if len(match) > 2 else None
+
+                        if software_name and len(software_name) > 3:  # Filtro nomi troppo corti
+                            try:
+                                # Prova a parsare la data
+                                if 'T' in install_date_str:
+                                    install_date = install_date_str  # Già formato ISO
+                                else:
+                                    install_date = datetime.strptime(install_date_str, '%Y-%m-%d').isoformat()
+
+                                self.cursor.execute('''
+                                    INSERT OR IGNORE INTO installed_software (
+                                        ip_address, software_name, install_date, version
+                                    ) VALUES (?, ?, ?, ?)
+                                ''', (ip_addr, software_name, install_date, version))
+
+                            except Exception as e:
+                                logger.warning(f"Errore parsing data fallback {install_date_str}: {e}")
+
+        except Exception as e:
+            logger.warning(f"Errore nel parsing fallback software per {ip_addr}: {e}")
+
+    def _parse_processes_from_script_element(self, ip_addr: str, script_element):
+        """Parse dei processi dall'elemento script XML - VERSIONE CORRETTA"""
+        try:
+            # Parse dalle tabelle XML
+            tables = script_element.findall('table')
+
+            for table in tables:
+                process_name = None
+                pid = None
+                process_path = None
+                process_params = None
+
+                # Estrai dati dalla tabella
+                for elem in table.findall('elem'):
+                    key = elem.get('key', '')
+                    value = elem.text if elem.text else ''
+
+                    if key in ['name', 'process_name']:
+                        process_name = value.strip()
+                    elif key in ['pid', 'process_id']:
+                        try:
+                            pid = int(value.strip())
+                        except:
+                            pid = None
+                    elif key in ['path', 'process_path', 'exe_path']:
+                        process_path = value.strip()
+                    elif key in ['params', 'arguments', 'cmdline']:
+                        process_params = value.strip()
+
+                # Inserisci se abbiamo almeno nome o PID
+                if process_name or pid:
+                    logger.info(f"Aggiunto processo: {process_name} (PID: {pid}) per {ip_addr}")
+                    self.cursor.execute('''
+                        INSERT OR IGNORE INTO running_processes (
+                            ip_address, pid, process_name, process_path, process_params
+                        ) VALUES (?, ?, ?, ?, ?)
+                    ''', (ip_addr, pid, process_name, process_path, process_params))
+
+            # FALLBACK: Se non ci sono tabelle, prova parsing testuale
+            if not tables:
+                self._parse_processes_from_output_fallback(ip_addr, script_element.get('output', ''))
+
+        except Exception as e:
+            logger.error(f"Errore parsing processi da script element per {ip_addr}: {e}")
+
+    def _parse_processes_from_output_fallback(self, ip_addr: str, output: str):
+        """Fallback per parsing testuale dei processi - pattern migliorati"""
+        if not output:
+            return
+
+        try:
+            # Pattern più flessibili per processi
+            patterns = [
+                # Formato Windows: PID: percorso\nome parametri
+                r'(\d+):\s*([^\\]+)\\([^\\]+)\s*(.*)',
+                # Formato Linux: PID nome percorso
+                r'^\s*(\d+)\s+([^\s]+)\s+([^\n]+)',
+                # Formato semplice: nome (PID)
+                r'([^\(\n]+)\s*\((\d+)\)',
+                # Lista processi con percorsi
+                r'([A-Za-z0-9_.-]+\.exe)\s+(\d+)',
+            ]
+
+            for pattern in patterns:
+                matches = re.findall(pattern, output, re.MULTILINE | re.IGNORECASE)
+                for match in matches:
+                    try:
+                        if len(match) >= 2:
+                            # Determina formato match
+                            if pattern.endswith(r'\.exe)\s+(\d+)'):  # Formato exe + PID
+                                process_name = match[0]
+                                pid = int(match[1])
+                                process_path = None
+                                process_params = None
+                            elif pattern.startswith(r'([^\(\n]+)'):  # Formato nome (PID)
+                                process_name = match[0].strip()
+                                pid = int(match[1])
+                                process_path = None
+                                process_params = None
+                            else:  # Formato complesso con percorso
+                                pid = int(match[0])
+                                if len(match) >= 3:
+                                    process_path = match[1]
+                                    process_name = match[2]
+                                    process_params = match[3] if len(match) > 3 else None
+                                else:
+                                    process_name = match[1]
+                                    process_path = None
+                                    process_params = None
+
+                            if process_name and len(process_name) > 1:
+                                self.cursor.execute('''
+                                    INSERT OR IGNORE INTO running_processes (
+                                        ip_address, pid, process_name, process_path, process_params
+                                    ) VALUES (?, ?, ?, ?, ?)
+                                ''', (ip_addr, pid, process_name, process_path, process_params))
+
+                    except Exception as e:
+                        logger.warning(f"Errore parsing processo {match}: {e}")
+                        continue
+
+        except Exception as e:
+            logger.warning(f"Errore nel parsing fallback processi per {ip_addr}: {e}")
+
+    def debug_available_scripts(self, xml_file_path: str):
+        """Funzione di debug per vedere tutti gli script disponibili"""
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+
+            scripts_found = set()
+
+            for script in root.findall('.//script'):
+                script_name = script.get('id', '')
+                if script_name:
+                    scripts_found.add(script_name)
+
+            logger.info(f"Script trovati in {xml_file_path}:")
+            for script in sorted(scripts_found):
+                logger.info(f"  - {script}")
+
+            return scripts_found
+
+        except Exception as e:
+            logger.error(f"Errore debug script in {xml_file_path}: {e}")
+            return set()
+
+    def test_software_parsing(self):
+        """Test rapido per verificare il parsing del software"""
+        try:
+            # Debug: stampa tutti gli script disponibili
+            xml_files = [f for f in os.listdir("../xml") if f.endswith('.xml')]
+            all_scripts = set()
+
+            for xml_file in xml_files:
+                file_path = os.path.join("../xml", xml_file)
+                scripts = self.debug_available_scripts(file_path)
+                all_scripts.update(scripts)
+
+            print(f"\nTutti gli script NSE trovati ({len(all_scripts)}):")
+            for script in sorted(all_scripts):
+                print(f"  - {script}")
+
+            # Cerca specificamente script di software
+            software_scripts = [s for s in all_scripts if any(keyword in s.lower()
+                                                              for keyword in
+                                                              ['software', 'enum', 'installed', 'wmi', 'smb'])]
+
+            print(f"\nScript potenzialmente legati al software ({len(software_scripts)}):")
+            for script in sorted(software_scripts):
+                print(f"  - {script}")
+
+            # Test parsing su un file specifico
+            if xml_files:
+                test_file = os.path.join("../xml", xml_files[0])
+                print(f"\nTestando parsing su: {test_file}")
+                self.parse_software_and_processes(test_file)
+
+                # Verifica risultati
+                self.cursor.execute('SELECT COUNT(*) FROM installed_software')
+                software_count = self.cursor.fetchone()[0]
+
+                self.cursor.execute('SELECT COUNT(*) FROM running_processes')
+                processes_count = self.cursor.fetchone()[0]
+
+                print(f"Software trovati: {software_count}")
+                print(f"Processi trovati: {processes_count}")
+
+                if software_count > 0:
+                    self.cursor.execute('SELECT software_name, install_date FROM installed_software LIMIT 5')
+                    samples = self.cursor.fetchall()
+                    print("Esempi software:")
+                    for name, date in samples:
+                        print(f"  - {name} ({date})")
+
+        except Exception as e:
+            logger.error(f"Errore nel test software parsing: {e}")
+
+    def process_hostname_discovery(self, xml_file_path: str):
+        """Processo dedicato per discovery hostname da tutti gli script NSE"""
+        try:
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+
+            hostname_found = 0
+
+            for host in root.findall('host'):
+                ip_addr = None
+                for address in host.findall('address'):
+                    if address.get('addrtype') == 'ipv4':
+                        ip_addr = address.get('addr')
+                        break
+
+                if not ip_addr:
+                    continue
+
+                # Cerca in tutti gli script NSE
+                for script in host.findall('.//script'):
+                    script_name = script.get('id', '')
+                    output = script.get('output', '')
+
+                    if output and len(output.strip()) > 5:
+                        hostname = self._extract_hostname_from_script(script_name, output)
+                        if hostname:
+                            self._update_host_hostname(ip_addr, hostname, f"discovery_{script_name}")
+                            hostname_found += 1
+
+            logger.info(f"Discovery hostname completato: {hostname_found} hostname trovati in {xml_file_path}")
+            self.conn.commit()
+
+        except Exception as e:
+            logger.error(f"Errore nel discovery hostname da {xml_file_path}: {e}")
+
+    def process_all_xml_files(self, directory_path: str = "../xml"):
+        """Processa tutti i file XML nella directory xml del progetto"""
         xml_files = [f for f in os.listdir(directory_path) if f.endswith('.xml')]
 
         if not xml_files:
@@ -701,25 +1375,37 @@ class NmapXMLParser:
             if success:
                 # Processa anche software e processi se presenti
                 self.parse_software_and_processes(file_path)
+
+                # Esegui discovery hostname dedicato
+                self.process_hostname_discovery(file_path)
             else:
                 logger.error(f"Errore nel processare {xml_file}")
 
     def generate_summary_report(self) -> Dict:
-        """
-        Genera un report riassuntivo dei dati nel database
-        """
+        """Genera un report riassuntivo dei dati nel database"""
         report = {}
 
         # Conteggio host
         self.cursor.execute('SELECT COUNT(*) FROM hosts')
         report['total_hosts'] = self.cursor.fetchone()[0]
 
-        # Host attivi
-        self.cursor.execute("SELECT COUNT(*) FROM hosts WHERE status = 'up'")
+        # Host attivi (solo quelli realmente esistenti)
+        self.cursor.execute("SELECT COUNT(*) FROM hosts WHERE status IN ('up', 'open')")
         report['active_hosts'] = self.cursor.fetchone()[0]
 
-        # Totale porte aperte
-        self.cursor.execute("SELECT COUNT(*) FROM ports WHERE state = 'open'")
+        # Host con hostname identificati
+        self.cursor.execute('SELECT COUNT(*) FROM hosts WHERE hostname IS NOT NULL AND hostname != ""')
+        report['hosts_with_hostname'] = self.cursor.fetchone()[0]
+
+        # Genera report aggiuntivo con hostname multipli
+        self.cursor.execute('''
+            SELECT COUNT(*) FROM hosts 
+            WHERE hostname IS NOT NULL AND hostname != "" AND hostname LIKE "%|%"
+        ''')
+        report['hosts_with_multiple_hostnames'] = self.cursor.fetchone()[0]
+
+        # Totale porte aperte/filtrate (solo quelle significative)
+        self.cursor.execute("SELECT COUNT(*) FROM ports WHERE state IN ('open', 'filtered', 'open|filtered')")
         report['open_ports'] = self.cursor.fetchone()[0]
 
         # Vulnerabilità trovate
@@ -734,10 +1420,10 @@ class NmapXMLParser:
         self.cursor.execute('SELECT COUNT(*) FROM running_processes')
         report['running_processes'] = self.cursor.fetchone()[0]
 
-        # Top 5 porte più comuni
+        # Top 5 porte più comuni (solo quelle aperte/filtrate)
         self.cursor.execute('''
             SELECT port_number, COUNT(*) as count 
-            FROM ports WHERE state = 'open' 
+            FROM ports WHERE state IN ('open', 'filtered', 'open|filtered') 
             GROUP BY port_number 
             ORDER BY count DESC 
             LIMIT 5
@@ -771,7 +1457,12 @@ def main():
         parser.connect_db()
         parser.create_tables()
 
-        # Processa tutti i file XML nella directory root del progetto
+        # DEBUG: Test parsing software prima dell'elaborazione completa
+        print("=== TEST PARSING SOFTWARE ===")
+        parser.test_software_parsing()
+        print("=" * 50)
+
+        # Processa tutti i file XML nella directory xml del progetto
         parser.process_all_xml_files("../xml")
 
         # Genera report
@@ -782,6 +1473,8 @@ def main():
         print("=" * 50)
         print(f"Host totali trovati: {report['total_hosts']}")
         print(f"Host attivi: {report['active_hosts']}")
+        print(f"Host con hostname: {report['hosts_with_hostname']}")
+        print(f"Host con hostname multipli: {report['hosts_with_multiple_hostnames']}")
         print(f"Porte aperte totali: {report['open_ports']}")
         print(f"Vulnerabilità trovate: {report['vulnerabilities']}")
         print(f"Software installato: {report['installed_software']}")
