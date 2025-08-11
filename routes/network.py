@@ -241,9 +241,13 @@ def hosts():
         return render_template('network/hosts.html',
                                hosts=hosts_data,
                                pagination=pagination,
-                               current_filters=current_filters,
-                               vendors=vendors,
-                               filter_stats=filter_stats)
+                               filters=current_filters,  # ← Cambiato nome variabile
+                               available_filters={'vendors': vendors},  # ← Aggiunto per coerenza
+                               stats=filter_stats,  # ← Cambiato nome per coerenza
+                               total_count=total_count,
+                               page=page,
+                               per_page=per_page,
+                               total_pages=total_pages)
 
     except Exception as e:
         current_app.logger.error(f"Errore in hosts: {e}")

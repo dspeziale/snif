@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}Security Summary - Security{% endblock %}
+{% block page_title %}Security Summary Report{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('security.overview') }}">Security</a></li>
+<li class="breadcrumb-item active">Security Summary</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Executive Summary -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-graph-up"></i> Executive Summary
+      </h3>
+      <div class="card-tools">
+        <span class="badge bg-info">Report Generated: {{ current_time|format_datetime }}</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="info-box">
+            <span class="info-box-icon bg-danger">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">Critical Risk</span>
+              <span class="info-box-number">{{ summary.critical_vulnerabilities }}</span>
+              <div class="progress">
+                <div class="progress-bar bg-danger"
+                     style="width: {{ (summary.critical_vulnerabilities / summary.total_vulnerabilities * 100) if summary.total_vulnerabilities > 0 else 0 }}%"></div>
+              </div>
+              <span class="progress-description">
+                {{ "%.1f"|format((summary.critical_vulnerabilities / summary.total_vulnerabilities * 100) if summary.total_vulnerabilities > 0 else 0) }}% of total vulnerabilities
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-box">
+            <span class="info-box-icon bg-warning">
+              <i class="bi bi-shield-exclamation"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">High Risk</span>
+              <span class="info-box-number">{{ summary.high_vulnerabilities }}</span>
+              <div class="progress">
+                <div class="progress-bar bg-warning"
+                     style="width: {{ (summary.high_vulnerabilities / summary.total_vulnerabilities * 100) if summary.total_vulnerabilities > 0 else 0 }}%"></div>
+              </div>
+              <span class="progress-description">
+                {{ "%.1f"|format((summary.high_vulnerabilities / summary.total_vulnerabilities * 100) if summary.total_vulnerabilities > 0 else 0) }}% of total vulnerabilities
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-box">
+            <span class="info-box-icon bg-info">
+              <i class="bi bi-hdd-network"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">Affected Hosts</span>
+              <span class="info-box-number">{{ summary.affected_hosts }}</span>
+              <div class="progress">
+                <div class="progress-bar bg-info"
+                     style="width: {{ (summary.affected_hosts / summary.total_hosts * 100) if summary.total_hosts > 0 else 0 }}%"></div>
+              </div>
+              <span class="progress-description">
+                {{ "%.1f"|format((summary.affected_hosts / summary.total_hosts * 100) if summary.total_hosts > 0 else 0) }}% of total hosts
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-box">
+            <span class="info-box-icon bg-success">
+              <i class="bi bi-shield-check"></i>
+            </span>
+            <div class="info-box-content">
+              <span class="info-box-text">Security Score</span>
+              <span class="info-box-number">{{ summary.security_score }}</span>
+              <div class="progress">
+                <div class="progress-bar bg-{{ 'success' if summary.security_score >= 80 else 'warning' if summary.security_score >= 60 else 'danger' }}"
+                     style="width: {{ summary.security_score }}%"></div>
+              </div>
+              <span class="progress-description">
+                {{ 'Excellent' if summary.security_score >= 90 else 'Good' if summary.security_score >= 80 else 'Fair' if summary.security_score >= 60 else 'Poor' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Vulnerability Trends -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-graph-up"></i> Vulnerability Trends (Last 30 Days)
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="vulnerabilityTrendsChart" style="height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Severity Distribution -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="bi bi-pie-chart"></i> Vulnerability Severity Distribution
+          </h3>
+        </div>
+        <div class="card-body">
+          <canvas id="severityDistributionChart" style="height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Vulnerable Hosts -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-hdd-stack"></i> Most Vulnerable Hosts
+        <span class="badge bg-secondary ms-2">Top 10</span>
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Host</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+              <th>Risk Score</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for host in top_vulnerable_hosts %}
+            <tr>
+              <td>
+                <span class="badge bg-{{ 'danger' if loop.index <= 3 else 'warning' if loop.index <= 5 else 'info' }}">
+                  #{{ loop.index }}
+                </span>
+              </td>
+              <td>
+                <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}" class="text-decoration-none">
+                  {{ host.ip_address }}
+                </a>
+                {% if host.hostname %}
+                <br><small class="text-muted">{{ host.hostname }}</small>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-danger">{{ host.critical_count }}</span>
+              </td>
+              <td>
+                <span class="badge bg-warning">{{ host.high_count }}</span>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ host.medium_count }}</span>
+              </td>
+              <td>
+                <span class="badge bg-success">{{ host.low_count }}</span>
+              </td>
+              <td>
+                <strong>{{ host.total_vulnerabilities }}</strong>
+              </td>
+              <td>
+                <div class="progress" style="width: 100px; height: 20px;">
+                  <div class="progress-bar bg-{{ 'danger' if host.risk_score >= 80 else 'warning' if host.risk_score >= 60 else 'info' }}"
+                       role="progressbar"
+                       style="width: {{ host.risk_score }}%">
+                    {{ host.risk_score }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="{{ url_for('security.vulnerabilities', ip_address=host.ip_address) }}"
+                   class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye"></i> View
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top CVEs -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-shield-exclamation"></i> Most Prevalent CVEs
+        <span class="badge bg-secondary ms-2">Top 10</span>
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>CVE ID</th>
+              <th>Severity</th>
+              <th>CVSS Score</th>
+              <th>Affected Hosts</th>
+              <th>Total Occurrences</th>
+              <th>First Seen</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cve in top_cves %}
+            <tr>
+              <td>
+                <span class="badge bg-{{ 'danger' if loop.index <= 3 else 'warning' if loop.index <= 5 else 'info' }}">
+                  #{{ loop.index }}
+                </span>
+              </td>
+              <td>
+                <a href="{{ url_for('security.cve_detail', cve_id=cve.cve_id) }}" class="text-decoration-none">
+                  <code>{{ cve.cve_id }}</code>
+                </a>
+              </td>
+              <td>
+                <span class="badge bg-{{ 'danger' if cve.max_severity == 'CRITICAL' else 'warning' if cve.max_severity == 'HIGH' else 'info' if cve.max_severity == 'MEDIUM' else 'success' }}">
+                  {{ cve.max_severity }}
+                </span>
+              </td>
+              <td>
+                {% if cve.max_cvss_score %}
+                <span class="badge bg-{{ 'danger' if cve.max_cvss_score >= 9 else 'warning' if cve.max_cvss_score >= 7 else 'info' if cve.max_cvss_score >= 4 else 'success' }}">
+                  {{ "%.1f"|format(cve.max_cvss_score) }}
+                </span>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-info">{{ cve.affected_hosts }}</span>
+              </td>
+              <td>
+                <strong>{{ cve.total_occurrences }}</strong>
+              </td>
+              <td>
+                <small class="text-muted">{{ cve.first_seen|format_datetime }}</small>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="{{ url_for('security.cve_detail', cve_id=cve.cve_id) }}"
+                     class="btn btn-outline-primary">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="https://nvd.nist.gov/vuln/detail/{{ cve.cve_id }}"
+                     target="_blank" class="btn btn-outline-info">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-lightbulb"></i> Security Recommendations
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>High Priority Actions</h5>
+          <ul class="list-group list-group-flush">
+            {% if summary.critical_vulnerabilities > 0 %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-exclamation-triangle-fill text-danger"></i> Address {{ summary.critical_vulnerabilities }} critical vulnerabilities</span>
+              <span class="badge bg-danger rounded-pill">Critical</span>
+            </li>
+            {% endif %}
+            {% if summary.high_vulnerabilities > 5 %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-shield-exclamation text-warning"></i> Review {{ summary.high_vulnerabilities }} high-severity vulnerabilities</span>
+              <span class="badge bg-warning rounded-pill">High</span>
+            </li>
+            {% endif %}
+            {% if summary.outdated_services > 0 %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-arrow-up-circle text-info"></i> Update {{ summary.outdated_services }} outdated services</span>
+              <span class="badge bg-info rounded-pill">Medium</span>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h5>Preventive Measures</h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <i class="bi bi-arrow-clockwise text-success"></i> Implement regular patch management
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-shield-check text-success"></i> Enable automated security scanning
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-eye text-success"></i> Set up continuous monitoring
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-people text-success"></i> Conduct security awareness training
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Charts initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Vulnerability Trends Chart
+    const trendsCtx = document.getElementById('vulnerabilityTrendsChart').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trends_data.labels|safe }},
+            datasets: [{
+                label: 'Critical',
+                data: {{ trends_data.critical|safe }},
+                borderColor: 'rgb(220, 53, 69)',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.1
+            }, {
+                label: 'High',
+                data: {{ trends_data.high|safe }},
+                borderColor: 'rgb(255, 193, 7)',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Severity Distribution Chart
+    const severityCtx = document.getElementById('severityDistributionChart').getContext('2d');
+    new Chart(severityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Critical', 'High', 'Medium', 'Low'],
+            datasets: [{
+                data: [
+                    {{ summary.critical_vulnerabilities }},
+                    {{ summary.high_vulnerabilities }},
+                    {{ summary.medium_vulnerabilities }},
+                    {{ summary.low_vulnerabilities }}
+                ],
+                backgroundColor: [
+                    'rgb(220, 53, 69)',
+                    'rgb(255, 193, 7)',
+                    'rgb(13, 202, 240)',
+                    'rgb(25, 135, 84)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

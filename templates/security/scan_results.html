@@ -1,0 +1,596 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Results - Security{% endblock %}
+{% block page_title %}Security Scan Results{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('security.overview') }}">Security</a></li>
+<li class="breadcrumb-item active">Scan Results</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Scan Filters -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-funnel"></i> Scan Filters
+      </h3>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{{ url_for('security.scan_results') }}">
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Scanner Type</label>
+            <select name="scanner" class="form-select">
+              <option value="">All Scanners</option>
+              <option value="nmap" {% if request.args.get('scanner') == 'nmap' %}selected{% endif %}>Nmap</option>
+              <option value="nessus" {% if request.args.get('scanner') == 'nessus' %}selected{% endif %}>Nessus</option>
+              <option value="openvas" {% if request.args.get('scanner') == 'openvas' %}selected{% endif %}>OpenVAS</option>
+              <option value="custom" {% if request.args.get('scanner') == 'custom' %}selected{% endif %}>Custom</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+              <option value="">All Status</option>
+              <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+              <option value="running" {% if request.args.get('status') == 'running' %}selected{% endif %}>Running</option>
+              <option value="failed" {% if request.args.get('status') == 'failed' %}selected{% endif %}>Failed</option>
+              <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Date From</label>
+            <input type="date" name="date_from" class="form-control"
+                   value="{{ request.args.get('date_from', '') }}">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Date To</label>
+            <input type="date" name="date_to" class="form-control"
+                   value="{{ request.args.get('date_to', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Filter Results
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scan Statistics -->
+  <div class="row mb-3">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ stats.total_scans or 0 }}</h3>
+          <p>Total Scans</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-search"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ stats.successful_scans or 0 }}</h3>
+          <p>Successful</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ stats.failed_scans or 0 }}</h3>
+          <p>Failed</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-x-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ stats.vulnerabilities_found or 0 }}</h3>
+          <p>Vulnerabilities Found</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-shield-exclamation"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Results Table -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-list-ul"></i> Scan Results
+        <span class="badge bg-secondary ms-2">{{ scan_results|length or 0 }} results</span>
+      </h3>
+      <div class="card-tools">
+        <a href="{{ url_for('security.scan_results') }}?export=csv" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-download"></i> Export CSV
+        </a>
+        <a href="{{ url_for('tools.security_scanner') }}" class="btn btn-sm btn-success">
+          <i class="bi bi-plus"></i> New Scan
+        </a>
+      </div>
+    </div>
+    <div class="card-body table-responsive p-0">
+      <table class="table table-hover text-nowrap">
+        <thead>
+          <tr>
+            <th>Scan ID</th>
+            <th>Scanner</th>
+            <th>Target</th>
+            <th>Start Time</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Findings</th>
+            <th>Progress</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in scan_results %}
+          <tr>
+            <td>
+              <a href="{{ url_for('security.scan_detail', scan_id=scan.id) }}" class="text-decoration-none">
+                <code>{{ scan.scan_id or scan.id }}</code>
+              </a>
+            </td>
+            <td>
+              <span class="badge bg-info">{{ scan.scanner|title if scan.scanner else 'Unknown' }}</span>
+            </td>
+            <td>
+              {% if scan.target_type == 'host' %}
+              <i class="bi bi-hdd"></i> {{ scan.target }}
+              {% elif scan.target_type == 'network' %}
+              <i class="bi bi-diagram-3"></i> {{ scan.target }}
+              {% elif scan.target_type == 'port_range' %}
+              <i class="bi bi-hdd-network"></i> {{ scan.target }}
+              {% else %}
+              <i class="bi bi-question-circle"></i> {{ scan.target or 'N/A' }}
+              {% endif %}
+            </td>
+            <td>
+              <small class="text-muted">{{ scan.start_time|format_datetime if scan.start_time else 'N/A' }}</small>
+            </td>
+            <td>
+              {% if scan.end_time and scan.start_time %}
+              {% set duration = (scan.end_time|format_datetime_obj - scan.start_time|format_datetime_obj).total_seconds() %}
+              <small class="text-muted">
+                {% if duration < 60 %}
+                {{ "%.0f"|format(duration) }}s
+                {% elif duration < 3600 %}
+                {{ "%.1f"|format(duration/60) }}m
+                {% else %}
+                {{ "%.1f"|format(duration/3600) }}h
+                {% endif %}
+              </small>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if scan.status == 'completed' %}
+              <span class="badge bg-success">Completed</span>
+              {% elif scan.status == 'running' %}
+              <span class="badge bg-primary">
+                <i class="bi bi-arrow-clockwise"></i> Running
+              </span>
+              {% elif scan.status == 'failed' %}
+              <span class="badge bg-danger">Failed</span>
+              {% elif scan.status == 'cancelled' %}
+              <span class="badge bg-secondary">Cancelled</span>
+              {% else %}
+              <span class="badge bg-warning">{{ scan.status|title if scan.status else 'Unknown' }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="me-2">
+                  {% if scan.vulnerabilities_count and scan.vulnerabilities_count > 0 %}
+                  <span class="badge bg-danger">{{ scan.vulnerabilities_count }}</span>
+                  {% else %}
+                  <span class="badge bg-success">0</span>
+                  {% endif %}
+                </div>
+                {% if scan.vulnerabilities_count and scan.vulnerabilities_count > 0 %}
+                <small class="text-muted">
+                  {% if scan.critical_count and scan.critical_count > 0 %}
+                  <span class="text-danger">{{ scan.critical_count }}C</span>
+                  {% endif %}
+                  {% if scan.high_count and scan.high_count > 0 %}
+                  <span class="text-warning">{{ scan.high_count }}H</span>
+                  {% endif %}
+                  {% if scan.medium_count and scan.medium_count > 0 %}
+                  <span class="text-info">{{ scan.medium_count }}M</span>
+                  {% endif %}
+                  {% if scan.low_count and scan.low_count > 0 %}
+                  <span class="text-success">{{ scan.low_count }}L</span>
+                  {% endif %}
+                </small>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if scan.status == 'running' and scan.progress %}
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar"
+                     style="width: {{ scan.progress }}%">
+                  {{ scan.progress }}%
+                </div>
+              </div>
+              {% elif scan.status == 'completed' %}
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-success"
+                     role="progressbar"
+                     style="width: 100%">
+                  100%
+                </div>
+              </div>
+              {% elif scan.status == 'failed' %}
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar bg-danger"
+                     role="progressbar"
+                     style="width: 100%">
+                  Failed
+                </div>
+              </div>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('security.scan_detail', scan_id=scan.id) }}"
+                   class="btn btn-outline-primary" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if scan.vulnerabilities_count and scan.vulnerabilities_count > 0 %}
+                <a href="{{ url_for('security.vulnerabilities', scan_id=scan.id) }}"
+                   class="btn btn-outline-warning" title="View Vulnerabilities">
+                  <i class="bi bi-shield-exclamation"></i>
+                </a>
+                {% endif %}
+                {% if scan.status == 'running' %}
+                <button class="btn btn-outline-danger"
+                        onclick="cancelScan('{{ scan.id }}')"
+                        title="Cancel Scan">
+                  <i class="bi bi-stop"></i>
+                </button>
+                {% endif %}
+                {% if scan.status in ['completed', 'failed'] %}
+                <a href="{{ url_for('security.scan_results') }}?download={{ scan.id }}"
+                   class="btn btn-outline-info" title="Download Report">
+                  <i class="bi bi-download"></i>
+                </a>
+                {% endif %}
+                <button class="btn btn-outline-secondary"
+                        onclick="deleteScan('{{ scan.id }}')"
+                        title="Delete Scan">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center py-4">
+              <div class="text-muted">
+                <i class="bi bi-search fs-1"></i>
+                <p class="mt-2">No scan results found.</p>
+                <a href="{{ url_for('tools.security_scanner') }}" class="btn btn-primary">
+                  <i class="bi bi-plus"></i> Start New Scan
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination %}
+  <nav aria-label="Scan results pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('security.scan_results', page=pagination.prev_num, **request.args) }}">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+      </li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+          {% if page_num != pagination.page %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('security.scan_results', page=page_num, **request.args) }}">{{ page_num }}</a>
+          </li>
+          {% else %}
+          <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+          </li>
+          {% endif %}
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">…</span>
+        </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('security.scan_results', page=pagination.next_num, **request.args) }}">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  <!-- Quick Actions -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-lightning"></i> Quick Actions
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="d-grid">
+            <a href="{{ url_for('tools.security_scanner') }}" class="btn btn-success">
+              <i class="bi bi-plus"></i> Start New Scan
+            </a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-grid">
+            <button class="btn btn-outline-primary" onclick="scheduleRecurringScan()">
+              <i class="bi bi-clock"></i> Schedule Recurring
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-grid">
+            <a href="{{ url_for('security.vulnerabilities') }}" class="btn btn-outline-warning">
+              <i class="bi bi-shield-exclamation"></i> View All Vulnerabilities
+            </a>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-grid">
+            <a href="{{ url_for('security.reports') }}" class="btn btn-outline-info">
+              <i class="bi bi-file-earmark-text"></i> Generate Report
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Management -->
+  <div class="card mt-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-gear"></i> Scan Management
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>Bulk Actions</h5>
+          <div class="btn-group" role="group">
+            <button class="btn btn-outline-danger" onclick="deleteOldScans()">
+              <i class="bi bi-trash"></i> Delete Old Scans
+            </button>
+            <button class="btn btn-outline-warning" onclick="cancelAllRunning()">
+              <i class="bi bi-stop"></i> Cancel All Running
+            </button>
+            <button class="btn btn-outline-info" onclick="exportAllResults()">
+              <i class="bi bi-download"></i> Export All
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <h5>Scan Statistics</h5>
+          <div class="row">
+            <div class="col-6">
+              <div class="text-center">
+                <div class="fs-4 text-success">{{ "%.1f"|format(stats.success_rate or 0) }}%</div>
+                <small class="text-muted">Success Rate</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="fs-4 text-info">{{ stats.avg_duration or 'N/A' }}</div>
+                <small class="text-muted">Avg Duration</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function cancelScan(scanId) {
+    if (confirm('Are you sure you want to cancel this scan?')) {
+        fetch(`/security/api/scans/${scanId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Scan cancelled successfully', 'success');
+                location.reload();
+            } else {
+                showAlert('Failed to cancel scan: ' + (data.error || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to cancel scan: Network error', 'danger');
+        });
+    }
+}
+
+function deleteScan(scanId) {
+    if (confirm('Are you sure you want to delete this scan? This action cannot be undone.')) {
+        fetch(`/security/api/scans/${scanId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Scan deleted successfully', 'success');
+                location.reload();
+            } else {
+                showAlert('Failed to delete scan: ' + (data.error || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to delete scan: Network error', 'danger');
+        });
+    }
+}
+
+function scheduleRecurringScan() {
+    alert('Recurring scan scheduling feature coming soon!');
+}
+
+function deleteOldScans() {
+    if (confirm('Delete all scans older than 30 days?')) {
+        fetch('/security/api/scans/cleanup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ days: 30 })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(`Deleted ${data.deleted_count} old scans`, 'success');
+                location.reload();
+            } else {
+                showAlert('Failed to delete old scans: ' + (data.error || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to delete old scans: Network error', 'danger');
+        });
+    }
+}
+
+function cancelAllRunning() {
+    if (confirm('Cancel all currently running scans?')) {
+        fetch('/security/api/scans/cancel-all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(`Cancelled ${data.cancelled_count} running scans`, 'success');
+                location.reload();
+            } else {
+                showAlert('Failed to cancel running scans: ' + (data.error || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to cancel running scans: Network error', 'danger');
+        });
+    }
+}
+
+function exportAllResults() {
+    window.open('/security/scan_results?export=all', '_blank');
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Auto-refresh for running scans
+document.addEventListener('DOMContentLoaded', function() {
+    const runningScans = document.querySelectorAll('.badge-primary');
+    let hasRunningScans = false;
+
+    runningScans.forEach(badge => {
+        if (badge.textContent.includes('Running')) {
+            hasRunningScans = true;
+        }
+    });
+
+    if (hasRunningScans) {
+        console.log('Running scans detected, enabling auto-refresh');
+        setTimeout(() => {
+            location.reload();
+        }, 30000); // Refresh every 30 seconds if there are running scans
+    }
+});
+
+// Real-time progress updates (placeholder for WebSocket implementation)
+function initializeRealTimeUpdates() {
+    // This would connect to WebSocket for real-time scan progress updates
+    // For now, we rely on page refresh
+    console.log('Real-time updates would be initialized here');
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeRealTimeUpdates();
+});
+</script>
+{% endblock %}

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, g, current_app
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Blueprint per Security Analysis
 security_bp = Blueprint('security', __name__, url_prefix='/security')
@@ -15,6 +15,137 @@ def get_db():
 
 
 # ===========================
+# SECURITY OVERVIEW (ROUTE MANCANTE)
+# ===========================
+
+@security_bp.route('/overview')
+@security_bp.route('/')
+def overview():
+    """Security Overview Dashboard"""
+    try:
+        db = get_db()
+
+        # Statistiche vulnerabilità per severità
+        vuln_stats = {
+            'critical': 0,
+            'high': 0,
+            'medium': 0,
+            'low': 0,
+            'total': 0
+        }
+
+        try:
+            # Conta vulnerabilità per severità
+            severity_counts = db.execute('''
+                SELECT severity, COUNT(*) as count
+                FROM vulnerabilities 
+                WHERE severity IS NOT NULL
+                GROUP BY severity
+            ''').fetchall()
+
+            for row in severity_counts:
+                severity = row['severity'].lower() if row['severity'] else 'unknown'
+                if severity in vuln_stats:
+                    vuln_stats[severity] = row['count']
+                vuln_stats['total'] += row['count']
+
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo statistiche vulnerabilità: {e}")
+
+        # Statistiche host affetti
+        affected_hosts_count = 0
+        try:
+            affected_hosts = db.execute('''
+                SELECT COUNT(DISTINCT ip_address) as count
+                FROM vulnerabilities
+            ''').fetchone()
+
+            if affected_hosts:
+                affected_hosts_count = affected_hosts['count']
+
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo host affetti: {e}")
+
+        # Statistiche scansioni recenti
+        recent_scans_count = 0
+        try:
+            week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+
+            recent_scans = db.execute('''
+                SELECT COUNT(*) as count
+                FROM scan_results 
+                WHERE start_time > ?
+            ''', (week_ago,)).fetchone()
+
+            if recent_scans:
+                recent_scans_count = recent_scans['count']
+
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo scansioni recenti: {e}")
+
+        # Top 5 CVE più comuni
+        top_cves = []
+        try:
+            top_cves = db.execute('''
+                SELECT cve_id, COUNT(*) as count, 
+                       MAX(severity) as max_severity,
+                       COUNT(DISTINCT ip_address) as affected_hosts
+                FROM vulnerabilities 
+                WHERE cve_id IS NOT NULL AND cve_id != ''
+                GROUP BY cve_id 
+                ORDER BY count DESC 
+                LIMIT 5
+            ''').fetchall()
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo top CVE: {e}")
+
+        # Top 5 host più vulnerabili
+        vulnerable_hosts = []
+        try:
+            vulnerable_hosts = db.execute('''
+                SELECT v.ip_address, h.hostname, 
+                       COUNT(*) as vuln_count,
+                       SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count,
+                       SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_count
+                FROM vulnerabilities v
+                LEFT JOIN hosts h ON v.ip_address = h.ip_address
+                GROUP BY v.ip_address, h.hostname 
+                ORDER BY vuln_count DESC 
+                LIMIT 5
+            ''').fetchall()
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo host vulnerabili: {e}")
+
+        # Calcola security score (0-100)
+        security_score = 100
+        if vuln_stats['total'] > 0:
+            penalty = (vuln_stats['critical'] * 10 +
+                       vuln_stats['high'] * 5 +
+                       vuln_stats['medium'] * 2 +
+                       vuln_stats['low'] * 1)
+            security_score = max(0, 100 - penalty)
+
+        return render_template('security/overview.html',
+                               vuln_stats=vuln_stats,
+                               affected_hosts=affected_hosts_count,
+                               recent_scans=recent_scans_count,
+                               security_score=security_score,
+                               top_cves=top_cves,
+                               vulnerable_hosts=vulnerable_hosts)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in security overview: {e}")
+        return render_template('security/overview.html',
+                               vuln_stats={'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'total': 0},
+                               affected_hosts=0,
+                               recent_scans=0,
+                               security_score=100,
+                               top_cves=[],
+                               vulnerable_hosts=[],
+                               error=str(e))
+
+
+# ===========================
 # VULNERABILITIES OVERVIEW
 # ===========================
 
@@ -25,76 +156,104 @@ def vulnerabilities_overview():
         db = get_db()
 
         # Statistiche generali
-        total_vulns = db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0]
+        total_vulns = 0
+        try:
+            total_vulns = db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0]
+        except:
+            pass
 
         # Statistiche per severità
-        severity_stats = db.execute('''
-            SELECT severity, COUNT(*) as count
-            FROM vulnerabilities 
-            GROUP BY severity
-            ORDER BY 
-                CASE severity 
-                    WHEN 'CRITICAL' THEN 1 
-                    WHEN 'HIGH' THEN 2 
-                    WHEN 'MEDIUM' THEN 3 
-                    WHEN 'LOW' THEN 4 
-                    ELSE 5 
-                END
-        ''').fetchall()
+        severity_stats = []
+        try:
+            severity_stats = db.execute('''
+                SELECT severity, COUNT(*) as count
+                FROM vulnerabilities 
+                GROUP BY severity
+                ORDER BY 
+                    CASE severity 
+                        WHEN 'CRITICAL' THEN 1 
+                        WHEN 'HIGH' THEN 2 
+                        WHEN 'MEDIUM' THEN 3 
+                        WHEN 'LOW' THEN 4 
+                        ELSE 5 
+                    END
+            ''').fetchall()
+        except:
+            pass
 
         # Statistiche per tipo
-        type_stats = db.execute('''
-            SELECT vuln_type, COUNT(*) as count
-            FROM vulnerabilities 
-            GROUP BY vuln_type 
-            ORDER BY count DESC
-        ''').fetchall()
+        type_stats = []
+        try:
+            type_stats = db.execute('''
+                SELECT vuln_type, COUNT(*) as count
+                FROM vulnerabilities 
+                GROUP BY vuln_type 
+                ORDER BY count DESC
+            ''').fetchall()
+        except:
+            pass
 
         # Host più vulnerabili
-        vulnerable_hosts = db.execute('''
-            SELECT v.ip_address, h.hostname, 
-                   COUNT(*) as total_vulns,
-                   SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count,
-                   SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_count,
-                   SUM(CASE WHEN v.severity = 'MEDIUM' THEN 1 ELSE 0 END) as medium_count,
-                   SUM(CASE WHEN v.severity = 'LOW' THEN 1 ELSE 0 END) as low_count
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            GROUP BY v.ip_address, h.hostname 
-            ORDER BY total_vulns DESC 
-            LIMIT 10
-        ''').fetchall()
+        vulnerable_hosts = []
+        try:
+            vulnerable_hosts = db.execute('''
+                SELECT v.ip_address, h.hostname, 
+                       COUNT(*) as total_vulns,
+                       SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count,
+                       SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_count,
+                       SUM(CASE WHEN v.severity = 'MEDIUM' THEN 1 ELSE 0 END) as medium_count,
+                       SUM(CASE WHEN v.severity = 'LOW' THEN 1 ELSE 0 END) as low_count
+                FROM vulnerabilities v
+                LEFT JOIN hosts h ON v.ip_address = h.ip_address
+                GROUP BY v.ip_address, h.hostname 
+                ORDER BY total_vulns DESC 
+                LIMIT 10
+            ''').fetchall()
+        except:
+            pass
 
         # CVE più comuni
-        common_cves = db.execute('''
-            SELECT cve_id, COUNT(*) as count, severity,
-                   GROUP_CONCAT(DISTINCT vuln_type) as types
-            FROM vulnerabilities 
-            WHERE cve_id IS NOT NULL 
-            GROUP BY cve_id, severity 
-            ORDER BY count DESC 
-            LIMIT 10
-        ''').fetchall()
+        common_cves = []
+        try:
+            common_cves = db.execute('''
+                SELECT cve_id, COUNT(*) as count, severity,
+                       GROUP_CONCAT(DISTINCT vuln_type) as types
+                FROM vulnerabilities 
+                WHERE cve_id IS NOT NULL 
+                GROUP BY cve_id, severity 
+                ORDER BY count DESC 
+                LIMIT 10
+            ''').fetchall()
+        except:
+            pass
 
         # Vulnerabilità critiche recenti
-        critical_vulns = db.execute('''
-            SELECT v.*, h.hostname
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            WHERE v.severity = 'CRITICAL'
-            ORDER BY v.vuln_id DESC
-            LIMIT 5
-        ''').fetchall()
+        critical_vulns = []
+        try:
+            critical_vulns = db.execute('''
+                SELECT v.*, h.hostname
+                FROM vulnerabilities v
+                LEFT JOIN hosts h ON v.ip_address = h.ip_address
+                WHERE v.severity = 'CRITICAL'
+                ORDER BY v.id DESC
+                LIMIT 5
+            ''').fetchall()
+        except:
+            pass
 
         # Distribuzione per porta
-        port_vulns = db.execute('''
-            SELECT port_number, protocol, COUNT(*) as count
-            FROM vulnerabilities 
-            WHERE port_number IS NOT NULL
-            GROUP BY port_number, protocol 
-            ORDER BY count DESC 
-            LIMIT 10
-        ''').fetchall()
+        port_vulns = []
+        try:
+            port_vulns = db.execute('''
+                SELECT port, protocol, COUNT(*) as count
+                FROM vulnerabilities 
+                WHERE port IS NOT NULL
+                GROUP BY port, protocol 
+                ORDER BY count DESC 
+                LIMIT 10
+            ''').fetchall()
+        except:
+            pass
 
         # Calcola percentuali
         severity_percentages = {}
@@ -114,7 +273,16 @@ def vulnerabilities_overview():
 
     except Exception as e:
         current_app.logger.error(f"Errore in vulnerabilities_overview: {e}")
-        return render_template('security/vulnerabilities_overview.html', error=str(e))
+        return render_template('security/vulnerabilities_overview.html',
+                               total_vulns=0,
+                               severity_stats=[],
+                               severity_percentages={},
+                               type_stats=[],
+                               vulnerable_hosts=[],
+                               common_cves=[],
+                               critical_vulns=[],
+                               port_vulns=[],
+                               error=str(e))
 
 
 # ===========================
@@ -167,16 +335,11 @@ def vulnerabilities():
             params.append(host_ip)
 
         if cve_id:
-            conditions.append('v.cve_id LIKE ?')
-            params.append(f'%{cve_id}%')
+            conditions.append('v.cve_id = ?')
+            params.append(cve_id)
 
         if search:
-            conditions.append('''(
-                v.title LIKE ? OR 
-                v.description LIKE ? OR 
-                v.cve_id LIKE ? OR
-                h.hostname LIKE ?
-            )''')
+            conditions.append('(v.cve_id LIKE ? OR v.vuln_type LIKE ? OR v.ip_address LIKE ? OR h.hostname LIKE ?)')
             search_param = f'%{search}%'
             params.extend([search_param, search_param, search_param, search_param])
 
@@ -191,17 +354,50 @@ def vulnerabilities():
                     WHEN 'MEDIUM' THEN 3 
                     WHEN 'LOW' THEN 4 
                     ELSE 5 
-                END, v.ip_address, v.vuln_id
+                END, v.ip_address
         '''
 
-        # Conteggio totale
+        # Conteggio totale per paginazione
         count_query = query.replace('SELECT v.*, h.hostname, h.vendor', 'SELECT COUNT(*)')
         total_count = db.execute(count_query, params).fetchone()[0]
 
         # Paginazione
         offset = (page - 1) * per_page
         paginated_query = query + f' LIMIT {per_page} OFFSET {offset}'
-        vulns_data = db.execute(paginated_query, params).fetchall()
+        vulnerabilities = db.execute(paginated_query, params).fetchall()
+
+        # Statistiche per i filtri correnti
+        stats = {
+            'critical': 0,
+            'high': 0,
+            'medium': 0,
+            'low': 0,
+            'total': total_count
+        }
+
+        if conditions:
+            stats_query = '''
+                SELECT severity, COUNT(*) as count
+                FROM vulnerabilities v
+                LEFT JOIN hosts h ON v.ip_address = h.ip_address
+                WHERE ''' + ' AND '.join(conditions) + '''
+                GROUP BY severity
+            '''
+        else:
+            stats_query = '''
+                SELECT severity, COUNT(*) as count
+                FROM vulnerabilities 
+                GROUP BY severity
+            '''
+
+        try:
+            severity_counts = db.execute(stats_query, params).fetchall()
+            for row in severity_counts:
+                severity = row['severity'].lower() if row['severity'] else 'unknown'
+                if severity in stats:
+                    stats[severity] = row['count']
+        except Exception as e:
+            current_app.logger.error(f"Errore nel calcolo statistiche filtri: {e}")
 
         # Informazioni paginazione
         total_pages = (total_count + per_page - 1) // per_page
@@ -211,195 +407,37 @@ def vulnerabilities():
             'total': total_count,
             'total_pages': total_pages,
             'has_prev': page > 1,
-            'has_next': page < total_pages
-        }
-
-        # Ottieni hosts disponibili per filtro
-        hosts_with_vulns = db.execute('''
-            SELECT DISTINCT v.ip_address, h.hostname
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            ORDER BY v.ip_address
-        ''').fetchall()
-
-        # Statistiche per i filtri attuali
-        if conditions:
-            filter_stats_query = count_query
-            filter_stats = {
-                'total_filtered': db.execute(filter_stats_query, params).fetchone()[0]
-            }
-        else:
-            filter_stats = {'total_filtered': total_count}
-
-        current_filters = {
-            'severity': severity,
-            'type': vuln_type,
-            'host': host_ip,
-            'cve': cve_id,
-            'search': search
+            'has_next': page < total_pages,
+            'prev_num': page - 1 if page > 1 else None,
+            'next_num': page + 1 if page < total_pages else None,
+            'iter_pages': lambda: range(max(1, page - 2), min(total_pages + 1, page + 3))
         }
 
         return render_template('security/vulnerabilities.html',
-                               vulnerabilities=vulns_data,
-                               pagination=pagination,
-                               current_filters=current_filters,
-                               hosts_with_vulns=hosts_with_vulns,
-                               filter_stats=filter_stats)
+                               vulnerabilities=vulnerabilities,
+                               stats=stats,
+                               pagination=pagination)
 
     except Exception as e:
         current_app.logger.error(f"Errore in vulnerabilities: {e}")
         return render_template('security/vulnerabilities.html',
-                               vulnerabilities=[], pagination={}, error=str(e))
-
-
-@security_bp.route('/vulnerabilities/<int:vuln_id>')
-def vulnerability_detail(vuln_id):
-    """Dettaglio singola vulnerabilità"""
-    try:
-        db = get_db()
-
-        # Dettagli vulnerabilità
-        vuln = db.execute('''
-            SELECT v.*, h.hostname, h.vendor, h.status,
-                   s.service_name, s.service_product, s.service_version
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            LEFT JOIN services s ON v.ip_address = s.ip_address AND v.port_number = s.port_number
-            WHERE v.vuln_id = ?
-        ''', (vuln_id,)).fetchone()
-
-        if not vuln:
-            return render_template('errors/404.html'), 404
-
-        # Altre vulnerabilità dello stesso host
-        related_vulns = db.execute('''
-            SELECT * FROM vulnerabilities 
-            WHERE ip_address = ? AND vuln_id != ?
-            ORDER BY severity, vuln_id
-            LIMIT 10
-        ''', (vuln['ip_address'], vuln_id)).fetchall()
-
-        # Altre occorrenze della stessa vulnerabilità
-        similar_vulns = []
-        if vuln['cve_id']:
-            similar_vulns = db.execute('''
-                SELECT v.*, h.hostname
-                FROM vulnerabilities v
-                LEFT JOIN hosts h ON v.ip_address = h.ip_address
-                WHERE v.cve_id = ? AND v.vuln_id != ?
-                ORDER BY v.ip_address
-            ''', (vuln['cve_id'], vuln_id)).fetchall()
-
-        return render_template('security/vulnerability_detail.html',
-                               vulnerability=vuln,
-                               related_vulns=related_vulns,
-                               similar_vulns=similar_vulns)
-
-    except Exception as e:
-        current_app.logger.error(f"Errore in vulnerability_detail per {vuln_id}: {e}")
-        return render_template('errors/500.html'), 500
+                               vulnerabilities=[],
+                               stats={'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'total': 0},
+                               pagination={},
+                               error=str(e))
 
 
 # ===========================
-# CVE DATABASE
+# CVE DETAILS
 # ===========================
-
-@security_bp.route('/cve-database')
-def cve_database():
-    """Database CVE identificati"""
-    try:
-        db = get_db()
-
-        search_cve = request.args.get('search', '').strip()
-        page = int(request.args.get('page', 1))
-        per_page = 30
-
-        # Query per CVE con statistiche
-        query = '''
-            SELECT cve_id, 
-                   COUNT(*) as occurrences,
-                   COUNT(DISTINCT ip_address) as affected_hosts,
-                   GROUP_CONCAT(DISTINCT severity) as severities,
-                   GROUP_CONCAT(DISTINCT vuln_type) as types,
-                   AVG(cvss_score) as avg_cvss,
-                   MAX(cvss_score) as max_cvss
-            FROM vulnerabilities 
-            WHERE cve_id IS NOT NULL AND cve_id != ""
-        '''
-
-        params = []
-        if search_cve:
-            query += ' AND cve_id LIKE ?'
-            params.append(f'%{search_cve}%')
-
-        query += '''
-            GROUP BY cve_id 
-            ORDER BY occurrences DESC, max_cvss DESC
-        '''
-
-        # Conteggio totale
-        count_query = f'''
-            SELECT COUNT(DISTINCT cve_id) 
-            FROM vulnerabilities 
-            WHERE cve_id IS NOT NULL AND cve_id != ""
-            {f" AND cve_id LIKE ?" if search_cve else ""}
-        '''
-        total_count = db.execute(count_query, params[:1] if search_cve else []).fetchone()[0]
-
-        # Paginazione
-        offset = (page - 1) * per_page
-        paginated_query = query + f' LIMIT {per_page} OFFSET {offset}'
-        cves_data = db.execute(paginated_query, params).fetchall()
-
-        pagination = {
-            'page': page,
-            'per_page': per_page,
-            'total': total_count,
-            'total_pages': (total_count + per_page - 1) // per_page,
-            'has_prev': page > 1,
-            'has_next': page < (total_count + per_page - 1) // per_page
-        }
-
-        # Statistiche CVE
-        cve_stats = {
-            'total_unique_cves': total_count,
-            'total_occurrences': db.execute('SELECT COUNT(*) FROM vulnerabilities WHERE cve_id IS NOT NULL').fetchone()[
-                0],
-            'hosts_with_cves': db.execute(
-                'SELECT COUNT(DISTINCT ip_address) FROM vulnerabilities WHERE cve_id IS NOT NULL').fetchone()[0]
-        }
-
-        # Top CVE per numero di host affetti
-        top_cves_by_hosts = db.execute('''
-            SELECT cve_id, COUNT(DISTINCT ip_address) as affected_hosts,
-                   MAX(cvss_score) as max_cvss, GROUP_CONCAT(DISTINCT severity) as severities
-            FROM vulnerabilities 
-            WHERE cve_id IS NOT NULL 
-            GROUP BY cve_id 
-            ORDER BY affected_hosts DESC 
-            LIMIT 10
-        ''').fetchall()
-
-        return render_template('security/cve_database.html',
-                               cves_data=cves_data,
-                               pagination=pagination,
-                               current_search=search_cve,
-                               cve_stats=cve_stats,
-                               top_cves_by_hosts=top_cves_by_hosts)
-
-    except Exception as e:
-        current_app.logger.error(f"Errore in cve_database: {e}")
-        return render_template('security/cve_database.html',
-                               cves_data=[], pagination={}, error=str(e))
-
 
 @security_bp.route('/cve/<cve_id>')
 def cve_detail(cve_id):
-    """Dettaglio specifico CVE"""
+    """Dettagli specifici di un CVE"""
     try:
         db = get_db()
 
-        # Tutte le occorrenze di questo CVE
+        # Trova tutte le occorrenze di questo CVE
         cve_occurrences = db.execute('''
             SELECT v.*, h.hostname, h.vendor
             FROM vulnerabilities v
@@ -446,7 +484,193 @@ def cve_detail(cve_id):
 
 
 # ===========================
-# SECURITY METRICS & REPORTING
+# VULNERABILITY DETAILS
+# ===========================
+
+@security_bp.route('/vulnerability/<int:vuln_id>')
+def vulnerability_detail(vuln_id):
+    """Dettaglio singola vulnerabilità"""
+    try:
+        db = get_db()
+
+        # Dettagli vulnerabilità
+        vulnerability = db.execute('''
+            SELECT v.*, h.hostname, h.vendor, h.os_info
+            FROM vulnerabilities v
+            LEFT JOIN hosts h ON v.ip_address = h.ip_address
+            WHERE v.id = ?
+        ''', (vuln_id,)).fetchone()
+
+        if not vulnerability:
+            return render_template('errors/404.html'), 404
+
+        return render_template('security/vulnerability_detail.html',
+                               vulnerability=vulnerability)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in vulnerability_detail per {vuln_id}: {e}")
+        return render_template('errors/500.html'), 500
+
+
+# ===========================
+# SCAN RESULTS
+# ===========================
+
+@security_bp.route('/scan-results')
+def scan_results():
+    """Lista risultati scansioni"""
+    try:
+        db = get_db()
+
+        # Filtri
+        scanner = request.args.get('scanner')
+        status = request.args.get('status')
+        date_from = request.args.get('date_from')
+        date_to = request.args.get('date_to')
+
+        query = 'SELECT * FROM scan_results'
+        params = []
+        conditions = []
+
+        if scanner:
+            conditions.append('scanner = ?')
+            params.append(scanner)
+
+        if status:
+            conditions.append('status = ?')
+            params.append(status)
+
+        if date_from:
+            conditions.append('start_time >= ?')
+            params.append(date_from)
+
+        if date_to:
+            conditions.append('start_time <= ?')
+            params.append(date_to + ' 23:59:59')
+
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
+
+        query += ' ORDER BY start_time DESC'
+
+        scan_results = db.execute(query, params).fetchall()
+
+        # Statistiche
+        stats = {
+            'total_scans': len(scan_results),
+            'successful_scans': len([s for s in scan_results if s['status'] == 'completed']),
+            'failed_scans': len([s for s in scan_results if s['status'] == 'failed']),
+            'vulnerabilities_found': db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0]
+        }
+
+        return render_template('security/scan_results.html',
+                               scan_results=scan_results,
+                               stats=stats)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in scan_results: {e}")
+        return render_template('security/scan_results.html',
+                               scan_results=[],
+                               stats={'total_scans': 0, 'successful_scans': 0, 'failed_scans': 0,
+                                      'vulnerabilities_found': 0},
+                               error=str(e))
+
+
+# ===========================
+# SCAN DETAIL
+# ===========================
+
+@security_bp.route('/scan/<int:scan_id>')
+def scan_detail(scan_id):
+    """Dettagli specifici di una scansione"""
+    try:
+        db = get_db()
+
+        # Dettagli scansione
+        scan = db.execute('SELECT * FROM scan_results WHERE id = ?', (scan_id,)).fetchone()
+
+        if not scan:
+            return render_template('errors/404.html'), 404
+
+        # Host scoperti in questa scansione
+        discovered_hosts = []
+        try:
+            discovered_hosts = db.execute('''
+                SELECT DISTINCT h.*, 
+                       COUNT(p.id) as open_ports_count,
+                       COUNT(v.id) as vulnerabilities_count
+                FROM hosts h
+                LEFT JOIN ports p ON h.ip_address = p.ip_address AND p.state = 'open'
+                LEFT JOIN vulnerabilities v ON h.ip_address = v.ip_address
+                WHERE h.scan_id = ?
+                GROUP BY h.ip_address
+                ORDER BY h.ip_address
+            ''', (scan_id,)).fetchall()
+        except:
+            pass
+
+        # Vulnerabilità trovate in questa scansione
+        vulnerabilities = []
+        try:
+            vulnerabilities = db.execute('''
+                SELECT v.*, h.hostname 
+                FROM vulnerabilities v
+                LEFT JOIN hosts h ON v.ip_address = h.ip_address
+                WHERE v.scan_id = ?
+                ORDER BY 
+                    CASE v.severity 
+                        WHEN 'CRITICAL' THEN 1 
+                        WHEN 'HIGH' THEN 2 
+                        WHEN 'MEDIUM' THEN 3 
+                        WHEN 'LOW' THEN 4 
+                        ELSE 5 
+                    END
+                LIMIT 20
+            ''', (scan_id,)).fetchall()
+        except:
+            pass
+
+        return render_template('security/scan_detail.html',
+                               scan=scan,
+                               discovered_hosts=discovered_hosts,
+                               vulnerabilities=vulnerabilities)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in scan_detail per {scan_id}: {e}")
+        return render_template('errors/500.html'), 500
+
+
+# ===========================
+# REPORTS
+# ===========================
+
+@security_bp.route('/reports')
+def reports():
+    """Gestione report di sicurezza"""
+    try:
+        db = get_db()
+
+        # Lista report esistenti (se hai una tabella reports)
+        reports_list = []
+        try:
+            reports_list = db.execute('''
+                SELECT * FROM security_reports 
+                ORDER BY created_at DESC 
+                LIMIT 20
+            ''').fetchall()
+        except:
+            # Se la tabella non esiste, lista vuota
+            pass
+
+        return render_template('security/reports.html', reports=reports_list)
+
+    except Exception as e:
+        current_app.logger.error(f"Errore in reports: {e}")
+        return render_template('security/reports.html', reports=[], error=str(e))
+
+
+# ===========================
+# SECURITY SUMMARY
 # ===========================
 
 @security_bp.route('/security-summary')
@@ -455,222 +679,158 @@ def security_summary():
     try:
         db = get_db()
 
-        # Risk Score per host (basato su vulnerabilità)
-        risk_scores = db.execute('''
+        # Dati per il summary
+        summary = {}
+
+        # Vulnerabilità per severità
+        severity_counts = db.execute('''
+            SELECT severity, COUNT(*) as count
+            FROM vulnerabilities 
+            GROUP BY severity
+        ''').fetchall()
+
+        summary['critical_vulnerabilities'] = 0
+        summary['high_vulnerabilities'] = 0
+        summary['medium_vulnerabilities'] = 0
+        summary['low_vulnerabilities'] = 0
+        summary['total_vulnerabilities'] = 0
+
+        for row in severity_counts:
+            severity = row['severity'].lower() if row['severity'] else 'unknown'
+            count = row['count']
+            summary['total_vulnerabilities'] += count
+            if severity == 'critical':
+                summary['critical_vulnerabilities'] = count
+            elif severity == 'high':
+                summary['high_vulnerabilities'] = count
+            elif severity == 'medium':
+                summary['medium_vulnerabilities'] = count
+            elif severity == 'low':
+                summary['low_vulnerabilities'] = count
+
+        # Host totali e affetti
+        summary['total_hosts'] = db.execute('SELECT COUNT(*) FROM hosts').fetchone()[0]
+        summary['affected_hosts'] = db.execute('SELECT COUNT(DISTINCT ip_address) FROM vulnerabilities').fetchone()[0]
+
+        # Security score
+        if summary['total_vulnerabilities'] > 0:
+            penalty = (summary['critical_vulnerabilities'] * 10 +
+                       summary['high_vulnerabilities'] * 5 +
+                       summary['medium_vulnerabilities'] * 2 +
+                       summary['low_vulnerabilities'] * 1)
+            summary['security_score'] = max(0, 100 - penalty)
+        else:
+            summary['security_score'] = 100
+
+        # Top host vulnerabili
+        top_vulnerable_hosts = db.execute('''
             SELECT v.ip_address, h.hostname,
-                   SUM(CASE v.severity 
-                       WHEN 'CRITICAL' THEN 10 
-                       WHEN 'HIGH' THEN 7 
-                       WHEN 'MEDIUM' THEN 4 
-                       WHEN 'LOW' THEN 1 
-                       ELSE 0 
-                   END) as risk_score,
-                   COUNT(*) as total_vulns,
-                   SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count
+                   COUNT(*) as total_vulnerabilities,
+                   SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count,
+                   SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_count,
+                   SUM(CASE WHEN v.severity = 'MEDIUM' THEN 1 ELSE 0 END) as medium_count,
+                   SUM(CASE WHEN v.severity = 'LOW' THEN 1 ELSE 0 END) as low_count
             FROM vulnerabilities v
             LEFT JOIN hosts h ON v.ip_address = h.ip_address
             GROUP BY v.ip_address, h.hostname
-            ORDER BY risk_score DESC
-            LIMIT 20
+            ORDER BY total_vulnerabilities DESC
+            LIMIT 10
         ''').fetchall()
 
-        # Trend temporale (se ci sono timestamp)
-        vuln_timeline = db.execute('''
-            SELECT DATE(h.scan_id) as scan_date,
-                   COUNT(*) as vulns_found
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            WHERE h.scan_id IS NOT NULL
-            GROUP BY scan_date
-            ORDER BY scan_date DESC
-            LIMIT 30
+        # Calcola risk score per ogni host
+        for host in top_vulnerable_hosts:
+            risk_score = (host['critical_count'] * 10 +
+                          host['high_count'] * 5 +
+                          host['medium_count'] * 2 +
+                          host['low_count'] * 1)
+            host = dict(host)
+            host['risk_score'] = min(100, risk_score)
+
+        # Top CVE
+        top_cves = db.execute('''
+            SELECT cve_id, 
+                   COUNT(*) as total_occurrences,
+                   COUNT(DISTINCT ip_address) as affected_hosts,
+                   MAX(severity) as max_severity,
+                   MAX(cvss_score) as max_cvss_score,
+                   MIN(first_seen) as first_seen
+            FROM vulnerabilities 
+            WHERE cve_id IS NOT NULL AND cve_id != ''
+            GROUP BY cve_id
+            ORDER BY total_occurrences DESC
+            LIMIT 10
         ''').fetchall()
 
-        # Distribuzione per servizio
-        service_vulns = db.execute('''
-            SELECT s.service_name, COUNT(*) as vuln_count,
-                   COUNT(DISTINCT v.ip_address) as hosts_affected
-            FROM vulnerabilities v
-            LEFT JOIN services s ON v.ip_address = s.ip_address AND v.port_number = s.port_number
-            WHERE s.service_name IS NOT NULL
-            GROUP BY s.service_name
-            ORDER BY vuln_count DESC
-            LIMIT 15
-        ''').fetchall()
-
-        # Compliance metrics (esempio)
-        compliance_metrics = {
-            'hosts_with_critical': db.execute('''
-                SELECT COUNT(DISTINCT ip_address) 
-                FROM vulnerabilities WHERE severity = 'CRITICAL'
-            ''').fetchone()[0],
-            'unpatched_systems': db.execute('''
-                SELECT COUNT(DISTINCT ip_address) 
-                FROM vulnerabilities WHERE cve_id IS NOT NULL
-            ''').fetchone()[0],
-            'exposed_services': db.execute('''
-                SELECT COUNT(*) 
-                FROM services s 
-                JOIN ports p ON s.ip_address = p.ip_address AND s.port_number = p.port_number
-                WHERE p.state = 'open'
-            ''').fetchone()[0]
+        # Dati per i trend (mockup - potresti implementare con dati reali)
+        trends_data = {
+            'labels': ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            'critical': [5, 8, 3, 7],
+            'high': [12, 15, 9, 11]
         }
 
         return render_template('security/security_summary.html',
-                               risk_scores=risk_scores,
-                               vuln_timeline=vuln_timeline,
-                               service_vulns=service_vulns,
-                               compliance_metrics=compliance_metrics)
+                               summary=summary,
+                               current_time=datetime.now(),
+                               top_vulnerable_hosts=top_vulnerable_hosts,
+                               top_cves=top_cves,
+                               trends_data=trends_data)
 
     except Exception as e:
         current_app.logger.error(f"Errore in security_summary: {e}")
-        return render_template('security/security_summary.html', error=str(e))
+        return render_template('security/security_summary.html',
+                               summary={'security_score': 0, 'total_vulnerabilities': 0},
+                               top_vulnerable_hosts=[],
+                               top_cves=[],
+                               error=str(e))
 
 
 # ===========================
 # API ENDPOINTS
 # ===========================
 
-@security_bp.route('/api/vulnerabilities')
-def api_vulnerabilities():
-    """API endpoint per vulnerabilità in formato JSON"""
-    try:
-        db = get_db()
-
-        # Parametri query
-        severity = request.args.get('severity')
-        limit = int(request.args.get('limit', 100))
-
-        query = '''
-            SELECT v.vuln_id, v.ip_address, v.port_number, v.protocol,
-                   v.severity, v.title, v.vuln_type, v.cve_id, v.cvss_score,
-                   h.hostname
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-        '''
-
-        params = []
-        if severity:
-            query += ' WHERE v.severity = ?'
-            params.append(severity.upper())
-
-        query += ' ORDER BY v.severity, v.ip_address LIMIT ?'
-        params.append(limit)
-
-        vulns_data = db.execute(query, params).fetchall()
-
-        # Converti in lista di dizionari
-        vulns_list = []
-        for vuln in vulns_data:
-            vulns_list.append({
-                'vuln_id': vuln['vuln_id'],
-                'ip_address': vuln['ip_address'],
-                'hostname': vuln['hostname'],
-                'port': f"{vuln['port_number']}/{vuln['protocol']}" if vuln['port_number'] else None,
-                'severity': vuln['severity'],
-                'title': vuln['title'],
-                'type': vuln['vuln_type'],
-                'cve_id': vuln['cve_id'],
-                'cvss_score': vuln['cvss_score']
-            })
-
-        return jsonify(vulns_list)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@security_bp.route('/api/security-stats')
-def api_security_stats():
-    """API endpoint per statistiche sicurezza"""
+@security_bp.route('/api/stats')
+def api_stats():
+    """API endpoint per statistiche security"""
     try:
         db = get_db()
 
         stats = {
-            'total_vulnerabilities': db.execute('SELECT COUNT(*) FROM vulnerabilities').fetchone()[0],
-            'hosts_with_vulns': db.execute('SELECT COUNT(DISTINCT ip_address) FROM vulnerabilities').fetchone()[0],
-            'critical_vulns': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'CRITICAL'").fetchone()[
-                0],
-            'high_vulns': db.execute("SELECT COUNT(*) FROM vulnerabilities WHERE severity = 'HIGH'").fetchone()[0],
-            'unique_cves':
-                db.execute('SELECT COUNT(DISTINCT cve_id) FROM vulnerabilities WHERE cve_id IS NOT NULL').fetchone()[0]
+            'vulnerabilities': {
+                'total': 0,
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0
+            },
+            'hosts': {
+                'total': 0,
+                'affected': 0
+            }
         }
 
-        # Distribuzione per severità
-        severity_dist = db.execute('''
+        # Conta vulnerabilità
+        vuln_counts = db.execute('''
             SELECT severity, COUNT(*) as count
             FROM vulnerabilities 
             GROUP BY severity
         ''').fetchall()
 
-        stats['severity_distribution'] = {s['severity']: s['count'] for s in severity_dist}
+        for row in vuln_counts:
+            severity = row['severity'].lower() if row['severity'] else 'unknown'
+            if severity in stats['vulnerabilities']:
+                stats['vulnerabilities'][severity] = row['count']
+                stats['vulnerabilities']['total'] += row['count']
 
-        # Top CVE
-        top_cves = db.execute('''
-            SELECT cve_id, COUNT(*) as count
-            FROM vulnerabilities 
-            WHERE cve_id IS NOT NULL
-            GROUP BY cve_id 
-            ORDER BY count DESC 
-            LIMIT 5
-        ''').fetchall()
+        # Conta host
+        total_hosts = db.execute('SELECT COUNT(*) as count FROM hosts').fetchone()
+        if total_hosts:
+            stats['hosts']['total'] = total_hosts['count']
 
-        stats['top_cves'] = [{'cve': c['cve_id'], 'count': c['count']} for c in top_cves]
+        affected_hosts = db.execute('SELECT COUNT(DISTINCT ip_address) as count FROM vulnerabilities').fetchone()
+        if affected_hosts:
+            stats['hosts']['affected'] = affected_hosts['count']
 
         return jsonify(stats)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@security_bp.route('/api/risk-assessment')
-def api_risk_assessment():
-    """API endpoint per risk assessment"""
-    try:
-        db = get_db()
-
-        # Calcola risk score per ogni host
-        risk_data = db.execute('''
-            SELECT v.ip_address, h.hostname,
-                   COUNT(*) as total_vulns,
-                   SUM(CASE v.severity 
-                       WHEN 'CRITICAL' THEN 10 
-                       WHEN 'HIGH' THEN 7 
-                       WHEN 'MEDIUM' THEN 4 
-                       WHEN 'LOW' THEN 1 
-                       ELSE 0 
-                   END) as risk_score,
-                   SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_count,
-                   SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_count
-            FROM vulnerabilities v
-            LEFT JOIN hosts h ON v.ip_address = h.ip_address
-            GROUP BY v.ip_address, h.hostname
-            ORDER BY risk_score DESC
-        ''').fetchall()
-
-        # Categorizza risk levels
-        risk_levels = []
-        for host in risk_data:
-            if host['risk_score'] >= 50:
-                risk_level = 'Critical'
-            elif host['risk_score'] >= 20:
-                risk_level = 'High'
-            elif host['risk_score'] >= 10:
-                risk_level = 'Medium'
-            else:
-                risk_level = 'Low'
-
-            risk_levels.append({
-                'ip_address': host['ip_address'],
-                'hostname': host['hostname'],
-                'risk_score': host['risk_score'],
-                'risk_level': risk_level,
-                'total_vulns': host['total_vulns'],
-                'critical_count': host['critical_count'],
-                'high_count': host['high_count']
-            })
-
-        return jsonify(risk_levels)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

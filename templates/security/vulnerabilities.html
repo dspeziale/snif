@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Vulnerabilities - Security{% endblock %}
+{% block page_title %}Vulnerabilities Management{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('security.overview') }}">Security</a></li>
+<li class="breadcrumb-item active">Vulnerabilities</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Filtri e ricerca -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-funnel"></i> Filters & Search
+      </h3>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{{ url_for('security.vulnerabilities') }}">
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Severity</label>
+            <select name="severity" class="form-select">
+              <option value="">All Severities</option>
+              <option value="CRITICAL" {% if request.args.get('severity') == 'CRITICAL' %}selected{% endif %}>Critical</option>
+              <option value="HIGH" {% if request.args.get('severity') == 'HIGH' %}selected{% endif %}>High</option>
+              <option value="MEDIUM" {% if request.args.get('severity') == 'MEDIUM' %}selected{% endif %}>Medium</option>
+              <option value="LOW" {% if request.args.get('severity') == 'LOW' %}selected{% endif %}>Low</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">CVE ID</label>
+            <input type="text" name="cve_id" class="form-control" placeholder="CVE-2023-1234"
+                   value="{{ request.args.get('cve_id', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Host IP</label>
+            <input type="text" name="ip_address" class="form-control" placeholder="192.168.1.1"
+                   value="{{ request.args.get('ip_address', '') }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Search
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Statistiche vulnerabilità -->
+  <div class="row mb-3">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ stats.critical }}</h3>
+          <p>Critical</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ stats.high }}</h3>
+          <p>High</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ stats.medium }}</h3>
+          <p>Medium</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-info-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ stats.low }}</h3>
+          <p>Low</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabella vulnerabilità -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-shield-exclamation"></i> Vulnerabilities
+        <span class="badge bg-secondary ms-2">{{ vulnerabilities|length }} results</span>
+      </h3>
+      <div class="card-tools">
+        <a href="{{ url_for('security.vulnerabilities') }}?export=csv" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-download"></i> Export CSV
+        </a>
+      </div>
+    </div>
+    <div class="card-body table-responsive p-0">
+      <table class="table table-hover text-nowrap">
+        <thead>
+          <tr>
+            <th>CVE ID</th>
+            <th>Host</th>
+            <th>Severity</th>
+            <th>CVSS Score</th>
+            <th>Type</th>
+            <th>Port</th>
+            <th>Service</th>
+            <th>First Seen</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vuln in vulnerabilities %}
+          <tr>
+            <td>
+              {% if vuln.cve_id %}
+              <a href="{{ url_for('security.cve_detail', cve_id=vuln.cve_id) }}" class="text-decoration-none">
+                <code>{{ vuln.cve_id }}</code>
+              </a>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('network.host_detail', ip_address=vuln.ip_address) }}" class="text-decoration-none">
+                {{ vuln.ip_address }}
+              </a>
+              {% if vuln.hostname %}
+              <br><small class="text-muted">{{ vuln.hostname }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if vuln.severity == 'CRITICAL' %}
+              <span class="badge bg-danger">{{ vuln.severity }}</span>
+              {% elif vuln.severity == 'HIGH' %}
+              <span class="badge bg-warning">{{ vuln.severity }}</span>
+              {% elif vuln.severity == 'MEDIUM' %}
+              <span class="badge bg-info">{{ vuln.severity }}</span>
+              {% elif vuln.severity == 'LOW' %}
+              <span class="badge bg-success">{{ vuln.severity }}</span>
+              {% else %}
+              <span class="badge bg-secondary">Unknown</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if vuln.cvss_score %}
+              <span class="badge bg-{{ 'danger' if vuln.cvss_score >= 9 else 'warning' if vuln.cvss_score >= 7 else 'info' if vuln.cvss_score >= 4 else 'success' }}">
+                {{ "%.1f"|format(vuln.cvss_score) }}
+              </span>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if vuln.vuln_type %}
+              <small class="text-muted">{{ vuln.vuln_type }}</small>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if vuln.port %}
+              <code>{{ vuln.port }}</code>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if vuln.service %}
+              <small>{{ vuln.service }}</small>
+              {% else %}
+              <span class="text-muted">N/A</span>
+              {% endif %}
+            </td>
+            <td>
+              <small class="text-muted">{{ vuln.first_seen|format_datetime }}</small>
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a href="{{ url_for('security.vulnerability_detail', vuln_id=vuln.id) }}"
+                   class="btn btn-outline-primary btn-sm" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </a>
+                {% if vuln.cve_id %}
+                <a href="https://nvd.nist.gov/vuln/detail/{{ vuln.cve_id }}"
+                   target="_blank" class="btn btn-outline-info btn-sm" title="View on NVD">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="9" class="text-center py-4">
+              <div class="text-muted">
+                <i class="bi bi-shield-check fs-1"></i>
+                <p class="mt-2">No vulnerabilities found matching your criteria.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paginazione -->
+  {% if pagination %}
+  <nav aria-label="Vulnerabilities pagination" class="mt-3">
+    <ul class="pagination justify-content-center">
+      {% if pagination.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('security.vulnerabilities', page=pagination.prev_num, **request.args) }}">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+      </li>
+      {% endif %}
+
+      {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+          {% if page_num != pagination.page %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('security.vulnerabilities', page=page_num, **request.args) }}">{{ page_num }}</a>
+          </li>
+          {% else %}
+          <li class="page-item active">
+            <span class="page-link">{{ page_num }}</span>
+          </li>
+          {% endif %}
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">…</span>
+        </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('security.vulnerabilities', page=pagination.next_num, **request.args) }}">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

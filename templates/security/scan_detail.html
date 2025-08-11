@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Details - Security{% endblock %}
+{% block page_title %}Scan Details: {{ scan.scan_id or scan.id }}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('security.overview') }}">Security</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('security.scan_results') }}">Scan Results</a></li>
+<li class="breadcrumb-item active">{{ scan.scan_id or scan.id }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Scan Header -->
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-search"></i> Scan Information
+        {% if scan.status == 'completed' %}
+        <span class="badge bg-success ms-2">Completed</span>
+        {% elif scan.status == 'running' %}
+        <span class="badge bg-primary ms-2">
+          <i class="bi bi-arrow-clockwise"></i> Running
+        </span>
+        {% elif scan.status == 'failed' %}
+        <span class="badge bg-danger ms-2">Failed</span>
+        {% elif scan.status == 'cancelled' %}
+        <span class="badge bg-secondary ms-2">Cancelled</span>
+        {% else %}
+        <span class="badge bg-warning ms-2">{{ scan.status|title }}</span>
+        {% endif %}
+      </h3>
+      <div class="card-tools">
+        {% if scan.status == 'running' %}
+        <button class="btn btn-outline-danger btn-sm" onclick="cancelScan('{{ scan.id }}')">
+          <i class="bi bi-stop"></i> Cancel Scan
+        </button>
+        {% endif %}
+        {% if scan.status in ['completed', 'failed'] %}
+        <a href="{{ url_for('security.scan_results', download=scan.id) }}"
+           class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-download"></i> Download Report
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>Scan Configuration</h5>
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Scan ID:</strong></td>
+              <td><code>{{ scan.scan_id or scan.id }}</code></td>
+            </tr>
+            <tr>
+              <td><strong>Scanner:</strong></td>
+              <td><span class="badge bg-info">{{ scan.scanner|title }}</span></td>
+            </tr>
+            <tr>
+              <td><strong>Target:</strong></td>
+              <td>
+                {% if scan.target_type == 'host' %}
+                <i class="bi bi-hdd"></i> Host: {{ scan.target }}
+                {% elif scan.target_type == 'network' %}
+                <i class="bi bi-diagram-3"></i> Network: {{ scan.target }}
+                {% elif scan.target_type == 'port_range' %}
+                <i class="bi bi-hdd-network"></i> Port Range: {{ scan.target }}
+                {% else %}
+                <i class="bi bi-question-circle"></i> {{ scan.target }}
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Scan Type:</strong></td>
+              <td>
+                {% if scan.scan_type %}
+                <span class="badge bg-secondary">{{ scan.scan_type|title }}</span>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Options:</strong></td>
+              <td>
+                {% if scan.scan_options %}
+                <small class="text-muted">{{ scan.scan_options }}</small>
+                {% else %}
+                <span class="text-muted">Default</span>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <h5>Execution Details</h5>
+          <table class="table table-sm">
+            <tr>
+              <td><strong>Start Time:</strong></td>
+              <td><small class="text-muted">{{ scan.start_time|format_datetime }}</small></td>
+            </tr>
+            <tr>
+              <td><strong>End Time:</strong></td>
+              <td>
+                {% if scan.end_time %}
+                <small class="text-muted">{{ scan.end_time|format_datetime }}</small>
+                {% else %}
+                <span class="text-muted">Still running</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Duration:</strong></td>
+              <td>
+                {% if scan.end_time and scan.start_time %}
+                {% set duration = (scan.end_time|format_datetime_obj - scan.start_time|format_datetime_obj).total_seconds() %}
+                <small class="text-muted">
+                  {% if duration < 60 %}
+                  {{ "%.0f"|format(duration) }} seconds
+                  {% elif duration < 3600 %}
+                  {{ "%.1f"|format(duration/60) }} minutes
+                  {% else %}
+                  {{ "%.1f"|format(duration/3600) }} hours
+                  {% endif %}
+                </small>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Progress:</strong></td>
+              <td>
+                {% if scan.status == 'running' and scan.progress %}
+                <div class="progress" style="height: 20px; width: 200px;">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated"
+                       role="progressbar"
+                       style="width: {{ scan.progress }}%">
+                    {{ scan.progress }}%
+                  </div>
+                </div>
+                {% elif scan.status == 'completed' %}
+                <span class="badge bg-success">100% Complete</span>
+                {% elif scan.status == 'failed' %}
+                <span class="badge bg-danger">Failed</span>
+                {% else %}
+                <span class="text-muted">{{ scan.status|title }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>User:</strong></td>
+              <td>
+                {% if scan.user %}
+                {{ scan.user }}
+                {% else %}
+                <span class="text-muted">System</span>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Results Summary -->
+  {% if scan.status in ['completed', 'failed'] %}
+  <div class="row mb-3">
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-danger">
+        <div class="inner">
+          <h3>{{ scan.critical_count or 0 }}</h3>
+          <p>Critical</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-warning">
+        <div class="inner">
+          <h3>{{ scan.high_count or 0 }}</h3>
+          <p>High</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-info">
+        <div class="inner">
+          <h3>{{ scan.medium_count or 0 }}</h3>
+          <p>Medium</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-info-circle"></i>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-6">
+      <div class="small-box bg-success">
+        <div class="inner">
+          <h3>{{ scan.low_count or 0 }}</h3>
+          <p>Low</p>
+        </div>
+        <div class="icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Discovered Hosts -->
+  {% if discovered_hosts %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-hdd-stack"></i> Discovered Hosts
+        <span class="badge bg-secondary ms-2">{{ discovered_hosts|length }} hosts</span>
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Hostname</th>
+              <th>Status</th>
+              <th>OS</th>
+              <th>Open Ports</th>
+              <th>Vulnerabilities</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for host in discovered_hosts %}
+            <tr>
+              <td>
+                <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}" class="text-decoration-none">
+                  {{ host.ip_address }}
+                </a>
+              </td>
+              <td>
+                {% if host.hostname %}
+                {{ host.hostname }}
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge bg-{{ 'success' if host.status == 'up' else 'danger' if host.status == 'down' else 'warning' }}">
+                  {{ host.status|title }}
+                </span>
+              </td>
+              <td>
+                {% if host.os_info %}
+                <small class="text-muted">{{ host.os_info }}</small>
+                {% else %}
+                <span class="text-muted">Unknown</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if host.open_ports_count %}
+                <span class="badge bg-info">{{ host.open_ports_count }}</span>
+                {% else %}
+                <span class="text-muted">0</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if host.vulnerabilities_count %}
+                <span class="badge bg-danger">{{ host.vulnerabilities_count }}</span>
+                {% else %}
+                <span class="badge bg-success">0</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('network.host_detail', ip_address=host.ip_address) }}"
+                   class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Vulnerabilities Found -->
+  {% if vulnerabilities %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-shield-exclamation"></i> Vulnerabilities Found
+        <span class="badge bg-secondary ms-2">{{ vulnerabilities|length }} vulnerabilities</span>
+      </h3>
+      <div class="card-tools">
+        <a href="{{ url_for('security.vulnerabilities', scan_id=scan.id) }}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-list"></i> View All
+        </a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Host</th>
+              <th>Severity</th>
+              <th>CVSS</th>
+              <th>Port</th>
+              <th>Service</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vuln in vulnerabilities[:10] %}
+            <tr>
+              <td>
+                {% if vuln.cve_id %}
+                <a href="{{ url_for('security.cve_detail', cve_id=vuln.cve_id) }}" class="text-decoration-none">
+                  <code>{{ vuln.cve_id }}</code>
+                </a>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('network.host_detail', ip_address=vuln.ip_address) }}" class="text-decoration-none">
+                  {{ vuln.ip_address }}
+                </a>
+              </td>
+              <td>
+                <span class="badge bg-{{ 'danger' if vuln.severity == 'CRITICAL' else 'warning' if vuln.severity == 'HIGH' else 'info' if vuln.severity == 'MEDIUM' else 'success' }}">
+                  {{ vuln.severity }}
+                </span>
+              </td>
+              <td>
+                {% if vuln.cvss_score %}
+                <span class="badge bg-{{ 'danger' if vuln.cvss_score >= 9 else 'warning' if vuln.cvss_score >= 7 else 'info' if vuln.cvss_score >= 4 else 'success' }}">
+                  {{ "%.1f"|format(vuln.cvss_score) }}
+                </span>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vuln.port %}
+                <code>{{ vuln.port }}</code>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vuln.service %}
+                <small>{{ vuln.service }}</small>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vuln.vuln_type %}
+                <small class="text-muted">{{ vuln.vuln_type }}</small>
+                {% else %}
+                <span class="text-muted">N/A</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('security.vulnerability_detail', vuln_id=vuln.id) }}"
+                   class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if vulnerabilities|length > 10 %}
+      <div class="text-center mt-3">
+        <a href="{{ url_for('security.vulnerabilities', scan_id=scan.id) }}" class="btn btn-outline-primary">
+          <i class="bi bi-list"></i> View All {{ vulnerabilities|length }} Vulnerabilities
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Scan Log -->
+  {% if scan.log_output %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-journal-text"></i> Scan Log
+      </h3>
+    </div>
+    <div class="card-body">
+      <pre class="bg-light p-3 border rounded" style="max-height: 400px; overflow-y: auto;"><code>{{ scan.log_output }}</code></pre>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Raw Output -->
+  {% if scan.raw_output %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-terminal"></i> Raw Scan Output
+      </h3>
+      <div class="card-tools">
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleRawOutput()">
+          <i class="bi bi-eye"></i> Toggle
+        </button>
+      </div>
+    </div>
+    <div class="card-body" id="rawOutputContainer" style="display: none;">
+      <pre class="bg-dark text-light p-3 border rounded" style="max-height: 500px; overflow-y: auto;"><code>{{ scan.raw_output }}</code></pre>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Error Details -->
+  {% if scan.status == 'failed' and scan.error_message %}
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="bi bi-exclamation-triangle"></i> Error Details
+      </h3>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-danger">
+        <h5>Scan Failed</h5>
+        <p class="mb-0">{{ scan.error_message }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Navigation -->
+  <div class="mt-3">
+    <a href="{{ url_for('security.scan_results') }}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Scan Results
+    </a>
+    {% if scan.vulnerabilities_count > 0 %}
+    <a href="{{ url_for('security.vulnerabilities', scan_id=scan.id) }}" class="btn btn-outline-warning">
+      <i class="bi bi-shield-exclamation"></i> View All Vulnerabilities
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function cancelScan(scanId) {
+    if (confirm('Are you sure you want to cancel this scan?')) {
+        fetch(`/security/api/scans/${scanId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to cancel scan: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to cancel scan');
+        });
+    }
+}
+
+function toggleRawOutput() {
+    const container = document.getElementById('rawOutputContainer');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+// Auto-refresh for running scans
+document.addEventListener('DOMContentLoaded', function() {
+    {% if scan.status == 'running' %}
+    setTimeout(() => {
+        location.reload();
+    }, 10000); // Refresh every 10 seconds for running scans
+    {% endif %}
+});
+</script>
+{% endblock %}
