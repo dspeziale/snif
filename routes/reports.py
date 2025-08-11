@@ -122,7 +122,37 @@ def vulnerability_report():
 @reports_bp.route('/export')
 def export():
     """Pagina per export dati"""
-    return render_template('reports/export.html')
+    # Aggiungi context data per il template
+    from datetime import datetime, timedelta
+
+    context_data = {
+        'current_time': datetime.now(),
+        'recent_exports': [
+            {
+                'time': datetime.now() - timedelta(hours=2),
+                'type': 'Vulnerabilities',
+                'format': 'PDF',
+                'records': 245,
+                'status': 'Completed'
+            },
+            {
+                'time': datetime.now() - timedelta(days=1),
+                'type': 'All Hosts',
+                'format': 'CSV',
+                'records': 89,
+                'status': 'Completed'
+            },
+            {
+                'time': datetime.now() - timedelta(days=3),
+                'type': 'Complete Dataset',
+                'format': 'JSON',
+                'records': 1247,
+                'status': 'Expired'
+            }
+        ]
+    }
+
+    return render_template('reports/export.html', **context_data)
 
 
 @reports_bp.route('/history')

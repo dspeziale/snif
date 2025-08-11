@@ -1,250 +1,298 @@
 {% extends "base.html" %}
+{% set active_page = 'analytics' %}
 
-{% block title %}Analytics Overview - AdminLTE{% endblock %}
-{% block page_title %}Analytics & Metrics{% endblock %}
-
-{% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-<li class="breadcrumb-item active">Analytics</li>
-{% endblock %}
+{% block title %}Analytics Overview{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h3 mb-0">
+            <i class="bi bi-graph-up-arrow text-primary"></i> Analytics & Metrics
+          </h1>
+          <p class="text-muted">Comprehensive system analytics and performance insights</p>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-primary" onclick="generateReport()">
+            <i class="bi bi-file-earmark-text"></i> Generate Report
+          </button>
+          <button type="button" class="btn btn-outline-success" onclick="exportData()">
+            <i class="bi bi-download"></i> Export Data
+          </button>
+          <button type="button" class="btn btn-outline-info" onclick="scheduleReport()">
+            <i class="bi bi-calendar-check"></i> Schedule Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Health Overview -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="position-relative d-inline-block">
+            <canvas id="healthScoreChart" width="120" height="120"></canvas>
+            <div class="position-absolute top-50 start-50 translate-middle">
+              <h3 class="mb-0 text-success">{{ health_metrics.overall_score if health_metrics else 92 }}%</h3>
+              <small class="text-muted">Health</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <strong>Overall System Health</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-9">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">System Components Health</h5>
+          <div class="row">
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-primary">{{ health_metrics.network_health if health_metrics else 95 }}%</h4>
+                <p class="text-muted mb-0">Network</p>
+                <div class="progress progress-sm">
+                  <div class="progress-bar bg-primary" style="width: {{ health_metrics.network_health if health_metrics else 95 }}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-warning">{{ health_metrics.security_health if health_metrics else 88 }}%</h4>
+                <p class="text-muted mb-0">Security</p>
+                <div class="progress progress-sm">
+                  <div class="progress-bar bg-warning" style="width: {{ health_metrics.security_health if health_metrics else 88 }}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-success">{{ health_metrics.device_health if health_metrics else 93 }}%</h4>
+                <p class="text-muted mb-0">Devices</p>
+                <div class="progress progress-sm">
+                  <div class="progress-bar bg-success" style="width: {{ health_metrics.device_health if health_metrics else 93 }}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="text-center">
+                <h4 class="text-info">90%</h4>
+                <p class="text-muted mb-0">Performance</p>
+                <div class="progress progress-sm">
+                  <div class="progress-bar bg-info" style="width: 90%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-hdd-network fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-2 fw-bold">{{ quick_stats.total_devices if quick_stats else 156 }}</div>
+              <div class="fs-6">Total Devices</div>
+              <div class="progress progress-sm bg-white bg-opacity-25 mt-2">
+                <div class="progress-bar bg-white" style="width: 78%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-check-circle fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-2 fw-bold">{{ quick_stats.active_devices if quick_stats else 142 }}</div>
+              <div class="fs-6">Active Devices</div>
+              <div class="progress progress-sm bg-white bg-opacity-25 mt-2">
+                <div class="progress-bar bg-white" style="width: 91%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-danger">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-shield-exclamation fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-2 fw-bold">{{ quick_stats.total_vulnerabilities if quick_stats else 89 }}</div>
+              <div class="fs-6">Vulnerabilities</div>
+              <div class="progress progress-sm bg-white bg-opacity-25 mt-2">
+                <div class="progress-bar bg-white" style="width: 34%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+              <i class="bi bi-exclamation-triangle fs-2"></i>
+            </div>
+            <div class="flex-grow-1 ms-3 text-end">
+              <div class="fs-2 fw-bold">{{ quick_stats.critical_vulnerabilities if quick_stats else 12 }}</div>
+              <div class="fs-6">Critical Issues</div>
+              <div class="progress progress-sm bg-white bg-opacity-25 mt-2">
+                <div class="progress-bar bg-white" style="width: 13%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Analytics Categories -->
-  <div class="row">
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-info">
-        <div class="inner">
-          <h3><i class="bi bi-diagram-3"></i></h3>
-          <p>Network Analytics</p>
+  <div class="row mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="bi bi-diagram-3 text-info" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="card-title">Network Analytics</h5>
+          <p class="card-text">Network topology, device discovery, and connectivity analysis.</p>
         </div>
-        <div class="icon">
-          <i class="bi bi-speedometer2"></i>
+        <div class="card-footer">
+          <a href="{{ url_for('analytics.network') }}" class="btn btn-outline-info w-100">
+            <i class="bi bi-speedometer2"></i> View Network Metrics
+          </a>
         </div>
-        <a href="{{ url_for('analytics.network') }}" class="small-box-footer">
-          View Network Metrics <i class="fas fa-arrow-circle-right"></i>
-        </a>
       </div>
     </div>
 
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-success">
-        <div class="inner">
-          <h3><i class="bi bi-shield-check"></i></h3>
-          <p>Security Analytics</p>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="card-title">Security Analytics</h5>
+          <p class="card-text">Vulnerability trends, risk assessment, and security posture analysis.</p>
         </div>
-        <div class="icon">
-          <i class="bi bi-graph-up-arrow"></i>
+        <div class="card-footer">
+          <a href="{{ url_for('analytics.security') }}" class="btn btn-outline-success w-100">
+            <i class="bi bi-graph-up-arrow"></i> View Security Metrics
+          </a>
         </div>
-        <a href="{{ url_for('analytics.security') }}" class="small-box-footer">
-          View Security Metrics <i class="fas fa-arrow-circle-right"></i>
-        </a>
       </div>
     </div>
 
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-warning">
-        <div class="inner">
-          <h3><i class="bi bi-graph-down"></i></h3>
-          <p>Performance Trends</p>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="bi bi-graph-down text-warning" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="card-title">Performance Trends</h5>
+          <p class="card-text">Historical analysis, performance tracking, and trend identification.</p>
         </div>
-        <div class="icon">
-          <i class="bi bi-activity"></i>
+        <div class="card-footer">
+          <a href="{{ url_for('analytics.trends') }}" class="btn btn-outline-warning w-100">
+            <i class="bi bi-activity"></i> View Trends
+          </a>
         </div>
-        <a href="{{ url_for('analytics.trends') }}" class="small-box-footer">
-          View Trends <i class="fas fa-arrow-circle-right"></i>
-        </a>
       </div>
     </div>
 
-    <div class="col-lg-3 col-6">
-      <div class="small-box bg-danger">
-        <div class="inner">
-          <h3><i class="bi bi-bar-chart-steps"></i></h3>
-          <p>Comparative Analysis</p>
+    <div class="col-lg-3 col-md-6">
+      <div class="card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="bi bi-bar-chart-steps text-danger" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="card-title">Comparative Analysis</h5>
+          <p class="card-text">Benchmarking, comparative metrics, and performance comparison.</p>
         </div>
-        <div class="icon">
-          <i class="bi bi-clipboard-data"></i>
+        <div class="card-footer">
+          <a href="{{ url_for('analytics.comparative') }}" class="btn btn-outline-danger w-100">
+            <i class="bi bi-clipboard-data"></i> Compare Metrics
+          </a>
         </div>
-        <a href="{{ url_for('analytics.comparative') }}" class="small-box-footer">
-          Compare Data <i class="fas fa-arrow-circle-right"></i>
-        </a>
       </div>
     </div>
   </div>
 
-  <!-- Key Metrics Dashboard -->
-  <div class="row">
-    <!-- Network Health Score -->
-    <div class="col-md-4">
+  <!-- Charts and Visualizations -->
+  <div class="row mb-4">
+    <div class="col-md-6">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-heart-pulse"></i> Network Health Score
-          </h3>
+          <h5 class="card-title mb-0">
+            <i class="bi bi-bar-chart"></i> Risk Distribution
+          </h5>
         </div>
         <div class="card-body">
-          <div class="d-flex justify-content-center">
-            <canvas id="healthScoreChart" width="200" height="200"></canvas>
-          </div>
-          <div class="text-center mt-3">
-            <h4 class="text-success">92%</h4>
-            <p class="text-muted">Overall network health is good</p>
-          </div>
+          <canvas id="riskChart" height="300"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Risk Distribution -->
-    <div class="col-md-4">
+    <div class="col-md-6">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-exclamation-triangle"></i> Risk Distribution
-          </h3>
-        </div>
-        <div class="card-body">
-          <canvas id="riskChart" width="300" height="200"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Device Categories -->
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
+          <h5 class="card-title mb-0">
             <i class="bi bi-pie-chart"></i> Device Categories
-          </h3>
+          </h5>
         </div>
         <div class="card-body">
-          <canvas id="deviceChart" width="300" height="200"></canvas>
+          <canvas id="deviceChart" height="300"></canvas>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Analytics Tools -->
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-tools"></i> Analytics Tools
-          </h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <div class="text-center">
-                <button type="button" class="btn btn-outline-primary btn-block" onclick="generateReport()">
-                  <i class="bi bi-file-earmark-bar-graph"></i>
-                  <br>Generate Analytics Report
-                </button>
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <div class="text-center">
-                <button type="button" class="btn btn-outline-info btn-block" onclick="exportData()">
-                  <i class="bi bi-download"></i>
-                  <br>Export Analytics Data
-                </button>
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <div class="text-center">
-                <button type="button" class="btn btn-outline-success btn-block" onclick="scheduleReport()">
-                  <i class="bi bi-calendar-check"></i>
-                  <br>Schedule Reports
-                </button>
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <div class="text-center">
-                <button type="button" class="btn btn-outline-warning btn-block" onclick="customAnalysis()">
-                  <i class="bi bi-gear"></i>
-                  <br>Custom Analysis
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-lightning"></i> Quick Statistics
-          </h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-6">
-              <div class="description-block border-right">
-                <span class="description-percentage text-success">
-                  <i class="fas fa-caret-up"></i> 15%
-                </span>
-                <h5 class="description-header">152</h5>
-                <span class="description-text">New Devices</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="description-block">
-                <span class="description-percentage text-warning">
-                  <i class="fas fa-caret-down"></i> 8%
-                </span>
-                <h5 class="description-header">24</h5>
-                <span class="description-text">Vulnerabilities</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="row mt-3">
-            <div class="col-6">
-              <div class="description-block border-right">
-                <span class="description-percentage text-info">
-                  <i class="fas fa-caret-up"></i> 2%
-                </span>
-                <h5 class="description-header">1,205</h5>
-                <span class="description-text">Total Services</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="description-block">
-                <span class="description-percentage text-danger">
-                  <i class="fas fa-caret-down"></i> 3%
-                </span>
-                <h5 class="description-header">12</h5>
-                <span class="description-text">Critical Issues</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Trending Analysis -->
-  <div class="row">
+  <!-- Trend Analysis -->
+  <div class="row mb-4">
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">
-            <i class="bi bi-graph-up"></i> Network Activity Trends (Last 30 Days)
-          </h3>
-          <div class="card-tools">
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-outline-primary" onclick="changePeriod(7)">7 Days</button>
-              <button type="button" class="btn btn-sm btn-primary" onclick="changePeriod(30)">30 Days</button>
-              <button type="button" class="btn btn-sm btn-outline-primary" onclick="changePeriod(90)">90 Days</button>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-graph-up"></i> Trend Analysis
+            </h5>
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-secondary active" onclick="changePeriod(7)">7 Days</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="changePeriod(30)">30 Days</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="changePeriod(90)">90 Days</button>
             </div>
           </div>
         </div>
         <div class="card-body">
-          <canvas id="trendChart" width="400" height="100"></canvas>
+          <canvas id="trendChart" height="400"></canvas>
         </div>
       </div>
     </div>
@@ -255,29 +303,56 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">
+          <h5 class="card-title mb-0">
             <i class="bi bi-lightbulb"></i> Key Insights & Recommendations
-          </h3>
+          </h5>
         </div>
         <div class="card-body">
           <div class="row">
             <div class="col-md-4">
-              <div class="callout callout-info">
-                <h5>Network Growth</h5>
-                <p>Your network has grown by 15% this month. Consider reviewing capacity planning and security policies for new devices.</p>
+              <div class="alert alert-info border-info">
+                <h6 class="alert-heading">
+                  <i class="bi bi-info-circle"></i> Network Growth
+                </h6>
+                <p class="mb-2">Network has grown by 18% in the last month with 25 new devices discovered.</p>
+                <small class="text-muted">Consider reviewing capacity planning and security policies for new devices.</small>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="callout callout-warning">
-                <h5>Security Alert</h5>
-                <p>24 new vulnerabilities detected. Prioritize patching critical and high-severity issues.</p>
+              <div class="alert alert-warning border-warning">
+                <h6 class="alert-heading">
+                  <i class="bi bi-exclamation-triangle"></i> Security Alert
+                </h6>
+                <p class="mb-2">{{ quick_stats.critical_vulnerabilities if quick_stats else 12 }} critical vulnerabilities detected across the network.</p>
+                <small class="text-muted">Prioritize patching critical and high-severity issues.</small>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="callout callout-success">
-                <h5>Performance</h5>
-                <p>Network performance metrics are stable. No immediate action required.</p>
+              <div class="alert alert-success border-success">
+                <h6 class="alert-heading">
+                  <i class="bi bi-check-circle"></i> Performance
+                </h6>
+                <p class="mb-2">Network performance metrics are stable with 95% uptime.</p>
+                <small class="text-muted">No immediate action required for performance optimization.</small>
               </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Next Recommended Actions:</h6>
+              <ul class="mb-0">
+                <li>Schedule vulnerability remediation for critical issues</li>
+                <li>Review network segmentation for new devices</li>
+                <li>Update security policies for discovered services</li>
+              </ul>
+            </div>
+            <div class="text-end">
+              <button class="btn btn-primary" onclick="customAnalysis()">
+                <i class="bi bi-gear"></i> Custom Analysis
+              </button>
             </div>
           </div>
         </div>
@@ -296,7 +371,7 @@ const healthChart = new Chart(healthCtx, {
     type: 'doughnut',
     data: {
         datasets: [{
-            data: [92, 8],
+            data: [{{ health_metrics.overall_score if health_metrics else 92 }}, {{ 100 - (health_metrics.overall_score if health_metrics else 92) }}],
             backgroundColor: ['#28a745', '#e9ecef'],
             borderWidth: 0
         }]
@@ -306,7 +381,8 @@ const healthChart = new Chart(healthCtx, {
         maintainAspectRatio: false,
         cutout: '75%',
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: { enabled: false }
         }
     }
 });
@@ -318,15 +394,27 @@ const riskChart = new Chart(riskCtx, {
     data: {
         labels: ['Critical', 'High', 'Medium', 'Low'],
         datasets: [{
-            data: [3, 12, 45, 89],
-            backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745']
+            label: 'Vulnerabilities',
+            data: [{{ quick_stats.critical_vulnerabilities if quick_stats else 12 }}, 28, 45, 89],
+            backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745'],
+            borderWidth: 0
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Issues'
+                }
+            }
+        }
     }
 });
 
@@ -338,12 +426,19 @@ const deviceChart = new Chart(deviceCtx, {
         labels: ['Servers', 'Workstations', 'Network Devices', 'IoT', 'Others'],
         datasets: [{
             data: [25, 35, 15, 18, 7],
-            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#6c757d']
+            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#6c757d'],
+            borderWidth: 2,
+            borderColor: '#fff'
         }]
     },
     options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
     }
 });
 
@@ -358,20 +453,45 @@ const trendChart = new Chart(trendCtx, {
                 label: 'New Devices',
                 data: [12, 19, 15, 25],
                 borderColor: '#007bff',
-                tension: 0.1
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.3,
+                fill: true
             },
             {
                 label: 'Vulnerabilities',
                 data: [8, 12, 7, 14],
                 borderColor: '#dc3545',
-                tension: 0.1
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.3,
+                fill: true
+            },
+            {
+                label: 'Scans Completed',
+                data: [4, 6, 5, 7],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.3,
+                fill: true
             }
         ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } }
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Count'
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        }
     }
 });
 
@@ -385,16 +505,23 @@ function exportData() {
 }
 
 function scheduleReport() {
-    alert('Schedule Report functionality would be implemented here.');
+    alert('Schedule Report functionality would be implemented here. You can set up automatic analytics report generation and delivery.');
 }
 
 function customAnalysis() {
-    alert('Custom Analysis tool would be available here.');
+    alert('Custom Analysis tool would be available here. Create tailored analytics dashboards and reports.');
 }
 
 function changePeriod(days) {
     // Update charts based on selected period
-    console.log('Changing period to ' + days + ' days');
+    console.log('Changing analysis period to ' + days + ' days');
+    // In a real implementation, this would update the charts with new data
 }
+
+// Auto-refresh data every 5 minutes
+setInterval(function() {
+    console.log('Refreshing analytics data...');
+    // In a real application, you would fetch updated data and refresh charts
+}, 300000);
 </script>
 {% endblock %}
