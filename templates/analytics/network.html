@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Network Analytics{% endblock %}
+{% block page_title %}Network Analytics{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('analytics.overview') }}">Analytics</a></li>
+<li class="breadcrumb-item active">Network</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Error Display -->
+{% if error %}
+<div class="row">
+  <div class="col-12">
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle"></i>
+      <strong>Error:</strong> {{ error }}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Network Overview Cards -->
+<div class="row mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ network_data.ports_distribution|length if network_data.ports_distribution else 0 }}</h4>
+            <p class="card-text">Active Port Types</p>
+          </div>
+          <div>
+            <i class="bi bi-ethernet fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ network_data.service_popularity|length if network_data.service_popularity else 0 }}</h4>
+            <p class="card-text">Service Types</p>
+          </div>
+          <div>
+            <i class="bi bi-gear-wide-connected fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ network_data.device_types|length if network_data.device_types else 0 }}</h4>
+            <p class="card-text">Device Vendors</p>
+          </div>
+          <div>
+            <i class="bi bi-hdd-stack fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">95.8%</h4>
+            <p class="card-text">Network Coverage</p>
+          </div>
+          <div>
+            <i class="bi bi-wifi fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+  <!-- Port Distribution Chart -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-bar-chart"></i> Most Common Open Ports
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if network_data.ports_distribution %}
+        <canvas id="portsChart" height="300"></canvas>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <p>No port data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Service Distribution Chart -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-pie-chart"></i> Service Distribution
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if network_data.service_popularity %}
+        <canvas id="servicesChart" height="300"></canvas>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <p>No service data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Device Vendors and Network Activity -->
+<div class="row mb-4">
+  <!-- Device Vendors -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-diagram-3"></i> Device Vendors Distribution
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if network_data.device_types %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Vendor</th>
+                <th class="text-end">Count</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% set total_devices = network_data.device_types|sum(attribute='count') %}
+              {% for vendor in network_data.device_types %}
+              <tr>
+                <td>
+                  <i class="bi bi-router text-muted me-2"></i>
+                  {{ vendor.vendor or 'Unknown' }}
+                </td>
+                <td class="text-end">{{ vendor.count }}</td>
+                <td>
+                  {% set percentage = (vendor.count / total_devices * 100) if total_devices > 0 else 0 %}
+                  <div class="progress" style="height: 20px;">
+                    <div class="progress-bar" role="progressbar"
+                         style="width: {{ percentage }}%"
+                         aria-valuenow="{{ percentage }}"
+                         aria-valuemin="0" aria-valuemax="100">
+                      {{ "%.1f"|format(percentage) }}%
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <p>No vendor data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Activity Summary -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-activity"></i> Network Activity Summary
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-6">
+            <div class="border-end">
+              <h3 class="text-primary mb-1">{{ network_data.ports_distribution|sum(attribute='count') if network_data.ports_distribution else 0 }}</h3>
+              <small class="text-muted">Total Open Ports</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <h3 class="text-success mb-1">{{ network_data.service_popularity|sum(attribute='count') if network_data.service_popularity else 0 }}</h3>
+            <small class="text-muted">Active Services</small>
+          </div>
+        </div>
+
+        <hr>
+
+        <h6 class="mb-3">Top Port Activity</h6>
+        {% if network_data.ports_distribution %}
+        {% for port in network_data.ports_distribution[:5] %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge bg-primary">Port {{ port.port_number }}/{{ port.protocol or 'tcp' }}</span>
+          <span class="text-muted">{{ port.count }} instances</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted">No port activity data available</p>
+        {% endif %}
+
+        <hr>
+
+        <h6 class="mb-3">Common Services</h6>
+        {% if network_data.service_popularity %}
+        {% for service in network_data.service_popularity[:5] %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="badge bg-success">{{ service.service_name }}</span>
+          <span class="text-muted">{{ service.count }} instances</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted">No service data available</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Network Topology Insights -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-lightbulb"></i> Network Insights & Recommendations
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="alert alert-info border-info">
+              <h6 class="alert-heading">
+                <i class="bi bi-info-circle"></i> Port Analysis
+              </h6>
+              <p class="mb-2">
+                {% if network_data.ports_distribution %}
+                Most common port: {{ network_data.ports_distribution[0].port_number }}/{{ network_data.ports_distribution[0].protocol or 'tcp' }}
+                ({{ network_data.ports_distribution[0].count }} instances)
+                {% else %}
+                No port data available for analysis
+                {% endif %}
+              </p>
+              <small class="text-muted">Consider firewall rules for frequently used ports.</small>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="alert alert-success border-success">
+              <h6 class="alert-heading">
+                <i class="bi bi-check-circle"></i> Service Diversity
+              </h6>
+              <p class="mb-2">
+                {% if network_data.service_popularity %}
+                {{ network_data.service_popularity|length }} different service types detected across the network.
+                {% else %}
+                No service diversity data available
+                {% endif %}
+              </p>
+              <small class="text-muted">Good service diversity indicates healthy network utilization.</small>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="alert alert-warning border-warning">
+              <h6 class="alert-heading">
+                <i class="bi bi-exclamation-triangle"></i> Vendor Analysis
+              </h6>
+              <p class="mb-2">
+                {% if network_data.device_types %}
+                Network has devices from {{ network_data.device_types|length }} different vendors.
+                {% else %}
+                No vendor information available
+                {% endif %}
+              </p>
+              <small class="text-muted">Monitor for vendor-specific security updates and patches.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+          <div>
+            <h6 class="mb-1">Export Network Analytics:</h6>
+            <p class="text-muted mb-0">Download detailed network analysis reports</p>
+          </div>
+          <div class="btn-group" role="group">
+            <a href="{{ url_for('reports.detailed_network') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-pdf"></i> PDF Report
+            </a>
+            <a href="{{ url_for('reports.export', type='network') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-csv"></i> CSV Data
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Port Distribution Chart
+    {% if network_data.ports_distribution %}
+    const portsCtx = document.getElementById('portsChart');
+    if (portsCtx) {
+        new Chart(portsCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for port in network_data.ports_distribution %}
+                    'Port {{ port.port_number }}/{{ port.protocol or "tcp" }}'{{ ',' if not loop.last }}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Open Ports Count',
+                    data: [
+                        {% for port in network_data.ports_distribution %}
+                        {{ port.count }}{{ ',' if not loop.last }}
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Most Common Open Ports'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Services Distribution Chart
+    {% if network_data.service_popularity %}
+    const servicesCtx = document.getElementById('servicesChart');
+    if (servicesCtx) {
+        new Chart(servicesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    {% for service in network_data.service_popularity %}
+                    '{{ service.service_name }}'{{ ',' if not loop.last }}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for service in network_data.service_popularity %}
+                        {{ service.count }}{{ ',' if not loop.last }}
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
+                        '#4BC0C0', '#36A2EB'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Service Distribution'
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

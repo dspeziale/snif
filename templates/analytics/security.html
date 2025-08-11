@@ -1,0 +1,471 @@
+{% extends "base.html" %}
+
+{% block title %}Security Analytics{% endblock %}
+{% block page_title %}Security Analytics{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('analytics.overview') }}">Analytics</a></li>
+<li class="breadcrumb-item active">Security</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Error Display -->
+{% if error %}
+<div class="row">
+  <div class="col-12">
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle"></i>
+      <strong>Error:</strong> {{ error }}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Security Overview Cards -->
+<div class="row mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ security_data.severity_distribution.critical if security_data.severity_distribution else 0 }}</h4>
+            <p class="card-text">Critical Vulnerabilities</p>
+          </div>
+          <div>
+            <i class="bi bi-exclamation-triangle-fill fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ security_data.severity_distribution.high if security_data.severity_distribution else 0 }}</h4>
+            <p class="card-text">High Risk Issues</p>
+          </div>
+          <div>
+            <i class="bi bi-shield-exclamation fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ security_data.risk_assessment.overall_risk_score if security_data.risk_assessment else 'N/A' }}</h4>
+            <p class="card-text">Risk Score</p>
+          </div>
+          <div>
+            <i class="bi bi-graph-up-arrow fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ security_data.threat_landscape.secure_devices if security_data.threat_landscape else 'N/A' }}</h4>
+            <p class="card-text">Secure Devices</p>
+          </div>
+          <div>
+            <i class="bi bi-shield-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Security Charts -->
+<div class="row mb-4">
+  <!-- Vulnerability Severity Distribution -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-pie-chart-fill"></i> Vulnerability Severity Distribution
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if security_data.severity_distribution %}
+        <canvas id="severityChart" height="300"></canvas>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-shield-check fa-3x mb-3 text-success"></i>
+          <h5>No Vulnerabilities Found</h5>
+          <p>Your network appears to be secure with no known vulnerabilities.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Trends -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-graph-up"></i> Security Risk Trends
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if security_data.vulnerability_trends %}
+        <canvas id="riskTrendsChart" height="300"></canvas>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <p>No trend data available</p>
+          <small>Historical scan data needed to show trends</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CVE Analysis and Top Threats -->
+<div class="row mb-4">
+  <!-- CVE Analysis -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-bug-fill"></i> CVE Analysis
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if security_data.cve_analysis %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>CVE ID</th>
+                <th>Severity</th>
+                <th>Affected Hosts</th>
+                <th>CVSS Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cve in security_data.cve_analysis[:10] %}
+              <tr>
+                <td>
+                  <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name={{ cve.cve_id }}" target="_blank" class="text-decoration-none">
+                    {{ cve.cve_id }}
+                    <i class="bi bi-box-arrow-up-right small"></i>
+                  </a>
+                </td>
+                <td>
+                  {% set severity_class = 'danger' if cve.severity == 'CRITICAL' else 'warning' if cve.severity == 'HIGH' else 'info' if cve.severity == 'MEDIUM' else 'secondary' %}
+                  <span class="badge bg-{{ severity_class }}">{{ cve.severity }}</span>
+                </td>
+                <td>{{ cve.count }}</td>
+                <td>
+                  <span class="badge bg-dark">{{ cve.cvss_score or 'N/A' }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-shield-check fa-3x mb-3 text-success"></i>
+          <p>No CVE data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Assessment Summary -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-shield-fill-exclamation"></i> Risk Assessment Summary
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if security_data.risk_assessment %}
+        <!-- Overall Risk Score -->
+        <div class="mb-4">
+          <h6>Overall Risk Score</h6>
+          {% set risk_score = security_data.risk_assessment.overall_risk_score %}
+          {% set risk_level = 'Low' if risk_score < 3 else 'Medium' if risk_score < 6 else 'High' if risk_score < 9 else 'Critical' %}
+          {% set risk_class = 'success' if risk_level == 'Low' else 'warning' if risk_level == 'Medium' else 'danger' %}
+
+          <div class="progress mb-2" style="height: 25px;">
+            <div class="progress-bar bg-{{ risk_class }}" role="progressbar"
+                 style="width: {{ (risk_score / 10) * 100 }}%"
+                 aria-valuenow="{{ risk_score }}" aria-valuemin="0" aria-valuemax="10">
+              {{ risk_score }}/10 - {{ risk_level }} Risk
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Categories -->
+        <div class="row text-center mb-4">
+          <div class="col-4">
+            <div class="border-end">
+              <h4 class="text-danger mb-1">{{ security_data.risk_assessment.network_exposure or 'N/A' }}</h4>
+              <small class="text-muted">Network Exposure</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="border-end">
+              <h4 class="text-warning mb-1">{{ security_data.risk_assessment.patch_compliance or 'N/A' }}%</h4>
+              <small class="text-muted">Patch Compliance</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <h4 class="text-info mb-1">{{ security_data.risk_assessment.security_posture or 'N/A' }}</h4>
+            <small class="text-muted">Security Posture</small>
+          </div>
+        </div>
+
+        <!-- Risk Recommendations -->
+        <div class="border-top pt-3">
+          <h6 class="mb-3">Priority Actions</h6>
+          <div class="list-group list-group-flush">
+            {% if security_data.severity_distribution and security_data.severity_distribution.critical > 0 %}
+            <div class="list-group-item border-0 px-0 py-2">
+              <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+              <strong>Critical:</strong> Address {{ security_data.severity_distribution.critical }} critical vulnerabilities immediately
+            </div>
+            {% endif %}
+            {% if security_data.severity_distribution and security_data.severity_distribution.high > 0 %}
+            <div class="list-group-item border-0 px-0 py-2">
+              <i class="bi bi-shield-exclamation text-warning me-2"></i>
+              <strong>High:</strong> Plan remediation for {{ security_data.severity_distribution.high }} high-risk issues
+            </div>
+            {% endif %}
+            <div class="list-group-item border-0 px-0 py-2">
+              <i class="bi bi-arrow-clockwise text-info me-2"></i>
+              <strong>Regular:</strong> Schedule weekly vulnerability scans
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <p>Risk assessment data not available</p>
+          <small>Run a vulnerability scan to generate risk metrics</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Threat Landscape and Security Insights -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-lightbulb"></i> Security Insights & Recommendations
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="alert alert-danger border-danger">
+              <h6 class="alert-heading">
+                <i class="bi bi-exclamation-triangle"></i> Immediate Actions Required
+              </h6>
+              <ul class="mb-2">
+                {% if security_data.severity_distribution and security_data.severity_distribution.critical > 0 %}
+                <li>Patch {{ security_data.severity_distribution.critical }} critical vulnerabilities</li>
+                {% endif %}
+                {% if security_data.cve_analysis %}
+                <li>Review top CVEs: {{ security_data.cve_analysis[0].cve_id if security_data.cve_analysis else 'N/A' }}</li>
+                {% endif %}
+                <li>Update security policies and procedures</li>
+              </ul>
+              <small class="text-muted">These actions require immediate attention to reduce risk.</small>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="alert alert-warning border-warning">
+              <h6 class="alert-heading">
+                <i class="bi bi-shield-exclamation"></i> Medium-term Improvements
+              </h6>
+              <ul class="mb-2">
+                <li>Implement automated patch management</li>
+                <li>Enhance network segmentation</li>
+                <li>Deploy intrusion detection systems</li>
+                <li>Regular security awareness training</li>
+              </ul>
+              <small class="text-muted">Focus on these improvements over the next month.</small>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="alert alert-info border-info">
+              <h6 class="alert-heading">
+                <i class="bi bi-graph-up-arrow"></i> Long-term Strategy
+              </h6>
+              <ul class="mb-2">
+                <li>Develop incident response procedures</li>
+                <li>Regular penetration testing</li>
+                <li>Zero-trust architecture planning</li>
+                <li>Security metrics and KPI tracking</li>
+              </ul>
+              <small class="text-muted">Strategic initiatives for comprehensive security posture.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+          <div>
+            <h6 class="mb-1">Export Security Analytics:</h6>
+            <p class="text-muted mb-0">Download comprehensive security assessment reports</p>
+          </div>
+          <div class="btn-group" role="group">
+            <a href="{{ url_for('reports.executive_summary') }}" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-file-pdf"></i> Executive Report
+            </a>
+            <a href="{{ url_for('reports.detailed_security') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-text"></i> Detailed Report
+            </a>
+            <a href="{{ url_for('reports.export', type='security') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-file-csv"></i> CSV Data
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Vulnerability Severity Distribution Chart
+    {% if security_data.severity_distribution %}
+    const severityCtx = document.getElementById('severityChart');
+    if (severityCtx) {
+        const severityData = {{ security_data.severity_distribution | tojson }};
+        new Chart(severityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Critical', 'High', 'Medium', 'Low'],
+                datasets: [{
+                    data: [
+                        severityData.critical || 0,
+                        severityData.high || 0,
+                        severityData.medium || 0,
+                        severityData.low || 0
+                    ],
+                    backgroundColor: [
+                        '#dc3545', // Critical - red
+                        '#fd7e14', // High - orange
+                        '#ffc107', // Medium - yellow
+                        '#28a745'  // Low - green
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Vulnerability Distribution by Severity'
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Risk Trends Chart
+    {% if security_data.vulnerability_trends %}
+    const riskTrendsCtx = document.getElementById('riskTrendsChart');
+    if (riskTrendsCtx) {
+        new Chart(riskTrendsCtx, {
+            type: 'line',
+            data: {
+                labels: [
+                    {% for trend in security_data.vulnerability_trends %}
+                    '{{ trend.date }}'{{ ',' if not loop.last }}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Critical',
+                    data: [
+                        {% for trend in security_data.vulnerability_trends %}
+                        {{ trend.critical || 0 }}{{ ',' if not loop.last }}
+                        {% endfor %}
+                    ],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }, {
+                    label: 'High',
+                    data: [
+                        {% for trend in security_data.vulnerability_trends %}
+                        {{ trend.high || 0 }}{{ ',' if not loop.last }}
+                        {% endfor %}
+                    ],
+                    borderColor: '#fd7e14',
+                    backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Vulnerability Trends Over Time'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

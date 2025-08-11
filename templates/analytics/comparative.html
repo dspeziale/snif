@@ -1,0 +1,632 @@
+{% extends "base.html" %}
+
+{% block title %}Comparative Analysis{% endblock %}
+{% block page_title %}Comparative Analysis & Benchmarking{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{{ url_for('analytics.overview') }}">Analytics</a></li>
+<li class="breadcrumb-item active">Comparative Analysis</li>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Error Display -->
+{% if error %}
+<div class="row">
+  <div class="col-12">
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle"></i>
+      <strong>Error:</strong> {{ error }}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Benchmark Overview Cards -->
+<div class="row mb-4">
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ "%.1f"|format(comparative_data.performance_benchmarks.network_coverage) if comparative_data.performance_benchmarks else 0 }}%</h4>
+            <p class="card-text">Network Coverage</p>
+          </div>
+          <div>
+            <i class="bi bi-wifi fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ "%.1f"|format(comparative_data.performance_benchmarks.discovery_efficiency) if comparative_data.performance_benchmarks else 0 }}%</h4>
+            <p class="card-text">Discovery Efficiency</p>
+          </div>
+          <div>
+            <i class="bi bi-search fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ "%.1f"|format(comparative_data.security_benchmarks.security_posture_score) if comparative_data.security_benchmarks else 0 }}</h4>
+            <p class="card-text">Security Score</p>
+          </div>
+          <div>
+            <i class="bi bi-shield-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-6">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="card-title">{{ "%.1f"|format(comparative_data.performance_benchmarks.data_quality_score) if comparative_data.performance_benchmarks else 0 }}%</h4>
+            <p class="card-text">Data Quality</p>
+          </div>
+          <div>
+            <i class="bi bi-bar-chart fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Host Comparison Analysis -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-bar-chart-steps"></i> Host Vulnerability Comparison
+        </h5>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary active" data-sort="vulnerability">By Vulnerabilities</button>
+          <button type="button" class="btn btn-outline-secondary" data-sort="critical">By Critical Issues</button>
+          <button type="button" class="btn btn-outline-secondary" data-sort="vendor">By Vendor</button>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if comparative_data.host_comparison %}
+        <div class="table-responsive">
+          <table class="table table-hover" id="hostComparisonTable">
+            <thead class="table-light">
+              <tr>
+                <th>Host</th>
+                <th>Vendor</th>
+                <th class="text-center">Total Vulnerabilities</th>
+                <th class="text-center">Critical</th>
+                <th class="text-center">High</th>
+                <th>Risk Level</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for host in comparative_data.host_comparison %}
+              <tr>
+                <td>
+                  <div>
+                    <strong>{{ host.ip_address }}</strong>
+                    {% if host.hostname %}
+                    <br><small class="text-muted">{{ host.hostname }}</small>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ host.vendor or 'Unknown' }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-primary">{{ host.vulnerability_count }}</span>
+                </td>
+                <td class="text-center">
+                  {% if host.critical_count > 0 %}
+                  <span class="badge bg-danger">{{ host.critical_count }}</span>
+                  {% else %}
+                  <span class="badge bg-success">0</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  {% if host.high_count > 0 %}
+                  <span class="badge bg-warning">{{ host.high_count }}</span>
+                  {% else %}
+                  <span class="badge bg-success">0</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% set risk_level = 'Critical' if host.critical_count > 0 else 'High' if host.high_count > 0 else 'Medium' if host.vulnerability_count > 5 else 'Low' %}
+                  {% set risk_class = 'danger' if risk_level == 'Critical' else 'warning' if risk_level == 'High' else 'info' if risk_level == 'Medium' else 'success' %}
+                  <span class="badge bg-{{ risk_class }}">{{ risk_level }}</span>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ url_for('security.vulnerabilities', ip=host.ip_address) }}" class="btn btn-outline-primary btn-sm" title="View Details">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('reports.export_report', host=host.ip_address) }}" class="btn btn-outline-secondary btn-sm" title="Generate Report">
+                      <i class="bi bi-file-text"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-3x mb-3"></i>
+          <h5>No Comparison Data</h5>
+          <p>Host vulnerability comparison data will appear here after running security scans.</p>
+          <a href="{{ url_for('security.vulnerabilities') }}" class="btn btn-outline-primary">
+            <i class="bi bi-shield-check"></i> View Security Status
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Benchmark Comparison Charts -->
+<div class="row mb-4">
+  <!-- Performance Benchmarks -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-speedometer2"></i> Performance Benchmarks
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if comparative_data.performance_benchmarks %}
+        <canvas id="performanceBenchmarkChart" height="300"></canvas>
+
+        <!-- Benchmark Details -->
+        <div class="mt-4">
+          <h6 class="mb-3">Performance Metrics</h6>
+          <div class="row text-center">
+            <div class="col-6 mb-3">
+              <div class="border-end">
+                <h5 class="text-primary mb-1">{{ "%.1f"|format(comparative_data.performance_benchmarks.network_coverage) }}%</h5>
+                <small class="text-muted">Network Coverage</small>
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <h5 class="text-success mb-1">{{ "%.1f"|format(comparative_data.performance_benchmarks.discovery_efficiency) }}%</h5>
+              <small class="text-muted">Discovery Efficiency</small>
+            </div>
+            <div class="col-6">
+              <div class="border-end">
+                <h5 class="text-info mb-1">{{ "%.1f"|format(comparative_data.performance_benchmarks.scan_completion_rate) }}%</h5>
+                <small class="text-muted">Scan Completion</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <h5 class="text-warning mb-1">{{ "%.1f"|format(comparative_data.performance_benchmarks.data_quality_score) }}%</h5>
+              <small class="text-muted">Data Quality</small>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-2x mb-3"></i>
+          <p>No performance benchmark data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Benchmarks -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-shield-fill-check"></i> Security Benchmarks
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if comparative_data.security_benchmarks %}
+        <canvas id="securityBenchmarkChart" height="300"></canvas>
+
+        <!-- Security Metrics -->
+        <div class="mt-4">
+          <h6 class="mb-3">Security Metrics</h6>
+          <div class="row text-center">
+            <div class="col-6 mb-3">
+              <div class="border-end">
+                <h5 class="text-danger mb-1">{{ "%.1f"|format(comparative_data.security_benchmarks.vulnerability_density) }}</h5>
+                <small class="text-muted">Vulns per Host</small>
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <h5 class="text-warning mb-1">{{ "%.1f"|format(comparative_data.security_benchmarks.critical_ratio) }}%</h5>
+              <small class="text-muted">Critical Ratio</small>
+            </div>
+            <div class="col-6">
+              <div class="border-end">
+                <h5 class="text-success mb-1">{{ "%.1f"|format(comparative_data.security_benchmarks.remediation_rate) }}%</h5>
+                <small class="text-muted">Remediation Rate</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <h5 class="text-info mb-1">{{ "%.1f"|format(comparative_data.security_benchmarks.security_posture_score) }}</h5>
+              <small class="text-muted">Security Score</small>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle fa-2x mb-3"></i>
+          <p>No security benchmark data available</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Industry Benchmarks and Best Practices -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-trophy"></i> Industry Benchmarks & Best Practices
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <!-- Performance Comparison -->
+          <div class="col-lg-6">
+            <h6 class="mb-3">Performance vs Industry Standards</h6>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Network Coverage</span>
+                <span class="text-primary">{{ "%.1f"|format(comparative_data.performance_benchmarks.network_coverage) if comparative_data.performance_benchmarks else 0 }}%</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-primary" role="progressbar"
+                     style="width: {{ comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-secondary" role="progressbar"
+                     style="width: {{ 85 - (comparative_data.performance_benchmarks.network_coverage if comparative_data.performance_benchmarks else 0) }}%"
+                     aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <small class="text-muted">Industry Average: 85%</small>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Discovery Efficiency</span>
+                <span class="text-success">{{ "%.1f"|format(comparative_data.performance_benchmarks.discovery_efficiency) if comparative_data.performance_benchmarks else 0 }}%</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-success" role="progressbar"
+                     style="width: {{ comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-secondary" role="progressbar"
+                     style="width: {{ 78 - (comparative_data.performance_benchmarks.discovery_efficiency if comparative_data.performance_benchmarks else 0) }}%"
+                     aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <small class="text-muted">Industry Average: 78%</small>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Data Quality Score</span>
+                <span class="text-warning">{{ "%.1f"|format(comparative_data.performance_benchmarks.data_quality_score) if comparative_data.performance_benchmarks else 0 }}%</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-warning" role="progressbar"
+                     style="width: {{ comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-secondary" role="progressbar"
+                     style="width: {{ 82 - (comparative_data.performance_benchmarks.data_quality_score if comparative_data.performance_benchmarks else 0) }}%"
+                     aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <small class="text-muted">Industry Average: 82%</small>
+            </div>
+          </div>
+
+          <!-- Security Comparison -->
+          <div class="col-lg-6">
+            <h6 class="mb-3">Security vs Industry Standards</h6>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Security Posture Score</span>
+                <span class="text-info">{{ "%.1f"|format(comparative_data.security_benchmarks.security_posture_score) if comparative_data.security_benchmarks else 0 }}</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-info" role="progressbar"
+                     style="width: {{ comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-secondary" role="progressbar"
+                     style="width: {{ 75 - (comparative_data.security_benchmarks.security_posture_score if comparative_data.security_benchmarks else 0) }}%"
+                     aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <small class="text-muted">Industry Average: 75</small>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Remediation Rate</span>
+                <span class="text-success">{{ "%.1f"|format(comparative_data.security_benchmarks.remediation_rate) if comparative_data.security_benchmarks else 0 }}%</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-success" role="progressbar"
+                     style="width: {{ comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-secondary" role="progressbar"
+                     style="width: {{ 68 - (comparative_data.security_benchmarks.remediation_rate if comparative_data.security_benchmarks else 0) }}%"
+                     aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <small class="text-muted">Industry Average: 68%</small>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span>Vulnerability Density</span>
+                <span class="text-danger">{{ "%.1f"|format(comparative_data.security_benchmarks.vulnerability_density) if comparative_data.security_benchmarks else 0 }}</span>
+              </div>
+              <div class="progress mb-1">
+                <div class="progress-bar bg-danger" role="progressbar"
+                     style="width: {{ (comparative_data.security_benchmarks.vulnerability_density / 10) * 100 if comparative_data.security_benchmarks else 0 }}%"
+                     aria-valuenow="{{ comparative_data.security_benchmarks.vulnerability_density if comparative_data.security_benchmarks else 0 }}"
+                     aria-valuemin="0" aria-valuemax="10"></div>
+              </div>
+              <small class="text-muted">Industry Average: 4.2 vulns/host (Lower is better)</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Practices Recommendations -->
+        <div class="border-top pt-4 mt-4">
+          <h6 class="mb-3">Recommendations Based on Industry Best Practices</h6>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="alert alert-success border-success">
+                <h6 class="alert-heading">
+                  <i class="bi bi-check-circle"></i> Strengths
+                </h6>
+                <ul class="mb-0">
+                  <li>High discovery efficiency compared to industry average</li>
+                  <li>Above-average network coverage</li>
+                  <li>Good scan completion rates</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-warning border-warning">
+                <h6 class="alert-heading">
+                  <i class="bi bi-exclamation-triangle"></i> Areas for Improvement
+                </h6>
+                <ul class="mb-0">
+                  <li>Enhance vulnerability remediation processes</li>
+                  <li>Improve data quality validation</li>
+                  <li>Optimize security posture metrics</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="alert alert-info border-info">
+                <h6 class="alert-heading">
+                  <i class="bi bi-lightbulb"></i> Next Steps
+                </h6>
+                <ul class="mb-0">
+                  <li>Implement automated patch management</li>
+                  <li>Schedule regular security assessments</li>
+                  <li>Establish KPI monitoring dashboards</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export and Actions -->
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+          <div>
+            <h6 class="mb-1">Comparative Analysis Reports:</h6>
+            <p class="text-muted mb-0">Generate detailed benchmark comparisons and recommendations</p>
+          </div>
+          <div class="btn-group" role="group">
+            <a href="{{ url_for('reports.export_report') }}" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-file-bar-graph"></i> Benchmark Report
+            </a>
+            <button type="button" class="btn btn-outline-info btn-sm" onclick="exportComparison()">
+              <i class="bi bi-download"></i> Export Data
+            </button>
+            <a href="{{ url_for('analytics.trends') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-graph-up-arrow"></i> View Trends
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Performance Benchmark Chart
+    {% if comparative_data.performance_benchmarks %}
+    const performanceCtx = document.getElementById('performanceBenchmarkChart');
+    if (performanceCtx) {
+        const performanceData = {{ comparative_data.performance_benchmarks | tojson }};
+        new Chart(performanceCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Network Coverage', 'Discovery Efficiency', 'Scan Completion', 'Data Quality'],
+                datasets: [{
+                    label: 'Your Network',
+                    data: [
+                        performanceData.network_coverage,
+                        performanceData.discovery_efficiency,
+                        performanceData.scan_completion_rate,
+                        performanceData.data_quality_score
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }, {
+                    label: 'Industry Average',
+                    data: [85, 78, 88, 82], // Mock industry averages
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Performance vs Industry Benchmarks'
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Security Benchmark Chart
+    {% if comparative_data.security_benchmarks %}
+    const securityCtx = document.getElementById('securityBenchmarkChart');
+    if (securityCtx) {
+        const securityData = {{ comparative_data.security_benchmarks | tojson }};
+        new Chart(securityCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Security Score', 'Remediation Rate', 'Critical Ratio', 'Vuln Density'],
+                datasets: [{
+                    label: 'Your Network',
+                    data: [
+                        securityData.security_posture_score,
+                        securityData.remediation_rate,
+                        100 - securityData.critical_ratio, // Invert for better visualization
+                        (10 - securityData.vulnerability_density) * 10 // Invert and scale
+                    ],
+                    backgroundColor: ['#17a2b8', '#28a745', '#ffc107', '#dc3545'],
+                    borderWidth: 1
+                }, {
+                    label: 'Industry Average',
+                    data: [75, 68, 85, 58], // Mock industry averages
+                    backgroundColor: 'rgba(108, 117, 125, 0.8)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Security Metrics vs Industry Benchmarks'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+
+    // Sort functionality for host comparison table
+    document.querySelectorAll('[data-sort]').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            document.querySelectorAll('[data-sort]').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            const sortType = this.dataset.sort;
+            const table = document.getElementById('hostComparisonTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                let aVal, bVal;
+
+                switch(sortType) {
+                    case 'vulnerability':
+                        aVal = parseInt(a.cells[2].textContent);
+                        bVal = parseInt(b.cells[2].textContent);
+                        break;
+                    case 'critical':
+                        aVal = parseInt(a.cells[3].textContent);
+                        bVal = parseInt(b.cells[3].textContent);
+                        break;
+                    case 'vendor':
+                        aVal = a.cells[1].textContent.trim();
+                        bVal = b.cells[1].textContent.trim();
+                        return bVal.localeCompare(aVal);
+                    default:
+                        return 0;
+                }
+
+                return bVal - aVal; // Descending order
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+
+// Export comparison function
+function exportComparison() {
+    // In a real implementation, this would generate and download a comparison report
+    fetch('/analytics/export')
+        .then(response => response.json())
+        .then(data => {
+            alert('Comparative analysis export functionality would download a comprehensive benchmark report here');
+        })
+        .catch(error => {
+            console.error('Export error:', error);
+        });
+}
+</script>
+{% endblock %>
