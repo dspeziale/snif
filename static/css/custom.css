@@ -1,0 +1,270 @@
+/* Custom CSS per AdminLTE Flask App */
+
+/* Layout Base */
+.app-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    height: 57px;
+}
+
+.navbar-badge {
+    font-size: .6rem;
+    font-weight: 300;
+    position: absolute;
+    right: 5px;
+    top: 9px;
+}
+
+/* Sidebar */
+.app-sidebar {
+    position: fixed;
+    top: 57px;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    z-index: 1029;
+    overflow-y: auto;
+}
+
+.sidebar-brand {
+    height: 57px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: rgba(255,255,255,.8);
+}
+
+.brand-link:hover {
+    color: #fff;
+}
+
+.sidebar-menu {
+    padding: 0.5rem 0;
+}
+
+.sidebar-menu .nav-item {
+    margin: 0;
+}
+
+.sidebar-menu .nav-link {
+    color: rgba(255,255,255,.8);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu .nav-link:hover {
+    color: #fff;
+    background-color: rgba(255,255,255,.1);
+}
+
+.sidebar-menu .nav-link.active {
+    color: #fff;
+    background-color: rgba(255,255,255,.2);
+}
+
+.nav-icon {
+    margin-right: 0.5rem;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.nav-arrow {
+    margin-left: auto;
+}
+
+.nav-treeview {
+    padding-left: 1rem;
+}
+
+.nav-header {
+    padding: 0.5rem 1rem;
+    color: rgba(255,255,255,.4);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+/* Main Content */
+.app-main {
+    margin-left: 250px;
+    margin-top: 57px;
+    min-height: calc(100vh - 57px);
+    display: flex;
+    flex-direction: column;
+}
+
+.app-content-header {
+    padding: 1rem;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.app-content {
+    flex: 1;
+    padding: 1rem;
+}
+
+/* Footer */
+.app-footer {
+    margin-left: 250px;
+    padding: 1rem;
+    background-color: #fff;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Small Box Widget */
+.small-box {
+    border-radius: 0.25rem;
+    position: relative;
+    padding: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+}
+
+.small-box .inner {
+    padding: 10px;
+}
+
+.small-box h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    white-space: nowrap;
+}
+
+.small-box p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.small-box-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    opacity: 0.2;
+    height: 70px;
+    width: 70px;
+}
+
+.small-box-footer {
+    display: block;
+    padding: 3px 0;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* Direct Chat */
+.direct-chat-messages {
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.direct-chat-msg {
+    margin-bottom: 10px;
+}
+
+.direct-chat-msg.end {
+    text-align: right;
+}
+
+.direct-chat-infos {
+    margin-bottom: 5px;
+}
+
+.direct-chat-name {
+    font-weight: 600;
+}
+
+.direct-chat-timestamp {
+    color: #999;
+    font-size: 0.875rem;
+}
+
+.direct-chat-text {
+    background: #d2d6de;
+    border-radius: 5px;
+    padding: 5px 10px;
+    display: inline-block;
+    max-width: 80%;
+}
+
+.direct-chat-msg.end .direct-chat-text {
+    background: #007bff;
+    color: #fff;
+}
+
+/* Cards */
+.card {
+    margin-bottom: 1rem;
+}
+
+.card-tools {
+    float: right;
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .app-sidebar {
+        transform: translateX(-250px);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar-open .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .app-main,
+    .app-footer {
+        margin-left: 0;
+    }
+}
+
+/* Bootstrap Icons Size Fix */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* User Menu */
+.user-header {
+    padding: 20px;
+    text-align: center;
+}
+
+.user-footer {
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+/* Error Pages */
+.error-page {
+    margin: 20px auto;
+    text-align: center;
+}
+
+.error-page .headline {
+    font-size: 100px;
+    float: left;
+}
+
+.error-content {
+    margin-left: 190px;
+    padding-top: 20px;
+}
