@@ -1,0 +1,1078 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.92 scan initiated Tue Aug 12 10:01:55 2025 as: nmap -T5 -sn -oX all.sn.xml 192.168.20-80.0/24 -->
+<nmaprun scanner="nmap" args="nmap -T5 -sn -oX all.sn.xml 192.168.20-80.0/24" start="1754985715" startstr="Tue Aug 12 10:01:55 2025" version="7.92" xmloutputversion="1.05">
+<verbose level="0"/>
+<debugging level="0"/>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.1" addrtype="ipv4"/>
+<address addr="60:E3:27:27:4E:95" addrtype="mac" vendor="Tp-link Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="824" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.8" addrtype="ipv4"/>
+<address addr="00:22:2D:22:2F:DC" addrtype="mac" vendor="SMC Networks"/>
+<hostnames>
+</hostnames>
+<times srtt="1095752" rttvar="1384495" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.9" addrtype="ipv4"/>
+<address addr="00:FD:45:1B:26:60" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="2394" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.11" addrtype="ipv4"/>
+<address addr="08:97:34:5F:99:EC" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="8577" rttvar="8577" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.15" addrtype="ipv4"/>
+<address addr="B8:D4:E7:39:DF:9C" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
+<hostnames>
+</hostnames>
+<times srtt="11080" rttvar="11080" to="55400"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.17" addrtype="ipv4"/>
+<address addr="A8:52:D4:8A:BA:A5" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="1478277" rttvar="1869375" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.30" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:4B:AF" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="2389075" rttvar="2180780" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.31" addrtype="ipv4"/>
+<address addr="94:3F:C2:24:E0:90" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="239534" rttvar="272943" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.35" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:FA:3F" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="15219" rttvar="15219" to="76095"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.36" addrtype="ipv4"/>
+<address addr="E0:07:1B:51:54:A0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="3022" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.37" addrtype="ipv4"/>
+<address addr="64:E8:81:70:68:80" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
+<hostnames>
+</hostnames>
+<times srtt="21454" rttvar="29536" to="139598"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.38" addrtype="ipv4"/>
+<address addr="A0:1D:48:33:89:80" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="1515" rttvar="3948" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.82" addrtype="ipv4"/>
+<address addr="80:30:E0:94:ED:E0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="692" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.1" addrtype="ipv4"/>
+<address addr="F4:4D:5C:82:E5:F8" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="635" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.2" addrtype="ipv4"/>
+<address addr="00:90:0B:0F:F1:2F" addrtype="mac" vendor="Lanner Electronics"/>
+<hostnames>
+</hostnames>
+<times srtt="564" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.16" addrtype="ipv4"/>
+<address addr="38:21:C7:BD:B0:C0" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
+<hostnames>
+</hostnames>
+<times srtt="952" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.18" addrtype="ipv4"/>
+<address addr="00:15:5D:40:4C:05" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="903" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.19" addrtype="ipv4"/>
+<address addr="3C:2A:F4:92:73:75" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+<times srtt="2137" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.31" addrtype="ipv4"/>
+<address addr="00:0C:E6:07:23:ED" addrtype="mac" vendor="Fortinet"/>
+<hostnames>
+</hostnames>
+<times srtt="1313" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.34" addrtype="ipv4"/>
+<address addr="00:0C:26:2F:B0:F8" addrtype="mac" vendor="Weintek Labs."/>
+<hostnames>
+</hostnames>
+<times srtt="397" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.37" addrtype="ipv4"/>
+<address addr="14:49:D4:98:00:AF" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="4577" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.51" addrtype="ipv4"/>
+<address addr="4C:53:FD:DC:04:27" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="6934" rttvar="6934" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.52" addrtype="ipv4"/>
+<address addr="50:50:A4:A7:C3:52" addrtype="mac" vendor="Samsung Electronics"/>
+<hostnames>
+</hostnames>
+<times srtt="476596" rttvar="476596" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.58" addrtype="ipv4"/>
+<address addr="84:18:3A:23:AE:40" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="2021" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.59" addrtype="ipv4"/>
+<address addr="00:0C:E6:05:9C:B0" addrtype="mac" vendor="Fortinet"/>
+<hostnames>
+</hostnames>
+<times srtt="2299" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.74" addrtype="ipv4"/>
+<address addr="9C:6B:00:41:72:09" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="571" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.78" addrtype="ipv4"/>
+<address addr="40:A8:F0:5D:C2:03" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="496" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.82" addrtype="ipv4"/>
+<address addr="10:7C:61:B1:7F:A7" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="570" rttvar="2823" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.90" addrtype="ipv4"/>
+<address addr="14:CB:19:B9:F2:01" addrtype="mac" vendor="HP"/>
+<hostnames>
+</hostnames>
+<times srtt="12052" rttvar="12052" to="60260"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.93" addrtype="ipv4"/>
+<address addr="10:62:E5:AD:AB:3C" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="729" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.96" addrtype="ipv4"/>
+<address addr="88:51:FB:61:7C:1E" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="605" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.97" addrtype="ipv4"/>
+<address addr="6C:3B:E5:35:FA:93" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="610" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.100" addrtype="ipv4"/>
+<address addr="00:25:22:83:66:16" addrtype="mac" vendor="ASRock Incorporation"/>
+<hostnames>
+</hostnames>
+<times srtt="482" rttvar="3762" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.101" addrtype="ipv4"/>
+<address addr="D0:50:99:43:93:C4" addrtype="mac" vendor="ASRock Incorporation"/>
+<hostnames>
+</hostnames>
+<times srtt="879" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.103" addrtype="ipv4"/>
+<address addr="A8:5E:45:E1:A5:B3" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="1009" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.107" addrtype="ipv4"/>
+<address addr="D0:50:99:66:3D:5C" addrtype="mac" vendor="ASRock Incorporation"/>
+<hostnames>
+</hostnames>
+<times srtt="708" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.109" addrtype="ipv4"/>
+<address addr="60:45:CB:A0:F3:64" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="575" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.110" addrtype="ipv4"/>
+<address addr="B0:A7:B9:EC:C7:B6" addrtype="mac" vendor="TP-Link Limited"/>
+<hostnames>
+</hostnames>
+<times srtt="746" rttvar="3789" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.116" addrtype="ipv4"/>
+<address addr="B4:B5:2F:DC:53:1E" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="884" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.117" addrtype="ipv4"/>
+<address addr="04:0E:3C:38:0E:19" addrtype="mac" vendor="HP"/>
+<hostnames>
+</hostnames>
+<times srtt="712" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.124" addrtype="ipv4"/>
+<address addr="B0:6E:BF:33:D2:68" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="368" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.127" addrtype="ipv4"/>
+<address addr="40:B0:76:A4:E4:CF" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="1007" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.134" addrtype="ipv4"/>
+<address addr="00:07:4D:3E:80:49" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="10690" rttvar="10690" to="53450"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.135" addrtype="ipv4"/>
+<address addr="00:07:4D:92:62:19" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="2486" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.136" addrtype="ipv4"/>
+<address addr="00:07:4D:23:B4:BE" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="2396" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.139" addrtype="ipv4"/>
+<address addr="00:07:4D:93:6F:93" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="2313" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.148" addrtype="ipv4"/>
+<address addr="00:07:4D:75:56:3F" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1741" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.157" addrtype="ipv4"/>
+<address addr="08:60:6E:87:CC:FB" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="1390" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.159" addrtype="ipv4"/>
+<address addr="BC:FC:E7:1E:C3:38" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="438" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.160" addrtype="ipv4"/>
+<address addr="D0:50:99:95:D4:8A" addrtype="mac" vendor="ASRock Incorporation"/>
+<hostnames>
+</hostnames>
+<times srtt="675" rttvar="3761" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.173" addrtype="ipv4"/>
+<address addr="00:80:4F:81:47:A5" addrtype="mac" vendor="Daikin Industries"/>
+<hostnames>
+</hostnames>
+<times srtt="1237" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.177" addrtype="ipv4"/>
+<address addr="00:06:C6:61:F7:45" addrtype="mac" vendor="lesswire AG"/>
+<hostnames>
+</hostnames>
+<times srtt="350968" rttvar="375049" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.185" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:CD" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1442" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.207" addrtype="ipv4"/>
+<address addr="0C:23:69:98:8E:40" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+<times srtt="287616" rttvar="234093" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.210" addrtype="ipv4"/>
+<address addr="D8:5E:D3:F8:59:10" addrtype="mac" vendor="Giga-byte Technology"/>
+<hostnames>
+</hostnames>
+<times srtt="3204863" rttvar="2000000" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.213" addrtype="ipv4"/>
+<address addr="24:5E:BE:7B:99:AE" addrtype="mac" vendor="Qnap Systems"/>
+<hostnames>
+</hostnames>
+<times srtt="343" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.214" addrtype="ipv4"/>
+<address addr="84:16:F9:04:93:0B" addrtype="mac" vendor="Tp-link Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="478" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.225" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:07" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="850" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.226" addrtype="ipv4"/>
+<address addr="00:08:5D:21:E1:74" addrtype="mac" vendor="Mitel"/>
+<hostnames>
+</hostnames>
+<times srtt="1941" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.228" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:06" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="1098" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.232" addrtype="ipv4"/>
+<address addr="74:FE:48:43:9D:19" addrtype="mac" vendor="Advantech"/>
+<hostnames>
+</hostnames>
+<times srtt="460" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.233" addrtype="ipv4"/>
+<address addr="24:5E:BE:31:67:9B" addrtype="mac" vendor="Qnap Systems"/>
+<hostnames>
+</hostnames>
+<times srtt="353" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.236" addrtype="ipv4"/>
+<address addr="A4:BF:01:72:8D:E3" addrtype="mac" vendor="Intel Corporate"/>
+<hostnames>
+</hostnames>
+<times srtt="662" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.238" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:04" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="875" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.242" addrtype="ipv4"/>
+<address addr="00:15:5D:40:4C:0A" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="713" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.243" addrtype="ipv4"/>
+<address addr="00:25:5C:6F:68:33" addrtype="mac" vendor="NEC"/>
+<hostnames>
+</hostnames>
+<times srtt="1090" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.244" addrtype="ipv4"/>
+<address addr="24:5E:BE:0E:B6:48" addrtype="mac" vendor="Qnap Systems"/>
+<hostnames>
+</hostnames>
+<times srtt="1011" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.245" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:00" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="2233" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.248" addrtype="ipv4"/>
+<address addr="24:5E:BE:0D:A4:8E" addrtype="mac" vendor="Qnap Systems"/>
+<hostnames>
+</hostnames>
+<times srtt="288" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.249" addrtype="ipv4"/>
+<address addr="A4:BF:01:72:91:A9" addrtype="mac" vendor="Intel Corporate"/>
+<hostnames>
+</hostnames>
+<times srtt="596" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.250" addrtype="ipv4"/>
+<address addr="00:15:5D:40:4C:04" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="927" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.251" addrtype="ipv4"/>
+<address addr="00:15:5D:40:4C:06" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="924" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.30.254" addrtype="ipv4"/>
+<address addr="00:15:5D:40:4C:00" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="899" rttvar="2552" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.35.108" addrtype="ipv4"/>
+<address addr="00:E2:69:22:3E:6E" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="528" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.35.109" addrtype="ipv4"/>
+<address addr="00:07:4D:99:D9:7D" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="794" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.35.129" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:05" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="529" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.35.150" addrtype="ipv4"/>
+<address addr="00:07:4D:99:D9:7A" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="2879" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.35.155" addrtype="ipv4"/>
+<address addr="00:07:4D:9A:02:F7" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1362" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="localhost-response" reason_ttl="0"/>
+<address addr="192.168.30.27" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.9" addrtype="ipv4"/>
+<address addr="00:17:C8:65:5A:C5" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<times srtt="555" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.11" addrtype="ipv4"/>
+<address addr="00:30:18:53:44:7B" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+<times srtt="810" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.12" addrtype="ipv4"/>
+<address addr="00:30:18:54:65:BF" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+<times srtt="971" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.15" addrtype="ipv4"/>
+<address addr="00:30:18:54:65:9D" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+<times srtt="375" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.19" addrtype="ipv4"/>
+<address addr="00:07:4D:D0:FC:E3" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="2184" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.21" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:C6" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1233" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.24" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:72" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1636" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.32" addrtype="ipv4"/>
+<address addr="C4:34:6B:14:EC:B0" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="599" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.37" addrtype="ipv4"/>
+<address addr="98:E7:F4:03:4B:0E" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="577" rttvar="2257" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.41" addrtype="ipv4"/>
+<address addr="00:07:4D:7C:41:D4" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1205" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.45" addrtype="ipv4"/>
+<address addr="00:07:4D:93:75:4F" addrtype="mac" vendor="Zebra Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="1166" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.46" addrtype="ipv4"/>
+<address addr="00:30:18:59:F7:CE" addrtype="mac" vendor="Jetway Information"/>
+<hostnames>
+</hostnames>
+<times srtt="427" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.50" addrtype="ipv4"/>
+<address addr="9C:7B:EF:8F:97:4C" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="1057" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.51" addrtype="ipv4"/>
+<address addr="00:17:C8:CC:48:4A" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<times srtt="747" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.53" addrtype="ipv4"/>
+<address addr="98:E7:F4:A7:0D:54" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="377" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.86" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:40" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="911" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.87" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:6F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="1433" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.88" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:7F" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="1253" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.89" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:23" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="651" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.90" addrtype="ipv4"/>
+<address addr="00:1A:22:0B:36:72" addrtype="mac" vendor="eQ-3 Entwicklung GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="1207" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.93" addrtype="ipv4"/>
+<address addr="B0:0C:D1:E1:58:76" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="1392" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.95" addrtype="ipv4"/>
+<address addr="3C:2A:F4:E0:DB:55" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+<times srtt="1163" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.96" addrtype="ipv4"/>
+<address addr="94:DD:F8:3F:72:5D" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="696601" rttvar="1206766" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.102" addrtype="ipv4"/>
+<address addr="DC:4A:3E:B0:29:BF" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="355" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.106" addrtype="ipv4"/>
+<address addr="00:E2:69:22:3E:9D" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="459" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.110" addrtype="ipv4"/>
+<address addr="00:17:C8:C5:88:56" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<times srtt="671" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.116" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:1D:3E" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+<times srtt="583" rttvar="3788" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.140" addrtype="ipv4"/>
+<address addr="0C:23:69:98:9D:DF" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+<times srtt="350228" rttvar="360739" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.150" addrtype="ipv4"/>
+<address addr="74:E9:BF:28:F4:1C" addrtype="mac" vendor="Huawei Technologies"/>
+<hostnames>
+</hostnames>
+<times srtt="723" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.155" addrtype="ipv4"/>
+<address addr="0C:23:69:55:1D:60" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+<times srtt="101968" rttvar="101968" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.157" addrtype="ipv4"/>
+<address addr="00:10:20:56:54:0B" addrtype="mac" vendor="Hand Held Products"/>
+<hostnames>
+</hostnames>
+<times srtt="350383" rttvar="350383" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.165" addrtype="ipv4"/>
+<address addr="68:D7:9A:02:7D:12" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+<times srtt="3068" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.166" addrtype="ipv4"/>
+<address addr="E4:E7:49:03:0C:F6" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="504" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.170" addrtype="ipv4"/>
+<address addr="0C:23:69:98:9A:9A" addrtype="mac" vendor="Honeywell SPS"/>
+<hostnames>
+</hostnames>
+<times srtt="275313" rttvar="275313" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.173" addrtype="ipv4"/>
+<address addr="08:0E:A8:00:3E:8C" addrtype="mac" vendor="Velex s.r.l."/>
+<hostnames>
+</hostnames>
+<times srtt="1138616" rttvar="1138616" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.175" addrtype="ipv4"/>
+<address addr="F0:9F:C2:A6:B1:EE" addrtype="mac" vendor="Ubiquiti Networks"/>
+<hostnames>
+</hostnames>
+<times srtt="1722" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.177" addrtype="ipv4"/>
+<address addr="B4:B6:86:78:3A:AE" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="588" rttvar="2916" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.183" addrtype="ipv4"/>
+<address addr="B0:0C:D1:DE:82:80" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="972684" rttvar="1111456" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.184" addrtype="ipv4"/>
+<address addr="D0:BF:9C:32:32:16" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="340" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.185" addrtype="ipv4"/>
+<address addr="F4:30:B9:29:1E:00" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="448" rttvar="2839" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.189" addrtype="ipv4"/>
+<address addr="B4:22:00:DB:53:54" addrtype="mac" vendor="Brother Industries"/>
+<hostnames>
+</hostnames>
+<times srtt="939279" rttvar="1188030" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.190" addrtype="ipv4"/>
+<address addr="00:17:C8:C5:88:64" addrtype="mac" vendor="Kyocera Display"/>
+<hostnames>
+</hostnames>
+<times srtt="643" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.192" addrtype="ipv4"/>
+<address addr="A0:8C:FD:12:E9:65" addrtype="mac" vendor="Hewlett Packard"/>
+<hostnames>
+</hostnames>
+<times srtt="902" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.198" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:80:DD" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="10929" rttvar="15573" to="73221"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.199" addrtype="ipv4"/>
+<address addr="94:DD:F8:31:B3:D0" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<times srtt="1503" rttvar="4040" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.218" addrtype="ipv4"/>
+<address addr="40:B0:76:A3:80:E5" addrtype="mac" vendor="Asustek Computer"/>
+<hostnames>
+</hostnames>
+<times srtt="595" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.225" addrtype="ipv4"/>
+<address addr="50:57:9C:5B:EA:6B" addrtype="mac" vendor="Seiko Epson"/>
+<hostnames>
+</hostnames>
+<times srtt="549" rttvar="3788" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.243" addrtype="ipv4"/>
+<address addr="84:18:3A:28:E6:C0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="11344" rttvar="11344" to="56720"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.244" addrtype="ipv4"/>
+<address addr="84:18:3A:29:2D:E0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="2217" rttvar="4246" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.245" addrtype="ipv4"/>
+<address addr="84:18:3A:28:FD:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="2074" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.246" addrtype="ipv4"/>
+<address addr="6C:AA:B3:0C:7B:76" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="617" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.248" addrtype="ipv4"/>
+<address addr="84:18:3A:23:B0:80" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="1342" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.40.249" addrtype="ipv4"/>
+<address addr="84:18:3A:23:74:D0" addrtype="mac" vendor="Ruckus Wireless"/>
+<hostnames>
+</hostnames>
+<times srtt="1415" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.42.1" addrtype="ipv4"/>
+<address addr="74:FE:48:43:9D:19" addrtype="mac" vendor="Advantech"/>
+<hostnames>
+</hostnames>
+<times srtt="917" rttvar="3809" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.40" addrtype="ipv4"/>
+<address addr="C0:74:AD:D9:DB:FD" addrtype="mac" vendor="Grandstream Networks"/>
+<hostnames>
+</hostnames>
+<times srtt="929" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.60" addrtype="ipv4"/>
+<address addr="58:9E:C6:05:33:FA" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.71" addrtype="ipv4"/>
+<address addr="14:02:EC:CC:B4:F4" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<times srtt="408" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.160" addrtype="ipv4"/>
+<address addr="50:A4:D0:50:53:FA" addrtype="mac" vendor="Ieee Registration Authority"/>
+<hostnames>
+</hostnames>
+<times srtt="966" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.161" addrtype="ipv4"/>
+<address addr="50:A4:D0:50:53:F4" addrtype="mac" vendor="Ieee Registration Authority"/>
+<hostnames>
+</hostnames>
+<times srtt="1931" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.162" addrtype="ipv4"/>
+<address addr="50:A4:D0:50:4F:1A" addrtype="mac" vendor="Ieee Registration Authority"/>
+<hostnames>
+</hostnames>
+<times srtt="2236" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.50.163" addrtype="ipv4"/>
+<address addr="50:A4:D0:50:53:F5" addrtype="mac" vendor="Ieee Registration Authority"/>
+<hostnames>
+</hostnames>
+<times srtt="2027" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.11" addrtype="ipv4"/>
+<address addr="E0:E6:56:00:0E:2B" addrtype="mac" vendor="Nethesis  srl"/>
+<hostnames>
+</hostnames>
+<times srtt="1968402" rttvar="2062285" to="300000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.12" addrtype="ipv4"/>
+<address addr="E0:E6:56:00:0E:2F" addrtype="mac" vendor="Nethesis  srl"/>
+<hostnames>
+</hostnames>
+<times srtt="706" rttvar="975" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.15" addrtype="ipv4"/>
+<address addr="E0:E6:56:00:0E:33" addrtype="mac" vendor="Nethesis  srl"/>
+<hostnames>
+</hostnames>
+<times srtt="1316" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.17" addrtype="ipv4"/>
+<address addr="E0:E6:56:00:12:40" addrtype="mac" vendor="Nethesis  srl"/>
+<hostnames>
+</hostnames>
+<times srtt="1164" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.18" addrtype="ipv4"/>
+<address addr="58:9E:C6:78:0B:7E" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="746" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.19" addrtype="ipv4"/>
+<address addr="58:9E:C6:78:06:4B" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="698" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.20" addrtype="ipv4"/>
+<address addr="58:9E:C6:78:02:A4" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="594" rttvar="5000" to="50000"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.22" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:80:BC" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="39031" rttvar="27741" to="149995"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.23" addrtype="ipv4"/>
+<address addr="58:9E:C6:54:D6:F8" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="29935" rttvar="29935" to="149675"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.25" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:7F:FD" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="38931" rttvar="21584" to="125267"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.28" addrtype="ipv4"/>
+<address addr="7C:2F:80:C5:80:2E" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="59124" rttvar="59124" to="295620"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.31" addrtype="ipv4"/>
+<address addr="7C:2F:80:DA:10:AE" addrtype="mac" vendor="Gigaset Communications GmbH"/>
+<hostnames>
+</hostnames>
+<times srtt="49237" rttvar="23251" to="142241"/>
+</host>
+<host><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.70.250" addrtype="ipv4"/>
+<address addr="00:15:5D:8F:60:0B" addrtype="mac" vendor="Microsoft"/>
+<hostnames>
+</hostnames>
+<times srtt="780" rttvar="5000" to="50000"/>
+</host>
+<runstats><finished time="1754985926" timestr="Tue Aug 12 10:05:26 2025" summary="Nmap done at Tue Aug 12 10:05:26 2025; 15616 IP addresses (153 hosts up) scanned in 211.02 seconds" elapsed="211.02" exit="success"/><hosts up="153" down="15463" total="15616"/>
+</runstats>
+</nmaprun>

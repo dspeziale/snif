@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.92 scan initiated Mon Aug 11 21:25:54 2025 as: nmap -O -oX 20.o.xml 192.168.20.0/24 -->
-<nmaprun scanner="nmap" args="nmap -O -oX 20.o.xml 192.168.20.0/24" start="1754940354" startstr="Mon Aug 11 21:25:54 2025" version="7.92" xmloutputversion="1.05">
+<!-- Nmap 7.92 scan initiated Tue Aug 12 09:29:56 2025 as: nmap -T5 -O -oX 20.o.xml 192.168.20.0/24 -->
+<nmaprun scanner="nmap" args="nmap -T5 -O -oX 20.o.xml 192.168.20.0/24" start="1754983796" startstr="Tue Aug 12 09:29:56 2025" version="7.92" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="1000" services="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,443-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
 <verbose level="0"/>
 <debugging level="0"/>
@@ -13,14 +13,14 @@
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.9" addrtype="ipv4"/>
-<address addr="00:FD:45:1B:26:60" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<address addr="192.168.20.4" addrtype="ipv4"/>
+<address addr="80:30:E0:94:26:00" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.4" addrtype="ipv4"/>
-<address addr="80:30:E0:94:26:00" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<address addr="192.168.20.9" addrtype="ipv4"/>
+<address addr="00:FD:45:1B:26:60" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
 </hostnames>
 </hosthint>
@@ -43,14 +43,8 @@
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.36" addrtype="ipv4"/>
-<address addr="E0:07:1B:51:54:A0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.35" addrtype="ipv4"/>
-<address addr="E4:DE:40:56:FA:3F" addrtype="mac"/>
+<address addr="192.168.20.30" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:4B:AF" addrtype="mac"/>
 <hostnames>
 </hostnames>
 </hosthint>
@@ -67,20 +61,14 @@
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.38" addrtype="ipv4"/>
-<address addr="A0:1D:48:33:89:80" addrtype="mac" vendor="Hewlett Packard"/>
-<hostnames>
-</hostnames>
-</hosthint>
-<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.37" addrtype="ipv4"/>
 <address addr="64:E8:81:70:68:80" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
 <hostnames>
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.11" addrtype="ipv4"/>
-<address addr="08:97:34:5F:99:EC" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<address addr="192.168.20.38" addrtype="ipv4"/>
+<address addr="A0:1D:48:33:89:80" addrtype="mac" vendor="Hewlett Packard"/>
 <hostnames>
 </hostnames>
 </hosthint>
@@ -91,12 +79,30 @@
 </hostnames>
 </hosthint>
 <hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.11" addrtype="ipv4"/>
+<address addr="08:97:34:5F:99:EC" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.36" addrtype="ipv4"/>
+<address addr="E0:07:1B:51:54:A0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.35" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:FA:3F" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.12" addrtype="ipv4"/>
 <address addr="08:F1:EA:53:FF:00" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
 </hostnames>
 </hosthint>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.1" addrtype="ipv4"/>
 <address addr="60:E3:27:27:4E:95" addrtype="mac" vendor="Tp-link Technologies"/>
 <hostnames>
@@ -114,14 +120,14 @@
 <osclass type="general purpose" vendor="Wind River" osfamily="VxWorks" accuracy="100"><cpe>cpe:/o:windriver:vxworks</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="7239920" lastboot="Tue May 20 02:20:57 2025"/>
+<uptime seconds="7283355" lastboot="Tue May 20 02:20:56 2025"/>
 <distance value="1"/>
-<tcpsequence index="260" difficulty="Good luck!" values="796331B7,1C53474B,90F58D4F,ACCFFC50,FCB4E556,303921DC"/>
-<ipidsequence class="Incrementing by 2" values="7A1A,7A1C,7A1E,7A20,7A22,7A24"/>
-<tcptssequence class="other" values="19E45520,19E45526,19E4552C,19E45532,19E45538,19E4553E"/>
-<times srtt="773" rttvar="273" to="100000"/>
+<tcpsequence index="260" difficulty="Good luck!" values="7B0F590B,4BB38F07,46A86F83,4D9BA80,590B7702,5D602404"/>
+<ipidsequence class="Incrementing by 2" values="C368,C36A,C36C,C36E,C370,C372"/>
+<tcptssequence class="other" values="1A0C1A7A,1A0C1A80,1A0C1A86,1A0C1A8C,1A0C1A92,1A0C1A98"/>
+<times srtt="785" rttvar="353" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.3" addrtype="ipv4"/>
 <address addr="D0:7E:28:07:61:25" addrtype="mac" vendor="Hewlett Packard"/>
 <hostnames>
@@ -138,12 +144,12 @@
 </osmatch>
 </os>
 <distance value="1"/>
-<tcpsequence index="205" difficulty="Good luck!" values="A8C2BC3F,A981FEDC,A9D52E0A,AA85CC27,AA8E4695,AB4B9FA1"/>
-<ipidsequence class="Incremental" values="5F85,5F86,5F87,5F88,5F89,5F8A"/>
+<tcpsequence index="202" difficulty="Good luck!" values="F85665F5,F897F4FF,F8DC6F78,F95A0339,FA2FFA57,FA9B677E"/>
+<ipidsequence class="Incremental" values="68EC,68ED,68EE,68EF,68F0,68F1"/>
 <tcptssequence class="none returned (unsupported)"/>
-<times srtt="1400" rttvar="163" to="100000"/>
+<times srtt="11018" rttvar="10851" to="54422"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.4" addrtype="ipv4"/>
 <address addr="80:30:E0:94:26:00" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -157,19 +163,19 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="40902"/>
+<portused state="closed" proto="udp" portid="40867"/>
 <osmatch name="HP 2530, 2920, or 5406zl switch" accuracy="100" line="35150">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="100"><cpe>cpe:/h:hp:switch_2530</cpe><cpe>cpe:/h:hp:switch_2920</cpe><cpe>cpe:/h:hp:switch_5406zl</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="2944562" lastboot="Tue Jul  8 19:30:15 2025"/>
+<uptime seconds="2987994" lastboot="Tue Jul  8 19:30:17 2025"/>
 <distance value="1"/>
-<tcpsequence index="128" difficulty="Good luck!" values="4F770033,4F77E6FE,4F789722,4F794037,4F79EC89,4F7AA34B"/>
-<ipidsequence class="Incremental" values="6B1D,6B1E,6B1F,6B20,6B21,6B22"/>
-<tcptssequence class="1000HZ" values="AF823DBC,AF823E20,AF823E84,AF823EE8,AF823F4C,AF823FB0"/>
-<times srtt="553" rttvar="96" to="100000"/>
+<tcpsequence index="134" difficulty="Good luck!" values="D6C269D0,D6C338E9,D6C425EF,D6C4A1D5,D6C57573,D6C62C81"/>
+<ipidsequence class="Incremental" values="7D88,7D89,7D8A,7D8B,7D8C,7D8D"/>
+<tcptssequence class="1000HZ" values="B2190E84,B2190EE8,B2190F4C,B2190FB0,B2191014,B2191078"/>
+<times srtt="572" rttvar="73" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.9" addrtype="ipv4"/>
 <address addr="00:FD:45:1B:26:60" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -181,20 +187,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="35975"/>
+<portused state="closed" proto="udp" portid="42000"/>
 <osmatch name="Linux 2.6.32 - 3.10" accuracy="100" line="56574">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="7239747" lastboot="Tue May 20 02:23:50 2025"/>
+<uptime seconds="7283182" lastboot="Tue May 20 02:23:49 2025"/>
 <distance value="1"/>
-<tcpsequence index="260" difficulty="Good luck!" values="74ED9D04,AC893326,6497A89C,ECC1C623,40D63E43,55FD75CB"/>
+<tcpsequence index="259" difficulty="Good luck!" values="E59C61F7,DBFC4896,1A148590,5BEACAD2,1491F3AE,D6A5597"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="100HZ" values="2B26F4DC,2B26F4E6,2B26F4F0,2B26F4FA,2B26F504,2B26F50E"/>
-<times srtt="1773" rttvar="707" to="100000"/>
+<tcptssequence class="100HZ" values="2B693E21,2B693E2B,2B693E35,2B693E3E,2B693E49,2B693E53"/>
+<times srtt="2198" rttvar="1485" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.11" addrtype="ipv4"/>
 <address addr="08:97:34:5F:99:EC" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -206,20 +212,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="43594"/>
+<portused state="closed" proto="udp" portid="30309"/>
 <osmatch name="Linux 2.6.32 - 3.10" accuracy="100" line="56574">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="7239445" lastboot="Tue May 20 02:28:52 2025"/>
+<uptime seconds="7282879" lastboot="Tue May 20 02:28:52 2025"/>
 <distance value="1"/>
-<tcpsequence index="264" difficulty="Good luck!" values="A6C8DD60,84E2027,79BB6BBE,7EFBB463,E1CA17F4,ECAA330E"/>
+<tcpsequence index="260" difficulty="Good luck!" values="26AA3B90,59B3958E,3AB57623,C590F90B,94B841D1,38C8F1AA"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="100HZ" values="2B267F1D,2B267F27,2B267F31,2B267F3B,2B267F45,2B267F4F"/>
-<times srtt="4796" rttvar="2752" to="100000"/>
+<tcptssequence class="100HZ" values="2B68C7AD,2B68C7B7,2B68C7C2,2B68C7CB,2B68C7D5,2B68C7DF"/>
+<times srtt="7799" rttvar="7497" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.12" addrtype="ipv4"/>
 <address addr="08:F1:EA:53:FF:00" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -231,20 +237,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="35839"/>
+<portused state="closed" proto="udp" portid="38494"/>
 <osmatch name="Linux 2.6.32 - 3.10" accuracy="100" line="56574">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="7239443" lastboot="Tue May 20 02:28:54 2025"/>
+<uptime seconds="7282877" lastboot="Tue May 20 02:28:54 2025"/>
 <distance value="1"/>
-<tcpsequence index="260" difficulty="Good luck!" values="37F5B55,4E3C68DD,28FD6F6F,806A5341,784C8AA8,68F9096F"/>
+<tcpsequence index="254" difficulty="Good luck!" values="BD4FB372,A8E8DDA9,F9214DBD,D059C7E0,A4F5544D,E101C42C"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="100HZ" values="2B267E53,2B267E5D,2B267E67,2B267E71,2B267E7B,2B267E85"/>
-<times srtt="2648" rttvar="1415" to="100000"/>
+<tcptssequence class="100HZ" values="2B68C6E1,2B68C6EB,2B68C6F5,2B68C6FF,2B68C709,2B68C713"/>
+<times srtt="3636" rttvar="3011" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.15" addrtype="ipv4"/>
 <address addr="B8:D4:E7:39:DF:9C" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
 <hostnames>
@@ -256,20 +262,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="44583"/>
+<portused state="closed" proto="udp" portid="33234"/>
 <osmatch name="Linux 2.6.32 - 3.10" accuracy="100" line="56574">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="7239429" lastboot="Tue May 20 02:29:08 2025"/>
+<uptime seconds="7282862" lastboot="Tue May 20 02:29:09 2025"/>
 <distance value="1"/>
-<tcpsequence index="259" difficulty="Good luck!" values="F680CA86,28734DD6,5C65D3A,7445DBCE,93891778,3F88D2C7"/>
+<tcpsequence index="257" difficulty="Good luck!" values="C0365377,EB0FC3DC,3C0D989F,CF09E585,A6E9AD5A,5E45E4D5"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="100HZ" values="2B26789B,2B2678A4,2B2678AE,2B2678B8,2B2678C2,2B2678CC"/>
-<times srtt="10620" rttvar="11700" to="100000"/>
+<tcptssequence class="100HZ" values="2B68C120,2B68C129,2B68C134,2B68C13E,2B68C148,2B68C152"/>
+<times srtt="2870" rttvar="1453" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940377"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.17" addrtype="ipv4"/>
 <address addr="A8:52:D4:8A:BA:A5" addrtype="mac"/>
 <hostnames>
@@ -282,151 +288,7 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="39576"/>
-<osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG 300-10, Dell PowerConnect 2748, Linksys SLM2024, SLM2048, or SLM224P, or Netgear FS728TP or GS724TP switch" accuracy="96" line="14504">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="96"><cpe>cpe:/h:cisco:sg_300-10</cpe></osclass>
-<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="96"><cpe>cpe:/h:dell:powerconnect_2748</cpe></osclass>
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="96"><cpe>cpe:/h:linksys:slm2024</cpe><cpe>cpe:/h:linksys:slm2048</cpe><cpe>cpe:/h:linksys:slm224p</cpe></osclass>
-<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="96"><cpe>cpe:/h:netgear:fs728tp</cpe><cpe>cpe:/h:netgear:prosafe_gs724tp</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG 200 or SG 300 switch" accuracy="95" line="14477">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_200</cpe><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG200 or SG300 switch" accuracy="93" line="14551">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="93"><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
-</osmatch>
-<osmatch name="Netgear FS700TS Smart Switch" accuracy="92" line="88216">
-<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="92"/>
-</osmatch>
-<osmatch name="3Com Baseline Switch 2924-SFP or Cisco ESW-520 switch or Allied Telesis AT-8000 series switch" accuracy="92" line="485">
-<osclass type="switch" vendor="3Com" osfamily="embedded" accuracy="92"><cpe>cpe:/h:3com:baseline_switch_2924-sfp</cpe></osclass>
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:esw-520</cpe></osclass>
-<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"/>
-</osmatch>
-<osmatch name="Allied Telesis AT-8000S; Dell PowerConnect 2824, 3448, 5316M, or 5324; Linksys SFE2000P, SRW2024, SRW2048, or SRW224G4; or TP-LINK TL-SL3428 switch" accuracy="92" line="2368">
-<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesis:at-8000s</cpe></osclass>
-<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="92"><cpe>cpe:/h:dell:powerconnect_2824</cpe><cpe>cpe:/h:dell:powerconnect_3448</cpe><cpe>cpe:/h:dell:powerconnect_5316m</cpe><cpe>cpe:/h:dell:powerconnect_5324</cpe></osclass>
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:sfe2000p</cpe><cpe>cpe:/h:linksys:srw2024</cpe><cpe>cpe:/h:linksys:srw2048</cpe><cpe>cpe:/h:linksys:srw224g4</cpe></osclass>
-<osclass type="switch" vendor="TP-LINK" osfamily="embedded" accuracy="92"><cpe>cpe:/h:tp-link:tl-sl3428</cpe></osclass>
-</osmatch>
-<osmatch name="Linksys SRW2008MP switch" accuracy="92" line="43945">
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:srw2008mp</cpe></osclass>
-</osmatch>
-<osmatch name="Linksys SRW2000-series or Allied Telesyn AT-8000S switch" accuracy="92" line="43926">
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"/>
-<osclass type="switch" vendor="Allied Telesyn" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesyn:at-8000s</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SRW2008-K9 switch" accuracy="92" line="14699">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:srw2008-k9</cpe></osclass>
-</osmatch>
-<osfingerprint fingerprint="OS:SCAN(V=7.92%E=4%D=8/11%OT=80%CT=1%CU=39576%PV=Y%DS=1%DC=D%G=Y%M=A852D4%T&#xa;OS:M=689A43D9%P=x86_64-redhat-linux-gnu)SEQ(SP=103%GCD=1%ISR=10D%TI=RD%CI=R&#xa;OS:D%II=RI%TS=U)OPS(O1=M5A0%O2=M5A0%O3=M5A0%O4=M5A0%O5=M5A0%O6=M5A0)WIN(W1=&#xa;OS:1000%W2=1000%W3=1000%W4=1000%W5=1000%W6=1000)ECN(R=Y%DF=N%T=40%W=1000%O=&#xa;OS:M5A0%CC=N%Q=)T1(R=Y%DF=N%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=Y%DF=N%T=40%W=0&#xa;OS:%S=Z%A=S%F=AR%O=%RD=0%Q=)T3(R=Y%DF=N%T=40%W=1000%S=O%A=S+%F=AS%O=M5A0%RD&#xa;OS:=0%Q=)T4(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=40%W=0%S&#xa;OS:=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R&#xa;OS:=Y%DF=N%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=38%UN=0%R&#xa;OS:IPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=S%T=40%CD=S)&#xa;"/>
-</os>
-<distance value="1"/>
-<tcpsequence index="260" difficulty="Good luck!" values="537CABE7,40DA01F5,10DC246C,7C989F77,22F63799,6EF6C8CA"/>
-<ipidsequence class="Randomized" values="7D9,9F4D,8567,2D2D,5010,793A"/>
-<tcptssequence class="none returned (unsupported)"/>
-<times srtt="1379" rttvar="246" to="100000"/>
-</host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.31" addrtype="ipv4"/>
-<address addr="94:3F:C2:24:E0:90" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
-<hostnames>
-</hostnames>
-<ports><extraports state="closed" count="999">
-<extrareasons reason="reset" count="999" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,443-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
-</extraports>
-<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="255"/><service name="http" method="table" conf="3"/></port>
-</ports>
-<os><portused state="open" proto="tcp" portid="80"/>
-<portused state="closed" proto="tcp" portid="1"/>
-<osmatch name="H3C Comware 5.20" accuracy="100" line="32201">
-<osclass type="switch" vendor="H3C" osfamily="Comware" osgen="5.X" accuracy="100"><cpe>cpe:/o:h3c:comware:5.20</cpe></osclass>
-</osmatch>
-</os>
-<distance value="1"/>
-<tcpsequence index="258" difficulty="Good luck!" values="B68AA209,AC90491C,3B23B65,232FAC10,F9DB2A85,AE467B64"/>
-<ipidsequence class="Incremental" values="4435,4436,4437,4438,4439,443A"/>
-<tcptssequence class="none returned (unsupported)"/>
-<times srtt="2163" rttvar="562" to="100000"/>
-</host>
-<host starttime="1754940358" endtime="1754940377"><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.32" addrtype="ipv4"/>
-<address addr="A8:52:D4:89:26:E1" addrtype="mac"/>
-<hostnames>
-</hostnames>
-<ports><extraports state="closed" count="998">
-<extrareasons reason="reset" count="998" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,444-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
-</extraports>
-<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
-<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" method="table" conf="3"/></port>
-</ports>
-<os><portused state="open" proto="tcp" portid="80"/>
-<portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="39680"/>
-<osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG 200 or SG 300 switch" accuracy="95" line="14477">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_200</cpe><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG 300-10, Dell PowerConnect 2748, Linksys SLM2024, SLM2048, or SLM224P, or Netgear FS728TP or GS724TP switch" accuracy="95" line="14504">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_300-10</cpe></osclass>
-<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="95"><cpe>cpe:/h:dell:powerconnect_2748</cpe></osclass>
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="95"><cpe>cpe:/h:linksys:slm2024</cpe><cpe>cpe:/h:linksys:slm2048</cpe><cpe>cpe:/h:linksys:slm224p</cpe></osclass>
-<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="95"><cpe>cpe:/h:netgear:fs728tp</cpe><cpe>cpe:/h:netgear:prosafe_gs724tp</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SG200 or SG300 switch" accuracy="93" line="14551">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="93"><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
-</osmatch>
-<osmatch name="Cisco SRW2008-K9 switch" accuracy="92" line="14699">
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:srw2008-k9</cpe></osclass>
-</osmatch>
-<osmatch name="Netgear FS700TS Smart Switch" accuracy="92" line="88216">
-<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="92"/>
-</osmatch>
-<osmatch name="3Com Baseline Switch 2924-SFP or Cisco ESW-520 switch or Allied Telesis AT-8000 series switch" accuracy="92" line="485">
-<osclass type="switch" vendor="3Com" osfamily="embedded" accuracy="92"><cpe>cpe:/h:3com:baseline_switch_2924-sfp</cpe></osclass>
-<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:esw-520</cpe></osclass>
-<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"/>
-</osmatch>
-<osmatch name="Allied Telesis AT-8000S; Dell PowerConnect 2824, 3448, 5316M, or 5324; Linksys SFE2000P, SRW2024, SRW2048, or SRW224G4; or TP-LINK TL-SL3428 switch" accuracy="92" line="2368">
-<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesis:at-8000s</cpe></osclass>
-<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="92"><cpe>cpe:/h:dell:powerconnect_2824</cpe><cpe>cpe:/h:dell:powerconnect_3448</cpe><cpe>cpe:/h:dell:powerconnect_5316m</cpe><cpe>cpe:/h:dell:powerconnect_5324</cpe></osclass>
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:sfe2000p</cpe><cpe>cpe:/h:linksys:srw2024</cpe><cpe>cpe:/h:linksys:srw2048</cpe><cpe>cpe:/h:linksys:srw224g4</cpe></osclass>
-<osclass type="switch" vendor="TP-LINK" osfamily="embedded" accuracy="92"><cpe>cpe:/h:tp-link:tl-sl3428</cpe></osclass>
-</osmatch>
-<osmatch name="Linksys SRW2008MP switch" accuracy="92" line="43945">
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:srw2008mp</cpe></osclass>
-</osmatch>
-<osmatch name="Linksys SRW2000-series or Allied Telesyn AT-8000S switch" accuracy="91" line="43926">
-<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="91"/>
-<osclass type="switch" vendor="Allied Telesyn" osfamily="embedded" accuracy="91"><cpe>cpe:/h:alliedtelesyn:at-8000s</cpe></osclass>
-</osmatch>
-<osfingerprint fingerprint="OS:SCAN(V=7.92%E=4%D=8/11%OT=80%CT=1%CU=39680%PV=Y%DS=1%DC=D%G=Y%M=A852D4%T&#xa;OS:M=689A43D9%P=x86_64-redhat-linux-gnu)SEQ(SP=FC%GCD=1%ISR=103%TI=RD%CI=RD&#xa;OS:%II=RI%TS=U)OPS(O1=M5A0%O2=M5A0%O3=M5A0%O4=M5A0%O5=M5A0%O6=M5A0)WIN(W1=1&#xa;OS:000%W2=1000%W3=1000%W4=1000%W5=1000%W6=1000)ECN(R=Y%DF=N%T=40%W=1000%O=M&#xa;OS:5A0%CC=N%Q=)T1(R=Y%DF=N%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=Y%DF=N%T=40%W=0%&#xa;OS:S=Z%A=S%F=AR%O=%RD=0%Q=)T3(R=Y%DF=N%T=40%W=1000%S=O%A=S+%F=AS%O=M5A0%RD=&#xa;OS:0%Q=)T4(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=40%W=0%S=&#xa;OS:Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=&#xa;OS:Y%DF=N%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=38%UN=0%RI&#xa;OS:PL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=S%T=40%CD=S)&#xa;"/>
-</os>
-<distance value="1"/>
-<tcpsequence index="259" difficulty="Good luck!" values="D55C50C,5E6139B3,705BD8B7,653F5C21,1389BAD5,4F6E4521"/>
-<ipidsequence class="Randomized" values="2E4B,440F,7AA6,44E3,E0CD,8F00"/>
-<tcptssequence class="none returned (unsupported)"/>
-<times srtt="1312" rttvar="214" to="100000"/>
-</host>
-<host starttime="1754940358" endtime="1754940377"><status state="up" reason="arp-response" reason_ttl="0"/>
-<address addr="192.168.20.35" addrtype="ipv4"/>
-<address addr="E4:DE:40:56:FA:3F" addrtype="mac"/>
-<hostnames>
-</hostnames>
-<ports><extraports state="closed" count="998">
-<extrareasons reason="reset" count="998" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,444-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
-</extraports>
-<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
-<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" method="table" conf="3"/></port>
-</ports>
-<os><portused state="open" proto="tcp" portid="80"/>
-<portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="34735"/>
+<portused state="closed" proto="udp" portid="44377"/>
 <osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
 <osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
 </osmatch>
@@ -466,15 +328,216 @@
 <osmatch name="Dell X1052P switch" accuracy="91" line="22627">
 <osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="91"><cpe>cpe:/h:dell:x1052p</cpe></osclass>
 </osmatch>
-<osfingerprint fingerprint="OS:SCAN(V=7.92%E=4%D=8/11%OT=80%CT=1%CU=34735%PV=Y%DS=1%DC=D%G=Y%M=E4DE40%T&#xa;OS:M=689A43D9%P=x86_64-redhat-linux-gnu)SEQ(SP=101%GCD=1%ISR=105%TI=RD%CI=R&#xa;OS:D%II=RI%TS=U)OPS(O1=M5A0%O2=M5A0%O3=M5A0%O4=M5A0%O5=M5A0%O6=M5A0)WIN(W1=&#xa;OS:1000%W2=1000%W3=1000%W4=1000%W5=1000%W6=1000)ECN(R=Y%DF=N%T=40%W=1000%O=&#xa;OS:M5A0%CC=N%Q=)T1(R=Y%DF=N%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=Y%DF=N%T=40%W=0&#xa;OS:%S=Z%A=S%F=AR%O=%RD=0%Q=)T3(R=Y%DF=N%T=40%W=1000%S=O%A=S+%F=AS%O=M5A0%RD&#xa;OS:=0%Q=)T4(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=40%W=0%S&#xa;OS:=Z%A=S+%F=AR%O=%RD=0%Q=)T6(R=Y%DF=N%T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R&#xa;OS:=Y%DF=N%T=40%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=40%IPL=38%UN=0%R&#xa;OS:IPL=G%RID=G%RIPCK=G%RUCK=G%RUD=G)IE(R=Y%DFI=S%T=40%CD=S)&#xa;"/>
 </os>
 <distance value="1"/>
-<tcpsequence index="253" difficulty="Good luck!" values="1850C8F8,2E54041A,462AEA45,EB4AFBE,4D07A659,6045E8A6"/>
-<ipidsequence class="Randomized" values="DBDA,F797,5F73,EC65,6090,B8AF"/>
+<tcpsequence index="259" difficulty="Good luck!" values="5B0098F5,22A46018,D45A532,759795D7,1491EFDC,4856785B"/>
+<ipidsequence class="Randomized" values="13DE,9AA3,15A0,ED51,297E,FFF4"/>
 <tcptssequence class="none returned (unsupported)"/>
-<times srtt="1320" rttvar="254" to="100000"/>
+<times srtt="1489" rttvar="311" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.30" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:4B:AF" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="998">
+<extrareasons reason="reset" count="998" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,444-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="80"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="40188"/>
+<osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 300-10, Dell PowerConnect 2748, Linksys SLM2024, SLM2048, or SLM224P, or Netgear FS728TP or GS724TP switch" accuracy="96" line="14504">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="96"><cpe>cpe:/h:cisco:sg_300-10</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="96"><cpe>cpe:/h:dell:powerconnect_2748</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="96"><cpe>cpe:/h:linksys:slm2024</cpe><cpe>cpe:/h:linksys:slm2048</cpe><cpe>cpe:/h:linksys:slm224p</cpe></osclass>
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="96"><cpe>cpe:/h:netgear:fs728tp</cpe><cpe>cpe:/h:netgear:prosafe_gs724tp</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 200 or SG 300 switch" accuracy="95" line="14477">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_200</cpe><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG200 or SG300 switch" accuracy="93" line="14551">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="93"><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Netgear FS700TS Smart Switch" accuracy="92" line="88216">
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="3Com Baseline Switch 2924-SFP or Cisco ESW-520 switch or Allied Telesis AT-8000 series switch" accuracy="92" line="485">
+<osclass type="switch" vendor="3Com" osfamily="embedded" accuracy="92"><cpe>cpe:/h:3com:baseline_switch_2924-sfp</cpe></osclass>
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:esw-520</cpe></osclass>
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="Allied Telesis AT-8000S; Dell PowerConnect 2824, 3448, 5316M, or 5324; Linksys SFE2000P, SRW2024, SRW2048, or SRW224G4; or TP-LINK TL-SL3428 switch" accuracy="92" line="2368">
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesis:at-8000s</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="92"><cpe>cpe:/h:dell:powerconnect_2824</cpe><cpe>cpe:/h:dell:powerconnect_3448</cpe><cpe>cpe:/h:dell:powerconnect_5316m</cpe><cpe>cpe:/h:dell:powerconnect_5324</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:sfe2000p</cpe><cpe>cpe:/h:linksys:srw2024</cpe><cpe>cpe:/h:linksys:srw2048</cpe><cpe>cpe:/h:linksys:srw224g4</cpe></osclass>
+<osclass type="switch" vendor="TP-LINK" osfamily="embedded" accuracy="92"><cpe>cpe:/h:tp-link:tl-sl3428</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2008MP switch" accuracy="92" line="43945">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:srw2008mp</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2000-series or Allied Telesyn AT-8000S switch" accuracy="92" line="43926">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"/>
+<osclass type="switch" vendor="Allied Telesyn" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesyn:at-8000s</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SRW2008-K9 switch" accuracy="92" line="14699">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:srw2008-k9</cpe></osclass>
+</osmatch>
+</os>
+<distance value="1"/>
+<tcpsequence index="256" difficulty="Good luck!" values="1DFEDF77,63B490C7,580C4FDE,64741F0B,56C5D825,2FC4B015"/>
+<ipidsequence class="Randomized" values="DA93,4949,E079,7F6F,C613,EF4D"/>
+<tcptssequence class="none returned (unsupported)"/>
+<times srtt="1437" rttvar="362" to="50000"/>
+</host>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.31" addrtype="ipv4"/>
+<address addr="94:3F:C2:24:E0:90" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="999">
+<extrareasons reason="reset" count="999" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,443-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="255"/><service name="http" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="80"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<osmatch name="H3C Comware 5.20" accuracy="100" line="32201">
+<osclass type="switch" vendor="H3C" osfamily="Comware" osgen="5.X" accuracy="100"><cpe>cpe:/o:h3c:comware:5.20</cpe></osclass>
+</osmatch>
+</os>
+<distance value="1"/>
+<tcpsequence index="262" difficulty="Good luck!" values="9FE47E77,13E0BC96,817CB3D7,3CE51E,D6425937,F7166BB8"/>
+<ipidsequence class="Incremental" values="4CE0,4CE1,4CE2,4CE3,4CE4,4CE5"/>
+<tcptssequence class="none returned (unsupported)"/>
+<times srtt="12454" rttvar="12446" to="62238"/>
+</host>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.32" addrtype="ipv4"/>
+<address addr="A8:52:D4:89:26:E1" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="998">
+<extrareasons reason="reset" count="998" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,444-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="80"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="37075"/>
+<osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 300-10, Dell PowerConnect 2748, Linksys SLM2024, SLM2048, or SLM224P, or Netgear FS728TP or GS724TP switch" accuracy="96" line="14504">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="96"><cpe>cpe:/h:cisco:sg_300-10</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="96"><cpe>cpe:/h:dell:powerconnect_2748</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="96"><cpe>cpe:/h:linksys:slm2024</cpe><cpe>cpe:/h:linksys:slm2048</cpe><cpe>cpe:/h:linksys:slm224p</cpe></osclass>
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="96"><cpe>cpe:/h:netgear:fs728tp</cpe><cpe>cpe:/h:netgear:prosafe_gs724tp</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 200 or SG 300 switch" accuracy="95" line="14477">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_200</cpe><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG200 or SG300 switch" accuracy="93" line="14551">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="93"><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Netgear FS700TS Smart Switch" accuracy="92" line="88216">
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="3Com Baseline Switch 2924-SFP or Cisco ESW-520 switch or Allied Telesis AT-8000 series switch" accuracy="92" line="485">
+<osclass type="switch" vendor="3Com" osfamily="embedded" accuracy="92"><cpe>cpe:/h:3com:baseline_switch_2924-sfp</cpe></osclass>
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:esw-520</cpe></osclass>
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="Allied Telesis AT-8000S; Dell PowerConnect 2824, 3448, 5316M, or 5324; Linksys SFE2000P, SRW2024, SRW2048, or SRW224G4; or TP-LINK TL-SL3428 switch" accuracy="92" line="2368">
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesis:at-8000s</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="92"><cpe>cpe:/h:dell:powerconnect_2824</cpe><cpe>cpe:/h:dell:powerconnect_3448</cpe><cpe>cpe:/h:dell:powerconnect_5316m</cpe><cpe>cpe:/h:dell:powerconnect_5324</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:sfe2000p</cpe><cpe>cpe:/h:linksys:srw2024</cpe><cpe>cpe:/h:linksys:srw2048</cpe><cpe>cpe:/h:linksys:srw224g4</cpe></osclass>
+<osclass type="switch" vendor="TP-LINK" osfamily="embedded" accuracy="92"><cpe>cpe:/h:tp-link:tl-sl3428</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2000-series or Allied Telesyn AT-8000S switch" accuracy="92" line="43926">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"/>
+<osclass type="switch" vendor="Allied Telesyn" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesyn:at-8000s</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SRW2008-K9 switch" accuracy="92" line="14699">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:srw2008-k9</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2008MP switch" accuracy="91" line="43945">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="91"><cpe>cpe:/h:linksys:srw2008mp</cpe></osclass>
+</osmatch>
+</os>
+<distance value="1"/>
+<tcpsequence index="255" difficulty="Good luck!" values="273AE0C4,66826AE9,5DCAAB34,1C862859,58EBE34F,2DF6D49B"/>
+<ipidsequence class="Randomized" values="FB16,ECFB,914D,A62D,8FE,3866"/>
+<tcptssequence class="none returned (unsupported)"/>
+<times srtt="1514" rttvar="211" to="50000"/>
+</host>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.20.35" addrtype="ipv4"/>
+<address addr="E4:DE:40:56:FA:3F" addrtype="mac"/>
+<hostnames>
+</hostnames>
+<ports><extraports state="closed" count="998">
+<extrareasons reason="reset" count="998" proto="tcp" ports="1,3-4,6-7,9,13,17,19-26,30,32-33,37,42-43,49,53,70,79,81-85,88-90,99-100,106,109-111,113,119,125,135,139,143-144,146,161,163,179,199,211-212,222,254-256,259,264,280,301,306,311,340,366,389,406-407,416-417,425,427,444-445,458,464-465,481,497,500,512-515,524,541,543-545,548,554-555,563,587,593,616-617,625,631,636,646,648,666-668,683,687,691,700,705,711,714,720,722,726,749,765,777,783,787,800-801,808,843,873,880,888,898,900-903,911-912,981,987,990,992-993,995,999-1002,1007,1009-1011,1021-1100,1102,1104-1108,1110-1114,1117,1119,1121-1124,1126,1130-1132,1137-1138,1141,1145,1147-1149,1151-1152,1154,1163-1166,1169,1174-1175,1183,1185-1187,1192,1198-1199,1201,1213,1216-1218,1233-1234,1236,1244,1247-1248,1259,1271-1272,1277,1287,1296,1300-1301,1309-1311,1322,1328,1334,1352,1417,1433-1434,1443,1455,1461,1494,1500-1501,1503,1521,1524,1533,1556,1580,1583,1594,1600,1641,1658,1666,1687-1688,1700,1717-1721,1723,1755,1761,1782-1783,1801,1805,1812,1839-1840,1862-1864,1875,1900,1914,1935,1947,1971-1972,1974,1984,1998-2010,2013,2020-2022,2030,2033-2035,2038,2040-2043,2045-2049,2065,2068,2099-2100,2103,2105-2107,2111,2119,2121,2126,2135,2144,2160-2161,2170,2179,2190-2191,2196,2200,2222,2251,2260,2288,2301,2323,2366,2381-2383,2393-2394,2399,2401,2492,2500,2522,2525,2557,2601-2602,2604-2605,2607-2608,2638,2701-2702,2710,2717-2718,2725,2800,2809,2811,2869,2875,2909-2910,2920,2967-2968,2998,3000-3001,3003,3005-3007,3011,3013,3017,3030-3031,3052,3071,3077,3128,3168,3211,3221,3260-3261,3268-3269,3283,3300-3301,3306,3322-3325,3333,3351,3367,3369-3372,3389-3390,3404,3476,3493,3517,3527,3546,3551,3580,3659,3689-3690,3703,3737,3766,3784,3800-3801,3809,3814,3826-3828,3851,3869,3871,3878,3880,3889,3905,3914,3918,3920,3945,3971,3986,3995,3998,4000-4006,4045,4111,4125-4126,4129,4224,4242,4279,4321,4343,4443-4446,4449,4550,4567,4662,4848,4899-4900,4998,5000-5004,5009,5030,5033,5050-5051,5054,5060-5061,5080,5087,5100-5102,5120,5190,5200,5214,5221-5222,5225-5226,5269,5280,5298,5357,5405,5414,5431-5432,5440,5500,5510,5544,5550,5555,5560,5566,5631,5633,5666,5678-5679,5718,5730,5800-5802,5810-5811,5815,5822,5825,5850,5859,5862,5877,5900-5904,5906-5907,5910-5911,5915,5922,5925,5950,5952,5959-5963,5987-5989,5998-6007,6009,6025,6059,6100-6101,6106,6112,6123,6129,6156,6346,6389,6502,6510,6543,6547,6565-6567,6580,6646,6666-6669,6689,6692,6699,6779,6788-6789,6792,6839,6881,6901,6969,7000-7002,7004,7007,7019,7025,7070,7100,7103,7106,7200-7201,7402,7435,7443,7496,7512,7625,7627,7676,7741,7777-7778,7800,7911,7920-7921,7937-7938,7999-8002,8007-8011,8021-8022,8031,8042,8045,8080-8090,8093,8099-8100,8180-8181,8192-8194,8200,8222,8254,8290-8292,8300,8333,8383,8400,8402,8443,8500,8600,8649,8651-8652,8654,8701,8800,8873,8888,8899,8994,9000-9003,9009-9011,9040,9050,9071,9080-9081,9090-9091,9099-9103,9110-9111,9200,9207,9220,9290,9415,9418,9485,9500,9502-9503,9535,9575,9593-9595,9618,9666,9876-9878,9898,9900,9917,9929,9943-9944,9968,9998-10004,10009-10010,10012,10024-10025,10082,10180,10215,10243,10566,10616-10617,10621,10626,10628-10629,10778,11110-11111,11967,12000,12174,12265,12345,13456,13722,13782-13783,14000,14238,14441-14442,15000,15002-15004,15660,15742,16000-16001,16012,16016,16018,16080,16113,16992-16993,17877,17988,18040,18101,18988,19101,19283,19315,19350,19780,19801,19842,20000,20005,20031,20221-20222,20828,21571,22939,23502,24444,24800,25734-25735,26214,27000,27352-27353,27355-27356,27715,28201,30000,30718,30951,31038,31337,32768-32785,33354,33899,34571-34573,35500,38292,40193,40911,41511,42510,44176,44442-44443,44501,45100,48080,49152-49161,49163,49165,49167,49175-49176,49400,49999-50003,50006,50300,50389,50500,50636,50800,51103,51493,52673,52822,52848,52869,54045,54328,55055-55056,55555,55600,56737-56738,57294,57797,58080,60020,60443,61532,61900,62078,63331,64623,64680,65000,65129,65389"/>
+</extraports>
+<port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="https" method="table" conf="3"/></port>
+</ports>
+<os><portused state="open" proto="tcp" portid="80"/>
+<portused state="closed" proto="tcp" portid="1"/>
+<portused state="closed" proto="udp" portid="37270"/>
+<osmatch name="Cisco SG250 switch" accuracy="97" line="14605">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="97"><cpe>cpe:/h:cisco:sg250</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 300-10, Dell PowerConnect 2748, Linksys SLM2024, SLM2048, or SLM224P, or Netgear FS728TP or GS724TP switch" accuracy="96" line="14504">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="96"><cpe>cpe:/h:cisco:sg_300-10</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="96"><cpe>cpe:/h:dell:powerconnect_2748</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="96"><cpe>cpe:/h:linksys:slm2024</cpe><cpe>cpe:/h:linksys:slm2048</cpe><cpe>cpe:/h:linksys:slm224p</cpe></osclass>
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="96"><cpe>cpe:/h:netgear:fs728tp</cpe><cpe>cpe:/h:netgear:prosafe_gs724tp</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG 200 or SG 300 switch" accuracy="95" line="14477">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="95"><cpe>cpe:/h:cisco:sg_200</cpe><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SG200 or SG300 switch" accuracy="93" line="14551">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="93"><cpe>cpe:/h:cisco:sg_300</cpe></osclass>
+</osmatch>
+<osmatch name="Netgear FS700TS Smart Switch" accuracy="92" line="88216">
+<osclass type="switch" vendor="Netgear" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="3Com Baseline Switch 2924-SFP or Cisco ESW-520 switch or Allied Telesis AT-8000 series switch" accuracy="92" line="485">
+<osclass type="switch" vendor="3Com" osfamily="embedded" accuracy="92"><cpe>cpe:/h:3com:baseline_switch_2924-sfp</cpe></osclass>
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:esw-520</cpe></osclass>
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"/>
+</osmatch>
+<osmatch name="Allied Telesis AT-8000S; Dell PowerConnect 2824, 3448, 5316M, or 5324; Linksys SFE2000P, SRW2024, SRW2048, or SRW224G4; or TP-LINK TL-SL3428 switch" accuracy="92" line="2368">
+<osclass type="switch" vendor="Allied Telesis" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesis:at-8000s</cpe></osclass>
+<osclass type="switch" vendor="Dell" osfamily="embedded" accuracy="92"><cpe>cpe:/h:dell:powerconnect_2824</cpe><cpe>cpe:/h:dell:powerconnect_3448</cpe><cpe>cpe:/h:dell:powerconnect_5316m</cpe><cpe>cpe:/h:dell:powerconnect_5324</cpe></osclass>
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"><cpe>cpe:/h:linksys:sfe2000p</cpe><cpe>cpe:/h:linksys:srw2024</cpe><cpe>cpe:/h:linksys:srw2048</cpe><cpe>cpe:/h:linksys:srw224g4</cpe></osclass>
+<osclass type="switch" vendor="TP-LINK" osfamily="embedded" accuracy="92"><cpe>cpe:/h:tp-link:tl-sl3428</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2000-series or Allied Telesyn AT-8000S switch" accuracy="92" line="43926">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="92"/>
+<osclass type="switch" vendor="Allied Telesyn" osfamily="embedded" accuracy="92"><cpe>cpe:/h:alliedtelesyn:at-8000s</cpe></osclass>
+</osmatch>
+<osmatch name="Cisco SRW2008-K9 switch" accuracy="92" line="14699">
+<osclass type="switch" vendor="Cisco" osfamily="embedded" accuracy="92"><cpe>cpe:/h:cisco:srw2008-k9</cpe></osclass>
+</osmatch>
+<osmatch name="Linksys SRW2008MP switch" accuracy="91" line="43945">
+<osclass type="switch" vendor="Linksys" osfamily="embedded" accuracy="91"><cpe>cpe:/h:linksys:srw2008mp</cpe></osclass>
+</osmatch>
+</os>
+<distance value="1"/>
+<tcpsequence index="263" difficulty="Good luck!" values="29CB654,767F7D3B,16672F00,762BCBA5,5C3F1639,67BBE68A"/>
+<ipidsequence class="Randomized" values="4058,AB74,434D,3F9F,ABED,32AE"/>
+<tcptssequence class="none returned (unsupported)"/>
+<times srtt="1467" rttvar="394" to="50000"/>
+</host>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.36" addrtype="ipv4"/>
 <address addr="E0:07:1B:51:54:A0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -486,20 +549,20 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="80"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="44770"/>
+<portused state="closed" proto="udp" portid="38243"/>
 <osmatch name="Linux 2.6.32 - 3.10" accuracy="100" line="56574">
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="2.6.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:2.6</cpe></osclass>
 <osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="3.X" accuracy="100"><cpe>cpe:/o:linux:linux_kernel:3</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="4745996" lastboot="Tue Jun 17 23:06:21 2025"/>
+<uptime seconds="4789433" lastboot="Tue Jun 17 23:06:19 2025"/>
 <distance value="1"/>
-<tcpsequence index="250" difficulty="Good luck!" values="AE678E0A,3924D1EF,B475FFEC,61AA3598,FB454293,9622D4BD"/>
+<tcpsequence index="262" difficulty="Good luck!" values="C3B31BEC,FBF3426C,E765652E,D95C2BAC,83BD4871,F8385A3E"/>
 <ipidsequence class="All zeros" values="0,0,0,0,0,0"/>
-<tcptssequence class="100HZ" values="1C49CB93,1C49CB9E,1C49CBA8,1C49CBB1,1C49CBBB,1C49CBC6"/>
-<times srtt="1902" rttvar="981" to="100000"/>
+<tcptssequence class="100HZ" values="1C8C14D2,1C8C14DB,1C8C14E6,1C8C14F0,1C8C14FA,1C8C1504"/>
+<times srtt="1930" rttvar="859" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940377"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.37" addrtype="ipv4"/>
 <address addr="64:E8:81:70:68:80" addrtype="mac" vendor="Aruba, a Hewlett Packard Enterprise Company"/>
 <hostnames>
@@ -513,7 +576,7 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="41461"/>
+<portused state="closed" proto="udp" portid="39181"/>
 <osmatch name="HP 2530, 2920, or 5406zl switch" accuracy="98" line="35150">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="98"><cpe>cpe:/h:hp:switch_2530</cpe><cpe>cpe:/h:hp:switch_2920</cpe><cpe>cpe:/h:hp:switch_5406zl</cpe></osclass>
 </osmatch>
@@ -544,16 +607,15 @@
 <osmatch name="AudioCodes MediaPack 118 or Mediant 1000 VoIP adapter" accuracy="92" line="8549">
 <osclass type="VoIP adapter" vendor="AudioCodes" osfamily="embedded" accuracy="92"><cpe>cpe:/h:audiocodes:mediapack_118</cpe><cpe>cpe:/h:audiocodes:mediant_1000</cpe></osclass>
 </osmatch>
-<osfingerprint fingerprint="OS:SCAN(V=7.92%E=4%D=8/11%OT=22%CT=1%CU=41461%PV=Y%DS=1%DC=D%G=Y%M=64E881%T&#xa;OS:M=689A43D9%P=x86_64-redhat-linux-gnu)SEQ(SP=7D%GCD=1%ISR=96%TI=I%CI=I%II&#xa;OS:=I%SS=S%TS=A)OPS(O1=M5B4NW1NNT11%O2=M578NW1NNSNNT11%O3=M280NW1NNT11%O4=M&#xa;OS:218NW1NNSNNT11%O5=M218NW1NNSNNT11%O6=M109NNSNNT11)WIN(W1=FFFF%W2=FFFF%W3&#xa;OS:=FFFF%W4=FFFF%W5=FFFF%W6=FFFF)ECN(R=Y%DF=Y%T=40%W=FFFF%O=M5B4NW1NNS%CC=N&#xa;OS:%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=N%T=4&#xa;OS:0%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=0%W=0%S=Z%A=S+%F=AR%O=%RD=0%Q&#xa;OS:=)T6(R=Y%DF=N%T=0%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=N%T=0%W=0%S=Z%A=S&#xa;OS:+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=FF%IPL=38%UN=0%RIPL=G%RID=G%RIPCK=G%RUCK&#xa;OS:=G%RUD=G)IE(R=Y%DFI=N%T=FF%CD=S)&#xa;"/>
 </os>
-<uptime seconds="139159" lastboot="Sun Aug 10 06:46:58 2025"/>
+<uptime seconds="182593" lastboot="Sun Aug 10 06:46:59 2025"/>
 <distance value="1"/>
-<tcpsequence index="133" difficulty="Good luck!" values="4F29FE8,4F31F2E,4F3D5B8,4F45095,4F51F4B,4F5DBCB"/>
-<ipidsequence class="Incremental" values="EE8B,EE8C,EE8D,EE8E,EE8F,EE90"/>
-<tcptssequence class="1000HZ" values="84B603A,84B609E,84B6102,84B6166,84B61CA,84B622E"/>
-<times srtt="1487" rttvar="786" to="100000"/>
+<tcpsequence index="130" difficulty="Good luck!" values="8C31192E,8C31990B,8C32684C,8C330B54,8C339E46,8C34474B"/>
+<ipidsequence class="Incremental" values="FDC6,FDC7,FDC8,FDC9,FDCA,FDCB"/>
+<tcptssequence class="1000HZ" values="AE220D6,AE2213A,AE2219E,AE22202,AE22266,AE222CA"/>
+<times srtt="1529" rttvar="828" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940377"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983811"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.38" addrtype="ipv4"/>
 <address addr="A0:1D:48:33:89:80" addrtype="mac" vendor="Hewlett Packard"/>
 <hostnames>
@@ -567,7 +629,7 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="42563"/>
+<portused state="closed" proto="udp" portid="43532"/>
 <osmatch name="HP 2530, 2920, or 5406zl switch" accuracy="99" line="35150">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="99"><cpe>cpe:/h:hp:switch_2530</cpe><cpe>cpe:/h:hp:switch_2920</cpe><cpe>cpe:/h:hp:switch_5406zl</cpe></osclass>
 </osmatch>
@@ -580,14 +642,14 @@
 <osmatch name="HP ProCurve 3500yl, 5412zl, or 8212zl switch" accuracy="98" line="35705">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="98"><cpe>cpe:/h:hp:procurve_switch_3500yl</cpe><cpe>cpe:/h:hp:procurve_switch_5412zl</cpe><cpe>cpe:/h:hp:procurve_switch_8212zl</cpe></osclass>
 </osmatch>
+<osmatch name="HP 2920 or 3800 switch" accuracy="96" line="35170">
+<osclass type="switch" vendor="HP" osfamily="embedded" accuracy="96"><cpe>cpe:/h:hp:2920</cpe><cpe>cpe:/h:hp:3800</cpe></osclass>
+</osmatch>
 <osmatch name="HP ProCurve 2520, 2915, 3500yl, or 5400zl-series switch" accuracy="96" line="35412">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="96"><cpe>cpe:/h:hp:procurve_switch_2520</cpe><cpe>cpe:/h:hp:procurve_switch_3500yl</cpe><cpe>cpe:/h:hp:procurve_switch_5400zl</cpe><cpe>cpe:/h:hp:procurve_switch_5412zl</cpe></osclass>
 </osmatch>
 <osmatch name="HP ProCurve 2910al switch" accuracy="96" line="35627">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="96"><cpe>cpe:/h:hp:procurve_switch_2910al</cpe></osclass>
-</osmatch>
-<osmatch name="HP 2920 or 3800 switch" accuracy="96" line="35170">
-<osclass type="switch" vendor="HP" osfamily="embedded" accuracy="96"><cpe>cpe:/h:hp:2920</cpe><cpe>cpe:/h:hp:3800</cpe></osclass>
 </osmatch>
 <osmatch name="HP ProCurve 5412zl switch" accuracy="95" line="35781">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="95"><cpe>cpe:/h:hp:procurve_switch_5412zl</cpe></osclass>
@@ -598,16 +660,15 @@
 <osmatch name="AudioCodes MediaPack 118 or Mediant 1000 VoIP adapter" accuracy="93" line="8549">
 <osclass type="VoIP adapter" vendor="AudioCodes" osfamily="embedded" accuracy="93"><cpe>cpe:/h:audiocodes:mediapack_118</cpe><cpe>cpe:/h:audiocodes:mediant_1000</cpe></osclass>
 </osmatch>
-<osfingerprint fingerprint="OS:SCAN(V=7.92%E=4%D=8/11%OT=22%CT=1%CU=42563%PV=Y%DS=1%DC=D%G=Y%M=A01D48%T&#xa;OS:M=689A43D9%P=x86_64-redhat-linux-gnu)SEQ(SP=87%GCD=1%ISR=96%TI=I%CI=I%II&#xa;OS:=I%SS=S%TS=A)OPS(O1=M5B4NW1NNSNNT11%O2=M578NW1NNSNNT11%O3=M280NW1NNT11%O&#xa;OS:4=M218NW1NNSNNT11%O5=M218NW1NNSNNT11%O6=M109NNSNNT11)WIN(W1=FFFF%W2=FFFF&#xa;OS:%W3=FFFF%W4=FFFF%W5=FFFF%W6=FFFF)ECN(R=Y%DF=Y%T=40%W=FFFF%O=M5B4NW1NNS%C&#xa;OS:C=N%Q=)T1(R=Y%DF=Y%T=40%S=O%A=S+%F=AS%RD=0%Q=)T2(R=N)T3(R=N)T4(R=Y%DF=N%&#xa;OS:T=40%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T5(R=Y%DF=N%T=0%W=0%S=Z%A=S+%F=AR%O=%RD=&#xa;OS:0%Q=)T6(R=Y%DF=N%T=0%W=0%S=A%A=Z%F=R%O=%RD=0%Q=)T7(R=Y%DF=N%T=0%W=0%S=Z%&#xa;OS:A=S+%F=AR%O=%RD=0%Q=)U1(R=Y%DF=N%T=FF%IPL=38%UN=0%RIPL=G%RID=G%RIPCK=G%R&#xa;OS:UCK=G%RUD=G)IE(R=Y%DFI=N%T=FF%CD=S)&#xa;"/>
 </os>
-<uptime seconds="3571684" lastboot="Tue Jul  1 13:18:13 2025"/>
+<uptime seconds="3615118" lastboot="Tue Jul  1 13:18:14 2025"/>
 <distance value="1"/>
-<tcpsequence index="128" difficulty="Good luck!" values="DC1D6E8B,DC1E2F25,DC1EBAD4,DC1F5E64,DC1FFC93,DC20C60A"/>
-<ipidsequence class="Incremental" values="476D,476E,476F,4770,4771,4772"/>
-<tcptssequence class="1000HZ" values="D4E38C54,D4E38CB8,D4E38D1C,D4E38D80,D4E38DE4,D4E38E48"/>
-<times srtt="1363" rttvar="588" to="100000"/>
+<tcpsequence index="135" difficulty="Good luck!" values="635C7BD2,635D565E,635DF640,635E6EBE,635F28C3,63601D56"/>
+<ipidsequence class="Incremental" values="56AA,56AB,56AC,56AD,56AE,56AF"/>
+<tcptssequence class="1000HZ" values="D77A4D40,D77A4D9A,D77A4DFE,D77A4E62,D77A4ED0,D77A4F34"/>
+<times srtt="1444" rttvar="674" to="50000"/>
 </host>
-<host starttime="1754940358" endtime="1754940365"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1754983798" endtime="1754983808"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="192.168.20.82" addrtype="ipv4"/>
 <address addr="80:30:E0:94:ED:E0" addrtype="mac" vendor="Hewlett Packard Enterprise"/>
 <hostnames>
@@ -621,18 +682,18 @@
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
 <portused state="closed" proto="tcp" portid="1"/>
-<portused state="closed" proto="udp" portid="38023"/>
+<portused state="closed" proto="udp" portid="30323"/>
 <osmatch name="HP 2530, 2920, or 5406zl switch" accuracy="100" line="35150">
 <osclass type="switch" vendor="HP" osfamily="embedded" accuracy="100"><cpe>cpe:/h:hp:switch_2530</cpe><cpe>cpe:/h:hp:switch_2920</cpe><cpe>cpe:/h:hp:switch_5406zl</cpe></osclass>
 </osmatch>
 </os>
-<uptime seconds="2944601" lastboot="Tue Jul  8 19:29:36 2025"/>
+<uptime seconds="2988035" lastboot="Tue Jul  8 19:29:37 2025"/>
 <distance value="1"/>
-<tcpsequence index="134" difficulty="Good luck!" values="4F39BE3F,4F3A3F7D,4F3B230D,4F3BF88D,4F3C8002,4F3D3D4F"/>
-<ipidsequence class="Incremental" values="73CC,73CD,73CE,73CF,73D0,73D1"/>
-<tcptssequence class="1000HZ" values="AF82D740,AF82D7A4,AF82D808,AF82D86C,AF82D8D0,AF82D934"/>
-<times srtt="511" rttvar="44" to="100000"/>
+<tcpsequence index="132" difficulty="Good luck!" values="D685F0FC,D68680F0,D6874A17,D6883452,D688D31D,D6898DC9"/>
+<ipidsequence class="Incremental" values="8639,863A,863B,863C,863D,863E"/>
+<tcptssequence class="1000HZ" values="B219A8EE,B219A952,B219A9B6,B219AA1A,B219AA7E,B219AAE2"/>
+<times srtt="539" rttvar="60" to="50000"/>
 </host>
-<runstats><finished time="1754940377" timestr="Mon Aug 11 21:26:17 2025" summary="Nmap done at Mon Aug 11 21:26:17 2025; 256 IP addresses (15 hosts up) scanned in 23.42 seconds" elapsed="23.42" exit="success"/><hosts up="15" down="241" total="256"/>
+<runstats><finished time="1754983812" timestr="Tue Aug 12 09:30:12 2025" summary="Nmap done at Tue Aug 12 09:30:12 2025; 256 IP addresses (16 hosts up) scanned in 15.56 seconds" elapsed="15.56" exit="success"/><hosts up="16" down="240" total="256"/>
 </runstats>
 </nmaprun>
